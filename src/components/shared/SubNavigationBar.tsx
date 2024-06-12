@@ -102,6 +102,10 @@ export const SubNavigationBar = forwardRef<
           label: 'Playground',
         },
         {
+          path: `/pipeline/${pipelineId}/analytics`,
+          label: 'Analytics',
+        },
+        {
           path: `/pipeline/${pipelineId}/logs`,
           label: 'Logs',
         },

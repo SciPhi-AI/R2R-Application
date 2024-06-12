@@ -3,11 +3,26 @@ import { useState, useRef } from 'react';
 
 import { R2RClient } from '../../r2r-js-client';
 
-export const UploadButton = ({
+interface UploadButtonProps {
+  userId: string;
+  apiUrl: string;
+  uploadedDocuments: any[];
+  onUploadSuccess?: () => void;
+  setUploadedDocuments: (docs: any[]) => void;
+  showToast?: (message: {
+    title: string;
+    description: string;
+    variant: 'default' | 'destructive' | 'success';
+  }) => void;
+}
+
+export const UploadButton: React.FC<UploadButtonProps> = ({
   userId,
   apiUrl,
   uploadedDocuments,
   setUploadedDocuments,
+  onUploadSuccess,
+  showToast = () => {}, // Default value as an empty function
 }) => {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -34,10 +49,8 @@ export const UploadButton = ({
           if (!file) continue;
           const fileId = client.generateIdFromLabel(file.name);
           uploadedFiles.push({ document_id: fileId, title: file.name });
-          // metadatas.push({ user_id: userId, title: file.name });
           metadatas.push({ title: file.name });
           userIds.push(userId);
-          // const user_data = await client.getUserDocumentsMetadata(userId);
         }
         console.log('metadatas = ', metadatas);
         console.log('files = ', files);
@@ -46,13 +59,21 @@ export const UploadButton = ({
         console.log('uploadedDocuments = ', uploadedDocuments);
         console.log('uploadedFiles = ', uploadedFiles);
         setUploadedDocuments([...uploadedDocuments, ...uploadedFiles]);
-        // setLogFetchID(client.generateRunId());
-
-        alert('Success');
+        showToast({
+          variant: 'success',
+          title: 'Upload Successful',
+          description: 'The document has been uploaded',
+        });
+        if (onUploadSuccess) {
+          onUploadSuccess();
+        }
       } catch (error) {
         console.error('Error uploading files:', error);
-        // setLogFetchID(client.generateRunId());
-        alert(error);
+        showToast({
+          variant: 'destructive',
+          title: 'Upload Failed',
+          description: error.message,
+        });
       } finally {
         setIsUploading(false);
         if (fileInputRef.current) {
