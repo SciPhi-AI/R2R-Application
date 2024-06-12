@@ -81,10 +81,7 @@ const PipelinePage = () => {
           <AlertTitle className="text-lg">
             <div className="flex items-center gap-2 text-xl">
               <span className=" text-gray-500 dark:text-gray-200">
-                {
-                  "🎉 Congratulations, you've launched a pipeline! "
-                  //  to test!'
-                }
+                {"🎉 Congratulations, you've launched a pipeline! "}
                 <a
                   href={`${pipeline?.pipelineId}/playground`}
                   className="text-indigo-500"

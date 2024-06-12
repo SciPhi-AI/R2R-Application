@@ -4,7 +4,8 @@ import { useRouter } from 'next/router';
 import React, { useState, useEffect } from 'react';
 
 import { Result } from '@/components/ChatDemo/result';
-import { Search } from '@/components/ChatDemo/search';
+// TODO: do we want to implement this in OSS?
+// import { Search } from '@/components/ChatDemo/search';
 import { Title } from '@/components/ChatDemo/title';
 import { UploadButton } from '@/components/ChatDemo/upload';
 import Layout from '@/components/Layout';
@@ -242,7 +243,7 @@ const Index: React.FC = () => {
                   <div className="h-80 pointer-events-none w-full backdrop-filter absolute bottom-0 bg-gradient-to-b from-transparent to-zinc-900 [mask-image:linear-gradient(to_top,zinc-800,transparent)]"></div>
                   <div className="absolute inset-x-0 bottom-6 px-4 md:px-8">
                     <div className="w-full">
-                      <Search pipeline={pipeline}></Search>
+                      {/* <Search pipeline={pipeline}></Search> */}
                     </div>
                   </div>
                 </div>

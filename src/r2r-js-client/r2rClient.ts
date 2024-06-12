@@ -287,7 +287,6 @@ export class R2RClient {
 
     const queryString = createQueryString(params);
     const url = `${this.baseUrl}/logs${queryString ? '?' + queryString : ''}`;
-    console.log('url = ', url);
 
     const response = await fetch(url, {
       method: 'GET',
@@ -374,6 +373,47 @@ export class R2RClient {
       throw new Error('Network response was not ok');
     }
     return response.json();
+  }
+
+  async getAnalytics(
+    filterCriteria: Record<string, any>,
+    analysisTypes?: Record<string, any>
+  ): Promise<any> {
+    const url = `${this.baseUrl}/analytics`;
+    const data: Record<string, any> = {
+      filter_criteria: {
+        filters: filterCriteria,
+      },
+      analysis_types: {
+        analysis_types: analysisTypes,
+      },
+    };
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(
+          `Error occurred while calling analytics API. Status Code: ${response.status}, Error Message: ${errorMessage}`
+        );
+      }
+
+      return await response.json();
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('Failed to fetch')) {
+        throw new Error(
+          `Error occurred while calling analytics API. ${error.message}`
+        );
+      }
+      throw error;
+    }
   }
 
   async getUsersStats(userIds?: string[] | null): Promise<any> {
