@@ -1,3 +1,7 @@
+<h2 align="center">
+R2R Dashboard
+</h2>
+<img src="https://github.com/SciPhi-AI/R2R/raw/main/docs/pages/r2r.png" alt="Sciphi Framework">
 <h3 align="center">
 Manage and Monitor Your R2R RAG Pipelines with Ease
 </h3>
@@ -103,6 +107,15 @@ If you'd like to develop the R2R dashboard, you can do so by starting a developm
 - [SciPhi Cloud Docs](https://docs.sciphi.ai/): SciPhi Cloud documentation.
 
 # Screenshots
+<img width="1500" alt="watch" src="https://github.com/SciPhi-AI/R2R-Dashboard/assets/34580718/eff7841c-e5ae-4573-9f3a-58900b580b69">
+
+<img width="1512" alt="oss_dashboard_documents" src="https://github.com/SciPhi-AI/R2R-Dashboard/assets/34580718/db0b3762-2fa6-42c0-bb2b-1970f8213776">
+
+<img width="1492" alt="chat-interface" src="https://github.com/SciPhi-AI/R2R-Dashboard/assets/34580718/b18b07e2-ca52-4189-886b-3d8723f9c6a5">
+
+<img width="1512" alt="oss_dashboard_analytics" src="https://github.com/SciPhi-AI/R2R-Dashboard/assets/34580718/442f9acb-45d4-494d-a09d-95f8b892b044">
+
+<img width="1489" alt="logs" src="https://github.com/SciPhi-AI/R2R-Dashboard/assets/34580718/4d431c35-7933-4cad-bff3-bdc55cd3123d">
 
 
 # Summary
