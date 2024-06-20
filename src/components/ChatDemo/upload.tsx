@@ -46,7 +46,9 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
         const metadatas: { title: string }[] = [];
         let userIds: string[] = [];
         for (const file of files) {
-          if (!file) continue;
+          if (!file) {
+            continue;
+          }
           const fileId = client.generateIdFromLabel(file.name);
           uploadedFiles.push({ document_id: fileId, title: file.name });
           metadatas.push({ title: file.name });
@@ -55,7 +57,7 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
         console.log('metadatas = ', metadatas);
         console.log('files = ', files);
 
-        await client.ingestFiles(metadatas, files, null, (userIds = userIds));
+        await client.ingestFiles(files, metadatas, null);
         console.log('uploadedDocuments = ', uploadedDocuments);
         console.log('uploadedFiles = ', uploadedFiles);
         setUploadedDocuments([...uploadedDocuments, ...uploadedFiles]);

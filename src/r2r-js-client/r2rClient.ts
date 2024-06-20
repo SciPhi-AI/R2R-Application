@@ -1,461 +1,288 @@
-import { v4 as uuidv4, v5 as uuidv5 } from 'uuid';
+import axios, { AxiosResponse } from 'axios';
+import { v4 as uuidv4 } from 'uuid';
 
-function defaultSerializer(obj: any): any {
-  if (obj instanceof uuidv4) {
-    return obj.toString();
-  }
-  // if (obj instanceof DocumentType) {
-  //   return obj.value;
-  // }
-  if (obj instanceof Uint8Array) {
-    throw new TypeError('Bytes serialization is not yet supported.');
-  }
-  throw new TypeError(`Type ${typeof obj} not serializable.`);
-}
-
-function createQueryString(params: Record<string, any>): string {
-  return Object.keys(params)
-    .map(
-      (key) => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`
-    )
-    .join('&');
-}
+import {
+  GenerationConfig,
+  KGSearchSettings,
+  VectorSearchSettings,
+  R2RUpdatePromptRequest,
+  R2RIngestDocumentsRequest,
+  R2RIngestFilesRequest,
+  R2RUpdateDocumentsRequest,
+  R2RUpdateFilesRequest,
+  R2RSearchRequest,
+  R2RRAGRequest,
+  R2RDeleteRequest,
+  R2RAnalyticsRequest,
+  R2RUsersStatsRequest,
+  R2RDocumentsInfoRequest,
+  R2RDocumentChunksRequest,
+} from './models';
 
 export class R2RClient {
   private baseUrl: string;
+  private prefix: string;
 
-  constructor(baseUrl: string) {
+  constructor(baseUrl: string, prefix: string = '/v1') {
     this.baseUrl = baseUrl;
+    this.prefix = prefix;
   }
 
   async updatePrompt(
-    name: string,
+    name: string = 'default_system',
     template?: string,
     inputTypes?: Record<string, string>
   ): Promise<any> {
-    const url = `${this.baseUrl}/update_prompt`;
-    const data = {
+    const url = `${this.baseUrl}${this.prefix}/update_prompt`;
+    const request = new R2RUpdatePromptRequest({
       name,
       template,
       input_types: inputTypes,
-    };
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data, defaultSerializer),
     });
-
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-
-    return response.json();
+    const response = await axios.post(url, request);
+    return response.data;
   }
 
-  async ingestDocuments(documents: Record<string, any>[]): Promise<any> {
-    const url = `${this.baseUrl}/ingest_documents`;
-    const data = { documents };
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data, defaultSerializer),
-    });
-
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-
-    return response.json();
+  async ingestDocuments(documents: any[], versions?: string[]): Promise<any> {
+    const url = `${this.baseUrl}${this.prefix}/ingest_documents`;
+    const request = new R2RIngestDocumentsRequest({ documents, versions });
+    const response = await axios.post(url, request);
+    return response.data;
   }
 
   async ingestFiles(
-    metadatas: Record<string, any>[] | null,
-    files: File[],
-    ids?: string[] | null,
-    userIds?: string[] | null
+    filePaths: string[],
+    metadatas?: any[],
+    documentIds?: string[],
+    userIds?: string[],
+    versions?: string[],
+    skipDocumentInfo?: boolean
   ): Promise<any> {
-    const url = `${this.baseUrl}/ingest_files`;
+    const url = `${this.baseUrl}${this.prefix}/ingest_files`;
     const formData = new FormData();
-    console.log('metadatas = ', metadatas);
-    console.log('userIds = ', userIds);
 
-    files.forEach((file) => {
+    filePaths.forEach((file, index) => {
       formData.append('files', file);
     });
 
-    formData.append('metadatas', JSON.stringify(metadatas || null));
-
-    if (ids !== undefined && ids !== null) {
-      formData.append('ids', JSON.stringify(ids));
-    } else {
-      formData.append('ids', JSON.stringify(null));
-    }
-
-    if (userIds !== undefined && userIds !== null) {
-      formData.append('user_ids', JSON.stringify(userIds));
-    } else {
-      formData.append('user_ids', JSON.stringify(null));
-    }
-
-    const response = await fetch(url, {
-      method: 'POST',
-      body: formData,
+    const request = new R2RIngestFilesRequest({
+      metadatas,
+      document_ids: documentIds,
+      user_ids: userIds,
+      versions,
+      skip_document_info: skipDocumentInfo,
     });
 
-    if (!response.ok) {
-      const responseJson = await response.json();
-      throw new Error(responseJson.detail);
-    }
+    Object.entries(request).forEach(([key, value]) => {
+      formData.append(key, JSON.stringify(value));
+    });
 
-    return response.json();
+    const response = await axios.post(url, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
   }
 
-  async updateDocuments(documents: Record<string, any>[]): Promise<any> {
-    const url = `${this.baseUrl}/update_documents`;
-    const data = { documents };
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data, defaultSerializer),
+  async updateDocuments(
+    documents: any[],
+    versions?: string[],
+    metadatas?: any[]
+  ): Promise<any> {
+    const url = `${this.baseUrl}${this.prefix}/update_documents`;
+    const request = new R2RUpdateDocumentsRequest({
+      documents,
+      versions,
+      metadatas,
     });
-
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-
-    return response.json();
+    const response = await axios.post(url, request);
+    return response.data;
   }
 
   async updateFiles(
-    metadatas: Record<string, any>[] | null,
-    files: File[],
-    ids: string[],
-    userIds?: string[] | null
+    files: string[],
+    documentIds: string[],
+    metadatas?: any[]
   ): Promise<any> {
-    const url = `${this.baseUrl}/update_files`;
+    const url = `${this.baseUrl}${this.prefix}/update_files`;
     const formData = new FormData();
 
-    files.forEach((file) => {
+    files.forEach((file, index) => {
       formData.append('files', file);
     });
 
-    formData.append('metadatas', JSON.stringify(metadatas || null));
-    formData.append('ids', JSON.stringify(ids));
-
-    if (userIds !== undefined && userIds !== null) {
-      formData.append('user_ids', JSON.stringify(userIds));
-    } else {
-      formData.append('user_ids', JSON.stringify(null));
-    }
-
-    const response = await fetch(url, {
-      method: 'POST',
-      body: formData,
+    const request = new R2RUpdateFilesRequest({
+      metadatas,
+      document_ids: documentIds,
     });
 
-    if (!response.ok) {
-      const responseJson = await response.json();
-      throw new Error(responseJson.detail);
-    }
+    formData.append('request', JSON.stringify(request));
 
-    return response.json();
+    const response = await axios.post(url, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
   }
 
   async search(
     query: string,
+    useVectorSearch: boolean = true,
     searchFilters: Record<string, any> = {},
-    searchLimit: number = 10
+    searchLimit: number = 10,
+    doHybridSearch: boolean = false,
+    useKg: boolean = false,
+    kgAgentGenerationConfig?: GenerationConfig
   ): Promise<any> {
-    const url = `${this.baseUrl}/search`;
-    const data = {
+    const url = `${this.baseUrl}${this.prefix}/search`;
+    const request = new R2RSearchRequest({
       query,
-      search_filters: JSON.stringify(searchFilters),
-      search_limit: searchLimit,
-    };
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
+      vector_search_settings: new VectorSearchSettings({
+        use_vector_search: useVectorSearch,
+        search_filters: searchFilters,
+        search_limit: searchLimit,
+        do_hybrid_search: doHybridSearch,
+      }),
+      kg_search_settings: new KGSearchSettings({
+        use_kg: useKg,
+        agent_generation_config: kgAgentGenerationConfig,
+      }),
     });
-
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-
-    return response.json();
+    const response = await axios.post(url, request);
+    return response.data;
   }
 
   async rag(
-    message: string,
+    query: string,
+    useVectorSearch: boolean = true,
     searchFilters: Record<string, any> = {},
     searchLimit: number = 10,
-    generationConfig: Record<string, any> = {},
-    streaming: boolean = false
+    doHybridSearch: boolean = false,
+    useKg: boolean = false,
+    kgAgentGenerationConfig?: GenerationConfig,
+    ragGenerationConfig?: GenerationConfig
   ): Promise<any> {
-    const url = `${this.baseUrl}/rag`;
-    const data = {
-      message,
-      search_filters: JSON.stringify(searchFilters),
-      search_limit: searchLimit,
-      streaming,
-      rag_generation_config: JSON.stringify(generationConfig),
-    };
+    console.log('rag_generation_config = ', ragGenerationConfig);
+    const request = new R2RRAGRequest({
+      query,
+      vector_search_settings: new VectorSearchSettings({
+        use_vector_search: useVectorSearch,
+        search_filters: searchFilters,
+        search_limit: searchLimit,
+        do_hybrid_search: doHybridSearch,
+      }),
+      kg_search_settings: new KGSearchSettings({
+        use_kg: useKg,
+        agent_generation_config: kgAgentGenerationConfig,
+      }),
+      rag_generation_config: ragGenerationConfig,
+    });
 
-    if (streaming) {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-
-      const reader = response.body?.getReader();
-      const stream = new ReadableStream({
-        async start(controller) {
-          try {
-            while (true) {
-              if (reader) {
-                const { done, value } = await reader.read();
-                if (done) {
-                  controller.close();
-                  break;
-                }
-                controller.enqueue(value);
-              }
-            }
-          } catch (error) {
-            controller.error(error);
-          }
-        },
-      });
-
-      return stream;
+    if (ragGenerationConfig?.stream) {
+      return this.streamRag(request);
     } else {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-
-      return response.json();
+      const url = `${this.baseUrl}${this.prefix}/rag`;
+      const response = await axios.post(url, request);
+      return response.data;
     }
+  }
+
+  private async streamRag(
+    ragRequest: R2RRAGRequest
+  ): Promise<ReadableStream<string>> {
+    const url = `${this.baseUrl}${this.prefix}/rag`;
+    const response = await axios.post(url, ragRequest, {
+      responseType: 'stream',
+    });
+    return new ReadableStream({
+      async start(controller) {
+        response.data.on('data', (chunk: Buffer) => {
+          controller.enqueue(chunk.toString());
+        });
+        response.data.on('end', () => {
+          controller.close();
+        });
+        response.data.on('error', (err: Error) => {
+          controller.error(err);
+        });
+      },
+    });
   }
 
   async delete(
     keys: string[],
     values: (boolean | number | string)[]
   ): Promise<any> {
-    const url = `${this.baseUrl}/delete`;
-    const data = { keys, values };
-    const response = await fetch(url, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-
-    return response.json();
+    const url = `${this.baseUrl}${this.prefix}/delete`;
+    const request = new R2RDeleteRequest({ keys, values });
+    const response = await axios.delete(url, { data: request });
+    return response.data;
   }
 
-  async getLogs(logTypeFilter?: string): Promise<any> {
-    const params: Record<string, any> = {};
-    if (logTypeFilter) params.log_type_filter = logTypeFilter;
+  async logs(logTypeFilter?: string): Promise<any> {
+    const url = `${this.baseUrl}${this.prefix}/logs`;
+    const params: Record<string, string> = {};
+    if (logTypeFilter) {
+      params.log_type_filter = logTypeFilter;
+    }
+    const response = await axios.get(url, { params });
+    return response.data;
+  }
 
-    const queryString = createQueryString(params);
-    const url = `${this.baseUrl}/logs${queryString ? '?' + queryString : ''}`;
+  async appSettings(): Promise<any> {
+    const url = `${this.baseUrl}${this.prefix}/app_settings`;
+    const response = await axios.get(url);
+    return response.data;
+  }
 
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-      },
+  async analytics(filterCriteria: any, analysisTypes: any): Promise<any> {
+    const url = `${this.baseUrl}${this.prefix}/analytics`;
+    const request = new R2RAnalyticsRequest({
+      filter_criteria: filterCriteria,
+      analysis_types: analysisTypes,
     });
+    const response = await axios.post(url, request);
+    return response.data;
+  }
 
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-
-    const logs = await response.json();
-
-    function parseLogs(logs: any) {
-      return logs.results.map((run: any) => {
-        const parsedEntries = run.entries.map((entry: any) => {
-          let parsedValue;
-          try {
-            parsedValue = JSON.parse(entry.value);
-          } catch (e) {
-            parsedValue = entry.value; // Keep as string if JSON parsing fails
-          }
-
-          // Format search results if present
-          if (entry.key === 'search_results' && Array.isArray(parsedValue)) {
-            parsedValue = parsedValue.map((result: any) => {
-              let parsedResult;
-              try {
-                parsedResult = JSON.parse(result);
-              } catch (e) {
-                parsedResult = result; // Keep as string if JSON parsing fails
-              }
-              return parsedResult;
-            });
-          }
-
-          return { key: entry.key, value: parsedValue };
-        });
-        return {
-          run_id: run.run_id,
-          run_type: run.run_type,
-          entries: parsedEntries,
-        };
-      });
-    }
-
-    return parseLogs(logs);
+  async usersStats(userIds?: string[]): Promise<any> {
+    const url = `${this.baseUrl}${this.prefix}/users_stats`;
+    const request = new R2RUsersStatsRequest({
+      user_ids: userIds,
+    });
+    const response = await axios.get(url, { data: request });
+    return response.data;
   }
 
   async getDocumentsInfo(
     documentIds?: string[] | null,
     userIds?: string[] | null
   ): Promise<any> {
-    console.log(`${this.baseUrl}`);
-    const url = new URL(`${this.baseUrl}/documents_info`);
-    const params: any = {};
+    const url = `${this.baseUrl}${this.prefix}/documents_info`;
+    const params: Record<string, string> = {};
 
-    // if (documentIds) params.document_ids = documentIds.join(',');
-    // if (userIds) params.user_ids = userIds.join(',');
-    if (documentIds && Array.isArray(documentIds)) {
-      params.document_ids = documentIds.join(',');
-    }
-    if (userIds && Array.isArray(userIds)) {
-      params.user_ids = userIds.join(',');
+    if (documentIds) {
+      params.document_ids = JSON.stringify(documentIds);
+    } else {
+      params.document_ids = JSON.stringify(null);
     }
 
-    // Append parameters to URL
-    Object.keys(params).forEach((key) =>
-      url.searchParams.append(key, params[key])
-    );
-
-    console.log('getting documents info from url = ', url.toString());
-    const response = await fetch(url.toString(), {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-      },
-    });
-
-    console.log('response = ', response);
-
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
+    if (userIds) {
+      params.user_ids = JSON.stringify(userIds);
+    } else {
+      params.user_ids = JSON.stringify(null);
     }
-    return response.json();
+
+    console.log('Request URL:', `${url}?${new URLSearchParams(params)}`);
+
+    const response = await axios.get(url, { params });
+    return response.data;
   }
 
-  async getAnalytics(
-    filterCriteria: Record<string, any>,
-    analysisTypes?: Record<string, any>
-  ): Promise<any> {
-    const url = `${this.baseUrl}/analytics`;
-    const data: Record<string, any> = {
-      filter_criteria: {
-        filters: filterCriteria,
-      },
-      analysis_types: {
-        analysis_types: analysisTypes,
-      },
-    };
-
-    try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        const errorMessage = await response.text();
-        throw new Error(
-          `Error occurred while calling analytics API. Status Code: ${response.status}, Error Message: ${errorMessage}`
-        );
-      }
-
-      return await response.json();
-    } catch (error) {
-      if (error instanceof Error && error.message.includes('Failed to fetch')) {
-        throw new Error(
-          `Error occurred while calling analytics API. ${error.message}`
-        );
-      }
-      throw error;
-    }
-  }
-
-  async getUsersStats(userIds?: string[] | null): Promise<any> {
-    const params: Record<string, any> = {};
-    if (userIds) params.user_ids = userIds.join(',');
-
-    const queryString = createQueryString(params);
-    const url = `${this.baseUrl}/users_stats${queryString ? '?' + queryString : ''}`;
-
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-    return response.json();
-  }
-
-  async getAppSettings(): Promise<any> {
-    const url = `${this.baseUrl}/app_settings`;
-    const response = await fetch(url, {
-      method: 'GET',
-    });
-
-    console.log('getAppSettings response = ', response);
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-
-    return response.json();
-  }
-
-  generateRunId() {
-    return uuidv4();
-  }
-
-  generateIdFromLabel(label: string) {
-    const NAMESPACE_DNS = '6ba7b810-9dad-11d1-80b4-00c04fd430c8';
-    return uuidv5(label, NAMESPACE_DNS);
+  async getDocumentChunks(documentId: string): Promise<any> {
+    const url = `${this.baseUrl}${this.prefix}/document_chunks`;
+    const request = new R2RDocumentChunksRequest({ document_id: documentId });
+    const response = await axios.post(url, request);
+    return response.data;
   }
 }
+
+export default R2RClient;

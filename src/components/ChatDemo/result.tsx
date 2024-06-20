@@ -23,16 +23,26 @@ export const Result: FC<{
   query: string;
   userId: string;
   apiUrl: string | undefined;
+  temperature: number | null;
+  topP: number | null;
+  topK: number | null;
+  maxTokensToSample: number | null;
   model: string;
   uploadedDocuments: string[];
   setUploadedDocuments: any;
+  switches: any;
 }> = ({
   query,
   userId,
   apiUrl,
+  temperature,
+  topP,
+  topK,
+  maxTokensToSample,
   model,
   uploadedDocuments,
   setUploadedDocuments,
+  switches,
 }) => {
   const [sources, setSources] = useState<string | null>(null);
   const [markdown, setMarkdown] = useState<string>('');
@@ -40,11 +50,15 @@ export const Result: FC<{
 
   let timeout: NodeJS.Timeout;
 
-  const parseStreaming = async (query, userId, apiUrl) => {
+  const parseStreaming = async (
+    query: string,
+    userId: string,
+    apiUrl: string
+  ) => {
     setSources(null);
     setMarkdown('');
     const response = await fetch(
-      `/api/rag-completion?query=${query}&userId=${userId}&apiUrl=${apiUrl}&model=${model}`,
+      `/api/rag-completion?query=${query}&userId=${userId}&apiUrl=${apiUrl}&model=${model}&temperature=${temperature}&topP=${topP}&topK=${topK}&maxTokensToSample=${maxTokensToSample}&hybridSearch=${switches.hybrid_search?.checked}&vectorSearch=${switches.vector_search?.checked}&useKnowledgeGraph=${switches.knowledge_graph_search?.checked}`,
       {
         method: 'GET',
         headers: {
@@ -68,7 +82,9 @@ export const Result: FC<{
 
     while (true) {
       const { value, done } = await reader.read();
-      if (done) break;
+      if (done) {
+        break;
+      }
       const chunk = decoder.decode(value);
       sink += chunk;
 
@@ -98,9 +114,13 @@ export const Result: FC<{
     }
 
     const debouncedParseStreaming = () => {
-      clearTimeout(timeout); // Clear any existing timeout
+      clearTimeout(timeout);
       timeout = setTimeout(() => {
-        parseStreaming(query, userId, apiUrl);
+        if (apiUrl !== undefined) {
+          parseStreaming(query, userId, apiUrl);
+        } else {
+          console.error('apiUrl is undefined');
+        }
       }, 500);
     };
 
@@ -118,10 +138,10 @@ export const Result: FC<{
       <Answer markdown={markdown} sources={sources}></Answer>
       <Sources sources={sources}></Sources>
 
-      {uploadedDocuments?.length === 0 && (
+      {uploadedDocuments?.length === 0 && apiUrl && (
         <div className="absolute inset-4 flex items-center justify-center bg-white/40 backdrop-blur-sm">
           <div className="flex items-center p-4 bg-white shadow-2xl rounded text-blue-500 font-medium gap-4">
-            Please upload atleast one document to submit queries.{' '}
+            Please upload at least one document to submit queries.{' '}
             <UploadButton
               userId={userId}
               apiUrl={apiUrl}
