@@ -29,11 +29,11 @@ export class R2RClient {
   }
 
   async updatePrompt(
-    name: string,
+    name: string = "default_system",
     template?: string,
     inputTypes?: Record<string, string>
   ): Promise<any> {
-    const url = `${this.baseUrl}/update_prompt`;
+    const url = `${this.baseUrl}/v1/update_prompt`;
     const data = {
       name,
       template,
@@ -54,9 +54,12 @@ export class R2RClient {
     return response.json();
   }
 
-  async ingestDocuments(documents: Record<string, any>[]): Promise<any> {
-    const url = `${this.baseUrl}/ingest_documents`;
-    const data = { documents };
+  async ingestDocuments(
+    documents: Record<string, any>[],
+    versions?: string[]
+  ): Promise<any> {
+    const url = `${this.baseUrl}/v1/ingest_documents`;
+    const data = { documents, versions };
     const response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -73,33 +76,25 @@ export class R2RClient {
   }
 
   async ingestFiles(
-    metadatas: Record<string, any>[] | null,
     files: File[],
-    ids?: string[] | null,
-    userIds?: string[] | null
+    metadatas?: Record<string, any>[] | null,
+    documentIds?: string[] | null,
+    userIds?: string[] | null,
+    versions?: string[] | null,
+    skipDocumentInfo: boolean = false
   ): Promise<any> {
-    const url = `${this.baseUrl}/ingest_files`;
+    const url = `${this.baseUrl}/v1/ingest_files`;
     const formData = new FormData();
-    console.log('metadatas = ', metadatas);
-    console.log('userIds = ', userIds);
 
     files.forEach((file) => {
       formData.append('files', file);
     });
 
     formData.append('metadatas', JSON.stringify(metadatas || null));
-
-    if (ids !== undefined && ids !== null) {
-      formData.append('ids', JSON.stringify(ids));
-    } else {
-      formData.append('ids', JSON.stringify(null));
-    }
-
-    if (userIds !== undefined && userIds !== null) {
-      formData.append('user_ids', JSON.stringify(userIds));
-    } else {
-      formData.append('user_ids', JSON.stringify(null));
-    }
+    formData.append('document_ids', JSON.stringify(documentIds || null));
+    formData.append('user_ids', JSON.stringify(userIds || null));
+    formData.append('versions', JSON.stringify(versions || null));
+    formData.append('skip_document_info', JSON.stringify(skipDocumentInfo));
 
     const response = await fetch(url, {
       method: 'POST',
@@ -114,9 +109,13 @@ export class R2RClient {
     return response.json();
   }
 
-  async updateDocuments(documents: Record<string, any>[]): Promise<any> {
-    const url = `${this.baseUrl}/update_documents`;
-    const data = { documents };
+  async updateDocuments(
+    documents: Record<string, any>[],
+    versions?: string[],
+    metadatas?: Record<string, any>[]
+  ): Promise<any> {
+    const url = `${this.baseUrl}/v1/update_documents`;
+    const data = { documents, versions, metadatas };
     const response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -133,26 +132,19 @@ export class R2RClient {
   }
 
   async updateFiles(
-    metadatas: Record<string, any>[] | null,
     files: File[],
-    ids: string[],
-    userIds?: string[] | null
+    documentIds: string[],
+    metadatas?: Record<string, any>[]
   ): Promise<any> {
-    const url = `${this.baseUrl}/update_files`;
+    const url = `${this.baseUrl}/v1/update_files`;
     const formData = new FormData();
 
     files.forEach((file) => {
       formData.append('files', file);
     });
 
+    formData.append('document_ids', JSON.stringify(documentIds));
     formData.append('metadatas', JSON.stringify(metadatas || null));
-    formData.append('ids', JSON.stringify(ids));
-
-    if (userIds !== undefined && userIds !== null) {
-      formData.append('user_ids', JSON.stringify(userIds));
-    } else {
-      formData.append('user_ids', JSON.stringify(null));
-    }
 
     const response = await fetch(url, {
       method: 'POST',
@@ -169,14 +161,26 @@ export class R2RClient {
 
   async search(
     query: string,
+    useVectorSearch: boolean = true,
     searchFilters: Record<string, any> = {},
-    searchLimit: number = 10
+    searchLimit: number = 10,
+    doHybridSearch: boolean = false,
+    useKg: boolean = false,
+    kgAgentGenerationConfig?: Record<string, any>
   ): Promise<any> {
-    const url = `${this.baseUrl}/search`;
+    const url = `${this.baseUrl}/v1/search`;
     const data = {
       query,
-      search_filters: JSON.stringify(searchFilters),
-      search_limit: searchLimit,
+      vector_settings: {
+        use_vector_search: useVectorSearch,
+        search_filters: searchFilters,
+        search_limit: searchLimit,
+        do_hybrid_search: doHybridSearch,
+      },
+      kg_settings: {
+        use_kg: useKg,
+        agent_generation_config: kgAgentGenerationConfig,
+      },
     };
     const response = await fetch(url, {
       method: 'POST',
@@ -194,22 +198,35 @@ export class R2RClient {
   }
 
   async rag(
-    message: string,
+    query: string,
+    useVectorSearch: boolean = true,
     searchFilters: Record<string, any> = {},
     searchLimit: number = 10,
-    generationConfig: Record<string, any> = {},
-    streaming: boolean = false
+    doHybridSearch: boolean = false,
+    useKg: boolean = false,
+    kgAgentGenerationConfig?: Record<string, any>,
+    ragGenerationConfig?: Record<string, any>
   ): Promise<any> {
-    const url = `${this.baseUrl}/rag`;
-    const data = {
-      message,
-      search_filters: JSON.stringify(searchFilters),
-      search_limit: searchLimit,
-      streaming,
-      rag_generation_config: JSON.stringify(generationConfig),
-    };
+    console.log('Got into the rag function');
+    const url = `${this.baseUrl}/v1/rag`;
 
-    if (streaming) {
+    const data = {
+      query,
+      vector_settings: {
+        use_vector_search: useVectorSearch,
+        search_filters: searchFilters,
+        search_limit: searchLimit,
+        do_hybrid_search: doHybridSearch,
+      },
+      kg_settings: {
+        use_kg: useKg,
+        agent_generation_config: kgAgentGenerationConfig,
+      },
+      rag_generation_config: ragGenerationConfig,
+    };
+    console.log('data = ', data);
+
+    if (ragGenerationConfig?.stream) {
       const response = await fetch(url, {
         method: 'POST',
         headers: {
@@ -223,7 +240,7 @@ export class R2RClient {
       }
 
       const reader = response.body?.getReader();
-      const stream = new ReadableStream({
+      return new ReadableStream({
         async start(controller) {
           try {
             while (true) {
@@ -242,7 +259,6 @@ export class R2RClient {
         },
       });
 
-      return stream;
     } else {
       const response = await fetch(url, {
         method: 'POST',
@@ -264,7 +280,7 @@ export class R2RClient {
     keys: string[],
     values: (boolean | number | string)[]
   ): Promise<any> {
-    const url = `${this.baseUrl}/delete`;
+    const url = `${this.baseUrl}/v1/delete`;
     const data = { keys, values };
     const response = await fetch(url, {
       method: 'DELETE',
@@ -283,10 +299,12 @@ export class R2RClient {
 
   async getLogs(logTypeFilter?: string): Promise<any> {
     const params: Record<string, any> = {};
-    if (logTypeFilter) params.log_type_filter = logTypeFilter;
+    if (logTypeFilter) {
+      params.log_type_filter = logTypeFilter;
+    }
 
     const queryString = createQueryString(params);
-    const url = `${this.baseUrl}/logs${queryString ? '?' + queryString : ''}`;
+    const url = `${this.baseUrl}/v1/logs${queryString ? '?' + queryString : ''}`;
 
     const response = await fetch(url, {
       method: 'GET',
@@ -342,11 +360,9 @@ export class R2RClient {
     userIds?: string[] | null
   ): Promise<any> {
     console.log(`${this.baseUrl}`);
-    const url = new URL(`${this.baseUrl}/documents_info`);
+    const url = new URL(`${this.baseUrl}/v1/documents_info`);
     const params: any = {};
 
-    // if (documentIds) params.document_ids = documentIds.join(',');
-    // if (userIds) params.user_ids = userIds.join(',');
     if (documentIds && Array.isArray(documentIds)) {
       params.document_ids = documentIds.join(',');
     }
@@ -361,7 +377,7 @@ export class R2RClient {
 
     console.log('getting documents info from url = ', url.toString());
     const response = await fetch(url.toString(), {
-      method: 'GET',
+      method: 'POST',
       headers: {
         Accept: 'application/json',
       },
@@ -375,11 +391,26 @@ export class R2RClient {
     return response.json();
   }
 
+  async getDocumentChunks(documentId: string): Promise<any> {
+    const url = `${this.baseUrl}/v1/document_chunks?document_id=${documentId}`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response.json();
+  }
+
   async getAnalytics(
     filterCriteria: Record<string, any>,
-    analysisTypes?: Record<string, any>
+    analysisTypes: Record<string, any>
   ): Promise<any> {
-    const url = `${this.baseUrl}/analytics`;
+    const url = `${this.baseUrl}/v1/analytics`;
     const data: Record<string, any> = {
       filter_criteria: {
         filters: filterCriteria,
@@ -418,10 +449,12 @@ export class R2RClient {
 
   async getUsersStats(userIds?: string[] | null): Promise<any> {
     const params: Record<string, any> = {};
-    if (userIds) params.user_ids = userIds.join(',');
+    if (userIds) {
+      params.user_ids = userIds.join(',');
+    }
 
     const queryString = createQueryString(params);
-    const url = `${this.baseUrl}/users_stats${queryString ? '?' + queryString : ''}`;
+    const url = `${this.baseUrl}/v1/users_stats${queryString ? '?' + queryString : ''}`;
 
     const response = await fetch(url, {
       method: 'GET',
@@ -437,7 +470,7 @@ export class R2RClient {
   }
 
   async getAppSettings(): Promise<any> {
-    const url = `${this.baseUrl}/app_settings`;
+    const url = `${this.baseUrl}/v1/app_settings`;
     const response = await fetch(url, {
       method: 'GET',
     });

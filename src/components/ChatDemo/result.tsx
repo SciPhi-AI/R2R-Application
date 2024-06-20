@@ -23,16 +23,26 @@ export const Result: FC<{
   query: string;
   userId: string;
   apiUrl: string | undefined;
+  temperature: number | null;
+  topP: number | null;
+  topK: number | null;
+  maxTokensToSample: number | null;
   model: string;
   uploadedDocuments: string[];
   setUploadedDocuments: any;
+  switches: any;
 }> = ({
   query,
   userId,
   apiUrl,
+  temperature,
+  topP,
+  topK,
+  maxTokensToSample,
   model,
   uploadedDocuments,
   setUploadedDocuments,
+  switches,
 }) => {
   const [sources, setSources] = useState<string | null>(null);
   const [markdown, setMarkdown] = useState<string>('');
@@ -44,7 +54,7 @@ export const Result: FC<{
     setSources(null);
     setMarkdown('');
     const response = await fetch(
-      `/api/rag-completion?query=${query}&userId=${userId}&apiUrl=${apiUrl}&model=${model}`,
+      `/api/rag-completion?query=${query}&userId=${userId}&apiUrl=${apiUrl}&model=${model}&temperature=${temperature}&topP=${topP}&topK=${topK}&maxTokensToSample=${maxTokensToSample}&hybridSearch=${switches.hybrid_search?.checked}&vectorSearch=${switches.vector_search?.checked}&useKnowledgeGraph=${switches.knowledge_graph_search?.checked}`,
       {
         method: 'GET',
         headers: {
@@ -68,7 +78,9 @@ export const Result: FC<{
 
     while (true) {
       const { value, done } = await reader.read();
-      if (done) break;
+      if (done) {
+        break;
+      }
       const chunk = decoder.decode(value);
       sink += chunk;
 

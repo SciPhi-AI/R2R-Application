@@ -17,19 +17,42 @@ export default async function handler(req) {
   const searchLimit = queryObject.searchLimit
     ? parseInt(queryObject.searchLimit)
     : 10;
-  const model = queryObject.model ? queryObject.model : 'gpt-4-turbo';
-
+  
+ 
+  //TODO: Move defaults to constants
+  const temperature = queryObject.temperature ? parseFloat(queryObject.temperature) : 0.1;
+  const topP = queryObject.topP ? parseFloat(queryObject.topP) : 1;
+  const topK = queryObject.topK ? parseInt(queryObject.topK) : 100;
+  const max_tokens_to_sample = queryObject.max_tokens_to_sample ? parseInt(queryObject.max_tokens_to_sample) : 1024;
+  const model = queryObject.model || 'gpt-4-turbo';
   const streaming = true;
-  const generationConfig = { model: model }; // , "stream": streaming};
+
+  const doHybridSearch = queryObject.hybridSearch ? queryObject.hybridSearch === 'true' : false;
+  const vectorSearch = queryObject.vectorSearch ? queryObject.vectorSearch === 'true' : false;
+  const useKnowledgeGraph = queryObject.useKnowledgeGraph ? queryObject.useKnowledgeGraph === 'true' : false;
+
+  const generationConfig = {
+    temperature: temperature,
+    top_p: topP,
+    top_k: topK,
+    max_tokens_to_sample: max_tokens_to_sample,
+    model: model,
+    stream: streaming,
+  };
+
+console.log("generationConfig", generationConfig);
 
   try {
     if (streaming) {
       const responseStream = await client.rag(
         message,
+        vectorSearch,
         searchFilters,
         searchLimit,
+        doHybridSearch,
+        useKnowledgeGraph,
+        generationConfig, // TODO: Need to add ability to set a KG config that differs from the generation config
         generationConfig,
-        streaming
       );
 
       const readableStream = new ReadableStream({
@@ -39,7 +62,9 @@ export default async function handler(req) {
           try {
             while (true) {
               const { value, done } = await reader.read();
-              if (done) break;
+              if (done) {
+                break;
+              }
               controller.enqueue(value);
             }
           } catch (error) {
@@ -56,10 +81,13 @@ export default async function handler(req) {
     } else {
       const response = await client.rag(
         message,
+        vectorSearch,
         searchFilters,
         searchLimit,
+        doHybridSearch,
+        useKnowledgeGraph,
+        generationConfig, // TODO: Need to add ability to set a KG config that differs from the generation config
         generationConfig,
-        streaming
       );
       return new Response(JSON.stringify(response), {
         headers: { 'Content-Type': 'application/json' },
