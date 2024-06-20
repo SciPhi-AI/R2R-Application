@@ -1,5 +1,4 @@
 import axios, { AxiosResponse } from 'axios';
-import { v4 as uuidv4 } from 'uuid';
 
 import {
   GenerationConfig,
@@ -52,16 +51,18 @@ export class R2RClient {
 
   async ingestFiles(
     filePaths: string[],
-    metadatas?: any[],
+    metadatas?: Record<string, any>[],
     documentIds?: string[],
-    userIds?: string[],
+    userIds?: (string | null)[],
     versions?: string[],
-    skipDocumentInfo?: boolean
+    skipDocumentInfo: boolean = false
   ): Promise<any> {
     const url = `${this.baseUrl}${this.prefix}/ingest_files`;
     const formData = new FormData();
 
-    filePaths.forEach((file, index) => {
+    // Append files
+    filePaths.forEach((filePath, index) => {
+      const file = new File([filePath], filePath.split('/').pop() || 'file');
       formData.append('files', file);
     });
 
@@ -73,8 +74,11 @@ export class R2RClient {
       skip_document_info: skipDocumentInfo,
     });
 
+    // Append other data
     Object.entries(request).forEach(([key, value]) => {
-      formData.append(key, JSON.stringify(value));
+      if (value !== undefined) {
+        formData.append(key, JSON.stringify(value));
+      }
     });
 
     const response = await axios.post(url, formData, {
@@ -217,7 +221,7 @@ export class R2RClient {
     return response.data;
   }
 
-  async logs(logTypeFilter?: string): Promise<any> {
+  async getLogs(logTypeFilter?: string): Promise<any> {
     const url = `${this.baseUrl}${this.prefix}/logs`;
     const params: Record<string, string> = {};
     if (logTypeFilter) {
@@ -227,13 +231,13 @@ export class R2RClient {
     return response.data;
   }
 
-  async appSettings(): Promise<any> {
+  async getAppSettings(): Promise<any> {
     const url = `${this.baseUrl}${this.prefix}/app_settings`;
     const response = await axios.get(url);
     return response.data;
   }
 
-  async analytics(filterCriteria: any, analysisTypes: any): Promise<any> {
+  async getAnalytics(filterCriteria: any, analysisTypes: any): Promise<any> {
     const url = `${this.baseUrl}${this.prefix}/analytics`;
     const request = new R2RAnalyticsRequest({
       filter_criteria: filterCriteria,
@@ -257,23 +261,22 @@ export class R2RClient {
     userIds?: string[] | null
   ): Promise<any> {
     const url = `${this.baseUrl}${this.prefix}/documents_info`;
-    const params: Record<string, string> = {};
+    const request = new R2RDocumentsInfoRequest({
+      document_ids: documentIds || undefined,
+      user_ids: userIds || undefined,
+    });
 
-    if (documentIds) {
-      params.document_ids = JSON.stringify(documentIds);
-    } else {
-      params.document_ids = JSON.stringify(null);
-    }
+    // Convert the request to a plain object
+    const requestData = {
+      document_ids: request.document_ids,
+      user_ids: request.user_ids,
+    };
 
-    if (userIds) {
-      params.user_ids = JSON.stringify(userIds);
-    } else {
-      params.user_ids = JSON.stringify(null);
-    }
-
-    console.log('Request URL:', `${url}?${new URLSearchParams(params)}`);
-
-    const response = await axios.get(url, { params });
+    // Send the request as JSON in the body of a GET request
+    const response = await axios.get(url, {
+      data: JSON.stringify(requestData),
+      headers: { 'Content-Type': 'application/json' },
+    });
     return response.data;
   }
 

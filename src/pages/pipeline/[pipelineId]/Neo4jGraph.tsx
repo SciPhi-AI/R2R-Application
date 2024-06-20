@@ -95,7 +95,9 @@ const Neo4jGraph: React.FC<Neo4jGraphProps> = ({ width, height }) => {
           });
         });
 
-        const colors: Record<string, string> = {};
+        const colors: Record<string, string> = {
+          default: '#000000',
+        };
         Array.from(nodeTypes).forEach((type, index) => {
           colors[type] = `hsl(${(index * 120) % 360}, 70%, 50%)`;
         });
@@ -138,7 +140,12 @@ const Neo4jGraph: React.FC<Neo4jGraphProps> = ({ width, height }) => {
           <NoSSRForceGraph
             ref={graphRef}
             nodeLabel="id"
-            nodeAutoColorBy={(node: { type: string }) => nodeColors[node.type]}
+            nodeAutoColorBy={(node: any) => {
+              if (typeof node === 'object' && node !== null && 'type' in node) {
+                return nodeColors[node.type] || nodeColors['default'];
+              }
+              return nodeColors['default'];
+            }}
             linkLabel="label"
             linkAutoColorBy="label"
             data={data}

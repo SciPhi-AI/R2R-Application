@@ -4,10 +4,8 @@ import React from 'react';
 import { Logo } from '@/components/shared/Logo';
 import { Code } from '@/components/ui/Code';
 
-const capitalizeFirstLetter = (string) => {
-  if (!string) return string;
-  return string.charAt(0).toUpperCase() + string.slice(1);
-};
+import { capitalizeFirstLetter } from '@/lib/utils';
+
 const DynamicHeaderPath = () => {
   const router = useRouter();
 
@@ -27,7 +25,9 @@ const DynamicHeaderPath = () => {
       <ul role="list" className="flex items-center gap-3 pt-2">
         <Logo width={38} height={38} />
         <Code onClick={redirectToHome} style={{ cursor: 'pointer' }}>
-          <span className="text-zinc-800 dark:text-zinc-400 ">R2R </span>{' '}
+          <span className="text-zinc-800 dark:text-zinc-400 ">
+            R2R Dashboard{' '}
+          </span>{' '}
         </Code>
         {isPipelineRoute && (
           <>
