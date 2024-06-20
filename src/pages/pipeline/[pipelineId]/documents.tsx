@@ -23,13 +23,13 @@ import { DocumentMagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { R2RClient } from '../../../r2r-js-client';
 
 class DocumentInfoType {
-  document_id: string;
-  user_id: string;
-  title: string;
-  version: string;
-  updated_at: string;
-  size_in_bytes: number;
-  metadata: any;
+  document_id: string = '';
+  user_id: string = '';
+  title: string = '';
+  version: string = '';
+  updated_at: string = '';
+  size_in_bytes: number = 0;
+  metadata: any = null;
 }
 
 const Index: React.FC = () => {
@@ -61,7 +61,7 @@ const Index: React.FC = () => {
 
   const userId = '063edaf8-3e63-4cb9-a4d6-a855f36376c3';
 
-  const handlePageChange = (pageNumber) => {
+  const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
   };
 
