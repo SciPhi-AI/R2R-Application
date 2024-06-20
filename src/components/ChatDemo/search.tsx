@@ -1,19 +1,21 @@
 import { ArrowRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { FC, useState, useCallback } from 'react';
-
-import { getSearchUrl } from './utils/get-search-url';
 import { Pipeline } from '../../types';
 
-function debounce(func, wait) {
-  let timeout;
-  return function (...args) {
-    clearTimeout(timeout);
-    // const context = this;
-    // timeout = setTimeout(() => func.apply(context, args), wait);
+function debounce<T extends (...args: any[]) => void>(
+  func: T,
+  wait: number
+): (...args: Parameters<T>) => void {
+  let timeout: NodeJS.Timeout | null = null;
+  return function (this: ThisParameterType<T>, ...args: Parameters<T>) {
+    if (timeout) {
+      clearTimeout(timeout);
+    }
     timeout = setTimeout(() => func.apply(this, args), wait);
   };
 }
+
 interface SearchProps {
   pipeline?: Pipeline;
 }
@@ -23,7 +25,7 @@ export const Search: FC<SearchProps> = ({ pipeline }) => {
   const router = useRouter();
 
   const navigateToSearch = useCallback(
-    debounce((searchValue) => {
+    debounce((searchValue: string) => {
       if (pipeline) {
         router.push(
           `/pipeline/${pipeline.pipelineId}/playground/?q=${encodeURIComponent(searchValue)}`
@@ -33,11 +35,11 @@ export const Search: FC<SearchProps> = ({ pipeline }) => {
     [router, pipeline]
   );
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (value.trim()) {
       navigateToSearch(value.trim());
-      setValue(''); // Consider moving this line to after navigation if the field clears too early for your liking
+      setValue('');
     }
   };
 
@@ -50,7 +52,9 @@ export const Search: FC<SearchProps> = ({ pipeline }) => {
         <input
           id="search-bar"
           value={value}
-          onChange={(e) => setValue(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setValue(e.target.value)
+          }
           autoFocus
           placeholder="Ask SciPhi AI anything ..."
           className="px-2 pr-6 w-full rounded-md flex-1 outline-none bg-zinc-800 text-zinc-200"
@@ -65,4 +69,3 @@ export const Search: FC<SearchProps> = ({ pipeline }) => {
     </form>
   );
 };
-

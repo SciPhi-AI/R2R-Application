@@ -1,5 +1,15 @@
 import React from 'react';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { R2RClient } from '../../r2r-js-client';
 
 interface DeleteButtonProps {
@@ -14,7 +24,13 @@ interface DeleteButtonProps {
   }) => void;
 }
 
-export const DeleteButton: React.FC<DeleteButtonProps> = ({ selectedDocumentIds, apiUrl, onDelete, onSuccess, showToast }) => {
+export const DeleteButton: React.FC<DeleteButtonProps> = ({
+  selectedDocumentIds,
+  apiUrl,
+  onDelete,
+  onSuccess,
+  showToast,
+}) => {
   const handleBatchDelete = async () => {
     if (selectedDocumentIds.length === 0) {
       return;
@@ -49,7 +65,9 @@ export const DeleteButton: React.FC<DeleteButtonProps> = ({ selectedDocumentIds,
       <AlertDialogTrigger asChild>
         <button
           className={`pl-2 pr-2 text-white py-2 px-4 rounded-full ${
-            selectedDocumentIds.length === 0 ? 'bg-red-400 cursor-not-allowed' : 'bg-red-500 hover:bg-red-600'
+            selectedDocumentIds.length === 0
+              ? 'bg-red-400 cursor-not-allowed'
+              : 'bg-red-500 hover:bg-red-600'
           }`}
           disabled={selectedDocumentIds.length === 0}
         >
@@ -58,14 +76,19 @@ export const DeleteButton: React.FC<DeleteButtonProps> = ({ selectedDocumentIds,
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you sure you want to delete the selected documents?</AlertDialogTitle>
+          <AlertDialogTitle>
+            Are you sure you want to delete the selected documents?
+          </AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. The selected documents will be permanently deleted.
+            This action cannot be undone. The selected documents will be
+            permanently deleted.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={handleBatchDelete}>Delete</AlertDialogAction>
+          <AlertDialogAction onClick={handleBatchDelete}>
+            Delete
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

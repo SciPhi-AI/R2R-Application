@@ -1,12 +1,16 @@
 import dynamic from 'next/dynamic';
 import React, { useState, useEffect, useRef } from 'react';
-import neo4j from "neo4j-driver";
-import { HomeIcon, MagnifyingGlassPlusIcon, MagnifyingGlassMinusIcon } from '@heroicons/react/24/outline';
+import neo4j from 'neo4j-driver';
+import {
+  HomeIcon,
+  MagnifyingGlassPlusIcon,
+  MagnifyingGlassMinusIcon,
+} from '@heroicons/react/24/outline';
 import { NoSSRForceGraphRef } from '@/lib/NoSSRForceGraph';
 
 const driver = neo4j.driver(
-  "neo4j://localhost:7687",
-  neo4j.auth.basic("neo4j", "Testtest")
+  'neo4j://localhost:7687',
+  neo4j.auth.basic('neo4j', 'Testtest')
 );
 
 const NoSSRForceGraph = dynamic(() => import('@/lib/NoSSRForceGraph'), {
@@ -18,8 +22,29 @@ interface Neo4jGraphProps {
   height: number;
 }
 
+interface Link {
+  source: string;
+  target: string;
+  label: string;
+  relationshipType: string;
+}
+
+interface MyRecord {
+  get: (param: string) => any;
+}
+
+type NodeType = {
+  id: any;
+  type: any;
+};
+
+type StateType = {
+  nodes: NodeType[];
+  links: any[];
+};
+
 const Neo4jGraph: React.FC<Neo4jGraphProps> = ({ width, height }) => {
-  const [data, setData] = useState({ nodes: [], links: [] });
+  const [data, setData] = useState<StateType>({ nodes: [], links: [] });
   const [nodeColors, setNodeColors] = useState<Record<string, string>>({});
   const graphRef = useRef<NoSSRForceGraphRef>(null);
 
@@ -33,10 +58,10 @@ const Neo4jGraph: React.FC<Neo4jGraphProps> = ({ width, height }) => {
         `);
 
         const nodes = new Map();
-        const links = [];
+        const links: Link[] = [];
         const nodeTypes = new Set<string>();
 
-        result.records.forEach((record) => {
+        result.records.forEach((record: MyRecord) => {
           const source = record.get('n');
           const target = record.get('m');
           const relationshipType = record.get('r').type;
@@ -64,6 +89,7 @@ const Neo4jGraph: React.FC<Neo4jGraphProps> = ({ width, height }) => {
           links.push({
             source: source.properties.id,
             target: target.properties.id,
+            relationshipType: relationshipType,
             label: relationshipType,
           });
         });
@@ -111,7 +137,7 @@ const Neo4jGraph: React.FC<Neo4jGraphProps> = ({ width, height }) => {
           <NoSSRForceGraph
             ref={graphRef}
             nodeLabel="id"
-            nodeAutoColorBy={(node) => nodeColors[node.type]}
+            nodeAutoColorBy={(node: { type: string }) => nodeColors[node.type]}
             linkLabel="label"
             linkAutoColorBy="label"
             data={data}

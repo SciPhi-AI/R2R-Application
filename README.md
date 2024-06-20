@@ -11,6 +11,7 @@ Manage and Monitor Your R2R RAG Pipelines with Ease
 The R2R Dashboard is an open-source React+Next.js application designed to provide [R2R](https://github.com/SciPhi-AI/R2R) developers with an easy interface to interact with their pipelines. This dashboard aims to reduce development and iteration time by offering a user-friendly environment.
 
 ## Key Features
+
 - **🗂️ Document Management**: Upload, update, and delete documents and their metadata.
 - **🛝 Playground**: Stream RAG responses with different models and configurable settings.
 - **📊 Analytics**: View aggregate statistics around latencies and metrics with detailed histograms.
@@ -18,6 +19,7 @@ The R2R Dashboard is an open-source React+Next.js application designed to provid
 - **🔧 Development Tools**: Easily start a development server, format code, and run lint checks.
 
 ## Table of Contents
+
 1. [Quick Install](#quick-install)
 2. [Links](#links)
 3. [Screenshots](#screenshots)
@@ -53,23 +55,23 @@ After installing PNPM, you may need to add it to your system's PATH. Follow the 
 
 1. **Clone the project repository and navigate to the project directory:**
 
-    ```bash
-    git clone git@github.com:SciPhi-AI/R2R-Dashboard.git
-    cd R2R-Dashboard
-    ```
+   ```bash
+   git clone git@github.com:SciPhi-AI/R2R-Dashboard.git
+   cd R2R-Dashboard
+   ```
 
 2. **Install the project dependencies using PNPM:**
 
-    ```bash
-    pnpm install
-    ```
+   ```bash
+   pnpm install
+   ```
 
 3. **Build and start the application for production:**
 
-    ```bash
-    pnpm build
-    pnpm start
-    ```
+   ```bash
+   pnpm build
+   pnpm start
+   ```
 
 This will build the application on port 3000. After `pnpm start` runs successfully, the dashboard can be viewed at [http://localhost:3000](http://localhost:3000).
 
@@ -79,18 +81,18 @@ If you'd like to develop the R2R dashboard, you can do so by starting a developm
 
 1. **Start the development server:**
 
-    ```bash
-    pnpm dev
-    ```
+   ```bash
+   pnpm dev
+   ```
 
 2. **Pre-commit checks (optional but recommended):**
 
-    Ensure your code is properly formatted and free of linting issues before committing:
+   Ensure your code is properly formatted and free of linting issues before committing:
 
-    ```bash
-    pnpm format
-    pnpm lint
-    ```
+   ```bash
+   pnpm format
+   pnpm lint
+   ```
 
 # Links
 
@@ -98,6 +100,7 @@ If you'd like to develop the R2R dashboard, you can do so by starting a developm
 - [R2R Docs Quickstart](https://r2r-docs.sciphi.ai/getting-started/quick-install)
 
 ## Docs
+
 - [R2R Dashboard](https://r2r-docs.sciphi.ai/cookbooks/dashboard): A how-to guide on connecting with the R2R Dashboard.
 - [R2R Demo](https://r2r-docs.sciphi.ai/getting-started/r2r-demo): A basic demo script designed to get you started with an R2R RAG application.
 - [R2R Client-Server](https://r2r-docs.sciphi.ai/cookbooks/client-server): An extension of the basic `R2R Demo` with client-server interactions.
@@ -107,6 +110,7 @@ If you'd like to develop the R2R dashboard, you can do so by starting a developm
 - [SciPhi Cloud Docs](https://docs.sciphi.ai/): SciPhi Cloud documentation.
 
 # Screenshots
+
 <img width="1500" alt="watch" src="https://github.com/SciPhi-AI/R2R-Dashboard/assets/34580718/eff7841c-e5ae-4573-9f3a-58900b580b69">
 
 <img width="1512" alt="oss_dashboard_documents" src="https://github.com/SciPhi-AI/R2R-Dashboard/assets/34580718/db0b3762-2fa6-42c0-bb2b-1970f8213776">
@@ -116,7 +120,6 @@ If you'd like to develop the R2R dashboard, you can do so by starting a developm
 <img width="1512" alt="oss_dashboard_analytics" src="https://github.com/SciPhi-AI/R2R-Dashboard/assets/34580718/442f9acb-45d4-494d-a09d-95f8b892b044">
 
 <img width="1489" alt="logs" src="https://github.com/SciPhi-AI/R2R-Dashboard/assets/34580718/4d431c35-7933-4cad-bff3-bdc55cd3123d">
-
 
 # Summary
 

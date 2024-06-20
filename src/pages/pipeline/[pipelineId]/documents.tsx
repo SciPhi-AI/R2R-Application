@@ -80,11 +80,12 @@ const Index: React.FC = () => {
   }, [apiUrl]);
 
   const [selectedDocumentId, setSelectedDocumentId] = useState('');
-  const [isDocumentInfoDialogOpen, setIsDocumentInfoDialogOpen] = useState(false);
+  const [isDocumentInfoDialogOpen, setIsDocumentInfoDialogOpen] =
+    useState(false);
 
   const renderTableRows = () => {
     const rows = [];
-  
+
     if (documents.length === 0) {
       rows.push(
         <tr key="no-docs">
@@ -93,10 +94,10 @@ const Index: React.FC = () => {
           </td>
         </tr>
       );
-  
+
       // Calculate the number of empty rows needed
       const emptyRowsCount = documentsPerPage - 1;
-  
+
       // Render empty rows
       for (let i = 0; i < emptyRowsCount; i++) {
         rows.push(
@@ -123,9 +124,16 @@ const Index: React.FC = () => {
                   checked={selectedDocumentIds.includes(doc.document_id)}
                   onCheckedChange={(checked) => {
                     if (checked) {
-                      setSelectedDocumentIds([...selectedDocumentIds, doc.document_id]);
+                      setSelectedDocumentIds([
+                        ...selectedDocumentIds,
+                        doc.document_id,
+                      ]);
                     } else {
-                      setSelectedDocumentIds(selectedDocumentIds.filter((id) => id !== doc.document_id));
+                      setSelectedDocumentIds(
+                        selectedDocumentIds.filter(
+                          (id) => id !== doc.document_id
+                        )
+                      );
                     }
                   }}
                 />
@@ -142,7 +150,9 @@ const Index: React.FC = () => {
                 className="overflow-x-auto whitespace-nowrap"
                 style={{ width: '150px' }}
               >
-                {doc.user_id !== null && doc.user_id !== undefined ? doc.user_id : "N/A"}
+                {doc.user_id !== null && doc.user_id !== undefined
+                  ? doc.user_id
+                  : 'N/A'}
               </div>
             </td>
             <td className="px-4 py-2 text-white">
@@ -150,7 +160,9 @@ const Index: React.FC = () => {
                 className="overflow-x-auto whitespace-nowrap"
                 style={{ width: '150px' }}
               >
-                {doc.title !== null && doc.title !== undefined ? doc.title : "N/A"}
+                {doc.title !== null && doc.title !== undefined
+                  ? doc.title
+                  : 'N/A'}
               </div>
             </td>
             <td className="px-4 py-2 text-white">
@@ -183,18 +195,20 @@ const Index: React.FC = () => {
                   <Tooltip>
                     <TooltipTrigger>
                       <UpdateButtonContainer
-                          apiUrl={apiUrl}
-                          documentId={doc.document_id}
-                          onUpdateSuccess={() => fetchDocuments(new R2RClient(apiUrl))}
-                          showToast={toast}
-                        />
+                        apiUrl={apiUrl}
+                        documentId={doc.document_id}
+                        onUpdateSuccess={() =>
+                          fetchDocuments(new R2RClient(apiUrl))
+                        }
+                        showToast={toast}
+                      />
                     </TooltipTrigger>
                     <TooltipContent>
                       <p>Update Document</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
-  
+
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger>
@@ -204,7 +218,6 @@ const Index: React.FC = () => {
                           setIsDocumentInfoDialogOpen(true);
                         }}
                         className="info-button hover:bg-blue-700 bg-blue-500 text-white font-bold rounded flex items-center justify-center"
-
                       >
                         <DocumentMagnifyingGlassIcon className="h-8 w-8" />
                       </button>
@@ -224,14 +237,13 @@ const Index: React.FC = () => {
                 {doc.updated_at}
               </div>
             </td>
-
           </tr>
         );
       });
-  
+
       // Calculate the number of empty rows needed
       const emptyRowsCount = documentsPerPage - currentDocuments.length;
-  
+
       // Render empty rows
       for (let i = 0; i < emptyRowsCount; i++) {
         rows.push(
@@ -248,7 +260,7 @@ const Index: React.FC = () => {
         );
       }
     }
-  
+
     return rows;
   };
 

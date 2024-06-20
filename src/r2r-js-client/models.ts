@@ -1,24 +1,22 @@
-// models.ts
-
 import { v4 as uuidv4 } from 'uuid';
 
 export enum DocumentType {
-    CSV = "csv",
-    DOCX = "docx",
-    HTML = "html",
-    JSON = "json",
-    MD = "md",
-    PDF = "pdf",
-    PPTX = "pptx",
-    TXT = "txt",
-    XLSX = "xlsx",
-    GIF = "gif",
-    PNG = "png",
-    JPG = "jpg",
-    JPEG = "jpeg",
-    SVG = "svg",
-    MP3 = "mp3",
-    MP4 = "mp4",
+  CSV = 'csv',
+  DOCX = 'docx',
+  HTML = 'html',
+  JSON = 'json',
+  MD = 'md',
+  PDF = 'pdf',
+  PPTX = 'pptx',
+  TXT = 'txt',
+  XLSX = 'xlsx',
+  GIF = 'gif',
+  PNG = 'png',
+  JPG = 'jpg',
+  JPEG = 'jpeg',
+  SVG = 'svg',
+  MP3 = 'mp3',
+  MP4 = 'mp4',
 }
 
 export type DataType = string | Uint8Array;
@@ -31,17 +29,20 @@ export class AnalysisTypes {
   }
 
   static generateBarChartData(logs: any[], key: string): any {
-    const chartData: { labels: string[], datasets: { label: string, data: number[] }[] } = { labels: [], datasets: [] };
+    const chartData: {
+      labels: string[];
+      datasets: { label: string; data: number[] }[];
+    } = { labels: [], datasets: [] };
     const valueCounts: Record<string, number> = {};
 
     for (const log of logs) {
-      if ("entries" in log) {
+      if ('entries' in log) {
         for (const entry of log.entries) {
           if (entry.key === key) {
             valueCounts[entry.value] = (valueCounts[entry.value] || 0) + 1;
           }
         }
-      } else if ("key" in log && log.key === key) {
+      } else if ('key' in log && log.key === key) {
         valueCounts[log.value] = (valueCounts[log.value] || 0) + 1;
       }
     }
@@ -68,7 +69,7 @@ export class GenerationConfig {
   top_p: number = 1.0;
   top_k: number = 100;
   max_tokens_to_sample: number = 1024;
-  model: string = "gpt-4o";
+  model: string = 'gpt-4o';
   stream: boolean = false;
   functions?: Record<string, any>[];
   skip_special_tokens: boolean = false;
@@ -85,42 +86,56 @@ export class GenerationConfig {
 }
 
 export class Document {
-    id: string = uuidv4();
-    type: DocumentType;
-    data: DataType;
-    metadata: Record<string, any>;
-  
-    constructor(data: Partial<Document>) {
-      Object.assign(this, data);
+  id: string = uuidv4();
+  type: DocumentType;
+  data: DataType;
+  metadata: Record<string, any>;
+
+  constructor(data: Partial<Document>) {
+    this.id = data.id || uuidv4();
+    this.type = data.type!;
+    this.data = data.data!;
+    this.metadata = data.metadata || {};
+    Object.assign(this, data);
+  }
+
+  encodeData(): void {
+    if (this.data instanceof Uint8Array) {
+      this.data = Buffer.from(this.data).toString('base64');
     }
-  
-    encodeData(): void {
-      if (this.data instanceof Uint8Array) {
-        this.data = Buffer.from(this.data).toString('base64');
-      }
-      this.id = this.id.toString();
-      for (const [key, value] of Object.entries(this.metadata)) {
-        if (typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)) {
-          this.metadata[key] = value.toString();
-        }
-      }
-    }
-  
-    decodeData(): void {
-      if (typeof this.data === 'string') {
-        try {
-          this.data = new Uint8Array(Buffer.from(this.data, 'base64'));
-        } catch (e) {
-          throw new Error(`Failed to decode data: ${e}`);
-        }
-      }
-      for (const [key, value] of Object.entries(this.metadata)) {
-        if (typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)) {
-          this.metadata[key] = value;  // Keep it as a string
-        }
+    this.id = this.id.toString();
+    for (const [key, value] of Object.entries(this.metadata)) {
+      if (
+        typeof value === 'string' &&
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+          value
+        )
+      ) {
+        this.metadata[key] = value.toString();
       }
     }
   }
+
+  decodeData(): void {
+    if (typeof this.data === 'string') {
+      try {
+        this.data = new Uint8Array(Buffer.from(this.data, 'base64'));
+      } catch (e) {
+        throw new Error(`Failed to decode data: ${e}`);
+      }
+    }
+    for (const [key, value] of Object.entries(this.metadata)) {
+      if (
+        typeof value === 'string' &&
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+          value
+        )
+      ) {
+        this.metadata[key] = value; // Keep it as a string
+      }
+    }
+  }
+}
 
 export class VectorSearchSettings {
   use_vector_search: boolean;
@@ -253,7 +268,7 @@ export class R2RAnalyticsRequest {
 }
 
 export class R2RUsersStatsRequest {
-    user_ids?: string[];
+  user_ids?: string[];
 
   constructor(data: Partial<R2RUsersStatsRequest>) {
     this.user_ids = data.user_ids;
@@ -261,19 +276,22 @@ export class R2RUsersStatsRequest {
 }
 
 export class R2RDocumentsInfoRequest {
+  document_ids?: string[];
+  user_ids?: string[];
+
+  constructor(data: {
     document_ids?: string[] | null;
     user_ids?: string[] | null;
-
-    constructor(data: { document_ids?: string[] | null; user_ids?: string[] | null }) {
-        this.document_ids = data.document_ids;
-        this.user_ids = data.user_ids;
-    }
+  }) {
+    this.document_ids = data.document_ids || undefined;
+    this.user_ids = data.user_ids || undefined;
+  }
 }
 
 export class R2RDocumentChunksRequest {
-    document_id: string;
+  document_id: string;
 
-    constructor(data: Partial<R2RDocumentChunksRequest>) {
+  constructor(data: Partial<R2RDocumentChunksRequest>) {
     this.document_id = data.document_id!;
-    }
+  }
 }

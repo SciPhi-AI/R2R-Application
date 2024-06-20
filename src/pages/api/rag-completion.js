@@ -17,19 +17,28 @@ export default async function handler(req) {
   const searchLimit = queryObject.searchLimit
     ? parseInt(queryObject.searchLimit)
     : 10;
-  
- 
+
   //TODO: Move defaults to constants
-  const temperature = queryObject.temperature ? parseFloat(queryObject.temperature) : 0.1;
+  const temperature = queryObject.temperature
+    ? parseFloat(queryObject.temperature)
+    : 0.1;
   const topP = queryObject.topP ? parseFloat(queryObject.topP) : 1;
   const topK = queryObject.topK ? parseInt(queryObject.topK) : 100;
-  const max_tokens_to_sample = queryObject.max_tokens_to_sample ? parseInt(queryObject.max_tokens_to_sample) : 1024;
+  const max_tokens_to_sample = queryObject.max_tokens_to_sample
+    ? parseInt(queryObject.max_tokens_to_sample)
+    : 1024;
   const model = queryObject.model || 'gpt-4-turbo';
   const streaming = true;
 
-  const doHybridSearch = queryObject.hybridSearch ? queryObject.hybridSearch === 'true' : false;
-  const vectorSearch = queryObject.vectorSearch ? queryObject.vectorSearch === 'true' : false;
-  const useKnowledgeGraph = queryObject.useKnowledgeGraph ? queryObject.useKnowledgeGraph === 'true' : false;
+  const doHybridSearch = queryObject.hybridSearch
+    ? queryObject.hybridSearch === 'true'
+    : false;
+  const vectorSearch = queryObject.vectorSearch
+    ? queryObject.vectorSearch === 'true'
+    : false;
+  const useKnowledgeGraph = queryObject.useKnowledgeGraph
+    ? queryObject.useKnowledgeGraph === 'true'
+    : false;
 
   const generationConfig = {
     temperature: temperature,
@@ -40,7 +49,7 @@ export default async function handler(req) {
     stream: streaming,
   };
 
-console.log("generationConfig", generationConfig);
+  console.log('generationConfig', generationConfig);
 
   try {
     if (streaming) {
@@ -52,7 +61,7 @@ console.log("generationConfig", generationConfig);
         doHybridSearch,
         useKnowledgeGraph,
         generationConfig, // TODO: Need to add ability to set a KG config that differs from the generation config
-        generationConfig,
+        generationConfig
       );
 
       const readableStream = new ReadableStream({
@@ -87,7 +96,7 @@ console.log("generationConfig", generationConfig);
         doHybridSearch,
         useKnowledgeGraph,
         generationConfig, // TODO: Need to add ability to set a KG config that differs from the generation config
-        generationConfig,
+        generationConfig
       );
       return new Response(JSON.stringify(response), {
         headers: { 'Content-Type': 'application/json' },

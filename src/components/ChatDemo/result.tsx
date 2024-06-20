@@ -50,7 +50,11 @@ export const Result: FC<{
 
   let timeout: NodeJS.Timeout;
 
-  const parseStreaming = async (query, userId, apiUrl) => {
+  const parseStreaming = async (
+    query: string,
+    userId: string,
+    apiUrl: string
+  ) => {
     setSources(null);
     setMarkdown('');
     const response = await fetch(
@@ -110,9 +114,13 @@ export const Result: FC<{
     }
 
     const debouncedParseStreaming = () => {
-      clearTimeout(timeout); // Clear any existing timeout
+      clearTimeout(timeout);
       timeout = setTimeout(() => {
-        parseStreaming(query, userId, apiUrl);
+        if (apiUrl !== undefined) {
+          parseStreaming(query, userId, apiUrl);
+        } else {
+          console.error('apiUrl is undefined');
+        }
       }, 500);
     };
 
@@ -130,10 +138,10 @@ export const Result: FC<{
       <Answer markdown={markdown} sources={sources}></Answer>
       <Sources sources={sources}></Sources>
 
-      {uploadedDocuments?.length === 0 && (
+      {uploadedDocuments?.length === 0 && apiUrl && (
         <div className="absolute inset-4 flex items-center justify-center bg-white/40 backdrop-blur-sm">
           <div className="flex items-center p-4 bg-white shadow-2xl rounded text-blue-500 font-medium gap-4">
-            Please upload atleast one document to submit queries.{' '}
+            Please upload at least one document to submit queries.{' '}
             <UploadButton
               userId={userId}
               apiUrl={apiUrl}

@@ -1,23 +1,34 @@
-"use client";
-
-import { useState, useEffect } from "react";
-import { Switch } from "@/components/ui/switch";
-
+import { useState, useEffect } from 'react';
 import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { Switch } from '@/components/ui/switch';
 
-const SingleSwitch = ({ id, initialChecked, onChange, label, tooltipText }) => {
+interface SingleSwitchProps {
+  id: string;
+  initialChecked: boolean;
+  onChange: (id: string, checked: boolean) => void;
+  label: string;
+  tooltipText: string;
+}
+
+const SingleSwitch: React.FC<SingleSwitchProps> = ({
+  id,
+  initialChecked,
+  onChange,
+  label,
+  tooltipText,
+}) => {
   const [isChecked, setIsChecked] = useState(initialChecked);
 
   useEffect(() => {
     setIsChecked(initialChecked);
   }, [initialChecked]);
 
-  const handleSwitchChange = (checked) => {
+  const handleSwitchChange = (checked: boolean) => {
     setIsChecked(checked);
     onChange(id, checked);
   };
@@ -26,16 +37,27 @@ const SingleSwitch = ({ id, initialChecked, onChange, label, tooltipText }) => {
     <div className="flex justify-between items-center mt-4">
       <TooltipProvider>
         <Tooltip>
-            <TooltipTrigger>
-                {label && <label htmlFor={id} className="mr-2 text-sm font-medium text-zinc-300">{label}</label>}
-            </TooltipTrigger>
-            <TooltipContent>
-                <p>{tooltipText}</p>
-            </TooltipContent>
+          <TooltipTrigger>
+            {label && (
+              <label
+                htmlFor={id}
+                className="mr-2 text-sm font-medium text-zinc-300"
+              >
+                {label}
+              </label>
+            )}
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{tooltipText}</p>
+          </TooltipContent>
         </Tooltip>
-        </TooltipProvider>
+      </TooltipProvider>
 
-        <Switch id={id} checked={isChecked} onCheckedChange={handleSwitchChange} />
+      <Switch
+        id={id}
+        checked={isChecked}
+        onCheckedChange={handleSwitchChange}
+      />
     </div>
   );
 };

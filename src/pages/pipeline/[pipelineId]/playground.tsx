@@ -5,8 +5,8 @@ import { useRouter } from 'next/router';
 import React, { useState, useEffect } from 'react';
 
 import { Result } from '@/components/ChatDemo/result';
-import SingleSwitch from "@/components/ChatDemo/SingleSwitch"
-import useSwitchManager from "@/components/ChatDemo/SwitchManager"
+import SingleSwitch from '@/components/ChatDemo/SingleSwitch';
+import useSwitchManager from '@/components/ChatDemo/SwitchManager';
 import { Search } from '@/components/ChatDemo/search';
 import { Title } from '@/components/ChatDemo/title';
 import Layout from '@/components/Layout';
@@ -15,10 +15,10 @@ import Neo4jGraph from './Neo4jGraph';
 
 import { InfoIcon } from '@/components/ui/InfoIcon';
 import ModelSelector from '@/components/ui/ModelSelector';
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
-import { Slider } from "@/components/ui/slider"
+import { Slider } from '@/components/ui/slider';
 
 import {
   Select,
@@ -35,7 +35,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet"
+} from '@/components/ui/sheet';
 
 import {
   Tooltip,
@@ -45,7 +45,6 @@ import {
 } from '@/components/ui/tooltip';
 
 import { Cog8ToothIcon } from '@heroicons/react/24/outline';
-  
 
 import { R2RClient } from '../../../r2r-js-client';
 
@@ -63,19 +62,18 @@ const Index: React.FC = () => {
   const [selectedModel, setSelectedModel] = useState('gpt-4-turbo');
   const [uploadedDocuments, setUploadedDocuments] = useState([]);
   const userId = '063edaf8-3e63-4cb9-a4d6-a855f36376c3';
-  
+
   // OSS specific pipeline logic
   const { pipelineId } = router.query;
   const { watchedPipelines } = useUserContext();
   const pipeline = watchedPipelines[pipelineId as string];
   const apiUrl = pipeline?.deploymentUrl;
   console.log('passing apiUrl = ', apiUrl);
-  
+
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('query');
 
   const { switches, initializeSwitch, updateSwitch } = useSwitchManager();
-
 
   const [temperature, setTemperature] = useState(0.1);
   const [topP, setTopP] = useState(1);
@@ -83,12 +81,27 @@ const Index: React.FC = () => {
   const [max_tokens_to_sample, setMax_tokens_to_sample] = useState(1024);
 
   useEffect(() => {
-    initializeSwitch("vector_search", true, "Vector Search", "Vector search is a search method that uses vectors to represent documents and queries. It is used to find similar documents to a given query.");
-    initializeSwitch("hybrid_search", false, "Hybrid Search", "Hybrid search is a search method that combines multiple search methods to provide more accurate and relevant search results.");
-    initializeSwitch("knowledge_graph_search", false, "Knowledge Graph Search", "Knowledge graph search is a search method that uses knowledge graphs to provide more accurate and relevant search results.");
+    initializeSwitch(
+      'vector_search',
+      true,
+      'Vector Search',
+      'Vector search is a search method that uses vectors to represent documents and queries. It is used to find similar documents to a given query.'
+    );
+    initializeSwitch(
+      'hybrid_search',
+      false,
+      'Hybrid Search',
+      'Hybrid search is a search method that combines multiple search methods to provide more accurate and relevant search results.'
+    );
+    initializeSwitch(
+      'knowledge_graph_search',
+      false,
+      'Knowledge Graph Search',
+      'Knowledge graph search is a search method that uses knowledge graphs to provide more accurate and relevant search results.'
+    );
   }, [initializeSwitch]);
-  
-  const handleSwitchChange = (id, checked) => {
+
+  const handleSwitchChange = (id: string, checked: boolean) => {
     updateSwitch(id, checked);
     toast({
       title: `${switches[id].label} status changed`,
@@ -144,7 +157,9 @@ const Index: React.FC = () => {
                               <InfoIcon width="w-4" height="h-4" />
                             </TooltipTrigger>
                             <TooltipContent>
-                              <p>The URL where your R2R pipeline is deployed.</p>
+                              <p>
+                                The URL where your R2R pipeline is deployed.
+                              </p>
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
@@ -198,7 +213,7 @@ const Index: React.FC = () => {
                       </h2>
                     </div>
                     <div className="border-b border-zinc-600"></div>
-                    <div className='mt-2 mb-2'>
+                    <div className="mt-2 mb-2">
                       <div>
                         {Object.keys(switches).map((id) => (
                           <SingleSwitch
@@ -213,76 +228,99 @@ const Index: React.FC = () => {
                       </div>
                     </div>
                     <div className="mt-2 mb-2">
-                    <div className="flex items-center justify-between">
-                      <label htmlFor="model" className="text-sm font-medium text-zinc-300 mb-3">
-                        Model
-                      </label>
-                      <Sheet>
-                        <SheetTrigger>
-                          <Cog8ToothIcon className="h-6 w-6 mb-3" />
-                        </SheetTrigger>
-                        <SheetContent side="left">
-                          <SheetHeader>
-                            <SheetTitle>RAG Generation Config</SheetTitle>
-                            <SheetDescription>Set the parameters for your model.</SheetDescription>
-                          </SheetHeader>
-                          <div className="grid gap-4 py-4">
-                            <div className="flex items-center justify-between gap-4">
-                              <Label htmlFor="temperature" className="text-right">
-                                temperature
-                              </Label>
-                              <div className="flex items-center gap-2">
-                                <Slider
-                                  defaultValue={[temperature]}
-                                  max={2}
-                                  step={0.01}
-                                  className="w-40"
-                                  onValueChange={(value) => setTemperature(value[0])}
+                      <div className="flex items-center justify-between">
+                        <label
+                          htmlFor="model"
+                          className="text-sm font-medium text-zinc-300 mb-3"
+                        >
+                          Model
+                        </label>
+                        <Sheet>
+                          <SheetTrigger>
+                            <Cog8ToothIcon className="h-6 w-6 mb-3" />
+                          </SheetTrigger>
+                          <SheetContent side="left">
+                            <SheetHeader>
+                              <SheetTitle>RAG Generation Config</SheetTitle>
+                              <SheetDescription>
+                                Set the parameters for your model.
+                              </SheetDescription>
+                            </SheetHeader>
+                            <div className="grid gap-4 py-4">
+                              <div className="flex items-center justify-between gap-4">
+                                <Label
+                                  htmlFor="temperature"
+                                  className="text-right"
+                                >
+                                  temperature
+                                </Label>
+                                <div className="flex items-center gap-2">
+                                  <Slider
+                                    defaultValue={[temperature]}
+                                    max={2}
+                                    step={0.01}
+                                    className="w-40"
+                                    onValueChange={(value) =>
+                                      setTemperature(value[0])
+                                    }
+                                  />
+                                  <span className="text-sm">
+                                    {temperature.toFixed(2)}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="flex items-center justify-between gap-4">
+                                <Label htmlFor="topP" className="text-right">
+                                  top_p
+                                </Label>
+                                <div className="flex items-center gap-2">
+                                  <Slider
+                                    defaultValue={[topP]}
+                                    max={1}
+                                    step={0.01}
+                                    className="w-40"
+                                    onValueChange={(value) => setTopP(value[0])}
+                                  />
+                                  <span className="text-sm">
+                                    {topP.toFixed(2)}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="flex items-center justify-between gap-4">
+                                <Label htmlFor="top_k" className="text-right">
+                                  top_k
+                                </Label>
+                                <Input
+                                  id="top_k"
+                                  value={top_k}
+                                  className="col-span-1 w-24"
+                                  onChange={(e) =>
+                                    setTop_k(Number(e.target.value))
+                                  }
                                 />
-                                <span className="text-sm">{temperature.toFixed(2)}</span>
+                              </div>
+                              <div className="flex items-center justify-between gap-4">
+                                <Label
+                                  htmlFor="max_tokens_to_sample"
+                                  className="text-right"
+                                >
+                                  max_tokens_to_sample
+                                </Label>
+                                <Input
+                                  id="max_tokens_to_sample"
+                                  value={max_tokens_to_sample}
+                                  className="col-span-1 w-24"
+                                  onChange={(e) =>
+                                    setMax_tokens_to_sample(
+                                      Number(e.target.value)
+                                    )
+                                  }
+                                />
                               </div>
                             </div>
-                            <div className="flex items-center justify-between gap-4">
-                              <Label htmlFor="topP" className="text-right">
-                                top_p
-                              </Label>
-                              <div className="flex items-center gap-2">
-                                <Slider
-                                  defaultValue={[topP]}
-                                  max={1}
-                                  step={0.01}
-                                  className="w-40"
-                                  onValueChange={(value) => setTopP(value[0])}
-                                />
-                                <span className="text-sm">{topP.toFixed(2)}</span>
-                              </div>
-                            </div>
-                            <div className="flex items-center justify-between gap-4">
-                              <Label htmlFor="top_k" className="text-right">
-                                top_k
-                              </Label>
-                              <Input
-                                id="top_k"
-                                value={top_k}
-                                className="col-span-1 w-24"
-                                onChange={(e) => setTop_k(Number(e.target.value))}
-                              />
-                            </div>
-                            <div className="flex items-center justify-between gap-4">
-                              <Label htmlFor="max_tokens_to_sample" className="text-right">
-                                max_tokens_to_sample
-                              </Label>
-                              <Input
-                                id="max_tokens_to_sample"
-                                value={max_tokens_to_sample}
-                                className="col-span-1 w-24"
-                                onChange={(e) => setMax_tokens_to_sample(Number(e.target.value))}
-                              />
-                            </div>
-                          </div>
-                        </SheetContent>
-                      </Sheet>
-                    </div>
+                          </SheetContent>
+                        </Sheet>
+                      </div>
                       <ModelSelector
                         selectedModel={selectedModel}
                         setSelectedModel={setSelectedModel}
@@ -301,7 +339,10 @@ const Index: React.FC = () => {
                                 <InfoIcon width="w-4" height="h-4" />
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>Each user interacts with the deployed pipeline through an allocated User ID.</p>
+                                <p>
+                                  Each user interacts with the deployed pipeline
+                                  through an allocated User ID.
+                                </p>
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
@@ -312,7 +353,7 @@ const Index: React.FC = () => {
                           <SelectValue>{userId}</SelectValue>
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="userId">{userId}</SelectItem>                        
+                          <SelectItem value="userId">{userId}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>

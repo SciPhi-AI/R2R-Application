@@ -23,26 +23,27 @@ export class R2RClient {
   private baseUrl: string;
   private prefix: string;
 
-  constructor(baseUrl: string, prefix: string = "/v1") {
+  constructor(baseUrl: string, prefix: string = '/v1') {
     this.baseUrl = baseUrl;
     this.prefix = prefix;
   }
 
   async updatePrompt(
-    name: string = "default_system",
+    name: string = 'default_system',
     template?: string,
     inputTypes?: Record<string, string>
   ): Promise<any> {
     const url = `${this.baseUrl}${this.prefix}/update_prompt`;
-    const request = new R2RUpdatePromptRequest({ name, template, input_types: inputTypes });
+    const request = new R2RUpdatePromptRequest({
+      name,
+      template,
+      input_types: inputTypes,
+    });
     const response = await axios.post(url, request);
     return response.data;
   }
 
-  async ingestDocuments(
-    documents: any[],
-    versions?: string[]
-  ): Promise<any> {
+  async ingestDocuments(documents: any[], versions?: string[]): Promise<any> {
     const url = `${this.baseUrl}${this.prefix}/ingest_documents`;
     const request = new R2RIngestDocumentsRequest({ documents, versions });
     const response = await axios.post(url, request);
@@ -77,7 +78,7 @@ export class R2RClient {
     });
 
     const response = await axios.post(url, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
+      headers: { 'Content-Type': 'multipart/form-data' },
     });
     return response.data;
   }
@@ -88,7 +89,11 @@ export class R2RClient {
     metadatas?: any[]
   ): Promise<any> {
     const url = `${this.baseUrl}${this.prefix}/update_documents`;
-    const request = new R2RUpdateDocumentsRequest({ documents, versions, metadatas });
+    const request = new R2RUpdateDocumentsRequest({
+      documents,
+      versions,
+      metadatas,
+    });
     const response = await axios.post(url, request);
     return response.data;
   }
@@ -113,7 +118,7 @@ export class R2RClient {
     formData.append('request', JSON.stringify(request));
 
     const response = await axios.post(url, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
+      headers: { 'Content-Type': 'multipart/form-data' },
     });
     return response.data;
   }
@@ -180,9 +185,13 @@ export class R2RClient {
     }
   }
 
-  private async streamRag(ragRequest: R2RRAGRequest): Promise<ReadableStream<string>> {
+  private async streamRag(
+    ragRequest: R2RRAGRequest
+  ): Promise<ReadableStream<string>> {
     const url = `${this.baseUrl}${this.prefix}/rag`;
-    const response = await axios.post(url, ragRequest, { responseType: 'stream' });
+    const response = await axios.post(url, ragRequest, {
+      responseType: 'stream',
+    });
     return new ReadableStream({
       async start(controller) {
         response.data.on('data', (chunk: Buffer) => {
@@ -194,11 +203,14 @@ export class R2RClient {
         response.data.on('error', (err: Error) => {
           controller.error(err);
         });
-      }
+      },
     });
   }
 
-  async delete(keys: string[], values: (boolean | number | string)[]): Promise<any> {
+  async delete(
+    keys: string[],
+    values: (boolean | number | string)[]
+  ): Promise<any> {
     const url = `${this.baseUrl}${this.prefix}/delete`;
     const request = new R2RDeleteRequest({ keys, values });
     const response = await axios.delete(url, { data: request });
@@ -223,7 +235,10 @@ export class R2RClient {
 
   async analytics(filterCriteria: any, analysisTypes: any): Promise<any> {
     const url = `${this.baseUrl}${this.prefix}/analytics`;
-    const request = new R2RAnalyticsRequest({ filter_criteria: filterCriteria, analysis_types: analysisTypes });
+    const request = new R2RAnalyticsRequest({
+      filter_criteria: filterCriteria,
+      analysis_types: analysisTypes,
+    });
     const response = await axios.post(url, request);
     return response.data;
   }
@@ -231,23 +246,38 @@ export class R2RClient {
   async usersStats(userIds?: string[]): Promise<any> {
     const url = `${this.baseUrl}${this.prefix}/users_stats`;
     const request = new R2RUsersStatsRequest({
-      user_ids: userIds
+      user_ids: userIds,
     });
     const response = await axios.get(url, { data: request });
     return response.data;
   }
 
-  async getDocumentsInfo(documentIds?: string[] | null, userIds?: string[] | null): Promise<any> {
+  async getDocumentsInfo(
+    documentIds?: string[] | null,
+    userIds?: string[] | null
+  ): Promise<any> {
     const url = `${this.baseUrl}${this.prefix}/documents_info`;
-    const request = new R2RDocumentsInfoRequest({
-      document_ids: documentIds || undefined,
-      user_ids: userIds || undefined,
-    });
-    const response = await axios.get(url, { data: request });
+    const params: Record<string, string> = {};
+
+    if (documentIds) {
+      params.document_ids = JSON.stringify(documentIds);
+    } else {
+      params.document_ids = JSON.stringify(null);
+    }
+
+    if (userIds) {
+      params.user_ids = JSON.stringify(userIds);
+    } else {
+      params.user_ids = JSON.stringify(null);
+    }
+
+    console.log('Request URL:', `${url}?${new URLSearchParams(params)}`);
+
+    const response = await axios.get(url, { params });
     return response.data;
   }
 
-  async documentChunks(documentId: string): Promise<any> {
+  async getDocumentChunks(documentId: string): Promise<any> {
     const url = `${this.baseUrl}${this.prefix}/document_chunks`;
     const request = new R2RDocumentChunksRequest({ document_id: documentId });
     const response = await axios.post(url, request);

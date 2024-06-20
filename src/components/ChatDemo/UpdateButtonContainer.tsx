@@ -24,7 +24,9 @@ const UpdateButtonContainer: React.FC<UpdateButtonContainerProps> = ({
   const [isUpdating, setIsUpdating] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleDocumentUpdate = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDocumentUpdate = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     event.preventDefault();
     if (
       fileInputRef.current &&
@@ -76,7 +78,9 @@ const UpdateButtonContainer: React.FC<UpdateButtonContainerProps> = ({
         onClick={handleUpdateButtonClick}
         disabled={isUpdating}
         className={`update-button text-white font-bold rounded flex items-center justify-center ${
-          isUpdating ? 'bg-gray-400 cursor-not-allowed' : 'hover:bg-blue-700 bg-blue-500'
+          isUpdating
+            ? 'bg-gray-400 cursor-not-allowed'
+            : 'hover:bg-blue-700 bg-blue-500'
         }`}
       >
         {isUpdating ? (
