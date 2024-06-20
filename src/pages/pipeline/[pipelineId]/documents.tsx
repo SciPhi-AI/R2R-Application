@@ -1,13 +1,13 @@
+import { DocumentMagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/router';
 import React, { useState, useEffect } from 'react';
 
-import Pagination from '@/components/ui/altPagination';
+import { DeleteButton } from '@/components/ChatDemo/deleteButton';
 import UpdateButtonContainer from '@/components/ChatDemo/UpdateButtonContainer';
 import { UploadButton } from '@/components/ChatDemo/upload';
-import { DeleteButton } from '@/components/ChatDemo/deleteButton';
 import DocumentInfoDialog from '@/components/ChatDemo/utils/documentDialogInfo';
 import Layout from '@/components/Layout';
-
+import Pagination from '@/components/ui/altPagination';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Tooltip,
@@ -17,8 +17,6 @@ import {
 } from '@/components/ui/tooltip';
 import { toast, useToast } from '@/components/ui/use-toast';
 import { useUserContext } from '@/context/UserContext';
-
-import { DocumentMagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
 import { R2RClient } from '../../../r2r-js-client';
 

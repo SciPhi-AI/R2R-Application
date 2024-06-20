@@ -1,8 +1,10 @@
 'use client';
-import React, { useState, useRef } from 'react';
-import { R2RClient } from '../../r2r-js-client';
 import { DocumentArrowUpIcon } from '@heroicons/react/24/outline';
+import React, { useState, useRef } from 'react';
+
 import { Spinner } from '@/components/Spinner';
+
+import { R2RClient } from '../../r2r-js-client';
 
 interface UpdateButtonContainerProps {
   apiUrl: string;

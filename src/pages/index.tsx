@@ -3,7 +3,6 @@ import type { NextPage } from 'next';
 import { CreatePipelineHeader } from '@/components/CreatePipelineHeader';
 import Layout from '@/components/Layout';
 import { PipeCard } from '@/components/PipelineCard';
-import { Heading } from '@/components/shared/Heading';
 import { Separator } from '@/components/ui/separator';
 import 'react-tippy/dist/tippy.css';
 import { useUserContext } from '@/context/UserContext';
@@ -15,7 +14,10 @@ const Home: NextPage = () => {
     <Layout>
       <main className="w-full flex flex-col min-h-screen mt-[4rem] sm:mt-[6rem] container">
         <div className="text-xl mb-4 pt-4">
-          R2R - Build, deploy and observe your RAG pipelines
+          <h2> R2R</h2>
+          The open source answer engine with a RESTful API supporting hybrid
+          search, GraphRAG, multimodal RAG, observability and analytics, and
+          more.
         </div>
 
         <Separator className="mt-8 mb-0" />

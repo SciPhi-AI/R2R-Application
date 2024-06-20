@@ -44,7 +44,7 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
         }
         const uploadedFiles: any[] = [];
         const metadatas: { title: string }[] = [];
-        let userIds: string[] = [];
+        const userIds: string[] = [];
         for (const file of files) {
           if (!file) {
             continue;

@@ -1,25 +1,20 @@
 'use client';
+import { Cog8ToothIcon } from '@heroicons/react/24/outline';
 import { Loader } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/router';
 import React, { useState, useEffect } from 'react';
 
 import { Result } from '@/components/ChatDemo/result';
+import { Search } from '@/components/ChatDemo/search';
 import SingleSwitch from '@/components/ChatDemo/SingleSwitch';
 import useSwitchManager from '@/components/ChatDemo/SwitchManager';
-import { Search } from '@/components/ChatDemo/search';
 import { Title } from '@/components/ChatDemo/title';
 import Layout from '@/components/Layout';
-import { useUserContext } from '@/context/UserContext';
-import Neo4jGraph from './Neo4jGraph';
-
 import { InfoIcon } from '@/components/ui/InfoIcon';
-import ModelSelector from '@/components/ui/ModelSelector';
-import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { useToast } from '@/components/ui/use-toast';
-import { Slider } from '@/components/ui/slider';
-
+import { Label } from '@/components/ui/label';
+import ModelSelector from '@/components/ui/ModelSelector';
 import {
   Select,
   SelectContent,
@@ -27,7 +22,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-
 import {
   Sheet,
   SheetContent,
@@ -36,16 +30,17 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-
+import { Slider } from '@/components/ui/slider';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { useToast } from '@/components/ui/use-toast';
+import { useUserContext } from '@/context/UserContext';
 
-import { Cog8ToothIcon } from '@heroicons/react/24/outline';
-
+import Neo4jGraph from './Neo4jGraph';
 import { R2RClient } from '../../../r2r-js-client';
 
 const Index: React.FC = () => {

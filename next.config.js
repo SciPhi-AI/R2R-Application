@@ -1,7 +1,16 @@
 module.exports = {
   reactStrictMode: false,
   images: {
-    domains: ['github.com', 'lh3.googleusercontent.com'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'github.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+      },
+    ],
   },
   env: {
     CLOUD_INKEEP_API_KEY: process.env.CLOUD_INKEEP_API_KEY,

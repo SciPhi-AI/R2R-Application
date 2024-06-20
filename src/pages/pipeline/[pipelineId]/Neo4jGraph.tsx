@@ -1,11 +1,12 @@
-import dynamic from 'next/dynamic';
-import React, { useState, useEffect, useRef } from 'react';
-import neo4j from 'neo4j-driver';
 import {
   HomeIcon,
   MagnifyingGlassPlusIcon,
   MagnifyingGlassMinusIcon,
 } from '@heroicons/react/24/outline';
+import neo4j from 'neo4j-driver';
+import dynamic from 'next/dynamic';
+import React, { useState, useEffect, useRef } from 'react';
+
 import { NoSSRForceGraphRef } from '@/lib/NoSSRForceGraph';
 
 const driver = neo4j.driver(

@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
+
+import { Switch } from '@/components/ui/switch';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Switch } from '@/components/ui/switch';
 
 interface SingleSwitchProps {
   id: string;

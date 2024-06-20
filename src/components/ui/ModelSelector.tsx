@@ -1,11 +1,4 @@
 import React, { useState } from 'react';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 
 import {
   Dialog,
@@ -14,6 +7,13 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 const ModelSelector = ({ selectedModel, setSelectedModel }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);

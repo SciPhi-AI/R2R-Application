@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
+
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+
 import { R2RClient } from '../../../r2r-js-client';
 
 interface DocumentInfoDialogProps {
