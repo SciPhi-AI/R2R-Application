@@ -15,18 +15,26 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-const ModelSelector = ({ selectedModel, setSelectedModel }) => {
+interface ModelSelectorProps {
+  selectedModel: string;
+  setSelectedModel: (model: string) => void;
+}
+
+const ModelSelector: React.FC<ModelSelectorProps> = ({
+  selectedModel,
+  setSelectedModel,
+}) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [customModelValue, setCustomModelValue] = useState('');
 
-  const handleValueChange = (value) => {
+  const handleValueChange = (value: string) => {
     setSelectedModel(value);
     if (value === 'customModel') {
       setIsDialogOpen(true);
     }
   };
 
-  const handleCustomModelChange = (e) => {
+  const handleCustomModelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCustomModelValue(e.target.value);
   };
 

@@ -45,14 +45,16 @@ const UpdateButtonContainer: React.FC<UpdateButtonContainerProps> = ({
         }
         const metadata = { title: file.name };
 
-        await client.updateFiles([file], [documentId], [metadata]);
+        const filePath = URL.createObjectURL(file);
+
+        await client.updateFiles([filePath], [documentId], [metadata]);
         showToast({
           variant: 'success',
           title: 'Update Successful',
           description: 'The document has been updated',
         });
         onUpdateSuccess();
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error updating file:', error);
         showToast({
           variant: 'destructive',

@@ -13,16 +13,20 @@ const Home: NextPage = () => {
   return (
     <Layout>
       <main className="w-full flex flex-col min-h-screen mt-[4rem] sm:mt-[6rem] container">
-        <div className="text-xl mb-4 pt-4">
-          <h2> R2R</h2>
-          The open source answer engine with a RESTful API supporting hybrid
-          search, GraphRAG, multimodal RAG, observability and analytics, and
-          more.
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold">R2R</h1>
+          <p className="text-lg mt-2">
+            R2R (Rag to Riches) is the ultimate open-source framework for
+            building and deploying high-quality Retrieval-Augmented Generation
+            (RAG) systems. Designed to bridge the gap between local LLM
+            experimentation and scalable, production-ready applications, R2R
+            provides a comprehensive, feature-rich environment for developers.
+          </p>
         </div>
 
-        <Separator className="mt-8 mb-0" />
+        <Separator className="mb-8" />
 
-        <div className="text-2xl mt-4 pl-1">Pipelines </div>
+        <div className="text-2xl mt-4 pl-1">Pipelines</div>
 
         <>
           <CreatePipelineHeader />
@@ -30,7 +34,6 @@ const Home: NextPage = () => {
 
           <div className="not-prose grid grid-cols-1 gap-y-6 gap-x-10 pt-10 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 dark:border-white/5 place-items-center sm:place-items-start">
             {Object.values(watchedPipelines).map((pipeline) => {
-              console.log('pipeline', pipeline);
               if (pipeline.pipelineId) {
                 return (
                   <PipeCard
