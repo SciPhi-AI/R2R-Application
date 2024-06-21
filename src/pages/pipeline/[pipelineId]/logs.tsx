@@ -28,11 +28,11 @@ const Index: React.FC = () => {
 
   const fetchLogs = (client: R2RClient) => {
     if (selectedLogs === 'ALL') {
-      client.getLogs().then((data) => {
+      client.logs().then((data) => {
         setLogs(data);
       });
     } else {
-      client.getLogs(selectedLogs.toLowerCase()).then((data) => {
+      client.logs(selectedLogs.toLowerCase()).then((data) => {
         setLogs(data);
       });
     }

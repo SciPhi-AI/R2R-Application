@@ -20,6 +20,12 @@ import {
 } from '@/components/ui/tooltip';
 import { useUserContext } from '@/context/UserContext';
 
+import {
+  R2RAnalyticsRequest,
+  FilterCriteria,
+  AnalysisTypes,
+} from '../../../r2r-js-client/models';
+
 import { R2RClient } from '../../../r2r-js-client';
 
 type FilterDisplayNameKeys =
@@ -270,13 +276,30 @@ const Analytics: React.FC = () => {
     };
     const percentiles = [10, 25, 50, 90];
 
+    const filter_criteria: FilterCriteria = { [filter]: filter };
+    const analysis_types: AnalysisTypes = {
+      [filter]:
+        filter === 'error'
+          ? ['bar_chart', filter]
+          : ['basic_statistics', filter],
+    };
+
+    const analyticsRequest: R2RAnalyticsRequest = {
+      filter_criteria,
+      analysis_types,
+    };
+
     Promise.all([
-      client.getAnalytics(filters, metricsAnalysisTypes),
+      client.analytics(analyticsRequest),
       ...percentiles.map((percentile) => {
-        const percentileAnalysisTypes = {
+        const percentileAnalysisTypes: AnalysisTypes = {
           [filter]: ['percentile', filter, percentile.toString()],
         };
-        return client.getAnalytics(filters, percentileAnalysisTypes);
+        const percentileRequest: R2RAnalyticsRequest = {
+          filter_criteria,
+          analysis_types: percentileAnalysisTypes,
+        };
+        return client.analytics(percentileRequest);
       }),
     ])
       .then(([metricsData, ...percentilesData]) => {
