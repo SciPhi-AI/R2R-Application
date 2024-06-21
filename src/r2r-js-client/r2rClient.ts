@@ -1,5 +1,9 @@
+// R2RClient.ts
+
+import { v4 as uuidv4 } from 'uuid';
 import axios, { AxiosInstance } from 'axios';
-import * as FormData from 'form-data';
+import FormData from 'form-data';
+
 import * as fs from 'fs';
 import { UUID } from 'crypto';
 import {
@@ -35,6 +39,7 @@ export class R2RClient {
     });
   }
 
+  //TODO: This isn't implemented in the dashboard yet
   //NOQA
   async updatePrompt(request: R2RUpdatePromptRequest): Promise<any> {
     const response = await this.axiosInstance.post('/update_prompt', request);
@@ -77,23 +82,35 @@ export class R2RClient {
     return response.data;
   }
 
-  //NOQA
-  // async updateFiles(request: R2RUpdateFilesRequest, files: string[]): Promise<any> {
-  //   const formData = new FormData();
+  // //NOQA
+  async updateFiles(
+    files: File[],
+    documentIds: string[],
+    metadatas?: Record<string, any>[]
+  ): Promise<any> {
+    const formData = new FormData();
 
-  //   files.forEach((file) => {
-  //     formData.append('files', fs.createReadStream(file));
-  //   });
+    files.forEach((file, index) => {
+      formData.append('files', file, file.name);
+    });
 
-  //   Object.entries(request).forEach(([key, value]) => {
-  //     formData.append(key, JSON.stringify(value));
-  //   });
+    const request: R2RUpdateFilesRequest = {
+      metadatas: metadatas,
+      document_ids: documentIds,
+    };
 
-  //   const response = await this.axiosInstance.post('/update_files', formData, {
-  //     headers: formData.getHeaders(),
-  //   });
-  //   return response.data;
-  // }
+    Object.entries(request).forEach(([key, value]) => {
+      formData.append(key, JSON.stringify(value));
+    });
+
+    const response = await this.axiosInstance.post('/update_files', formData, {
+      headers: {
+        ...formData.getHeaders(),
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  }
 
   //NOQA
   async search(request: R2RSearchRequest): Promise<any> {
@@ -124,38 +141,35 @@ export class R2RClient {
     }
   }
 
-  //NOQA
   async delete(request: R2RDeleteRequest): Promise<any> {
-    const response = await this.axiosInstance.delete('/delete', {
-      data: request,
+    console.log('Request:', request);
+    const response = await this.axiosInstance({
+      method: 'delete',
+      url: '/delete',
+      data: {
+        keys: request.keys,
+        values: request.values,
+      },
+      headers: { 'Content-Type': 'application/json' },
     });
     return response.data;
   }
 
-  //NOQA
-  async logs(): Promise<any> {
-    try {
-      // const params: R2RLogsRequest = {
-      //   max_runs_requested: maxRunsRequested
-      // };
-      // if (logTypeFilter !== undefined) {
-      //   params.log_type_filter = logTypeFilter;
-      // }
+  async logs(request: R2RLogsRequest): Promise<any> {
+    const payload = {
+      ...request,
+      log_type_filter:
+        request.log_type_filter === undefined ? null : request.log_type_filter,
+      max_runs_requested: request.max_runs_requested || 100,
+    };
 
-      // console.log('Request params:', params);
+    const response = await this.axiosInstance.post('/logs', payload, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
-      const response = await this.axiosInstance.get('/logs');
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        console.error(
-          'Error response:',
-          JSON.stringify(error.response.data, null, 2)
-        );
-      }
-      console.error('Error fetching logs:', error);
-      throw error;
-    }
+    return response.data;
   }
 
   async appSettings(): Promise<any> {
@@ -164,10 +178,15 @@ export class R2RClient {
   }
 
   async analytics(request: R2RAnalyticsRequest): Promise<any> {
-    const response = await this.axiosInstance.post('/analytics', request);
+    const response = await this.axiosInstance.post('/analytics', request, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
     return response.data;
   }
 
+  // TODO: This isn't implemented in the dashboard yet
   //NOQA
   async usersOverview(request: R2RUsersOverviewRequest): Promise<any> {
     const response = await this.axiosInstance.get('/users_overview', {
@@ -176,37 +195,29 @@ export class R2RClient {
     return response.data;
   }
 
-  //NOQA
-  async documentsOverview(
-    documentIds?: UUID[],
-    userIds?: UUID[]
-  ): Promise<any> {
-    const request: R2RDocumentsOverviewRequest = {
-      document_ids: documentIds,
-      user_ids: userIds,
-    };
-
-    const response = await this.axiosInstance.request({
-      url: '/documents_overview',
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      data: request, // This sends the data in the body
-      // This allows Axios to send a body with a GET request
-      transformRequest: [
-        (data, headers) => {
-          return JSON.stringify(data);
+  async documentsOverview(request: R2RDocumentsOverviewRequest): Promise<any> {
+    const response = await this.axiosInstance.post(
+      '/documents_overview',
+      request,
+      {
+        headers: {
+          'Content-Type': 'application/json',
         },
-      ],
-    });
-
+      }
+    );
     return response.data;
   }
 
-  //NOQA
   async documentChunks(request: R2RDocumentChunksRequest): Promise<any> {
-    const response = await this.axiosInstance.post('/document_chunks', request);
+    const response = await this.axiosInstance.post(
+      '/document_chunks',
+      request,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
     return response.data;
   }
 }

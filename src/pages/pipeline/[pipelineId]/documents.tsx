@@ -42,8 +42,12 @@ const Index: React.FC = () => {
   const documentsPerPage = 10;
 
   const fetchDocuments = (client: R2RClient) => {
+    const documentsOverviewRequest: R2RDocumentsOverviewRequest = {
+      document_ids: [],
+      user_ids: [],
+    };
     client
-      .documentsOverview()
+      .documentsOverview(documentsOverviewRequest)
       .then((data) => {
         console.log('data = ', data.results);
         setDocuments(data.results);

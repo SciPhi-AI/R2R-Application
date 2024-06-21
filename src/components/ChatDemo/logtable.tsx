@@ -1,18 +1,27 @@
 import React, { useState } from 'react';
 
-class LogType {
+interface LogEntry {
+  key: string;
+  value: any;
+}
+
+interface LogType {
   run_id: string;
   run_type: string;
-  entries: { key: string; value: any }[];
+  entries: LogEntry[];
+}
+
+interface CollapsedStates {
+  [key: string]: boolean;
 }
 
 export function LogTable({ logs }: { logs: LogType[] }) {
-  const [collapsedStates, setCollapsedStates] = useState({});
+  const [collapsedStates, setCollapsedStates] = useState<CollapsedStates>({});
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedLogs, setSelectedLogs] = useState('ALL');
   const logsPerPage = 1;
 
-  const toggleCollapse = (logIndex, entryIndex) => {
+  const toggleCollapse = (logIndex: number, entryIndex: number) => {
     const key = `${logIndex}-${entryIndex}`;
     setCollapsedStates((prevState) => ({
       ...prevState,
@@ -20,7 +29,7 @@ export function LogTable({ logs }: { logs: LogType[] }) {
     }));
   };
 
-  const formatLogEntry = (log, logIndex) => {
+  const formatLogEntry = (log: LogType, logIndex: number) => {
     if (log.entries) {
       return log.entries.map((entry, entryIndex) => {
         const key = `${logIndex}-${entryIndex}`;
@@ -50,19 +59,20 @@ export function LogTable({ logs }: { logs: LogType[] }) {
                       }}
                     >
                       <ul className="no-list-style">
-                        {entry.value.length > 0 ? (
-                          entry.value.map((result, idx) => (
+                        {Array.isArray(entry.value) &&
+                        entry.value.length > 0 ? (
+                          entry.value.map((result: any, idx: number) => (
                             <li key={idx} className={idx > 0 ? 'pt-2' : ''}>
                               {result?.metadata?.title && (
                                 <p className="text-zinc-200">
                                   <strong>[{idx + 1}] </strong> Title:{' '}
-                                  {result?.metadata?.title}
+                                  {result.metadata.title}
                                 </p>
                               )}
                               {result?.metadata?.text && (
                                 <p className="text-zinc-300">
-                                  {result?.metadata?.text}{' '}
-                                  {isCollapsed ? '' : ' ...'}{' '}
+                                  {result.metadata.text}{' '}
+                                  {isCollapsed ? '' : ' ...'}
                                 </p>
                               )}
                             </li>
@@ -93,7 +103,7 @@ export function LogTable({ logs }: { logs: LogType[] }) {
     return null;
   };
 
-  const handlePageChange = (pageNumber) => {
+  const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
   };
 
@@ -110,22 +120,16 @@ export function LogTable({ logs }: { logs: LogType[] }) {
   };
 
   const handleSkipBack = () => {
-    if (currentPage > 10) {
-      setCurrentPage(currentPage - 10);
-    } else {
-      setCurrentPage(1);
-    }
+    setCurrentPage(Math.max(1, currentPage - 10));
   };
 
   const handleSkipForward = () => {
-    if (currentPage + 10 <= Math.ceil(filteredLogs.length / logsPerPage)) {
-      setCurrentPage(currentPage + 10);
-    } else {
-      setCurrentPage(Math.ceil(filteredLogs.length / logsPerPage));
-    }
+    setCurrentPage(
+      Math.min(Math.ceil(filteredLogs.length / logsPerPage), currentPage + 10)
+    );
   };
 
-  const filterLogs = (logs, filter) => {
+  const filterLogs = (logs: LogType[], filter: string) => {
     if (filter === 'ALL') {
       return logs;
     }
@@ -162,7 +166,7 @@ export function LogTable({ logs }: { logs: LogType[] }) {
               key={tab}
               onClick={() => {
                 setSelectedLogs(tab);
-                setCurrentPage(1); // Reset to first page when tab changes
+                setCurrentPage(1);
               }}
               className={`px-4 py-2 rounded ${
                 selectedLogs === tab
