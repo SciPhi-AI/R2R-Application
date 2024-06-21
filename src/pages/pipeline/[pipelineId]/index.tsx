@@ -1,9 +1,8 @@
-import { Check, Link } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 
 import Layout from '@/components/Layout';
-import { Alert, AlertTitle } from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
   CardTitle,
   CardDescription,
@@ -14,25 +13,12 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { useUserContext } from '@/context/UserContext';
 
-function CopyIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
-      <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
-    </svg>
-  );
-}
+import {
+  CheckIcon,
+  ClipboardDocumentCheckIcon,
+  LinkIcon,
+} from '@heroicons/react/24/outline';
+
 const PipelinePage = () => {
   const [copied, setCopied] = useState(false);
 
@@ -43,23 +29,19 @@ const PipelinePage = () => {
 
   const handleCopy = (text: string) => {
     if (!navigator.clipboard) {
-      // Fallback for older browsers or environments where the Clipboard API is not available
       const textarea = document.createElement('textarea');
       textarea.value = text;
       document.body.appendChild(textarea);
       textarea.select();
       try {
         document.execCommand('copy');
-        // Optional: Show a success message or perform any other actions
       } catch (err) {
         console.error('Failed to copy text: ', err);
       }
       document.body.removeChild(textarea);
     } else {
       navigator.clipboard.writeText(text).then(
-        () => {
-          // Optional: Show a success message or perform any other actions
-        },
+        () => {},
         (err) => {
           console.error('Failed to copy text: ', err);
         }
@@ -78,19 +60,59 @@ const PipelinePage = () => {
         </h1>
         <Separator />
         <Alert variant="default" className="mt-3">
-          <AlertTitle className="text-lg">
-            <div className="flex items-center gap-2 text-xl">
-              <span className=" text-gray-500 dark:text-gray-200">
-                {"🎉 Congratulations, you've launched a pipeline! "}
+          <AlertTitle className="text-lg text-center">
+            <div className="flex items-center justify-center gap-2 text-xl">
+              <span className="text-gray-500 dark:text-gray-200">
+                👀 You're now watching a pipeline! <br />
                 <a
                   href={`${pipeline?.pipelineId}/playground`}
-                  className="text-indigo-500"
+                  className="text-blue-500"
                 >
-                  Click here to try it out.
+                  Test it out now in the playground!
                 </a>
               </span>
             </div>
           </AlertTitle>
+          <AlertDescription>
+            <p className="text-center mb-2">
+              There are a number of tools in the R2R dashboard to help you
+              manage your RAG pipelines.
+            </p>
+            <div className="flex justify-center">
+              <div className="text-left">
+                <ul className="list-none pl-0">
+                  <li className="flex items-start mb-1">
+                    <span className="mr-2">🗂️</span>
+                    <span>
+                      Documents: Upload, update, and delete documents and their
+                      metadata.
+                    </span>
+                  </li>
+                  <li className="flex items-start mb-1">
+                    <span className="mr-2">🛝</span>
+                    <span>
+                      Playground: Stream RAG and knowledge graph responses with
+                      different models and configurable settings.
+                    </span>
+                  </li>
+                  <li className="flex items-start mb-1">
+                    <span className="mr-2">📊</span>
+                    <span>
+                      Analytics: View aggregate statistics around latencies and
+                      metrics with detailed histograms.
+                    </span>
+                  </li>
+                  <li className="flex items-start mb-1">
+                    <span className="mr-2">📜</span>
+                    <span>
+                      Logs: Track user queries, search results, and LLM
+                      responses.
+                    </span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </AlertDescription>
         </Alert>
         <div className="flex flex-wrap -mx-2">
           <div className="flex flex-col w-full sm:flex-row">
@@ -101,10 +123,13 @@ const PipelinePage = () => {
                     {pipeline?.pipelineName}
                   </CardTitle>
                   <CardDescription>
-                    This is a deployment an R2R RAG pipeline. Read the default{' '}
+                    This is a deployment of an R2R RAG pipeline. Read the
+                    default{' '}
                     <a
-                      href="https://r2r-docs.sciphi.ai/deep-dive/app"
-                      className="text-indigo-500"
+                      href="https://r2r-docs.sciphi.ai/deep-dive/rag"
+                      className="text-blue-500"
+                      target="_blank"
+                      rel="noopener noreferrer"
                     >
                       application documentation here
                     </a>
@@ -114,20 +139,20 @@ const PipelinePage = () => {
                 <CardContent className="pt-0">
                   <div className="grid gap-4" />
                   <div className="flex items-center gap-2 pt-4">
-                    <Link width="20" height="20" />
+                    <LinkIcon width="20" height="20" />
                     <span className="text-sm text-gray-500 dark:text-gray-400">
                       {pipeline?.deploymentUrl}
                     </span>
 
                     {copied ? (
-                      <Check className="w-4 h-4" />
+                      <CheckIcon className="w-4 h-4" />
                     ) : (
-                      <CopyIcon
+                      <ClipboardDocumentCheckIcon
                         className="w-4 h-4 cursor-pointer"
                         onClick={() => {
                           handleCopy(pipeline?.deploymentUrl);
                           setCopied(true);
-                          setTimeout(() => setCopied(false), 2000); // Reset after 2 seconds
+                          setTimeout(() => setCopied(false), 2000);
                         }}
                       />
                     )}

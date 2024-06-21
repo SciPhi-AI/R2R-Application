@@ -6,9 +6,34 @@ import {
   useMotionValue,
 } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { FiExternalLink } from 'react-icons/fi';
+import { FiExternalLink, FiX } from 'react-icons/fi';
+import { useUserContext } from '@/context/UserContext';
 
 import { GridPattern } from '@/components/shared/GridPattern';
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+
+const StopPropagationWrapper = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
+  const stopPropagation = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
+  return <div onClick={stopPropagation}>{children}</div>;
+};
 
 function ResourcePattern({
   mouseX,
@@ -33,7 +58,7 @@ function ResourcePattern({
         />
       </div>
       <motion.div
-        className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[rgb(7,7,7)] to-[rgb(16,255,3)] opacity-0 transition duration-300 group-hover:opacity-90 dark:from-indigo-600 dark:to-[#262b3c]"
+        className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[rgb(7,7,7)] to-[rgb(16,255,3)] opacity-0 transition duration-300 group-hover:opacity-90 dark:from-blue-600 dark:to-[#262b3c]"
         style={style}
       />
       <motion.div
@@ -62,9 +87,16 @@ export function PipeCard({
   const router = useRouter();
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
+  const { removeWatchedPipeline } = useUserContext();
 
-  const handleClick = () => {
-    router.push(`/pipeline/${pipeline.pipelineId}`);
+  const handleClick = (e: React.MouseEvent) => {
+    if (!(e.target as HTMLElement).closest('.delete-button')) {
+      router.push(`/pipeline/${pipeline.pipelineId}`);
+    }
+  };
+
+  const handleDelete = () => {
+    removeWatchedPipeline(pipeline.pipelineId);
   };
 
   function onMouseMove({
@@ -102,10 +134,36 @@ export function PipeCard({
             {pipeline.deploymentUrl}
           </p>
         </div>
-        <div className="absolute top-0 right-0 mt-2 mr-2">
-          <div className="bg-color7 p-2 rounded-full invisible group-hover:visible group-hover:animate-handleHoverLinkIconAnimation">
+        <div className="absolute top-0 right-0 mt-2 mr-2 flex space-x-2">
+          <div className="bg-color7 p-2 rounded-full invisible group-hover:visible group-hover:animate-handleHoverLinkIconAnimation hover:bg-opacity-80 transition-colors duration-200">
             <FiExternalLink size="16" className="text-color1" />
           </div>
+          <StopPropagationWrapper>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <div className="delete-button bg-red-500 p-2 rounded-full invisible group-hover:visible group-hover:animate-handleHoverLinkIconAnimation hover:bg-opacity-80 transition-colors duration-200">
+                  <FiX size="16" className="text-white" />
+                </div>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>
+                    Are you sure you want to unwatch this pipeline?
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Unwatching {pipeline.pipelineName} won't delete it, but
+                    you'll have to rewatch it to see it in your dashboard.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDelete}>
+                    Unwatch
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </StopPropagationWrapper>
         </div>
       </div>
     </div>

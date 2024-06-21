@@ -51,17 +51,33 @@ export const capitalizeFirstLetter = (string: string) => {
   return string.charAt(0).toUpperCase() + string.slice(1);
 };
 
-type ValidateFunction = (value: string) => boolean;
-export const useValidation = (value: string, validate: ValidateFunction) => {
+type ValidateFunction = (value: string) => {
+  isValid: boolean;
+  message: string;
+};
+export const useValidation = (
+  value: string,
+  validations: ValidateFunction[]
+) => {
   const [isValid, setIsValid] = useState(true);
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
-    setIsValid(validate(value));
-  }, [value, validate]);
+    for (const validate of validations) {
+      const result = validate(value);
+      if (!result.isValid) {
+        setIsValid(false);
+        setErrorMessage(result.message);
+        return;
+      }
+    }
+    setIsValid(true);
+    setErrorMessage('');
+  }, [value, validations]);
 
   const inputStyles = isValid ? 'border-green-700' : 'border-red-600';
 
-  return { isValid, inputStyles };
+  return { isValid, inputStyles, errorMessage };
 };
 
 export function cn(...inputs: ClassValue[]) {

@@ -4,6 +4,8 @@ import React from 'react';
 import { Logo } from '@/components/shared/Logo';
 import { Code } from '@/components/ui/Code';
 
+import { ChevronDoubleRightIcon } from '@heroicons/react/24/outline';
+
 import { capitalizeFirstLetter } from '@/lib/utils';
 
 const DynamicHeaderPath = () => {
@@ -26,14 +28,16 @@ const DynamicHeaderPath = () => {
         <Logo width={38} height={38} />
         <Code onClick={redirectToHome} style={{ cursor: 'pointer' }}>
           <span className="text-zinc-800 dark:text-zinc-400 ">
-            R2R Dashboard{' '}
-          </span>{' '}
+            R2R Dashboard
+          </span>
         </Code>
         {isPipelineRoute && (
           <>
-            <Code>{`>>`}</Code>
             <Code>
-              <span className="text-indigo-500">
+              <ChevronDoubleRightIcon className="w-4 h-4" strokeWidth={2} />
+            </Code>
+            <Code>
+              <span className="text-blue-500">
                 {afterPipelineSegment
                   ? `${capitalizeFirstLetter(afterPipelineSegment)}:`
                   : 'Pipeline:'}
