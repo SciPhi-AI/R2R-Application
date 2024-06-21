@@ -108,7 +108,7 @@ export interface R2RIngestFilesRequest {
 
 export interface R2RUpdateFilesRequest {
   metadatas?: Record<string, any>[];
-  document_ids?: UUID;
+  document_ids?: string[];
 }
 
 export interface R2RSearchRequest {
@@ -152,10 +152,10 @@ export interface R2RDocumentsOverviewRequest {
 }
 
 export interface R2RDocumentChunksRequest {
-  document_id: UUID;
+  document_id: string;
 }
 
 export interface R2RLogsRequest {
   log_type_filter?: string;
-  max_runs_requested: number;
+  max_runs_requested?: number;
 }

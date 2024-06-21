@@ -12,6 +12,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 
+import { R2RDeleteRequest } from '@/r2r-js-client/models';
 import { R2RClient } from '../../r2r-js-client';
 
 interface DeleteButtonProps {
@@ -41,9 +42,13 @@ export const DeleteButton: React.FC<DeleteButtonProps> = ({
     if (apiUrl) {
       try {
         const client = new R2RClient(apiUrl);
-        for (const documentId of selectedDocumentIds) {
-          await client.delete(['document_id'], [documentId]);
-        }
+
+        const deleteRequest: R2RDeleteRequest = {
+          keys: selectedDocumentIds.map(() => 'document_id'),
+          values: selectedDocumentIds,
+        };
+
+        await client.delete(deleteRequest);
         showToast({
           variant: 'success',
           title: 'Documents deleted',
@@ -51,13 +56,21 @@ export const DeleteButton: React.FC<DeleteButtonProps> = ({
         });
         onSuccess();
         onDelete();
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Error deleting documents:', error);
-        showToast({
-          variant: 'destructive',
-          title: 'Failed to delete documents',
-          description: error.message,
-        });
+        if (error instanceof Error) {
+          showToast({
+            variant: 'destructive',
+            title: 'Failed to delete documents',
+            description: error.message,
+          });
+        } else {
+          showToast({
+            variant: 'destructive',
+            title: 'Failed to delete documents',
+            description: 'An unknown error occurred',
+          });
+        }
       }
     }
   };
