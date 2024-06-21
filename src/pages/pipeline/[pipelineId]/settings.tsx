@@ -1,9 +1,7 @@
 import { useRouter } from 'next/router';
 import React, { useState, useEffect } from 'react';
-
 import Layout from '@/components/Layout';
 import { useUserContext } from '@/context/UserContext';
-
 import { R2RClient } from '../../../r2r-js-client';
 
 type Prompt = {
@@ -12,7 +10,12 @@ type Prompt = {
   input_types: Record<string, any>;
 };
 
-const renderNestedConfig = (config, depth = 0) => {
+interface AppData {
+  config: string;
+  prompts: Record<string, Prompt>;
+}
+
+const renderNestedConfig = (config: Record<string, any>, depth = 0) => {
   console.log('config = ', config);
   return Object.entries(config).map(([key, value]) => {
     if (typeof value === 'object' && value !== null) {
@@ -55,8 +58,8 @@ const renderNestedConfig = (config, depth = 0) => {
 };
 
 const Index: React.FC = () => {
-  const [appData, setAppData] = useState(null);
-  const [error, setError] = useState(null);
+  const [appData, setAppData] = useState<AppData | null>(null);
+  const [error, setError] = useState<Error | null>(null);
   const [activeTab, setActiveTab] = useState('config');
   const router = useRouter();
 
@@ -71,11 +74,16 @@ const Index: React.FC = () => {
         const client = new R2RClient(apiUrl);
 
         try {
-          const response = await client.getAppSettings();
+          const response = await client.appSettings();
+          console.log('response = ', response);
 
-          setAppData(response['results']);
+          if (response.results && response.results.results) {
+            setAppData(response.results.results as AppData);
+          } else {
+            throw new Error('Unexpected response structure');
+          }
         } catch (err) {
-          setError(err);
+          setError(err as Error);
         }
       }
     };
@@ -136,7 +144,17 @@ const Index: React.FC = () => {
                           </th>
                         </tr>
                       </thead>
-                      <tbody>{renderNestedConfig(JSON.parse(config))}</tbody>
+                      <tbody>
+                        {config ? (
+                          renderNestedConfig(JSON.parse(config))
+                        ) : (
+                          <tr>
+                            <td colSpan={2}>
+                              No valid configuration data available
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
                     </table>
                   </div>
                 )}
@@ -154,25 +172,19 @@ const Index: React.FC = () => {
                           <th className="px-4 py-2 text-left text-white">
                             Template
                           </th>
-                          {/* <th className="px-4 py-2 text-left text-white">Input Types</th> */}
                         </tr>
                       </thead>
                       <tbody>
-                        {Object.entries(prompts).map(
-                          ([name, prompt]: [string, Prompt]) => (
-                            <tr key={name} className="border-t border-gray-600">
-                              <td className="px-4 py-2 text-white">{name}</td>
-                              <td className="px-4 py-2 text-white">
-                                <pre className="whitespace-pre-wrap">
-                                  {prompt.template}
-                                </pre>
-                              </td>
-                              {/* <td className="px-4 py-2 text-white">
-                              <pre className="whitespace-pre-wrap">{JSON.stringify(prompt.input_types, null, 2)}</pre>
-                            </td> */}
-                            </tr>
-                          )
-                        )}
+                        {Object.entries(prompts).map(([name, prompt]) => (
+                          <tr key={name} className="border-t border-gray-600">
+                            <td className="px-4 py-2 text-white">{name}</td>
+                            <td className="px-4 py-2 text-white">
+                              <pre className="whitespace-pre-wrap">
+                                {prompt.template}
+                              </pre>
+                            </td>
+                          </tr>
+                        ))}
                       </tbody>
                     </table>
                   </div>

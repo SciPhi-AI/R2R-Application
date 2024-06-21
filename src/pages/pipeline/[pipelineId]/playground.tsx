@@ -105,7 +105,7 @@ const Index: React.FC = () => {
       const client = new R2RClient(apiUrl);
       setIsLoading(true);
       client
-        .getDocumentsInfo()
+        .documentsOverview(null)
         .then((documents) => {
           setUploadedDocuments(documents['results']);
         })
