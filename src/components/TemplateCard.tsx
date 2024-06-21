@@ -33,7 +33,7 @@ function ResourcePattern({
         />
       </div>
       <motion.div
-        className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[rgb(7,7,7)] to-[rgb(16,255,3)] opacity-0 transition duration-300 group-hover:opacity-90 dark:from-indigo-600 dark:to-[#262b3c]"
+        className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[rgb(7,7,7)] to-[rgb(16,255,3)] opacity-0 transition duration-300 group-hover:opacity-90 dark:from-blue-600 dark:to-[#262b3c]"
         style={style}
       />
       <motion.div
@@ -113,7 +113,7 @@ export function TemplateCard({
           </div>
         </div>
         <div className="absolute top-0 right-0 mt-2 mr-2">
-          <div className="bg-indigo-500 p-2 rounded-full invisible group-hover:visible group-hover:animate-handleHoverLinkIconAnimation">
+          <div className="bg-blue-500 p-2 rounded-full invisible group-hover:visible group-hover:animate-handleHoverLinkIconAnimation">
             Select
           </div>
         </div>

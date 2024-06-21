@@ -24,6 +24,8 @@ import { InfoIcon } from '@/components/ui/InfoIcon';
 import { isValidUrl, useValidation } from '@/lib/utils';
 import { WatchButton } from '@/components/ui/WatchButton';
 
+import { ChevronDoubleRightIcon } from '@heroicons/react/24/outline';
+
 type PipelineMenuProps = {
   pipelineName: string;
   setPipelineName: (value: string) => void;
@@ -39,27 +41,58 @@ function PipelineMenu({
 }: PipelineMenuProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [pipelineId] = useState(uuidv4());
-  const { addWatchedPipeline, watchedPipelines } = useUserContext();
+  const { addWatchedPipeline, isPipelineUnique } = useUserContext();
   const router = useRouter();
-
-  console.log('watchedPipelines = ', watchedPipelines);
 
   const handleSubmit = async () => {
     setIsLoading(true);
-    console.log('adding watched pipe.. = ', {
+    const { nameUnique, urlUnique } = isPipelineUnique(
       pipelineName,
-      deploymentUrl,
-      pipelineId,
-    });
+      deploymentUrl
+    );
+
+    if (!nameUnique || !urlUnique) {
+      alert(
+        `Error: ${nameUnique ? '' : 'Pipeline name already exists. '}${urlUnique ? '' : 'Deployment URL already exists.'}`
+      );
+      setIsLoading(false);
+      return;
+    }
+
     addWatchedPipeline(pipelineId, { pipelineName, deploymentUrl, pipelineId });
     setIsLoading(false);
-    router.push('/'); // Navigate to the home page
+    router.push('/');
   };
 
-  const { inputStyles: pipelineNameStyles, isValid: isPipelineNameValid } =
-    useValidation(pipelineName, (value) => value.trim() !== '');
-  const { inputStyles: deploymentUrlStyles, isValid: isDeploymentUrlValid } =
-    useValidation(deploymentUrl, isValidUrl);
+  const {
+    inputStyles: pipelineNameStyles,
+    isValid: isPipelineNameValid,
+    errorMessage: pipelineNameError,
+  } = useValidation(pipelineName, [
+    (value) => ({
+      isValid: value.trim() !== '',
+      message: 'Pipeline name cannot be empty',
+    }),
+    (value) => ({
+      isValid: isPipelineUnique(value, deploymentUrl).nameUnique,
+      message: 'Pipeline name already exists',
+    }),
+  ]);
+
+  const {
+    inputStyles: deploymentUrlStyles,
+    isValid: isDeploymentUrlValid,
+    errorMessage: deploymentUrlError,
+  } = useValidation(deploymentUrl, [
+    (value) => ({
+      isValid: isValidUrl(value),
+      message: 'Invalid or Empty URL',
+    }),
+    (value) => ({
+      isValid: isPipelineUnique(pipelineName, value).urlUnique,
+      message: 'Deployment URL already exists',
+    }),
+  ]);
 
   return (
     <Card className="w-full mt-4 bg-zinc-800">
@@ -94,6 +127,9 @@ function PipelineMenu({
                       onChange={(e) => setPipelineName(e.target.value)}
                       value={pipelineName}
                     />
+                    {!isPipelineNameValid && (
+                      <p className="text-red-500">{pipelineNameError}</p>
+                    )}
                   </div>
                   <div className="space-y-2 mb-4">
                     <Label htmlFor="github-url">Deployment URL</Label>
@@ -118,6 +154,9 @@ function PipelineMenu({
                       onChange={(e) => setDeploymentUrl(e.target.value)}
                       value={deploymentUrl}
                     />
+                    {!isDeploymentUrlValid && (
+                      <p className="text-red-500">{deploymentUrlError}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="github-url">Pipeline ID</Label>
@@ -155,8 +194,11 @@ export default function Watch() {
     <Layout>
       <main className="w-full flex flex-col items-center min-h-screen mt-[4rem] sm:mt-[6rem] container">
         <div className="font-mono flex items-center text-xl pb-2 border-b-2 border-gray-400 w-full max-w-[1150px] mb-4">
-          <div className="text-gray-200">{'Watch >> '}</div>
-          <div className={`ml-4 font-bold text-indigo-600`}>RAG Pipeline</div>
+          <div className="text-gray-200 flex items-center">
+            Watch{' '}
+            <ChevronDoubleRightIcon className="w-4 h-4 ml-4" strokeWidth={2} />
+          </div>
+          <div className={`ml-2 font-bold text-blue-600`}>RAG Pipeline</div>
         </div>
         <div className="flex flex-col grid-cols-2 sm:flex-row justify-center sm:justify-center sm:flex-wrap w-full"></div>
         <div className="pt-2 pb-20 w-full max-w-[1150px] flex justify-center">
