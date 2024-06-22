@@ -77,7 +77,6 @@ const Index: React.FC = () => {
 
   useEffect(() => {
     if (apiUrl) {
-      console.log('fetching...');
       const client = new R2RClient(apiUrl);
       fetchDocuments(client);
     }

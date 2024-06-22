@@ -74,7 +74,7 @@ export interface VectorSearchSettings {
 
 export interface KGSearchSettings {
   use_kg: boolean;
-  agent_generation_config?: GenerationConfig;
+  agent_generation_config?: GenerationConfig | null;
 }
 
 export interface Document {
@@ -100,8 +100,8 @@ export interface R2RUpdateDocumentsRequest {
 
 export interface R2RIngestFilesRequest {
   metadatas?: Record<string, any>[];
-  document_ids?: UUID[];
-  user_ids?: (UUID | null)[];
+  document_ids?: string[];
+  user_ids?: (string | null)[];
   versions?: string[];
   skip_document_info?: boolean;
 }
@@ -121,7 +121,7 @@ export interface R2RRAGRequest {
   query: string;
   vector_search_settings: VectorSearchSettings;
   kg_search_settings: KGSearchSettings;
-  rag_generation_config?: GenerationConfig;
+  rag_generation_config?: GenerationConfig | null;
 }
 
 export interface R2RDeleteRequest {

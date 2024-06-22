@@ -33,7 +33,7 @@ const Index: React.FC = () => {
     try {
       const data = await client.logs(request);
       console.log('data received = ', data);
-      setLogs(Array.isArray(data) ? data : []);
+      setLogs(data.results || []);
     } catch (error) {
       console.error('Error fetching logs:', error);
     }
