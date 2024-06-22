@@ -24,6 +24,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import Neo4jGraph from './Neo4jGraph';
+import { R2RDocumentsOverviewRequest } from '../../../r2r-js-client/models';
 import { R2RClient } from '../../../r2r-js-client';
 import { Loader } from 'lucide-react';
 import { Title } from '@/components/ChatDemo/title';
@@ -102,10 +103,14 @@ const Index: React.FC = () => {
 
   useEffect(() => {
     if (apiUrl) {
+      const documentsOverviewRequest: R2RDocumentsOverviewRequest = {
+        document_ids: [],
+        user_ids: [],
+      };
       const client = new R2RClient(apiUrl);
       setIsLoading(true);
       client
-        .documentsOverview(null)
+        .documentsOverview(documentsOverviewRequest)
         .then((documents) => {
           setUploadedDocuments(documents['results']);
         })

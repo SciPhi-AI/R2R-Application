@@ -39,13 +39,27 @@ const UpdateButtonContainer: React.FC<UpdateButtonContainerProps> = ({
       const file = fileInputRef.current.files[0];
       const client = new R2RClient(apiUrl);
 
+      console.log('Selected file:', file.name, 'Size:', file.size);
+
       try {
         if (!apiUrl) {
           throw new Error('API URL is not defined');
         }
         const metadata = { title: file.name };
 
-        await client.updateFiles([file], [documentId], [metadata]);
+        console.log('Sending request with:', {
+          file: file.name,
+          documentId,
+          metadata,
+        });
+
+        const response = await client.updateFiles(
+          [file],
+          [documentId],
+          [metadata]
+        );
+        console.log('Server response:', response);
+
         showToast({
           variant: 'success',
           title: 'Update Successful',
@@ -54,10 +68,11 @@ const UpdateButtonContainer: React.FC<UpdateButtonContainerProps> = ({
         onUpdateSuccess();
       } catch (error: any) {
         console.error('Error updating file:', error);
+        console.error('Error details:', error.response?.data);
         showToast({
           variant: 'destructive',
           title: 'Update Failed',
-          description: error.message,
+          description: error.message || 'An unknown error occurred',
         });
       } finally {
         setIsUpdating(false);

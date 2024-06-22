@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 
 import { generateIdFromLabel } from '@/lib/utils';
+import { R2RIngestFilesRequest } from '../../r2r-js-client/models';
 import { R2RClient } from '../../r2r-js-client';
 
 interface UploadButtonProps {
@@ -22,7 +23,7 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
   uploadedDocuments,
   setUploadedDocuments,
   onUploadSuccess,
-  showToast = () => {}, // Default value as an empty function
+  showToast = () => {},
 }) => {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -47,6 +48,7 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
       const metadatas: Record<string, any>[] = [];
       const userIds: (string | null)[] = [];
       const filePaths: string[] = [];
+      const filesToUpload: File[] = [];
 
       for (const file of Array.from(files)) {
         if (!file) {
@@ -56,13 +58,15 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
         uploadedFiles.push({ document_id: fileId, title: file.name });
         metadatas.push({ title: file.name });
         userIds.push(userId);
-
-        // Create a temporary URL for the file
-        const filePath = URL.createObjectURL(file);
-        filePaths.push(filePath);
+        filesToUpload.push(file);
       }
 
-      await client.ingestFiles(filePaths, metadatas, undefined, userIds);
+      const request: R2RIngestFilesRequest = {
+        metadatas: metadatas,
+        user_ids: userIds,
+      };
+
+      await client.ingestFiles(filesToUpload, request);
 
       // Clean up temporary URLs
       filePaths.forEach(URL.revokeObjectURL);

@@ -21,6 +21,8 @@ import {
   R2RDocumentChunksRequest,
   R2RLogsRequest,
   GenerationConfig,
+  VectorSearchSettings,
+  KGSearchSettings,
 } from './models';
 
 export class R2RClient {
@@ -55,23 +57,48 @@ export class R2RClient {
     return response.data;
   }
 
-  //NOQA
-  // async ingestFiles(request: R2RIngestFilesRequest, filePaths: string[]): Promise<any> {
-  //   const formData = new FormData();
+  async ingestFiles(
+    files: File[],
+    request: R2RIngestFilesRequest
+  ): Promise<any> {
+    const formData = new FormData();
 
-  //   filePaths.forEach((filePath) => {
-  //     formData.append('files', fs.createReadStream(filePath));
-  //   });
+    files.forEach((file, index) => {
+      formData.append('files', file);
+    });
 
-  //   Object.entries(request).forEach(([key, value]) => {
-  //     formData.append(key, JSON.stringify(value));
-  //   });
+    Object.entries(request).forEach(([key, value]) => {
+      formData.append(key, JSON.stringify(value));
+    });
 
-  //   const response = await this.axiosInstance.post('/ingest_files', formData, {
-  //     headers: formData.getHeaders(),
-  //   });
-  //   return response.data;
-  // }
+    try {
+      const response = await this.axiosInstance.post(
+        '/ingest_files',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+          transformRequest: [
+            (data, headers) => {
+              delete headers['Content-Type'];
+              return data;
+            },
+          ],
+        }
+      );
+      console.log('Ingest Files Response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error in ingestFiles:', error);
+      if (axios.isAxiosError(error) && error.response) {
+        console.error('Response data:', error.response.data);
+        console.error('Response status:', error.response.status);
+        console.error('Response headers:', error.response.headers);
+      }
+      throw error;
+    }
+  }
 
   //NOQA
   async updateDocuments(request: R2RUpdateDocumentsRequest): Promise<any> {
@@ -82,7 +109,6 @@ export class R2RClient {
     return response.data;
   }
 
-  // //NOQA
   async updateFiles(
     files: File[],
     documentIds: string[],
@@ -91,25 +117,36 @@ export class R2RClient {
     const formData = new FormData();
 
     files.forEach((file, index) => {
-      formData.append('files', file, file.name);
+      formData.append('files', file);
     });
 
-    const request: R2RUpdateFilesRequest = {
-      metadatas: metadatas,
-      document_ids: documentIds,
-    };
+    formData.append('document_ids', JSON.stringify(documentIds));
 
-    Object.entries(request).forEach(([key, value]) => {
-      formData.append(key, JSON.stringify(value));
-    });
+    if (metadatas) {
+      formData.append('metadatas', JSON.stringify(metadatas));
+    }
 
-    const response = await this.axiosInstance.post('/update_files', formData, {
-      headers: {
-        ...formData.getHeaders(),
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    return response.data;
+    try {
+      const response = await this.axiosInstance.post(
+        '/update_files',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+          transformRequest: [
+            (data, headers) => {
+              delete headers['Content-Type'];
+              return data;
+            },
+          ],
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error in updateFiles:', error);
+      throw error;
+    }
   }
 
   //NOQA
@@ -118,7 +155,7 @@ export class R2RClient {
     return response.data;
   }
 
-  //NOQA
+  // NOQA
   async rag(request: R2RRAGRequest): Promise<any> {
     if (request.rag_generation_config?.stream) {
       return this.streamRag(request);
@@ -129,16 +166,30 @@ export class R2RClient {
   }
 
   //NOQA
-  private async *streamRag(
-    request: R2RRAGRequest
-  ): AsyncGenerator<string, void, unknown> {
+  private async streamRag(request: R2RRAGRequest): Promise<ReadableStream> {
     const response = await this.axiosInstance.post('/rag', request, {
       responseType: 'stream',
     });
 
-    for await (const chunk of response.data) {
-      yield chunk.toString();
-    }
+    return new ReadableStream({
+      async start(controller) {
+        const reader = response.data;
+
+        try {
+          while (true) {
+            const { value, done } = await reader.read();
+            if (done) {
+              break;
+            }
+            controller.enqueue(value);
+          }
+        } catch (error) {
+          controller.error(error);
+        } finally {
+          controller.close();
+        }
+      },
+    });
   }
 
   async delete(request: R2RDeleteRequest): Promise<any> {
