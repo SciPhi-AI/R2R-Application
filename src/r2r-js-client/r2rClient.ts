@@ -33,8 +33,14 @@ export class R2RClient {
     this.baseUrl = `${baseURL}${prefix}`;
     this.axiosInstance = axios.create({
       baseURL: this.baseUrl,
+      headers: {
+        'Content-Type': 'application/json',
+      },
       transformRequest: [
         (data, headers) => {
+          if (typeof data === 'string') {
+            return data;
+          }
           return JSON.stringify(data);
         },
       ],
@@ -157,19 +163,38 @@ export class R2RClient {
 
   // NOQA
   async rag(request: R2RRAGRequest): Promise<any> {
-    if (request.rag_generation_config?.stream) {
-      return this.streamRag(request);
-    } else {
-      const response = await this.axiosInstance.post('/rag', request);
-      return response.data;
+    try {
+      console.log('RAG Request:', request);
+      if (request.rag_generation_config?.stream) {
+        return this.streamRag(request);
+      } else {
+        const response = await this.axiosInstance.post(
+          '/rag',
+          JSON.stringify(request)
+        );
+        return response.data;
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        console.error('Error response:', error.response.data);
+        console.error('Error status:', error.response.status);
+        console.error('Error headers:', error.response.headers);
+      } else {
+        console.error('Error:', error);
+      }
+      throw error;
     }
   }
 
   //NOQA
   private async streamRag(request: R2RRAGRequest): Promise<ReadableStream> {
-    const response = await this.axiosInstance.post('/rag', request, {
-      responseType: 'stream',
-    });
+    const response = await this.axiosInstance.post(
+      '/rag',
+      JSON.stringify(request),
+      {
+        responseType: 'stream',
+      }
+    );
 
     return new ReadableStream({
       async start(controller) {

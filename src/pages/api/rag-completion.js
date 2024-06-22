@@ -48,8 +48,6 @@ export default async function handler(req) {
     rag_generation_config: generationConfig,
   };
 
-  console.log('RAG Request:', ragRequest);
-
   try {
     const response = await client.rag(ragRequest);
 
