@@ -12,8 +12,8 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 
-import { R2RDeleteRequest } from '@/r2r-js-client/models';
-import { R2RClient } from '../../r2r-js-client';
+import { R2RDeleteRequest } from '@/r2r-ts-client/models';
+import { R2RClient } from '../../r2r-ts-client';
 
 interface DeleteButtonProps {
   selectedDocumentIds: string[];

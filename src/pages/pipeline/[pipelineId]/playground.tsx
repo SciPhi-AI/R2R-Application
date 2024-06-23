@@ -24,8 +24,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import Neo4jGraph from './Neo4jGraph';
-import { R2RDocumentsOverviewRequest } from '../../../r2r-js-client/models';
-import { R2RClient } from '../../../r2r-js-client';
+import { R2RDocumentsOverviewRequest } from '../../../r2r-ts-client/models';
+import { R2RClient } from '../../../r2r-ts-client';
 import { Loader } from 'lucide-react';
 import { Title } from '@/components/ChatDemo/title';
 import { Result } from '@/components/ChatDemo/result';

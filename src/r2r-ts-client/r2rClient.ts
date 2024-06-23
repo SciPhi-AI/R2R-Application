@@ -1,11 +1,8 @@
 // R2RClient.ts
 
-import { v4 as uuidv4 } from 'uuid';
 import axios, { AxiosInstance } from 'axios';
 import FormData from 'form-data';
 
-import * as fs from 'fs';
-import { UUID } from 'crypto';
 import {
   R2RUpdatePromptRequest,
   R2RIngestDocumentsRequest,
@@ -93,7 +90,6 @@ export class R2RClient {
           ],
         }
       );
-      console.log('Ingest Files Response:', response.data);
       return response.data;
     } catch (error) {
       console.error('Error in ingestFiles:', error);
@@ -161,10 +157,8 @@ export class R2RClient {
     return response.data;
   }
 
-  // NOQA
   async rag(request: R2RRAGRequest): Promise<any> {
     try {
-      console.log('RAG Request:', request);
       if (request.rag_generation_config?.stream) {
         return this.streamRag(request);
       } else {
@@ -186,8 +180,7 @@ export class R2RClient {
     }
   }
 
-  //NOQA
-  private async streamRag(request: R2RRAGRequest): Promise<ReadableStream> {
+  private async streamRag(request: R2RRAGRequest): Promise<any> {
     const response = await this.axiosInstance.post(
       '/rag',
       JSON.stringify(request),
@@ -196,29 +189,10 @@ export class R2RClient {
       }
     );
 
-    return new ReadableStream({
-      async start(controller) {
-        const reader = response.data;
-
-        try {
-          while (true) {
-            const { value, done } = await reader.read();
-            if (done) {
-              break;
-            }
-            controller.enqueue(value);
-          }
-        } catch (error) {
-          controller.error(error);
-        } finally {
-          controller.close();
-        }
-      },
-    });
+    return response.data;
   }
 
   async delete(request: R2RDeleteRequest): Promise<any> {
-    console.log('Request:', request);
     const response = await this.axiosInstance({
       method: 'delete',
       url: '/delete',

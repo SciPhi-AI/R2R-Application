@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import { UUID } from 'crypto';
 
 export enum DocumentType {
   CSV = 'csv',
@@ -20,8 +20,6 @@ export enum DocumentType {
 }
 
 export type DataType = string | Uint8Array;
-
-import { UUID } from 'crypto';
 
 export interface GenerationConfig {
   // RAG Configuration

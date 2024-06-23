@@ -18,9 +18,9 @@ import {
 import { toast, useToast } from '@/components/ui/use-toast';
 import { useUserContext } from '@/context/UserContext';
 
-import { R2RDocumentsOverviewRequest } from '../../../r2r-js-client/models';
+import { R2RDocumentsOverviewRequest } from '../../../r2r-ts-client/models';
 
-import { R2RClient } from '../../../r2r-js-client';
+import { R2RClient } from '../../../r2r-ts-client';
 
 class DocumentInfoType {
   document_id: string = '';
@@ -49,7 +49,6 @@ const Index: React.FC = () => {
     client
       .documentsOverview(documentsOverviewRequest)
       .then((data) => {
-        console.log('data = ', data.results);
         setDocuments(data.results);
       })
       .catch((error) => {

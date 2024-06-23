@@ -1,6 +1,7 @@
 {
   "name": "sciphi-application",
   "private": true,
+  "proxy": "http://localhost:8000",
   "scripts": {
     "dev": "NEXT_PUBLIC_CLOUD_MODE=false next dev",
     "dev:cloud": "NEXT_PUBLIC_CLOUD_MODE=true next dev",

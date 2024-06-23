@@ -24,9 +24,9 @@ import {
   R2RAnalyticsRequest,
   FilterCriteria,
   AnalysisTypes,
-} from '../../../r2r-js-client/models';
+} from '../../../r2r-ts-client/models';
 
-import { R2RClient } from '../../../r2r-js-client';
+import { R2RClient } from '../../../r2r-ts-client';
 
 type FilterDisplayNameKeys =
   | 'search_latency'
@@ -323,7 +323,6 @@ const Analytics: React.FC = () => {
 
   useEffect(() => {
     if (apiUrl) {
-      console.log('fetching analytics...');
       const client = new R2RClient(apiUrl);
       fetchAnalytics(client, selectedFilter);
     }
