@@ -2,7 +2,7 @@
 import { useEffect } from 'react';
 
 import { UploadButton } from './upload';
-import { R2RClient } from '../../r2r-js-client';
+import { R2RClient } from '../../r2r-ts-client';
 
 export function Sidebar({
   userId,

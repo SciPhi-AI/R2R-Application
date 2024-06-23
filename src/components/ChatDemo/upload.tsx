@@ -1,8 +1,8 @@
 import { useState, useRef } from 'react';
 
 import { generateIdFromLabel } from '@/lib/utils';
-import { R2RIngestFilesRequest } from '../../r2r-js-client/models';
-import { R2RClient } from '../../r2r-js-client';
+import { R2RIngestFilesRequest } from '../../r2r-ts-client/models';
+import { R2RClient } from '../../r2r-ts-client';
 
 interface UploadButtonProps {
   userId: string;

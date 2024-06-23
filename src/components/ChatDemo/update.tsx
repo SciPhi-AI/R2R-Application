@@ -1,7 +1,7 @@
 'use client';
 import { useState, useRef } from 'react';
 
-import { R2RClient } from '../../r2r-js-client';
+import { R2RClient } from '../../r2r-ts-client';
 
 interface UpdateButtonProps {
   userId: string;

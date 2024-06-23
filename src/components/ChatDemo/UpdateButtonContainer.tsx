@@ -4,7 +4,7 @@ import React, { useState, useRef } from 'react';
 
 import { Spinner } from '@/components/Spinner';
 
-import { R2RClient } from '../../r2r-js-client';
+import { R2RClient } from '../../r2r-ts-client';
 
 interface UpdateButtonContainerProps {
   apiUrl: string;
@@ -39,26 +39,17 @@ const UpdateButtonContainer: React.FC<UpdateButtonContainerProps> = ({
       const file = fileInputRef.current.files[0];
       const client = new R2RClient(apiUrl);
 
-      console.log('Selected file:', file.name, 'Size:', file.size);
-
       try {
         if (!apiUrl) {
           throw new Error('API URL is not defined');
         }
         const metadata = { title: file.name };
 
-        console.log('Sending request with:', {
-          file: file.name,
-          documentId,
-          metadata,
-        });
-
         const response = await client.updateFiles(
           [file],
           [documentId],
           [metadata]
         );
-        console.log('Server response:', response);
 
         showToast({
           variant: 'success',

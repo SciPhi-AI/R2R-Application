@@ -57,7 +57,7 @@ export const Search: FC<SearchProps> = ({ pipeline }) => {
             setValue(e.target.value)
           }
           autoFocus
-          placeholder="Ask SciPhi AI anything ..."
+          placeholder="Question everything..."
           className="px-2 pr-6 w-full rounded-md flex-1 outline-none bg-zinc-800 text-zinc-200"
         />
         <button

@@ -7,8 +7,8 @@ import { LogTable } from '@/components/ChatDemo/logtable';
 import Layout from '@/components/Layout';
 import { useUserContext } from '@/context/UserContext';
 
-import { R2RLogsRequest } from '../../../r2r-js-client/models';
-import { R2RClient } from '../../../r2r-js-client';
+import { R2RLogsRequest } from '../../../r2r-ts-client/models';
+import { R2RClient } from '../../../r2r-ts-client';
 
 const Index: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -32,7 +32,6 @@ const Index: React.FC = () => {
 
     try {
       const data = await client.logs(request);
-      console.log('data received = ', data);
       setLogs(data.results || []);
     } catch (error) {
       console.error('Error fetching logs:', error);

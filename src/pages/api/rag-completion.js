@@ -1,11 +1,11 @@
 import url from 'url';
-import { R2RClient } from '../../r2r-js-client/r2rClient';
+import { R2RClient } from '../../r2r-ts-client/r2rClient';
 import {
   R2RRAGRequest,
   VectorSearchSettings,
   KGSearchSettings,
   GenerationConfig,
-} from '../../r2r-js-client/models';
+} from '../../r2r-ts-client/models';
 
 export const config = {
   runtime: 'edge',
@@ -48,14 +48,12 @@ export default async function handler(req) {
     rag_generation_config: generationConfig,
   };
 
-  console.log('RAG Request:', ragRequest);
-
   try {
     const response = await client.rag(ragRequest);
 
     if (generationConfig.stream) {
       return new Response(response, {
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'text/event-stream' },
       });
     } else {
       return new Response(JSON.stringify(response), {

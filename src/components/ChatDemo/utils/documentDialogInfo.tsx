@@ -7,8 +7,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-import { R2RDocumentChunksRequest } from '../../../r2r-js-client/models';
-import { R2RClient } from '../../../r2r-js-client';
+import { R2RDocumentChunksRequest } from '../../../r2r-ts-client/models';
+import { R2RClient } from '../../../r2r-ts-client';
 
 interface DocumentInfoDialogProps {
   documentId: string;
@@ -39,7 +39,7 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
           document_id: documentId,
         };
         const chunks = await client.documentChunks(documentChunksRequest);
-        console.log('Document chunks:', chunks);
+
         setDocumentChunks(
           Array.isArray(chunks.results)
             ? (chunks.results as DocumentChunk[])
