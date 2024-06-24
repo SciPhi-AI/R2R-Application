@@ -40,6 +40,11 @@ export class R2RClient {
     });
   }
 
+  async healthCheck(): Promise<any> {
+    const response = await this.axiosInstance.get('/health');
+    return response.data;
+  }
+
   //TODO: This isn't implemented in the dashboard yet
   //NOQA
   async updatePrompt(request: R2RUpdatePromptRequest): Promise<any> {

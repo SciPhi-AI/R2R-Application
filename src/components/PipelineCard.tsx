@@ -8,6 +8,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { FiExternalLink, FiX } from 'react-icons/fi';
 
+import { PipelineStatus } from '@/components/ChatDemo/PipelineStatus';
 import { GridPattern } from '@/components/shared/GridPattern';
 import {
   AlertDialog,
@@ -124,6 +125,9 @@ export function PipeCard({
         ]}
       />
       <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-zinc-900/7.5 group-hover:ring-zinc-900/10 dark:ring-white/10 dark:group-hover:ring-white/20" />
+      <div className="absolute top-2 left-2">
+        <PipelineStatus pipeline={pipeline} />
+      </div>
       <div className="flex justify-between items-center relative rounded-2xl p-4 sm:p-8 w-full">
         <div className="flex-1">
           <div className="text-2xl font-medium h-[30px] line-clamp-1">

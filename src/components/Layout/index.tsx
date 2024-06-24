@@ -10,13 +10,19 @@ type Props = {
   children: ReactNode;
   localNav?: ReactNode;
   pageTitle?: string; // Optional prop for setting the page title
+  isConnected?: boolean;
 };
 
-const Layout: React.FC<Props> = ({ children, localNav, pageTitle }) => {
+const Layout: React.FC<Props> = ({
+  children,
+  localNav,
+  pageTitle,
+  isConnected,
+}) => {
   return (
     <div className="w-full min-h-screen flex flex-col">
       <Head>{pageTitle && <title>{pageTitle} | R2R</title>}</Head>
-      <Navbar />
+      <Navbar isConnected={isConnected || true} />
       <main className="flex-grow">{children}</main>
       <Toaster />
       <Footer />

@@ -4,7 +4,6 @@ about: Suggest an idea for the R2R Dashboard!
 title: ''
 labels: enhancement
 assignees: ''
-
 ---
 
 **Is your feature request related to a problem? Please describe.**
