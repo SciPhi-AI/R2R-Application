@@ -137,16 +137,6 @@ export const Answer: FC<{
                               : ''}
                           </div>
                           <div className="flex gap-4">
-                            {/* {source.primaryImageOfPage?.thumbnailUrl && (
-                              <div className="flex-none">
-                                <img
-                                  className="rounded h-16 w-16"
-                                  width={source.primaryImageOfPage?.width}
-                                  height={source.primaryImageOfPage?.height}
-                                  src={source.primaryImageOfPage?.thumbnailUrl}
-                                />
-                              </div>
-                            )} */}
                             <div className="flex-1">
                               <div className="line-clamp-4 text-zinc-300 break-words">
                                 {metadata?.snippet ? metadata?.snippet : ''}
@@ -156,27 +146,6 @@ export const Answer: FC<{
                               </div>
                             </div>
                           </div>
-                          {/* {metadata.title} */}
-                          {/* <div className="flex gap-2 items-center">
-                            <div className="flex-1 overflow-hidden">
-                              <div className="text-ellipsis text-blue-500 overflow-hidden whitespace-nowrap">
-                                <a
-                                  title={source.title}
-                                  href={source.link}
-                                  target="_blank"
-                                >
-                                  {source.link}
-                                </a>
-                              </div>
-                            </div>
-                            <div className="flex-none flex items-center relative">
-                              <img
-                                className="h-3 w-3"
-                                alt={source.link}
-                                src={`https://www.google.com/s2/favicons?domain=${source.link}&sz=${16}`}
-                              />
-                            </div>
-                          </div> */}
                         </PopoverContent>
                       </Popover>
                     </span>

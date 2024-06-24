@@ -1,21 +1,24 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { Loader } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/router';
-import Layout from '@/components/Layout';
+import React, { useState, useEffect, useRef } from 'react';
+
 import ConfigurationSheet from '@/components/ChatDemo/ConfigurationSheet';
-import SingleSwitch from '@/components/ChatDemo/SingleSwitch';
-import useSwitchManager from '@/components/ChatDemo/SwitchManager';
-import { useToast } from '@/components/ui/use-toast';
-import { useUserContext } from '@/context/UserContext';
-import ModelSelector from '@/components/ui/ModelSelector';
-import UserSelector from '@/components/ui/UserSelector';
-import Neo4jGraph from './Neo4jGraph';
-import { R2RDocumentsOverviewRequest } from '../../../r2r-ts-client/models';
-import { R2RClient } from '../../../r2r-ts-client';
-import { Loader } from 'lucide-react';
-import { Title } from '@/components/ChatDemo/title';
 import { Result } from '@/components/ChatDemo/result';
 import { Search } from '@/components/ChatDemo/search';
+import SingleSwitch from '@/components/ChatDemo/SingleSwitch';
+import useSwitchManager from '@/components/ChatDemo/SwitchManager';
+import { Title } from '@/components/ChatDemo/title';
+import Layout from '@/components/Layout';
+import ModelSelector from '@/components/ui/ModelSelector';
+import { useToast } from '@/components/ui/use-toast';
+import UserSelector from '@/components/ui/UserSelector';
+import { useUserContext } from '@/context/UserContext';
+
+import { R2RClient } from '../../../r2r-ts-client';
+import { R2RDocumentsOverviewRequest } from '../../../r2r-ts-client/models';
+
+import Neo4jGraph from './Neo4jGraph';
 
 const Index: React.FC = () => {
   const searchParams = useSearchParams();

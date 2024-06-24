@@ -1,7 +1,9 @@
+import { UUID } from 'crypto';
+
+import { ChevronDoubleRightIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { UUID } from 'crypto';
 
 import Layout from '@/components/Layout';
 import {
@@ -12,6 +14,7 @@ import {
   CardFooter,
   Card,
 } from '@/components/ui/card';
+import { InfoIcon } from '@/components/ui/InfoIcon';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -20,12 +23,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { useUserContext } from '@/context/UserContext';
-import { InfoIcon } from '@/components/ui/InfoIcon';
-import { isValidUrl, useValidation } from '@/lib/utils';
 import { WatchButton } from '@/components/ui/WatchButton';
-
-import { ChevronDoubleRightIcon } from '@heroicons/react/24/outline';
+import { useUserContext } from '@/context/UserContext';
+import { isValidUrl, useValidation } from '@/lib/utils';
 
 type PipelineMenuProps = {
   pipelineName: string;
@@ -99,7 +99,7 @@ function PipelineMenu({
     <Card className="w-full mt-4 bg-zinc-800">
       <CardHeader>
         <div className="flex justify-between items-start">
-          <CardTitle>Deploy a RAG Pipeline</CardTitle>
+          <CardTitle>Watch a RAG Pipeline</CardTitle>
           <div
             className="flex flex-col items-end"
             style={{ height: '0px' }}

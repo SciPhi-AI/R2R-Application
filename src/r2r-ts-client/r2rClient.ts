@@ -8,7 +8,6 @@ import {
   R2RIngestDocumentsRequest,
   R2RIngestFilesRequest,
   R2RUpdateDocumentsRequest,
-  R2RUpdateFilesRequest,
   R2RSearchRequest,
   R2RRAGRequest,
   R2RDeleteRequest,
@@ -17,9 +16,6 @@ import {
   R2RDocumentsOverviewRequest,
   R2RDocumentChunksRequest,
   R2RLogsRequest,
-  GenerationConfig,
-  VectorSearchSettings,
-  KGSearchSettings,
 } from './models';
 
 export class R2RClient {
@@ -34,7 +30,7 @@ export class R2RClient {
         'Content-Type': 'application/json',
       },
       transformRequest: [
-        (data, headers) => {
+        (data) => {
           if (typeof data === 'string') {
             return data;
           }
@@ -66,7 +62,7 @@ export class R2RClient {
   ): Promise<any> {
     const formData = new FormData();
 
-    files.forEach((file, index) => {
+    files.forEach((file) => {
       formData.append('files', file);
     });
 
@@ -118,7 +114,7 @@ export class R2RClient {
   ): Promise<any> {
     const formData = new FormData();
 
-    files.forEach((file, index) => {
+    files.forEach((file) => {
       formData.append('files', file);
     });
 

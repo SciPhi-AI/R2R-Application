@@ -1,11 +1,12 @@
 import url from 'url';
-import { R2RClient } from '../../r2r-ts-client/r2rClient';
+
 import {
   R2RRAGRequest,
   VectorSearchSettings,
   KGSearchSettings,
   GenerationConfig,
 } from '../../r2r-ts-client/models';
+import { R2RClient } from '../../r2r-ts-client/r2rClient';
 
 export const config = {
   runtime: 'edge',

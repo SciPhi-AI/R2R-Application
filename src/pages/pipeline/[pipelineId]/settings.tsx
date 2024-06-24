@@ -1,7 +1,9 @@
 import { useRouter } from 'next/router';
 import React, { useState, useEffect } from 'react';
+
 import Layout from '@/components/Layout';
 import { useUserContext } from '@/context/UserContext';
+
 import { R2RClient } from '../../../r2r-ts-client';
 
 type Prompt = {

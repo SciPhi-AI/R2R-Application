@@ -18,9 +18,8 @@ import {
 import { toast, useToast } from '@/components/ui/use-toast';
 import { useUserContext } from '@/context/UserContext';
 
-import { R2RDocumentsOverviewRequest } from '../../../r2r-ts-client/models';
-
 import { R2RClient } from '../../../r2r-ts-client';
+import { R2RDocumentsOverviewRequest } from '../../../r2r-ts-client/models';
 
 class DocumentInfoType {
   document_id: string = '';

@@ -1,13 +1,15 @@
 import { FC, useEffect, useState } from 'react';
-import { Answer } from './answer';
-import { Sources } from './sources';
-import { UploadButton } from './upload';
+
 import {
   LLM_START_TOKEN,
   LLM_END_TOKEN,
   SEARCH_START_TOKEN,
   SEARCH_END_TOKEN,
 } from '../../r2r-ts-client';
+
+import { Answer } from './answer';
+import { Sources } from './sources';
+import { UploadButton } from './upload';
 
 const markdownParse = (text: string) => {
   return text

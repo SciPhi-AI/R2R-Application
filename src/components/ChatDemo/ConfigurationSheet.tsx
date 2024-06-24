@@ -1,5 +1,6 @@
-import React from 'react';
 import { AdjustmentsHorizontalIcon } from '@heroicons/react/24/outline';
+import React from 'react';
+
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {

@@ -1,11 +1,9 @@
+import { ChevronDoubleRightIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/router';
 import React from 'react';
 
 import { Logo } from '@/components/shared/Logo';
 import { Code } from '@/components/ui/Code';
-
-import { ChevronDoubleRightIcon } from '@heroicons/react/24/outline';
-
 import { capitalizeFirstLetter } from '@/lib/utils';
 
 const DynamicHeaderPath = () => {

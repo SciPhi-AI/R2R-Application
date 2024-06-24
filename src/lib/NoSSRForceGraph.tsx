@@ -34,5 +34,6 @@ const NoSSRForceGraph = forwardRef<NoSSRForceGraphRef, NoSSRForceGraphProps>(
     );
   }
 );
+NoSSRForceGraph.displayName = 'NoSSRForceGraph';
 
 export default NoSSRForceGraph;
