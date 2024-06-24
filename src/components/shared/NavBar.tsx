@@ -20,18 +20,24 @@ import { SubNavigationBar } from './SubNavigationBar';
 function TopLevelNavItem({
   href,
   children,
+  target,
+  rel,
 }: {
   href: string;
   children: React.ReactNode;
+  target?: string;
+  rel?: string;
 }) {
   return (
     <li>
-      <Link
-        href={href}
-        className="text-sm leading-5 text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-        legacyBehavior
-      >
-        {children}
+      <Link href={href} passHref legacyBehavior>
+        <a
+          className="text-sm leading-5 text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+          target={target}
+          rel={rel}
+        >
+          {children}
+        </a>
       </Link>
     </li>
   );
@@ -91,7 +97,11 @@ export const Navbar = forwardRef<
           <div className="flex items-center gap-5">
             <nav className="hidden md:flex">
               <ul role="list" className="flex items-center gap-8">
-                <TopLevelNavItem href="https://r2r-docs.sciphi.ai/">
+                <TopLevelNavItem
+                  href="https://r2r-docs.sciphi.ai/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <Button
                     className="rounded-md py-1 px-3 w-30"
                     variant="primary"

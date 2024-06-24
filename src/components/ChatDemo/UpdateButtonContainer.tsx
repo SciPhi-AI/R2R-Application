@@ -1,31 +1,34 @@
 'use client';
-import { useState, useRef } from 'react';
+import { DocumentArrowUpIcon } from '@heroicons/react/24/outline';
+import React, { useState, useRef } from 'react';
+
+import { Spinner } from '@/components/Spinner';
 
 import { R2RClient } from '../../r2r-ts-client';
 
-interface UpdateButtonProps {
-  userId: string;
+interface UpdateButtonContainerProps {
   apiUrl: string;
   documentId: string;
   onUpdateSuccess: () => void;
-  showToast?: (message: {
+  showToast: (message: {
     title: string;
     description: string;
     variant: 'default' | 'destructive' | 'success';
   }) => void;
 }
 
-export const UpdateButton: React.FC<UpdateButtonProps> = ({
-  userId,
+const UpdateButtonContainer: React.FC<UpdateButtonContainerProps> = ({
   apiUrl,
   documentId,
   onUpdateSuccess,
-  showToast = () => {},
+  showToast,
 }) => {
   const [isUpdating, setIsUpdating] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleDocumentUpdate = async (event) => {
+  const handleDocumentUpdate = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     event.preventDefault();
     if (
       fileInputRef.current &&
@@ -42,19 +45,25 @@ export const UpdateButton: React.FC<UpdateButtonProps> = ({
         }
         const metadata = { title: file.name };
 
-        await client.updateFiles([metadata], [file], [documentId], [userId]);
+        const response = await client.updateFiles(
+          [file],
+          [documentId],
+          [metadata]
+        );
+
         showToast({
           variant: 'success',
           title: 'Update Successful',
           description: 'The document has been updated',
         });
         onUpdateSuccess();
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error updating file:', error);
+        console.error('Error details:', error.response?.data);
         showToast({
           variant: 'destructive',
           title: 'Update Failed',
-          description: error.message,
+          description: error.message || 'An unknown error occurred',
         });
       } finally {
         setIsUpdating(false);
@@ -72,27 +81,30 @@ export const UpdateButton: React.FC<UpdateButtonProps> = ({
   };
 
   return (
-    <div style={{ zIndex: 1000 }}>
-      <form onSubmit={handleDocumentUpdate}>
-        <input
-          type="file"
-          ref={fileInputRef}
-          style={{ display: 'none' }}
-          onChange={handleDocumentUpdate}
-        />
-        <button
-          type="button"
-          onClick={handleUpdateButtonClick}
-          disabled={isUpdating}
-          className={`${
-            isUpdating
-              ? 'bg-gray-400 cursor-not-allowed'
-              : 'hover:bg-blue-700 bg-blue-500'
-          } text-white font-bold py-1 px-2 rounded`}
-        >
-          {isUpdating ? <span className="animate-spin">↻</span> : '↺'}
-        </button>
-      </form>
+    <div>
+      <button
+        onClick={handleUpdateButtonClick}
+        disabled={isUpdating}
+        className={`update-button text-white font-bold rounded flex items-center justify-center ${
+          isUpdating
+            ? 'bg-gray-400 cursor-not-allowed'
+            : 'hover:bg-blue-700 bg-blue-500'
+        }`}
+      >
+        {isUpdating ? (
+          <Spinner className="h-5 w-5 text-white" />
+        ) : (
+          <DocumentArrowUpIcon className="h-8 w-8" />
+        )}
+      </button>
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleDocumentUpdate}
+        style={{ display: 'none' }}
+      />
     </div>
   );
 };
+
+export default UpdateButtonContainer;

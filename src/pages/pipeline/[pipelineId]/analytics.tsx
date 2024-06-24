@@ -1,10 +1,10 @@
 import { useRouter } from 'next/router';
 import React, { useState, useEffect } from 'react';
 
+import { InfoIcon } from '@/components/ui/InfoIcon';
 import Layout from '@/components/Layout';
 import Pagination from '@/components/ui/altPagination';
 import BarChart from '@/components/ui/BarChart';
-// import { DatePickerWithRange } from '@/components/ui/date-range-picker';
 import {
   Select,
   SelectContent,
@@ -18,28 +18,43 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { usePipelineContext } from '@/context/PipelineContext';
 import { useUserContext } from '@/context/UserContext';
 
-import { R2RClient } from '../../../r2r-js-client';
+import {
+  R2RAnalyticsRequest,
+  FilterCriteria,
+  AnalysisTypes,
+} from '../../../r2r-ts-client/models';
 
-const filterDisplayNames = {
+import { R2RClient } from '../../../r2r-ts-client';
+
+type FilterDisplayNameKeys =
+  | 'search_latency'
+  | 'search_metrics'
+  | 'rag_generation_latency'
+  | 'error';
+
+const filterDisplayNames: Record<FilterDisplayNameKeys, string> = {
   search_latency: 'Search Latency',
   search_metrics: 'Search Metrics',
   rag_generation_latency: 'RAG Latency',
   error: 'Errors',
 };
 
-const InfoIcon = () => (
-  <div className="flex items-center justify-center w-6 h-6 bg-blue-500 text-white rounded-full ml-2">
-    i
-  </div>
-);
-
 const MetricCard: React.FC<{
-  title: string;
+  title: FilterDisplayNameKeys;
   metrics: Record<string, number | string> | undefined;
 }> = ({ title, metrics }) => {
+  const defaultMetrics = {
+    count: 'N/A',
+    mean: 'N/A',
+    std: 'N/A',
+    min: 'N/A',
+    max: 'N/A',
+  };
+
+  const displayMetrics = metrics || defaultMetrics;
+
   return (
     <div className="bg-zinc-800 rounded-lg shadow-lg p-6 m-4">
       <div className="flex justify-center items-center mb-4">
@@ -49,7 +64,7 @@ const MetricCard: React.FC<{
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger>
-              <InfoIcon />
+              <InfoIcon width="w-5" height="h-5" />
             </TooltipTrigger>
             <TooltipContent>
               <p>Aggregate statistics around your data.</p>
@@ -57,29 +72,31 @@ const MetricCard: React.FC<{
           </Tooltip>
         </TooltipProvider>
       </div>
-      {metrics &&
-        Object.entries(metrics).map(([metric, value]) => (
-          <div key={metric} className="flex justify-between">
-            <span className="font-bold text-blue-500">{metric}:</span>
-            <span className="text-white pr-2">
-              {value !== null && value !== undefined ? value : 'N/A'}
-            </span>
-          </div>
-        ))}
-      {!metrics && (
-        <div className="flex justify-between">
-          <span className="font-bold text-blue-500">N/A</span>
-          <span className="text-white pr-2">N/A</span>
+      {Object.entries(displayMetrics).map(([metric, value]) => (
+        <div key={metric} className="flex justify-between">
+          <span className="font-bold text-blue-500">{metric}:</span>
+          <span className="text-white pr-2">
+            {value !== null && value !== undefined ? value : 'N/A'}
+          </span>
         </div>
-      )}
+      ))}
     </div>
   );
 };
 
 const PercentileCard: React.FC<{
-  title: string;
+  title: FilterDisplayNameKeys;
   percentiles: Record<string, number | string> | undefined;
 }> = ({ title, percentiles }) => {
+  const defaultPercentiles = {
+    p10: 'N/A',
+    p25: 'N/A',
+    p50: 'N/A',
+    p90: 'N/A',
+  };
+
+  const displayPercentiles = percentiles || defaultPercentiles;
+
   return (
     <div className="bg-zinc-800 rounded-lg shadow-lg p-6 m-4">
       <div className="flex justify-center items-center mb-4">
@@ -100,23 +117,16 @@ const PercentileCard: React.FC<{
           </Tooltip>
         </TooltipProvider>
       </div>
-      {percentiles &&
-        Object.entries(percentiles).map(([percentile, value]) => (
-          <div key={percentile} className="flex justify-between">
-            <span className="font-bold text-blue-500">
-              {percentile}th Percentile:
-            </span>
-            <span className="text-white pr-2">
-              {value !== null && value !== undefined ? value : 'N/A'}
-            </span>
-          </div>
-        ))}
-      {!percentiles && (
-        <div className="flex justify-between">
-          <span className="font-bold text-blue-500">N/A</span>
-          <span className="text-white pr-2">N/A</span>
+      {Object.entries(displayPercentiles).map(([percentile, value]) => (
+        <div key={percentile} className="flex justify-between">
+          <span className="font-bold text-blue-500">
+            {percentile}th Percentile:
+          </span>
+          <span className="text-white pr-2">
+            {value !== null && value !== undefined ? value : 'N/A'}
+          </span>
         </div>
-      )}
+      ))}
     </div>
   );
 };
@@ -224,10 +234,9 @@ const AnalysisResults: React.FC<{
   analysisResults: any;
   percentiles: any;
   selectedFilter: string;
-}> = ({ analysisResults, percentiles, selectedFilter }) => {
-  if (!analysisResults) {
-    return null;
-  }
+}> = ({ analysisResults, percentiles, selectedFilter: filterFromProps }) => {
+  const [selectedFilter, setSelectedFilter] =
+    useState<FilterDisplayNameKeys>('search_latency');
 
   return (
     <>
@@ -236,13 +245,11 @@ const AnalysisResults: React.FC<{
         title={selectedFilter}
         metrics={analysisResults}
       />
-      {percentiles && (
-        <PercentileCard
-          key={`${selectedFilter}-percentile`}
-          title={selectedFilter}
-          percentiles={percentiles}
-        />
-      )}
+      <PercentileCard
+        key={`${selectedFilter}-percentile`}
+        title={selectedFilter}
+        percentiles={percentiles}
+      />
     </>
   );
 };
@@ -251,11 +258,9 @@ const Analytics: React.FC = () => {
   const [analyticsData, setAnalyticsData] = useState<any>({});
   const router = useRouter();
 
-  const { pipelines, updatePipelines } = usePipelineContext();
   const { pipelineId } = router.query;
   const { watchedPipelines } = useUserContext();
   const pipeline = watchedPipelines[pipelineId as string];
-  const [isLoading, setIsLoading] = useState(true);
   const [selectedFilter, setSelectedFilter] = useState('search_latency');
   const [currentPage, setCurrentPage] = useState(1);
   const logsPerPage = 5;
@@ -271,13 +276,30 @@ const Analytics: React.FC = () => {
     };
     const percentiles = [10, 25, 50, 90];
 
+    const filter_criteria: FilterCriteria = { [filter]: filter };
+    const analysis_types: AnalysisTypes = {
+      [filter]:
+        filter === 'error'
+          ? ['bar_chart', filter]
+          : ['basic_statistics', filter],
+    };
+
+    const analyticsRequest: R2RAnalyticsRequest = {
+      filter_criteria,
+      analysis_types,
+    };
+
     Promise.all([
-      client.getAnalytics(filters, metricsAnalysisTypes),
+      client.analytics(analyticsRequest),
       ...percentiles.map((percentile) => {
-        const percentileAnalysisTypes = {
+        const percentileAnalysisTypes: AnalysisTypes = {
           [filter]: ['percentile', filter, percentile.toString()],
         };
-        return client.getAnalytics(filters, percentileAnalysisTypes);
+        const percentileRequest: R2RAnalyticsRequest = {
+          filter_criteria,
+          analysis_types: percentileAnalysisTypes,
+        };
+        return client.analytics(percentileRequest);
       }),
     ])
       .then(([metricsData, ...percentilesData]) => {
@@ -301,13 +323,12 @@ const Analytics: React.FC = () => {
 
   useEffect(() => {
     if (apiUrl) {
-      console.log('fetching analytics...');
       const client = new R2RClient(apiUrl);
       fetchAnalytics(client, selectedFilter);
     }
   }, [apiUrl, selectedFilter]);
 
-  const handlePageChange = (pageNumber) => {
+  const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
   };
 
@@ -341,7 +362,6 @@ const Analytics: React.FC = () => {
                 </SelectContent>
               </Select>
             </div>
-            {/* <DatePickerWithRange className="my-custom-class" /> */}
           </div>
 
           <div className="flex mt-4">

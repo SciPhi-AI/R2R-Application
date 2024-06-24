@@ -10,11 +10,18 @@ interface Pipeline {
 interface UserContextProps {
   watchedPipelines: Record<string, Pipeline>;
   addWatchedPipeline: (pipelineId: string, pipeline: Pipeline) => void;
+  removeWatchedPipeline: (pipelineId: string) => void;
+  isPipelineUnique: (
+    name: string,
+    url: string
+  ) => { nameUnique: boolean; urlUnique: boolean };
 }
 
 const UserContext = createContext<UserContextProps>({
   watchedPipelines: {},
   addWatchedPipeline: () => {},
+  removeWatchedPipeline: () => {},
+  isPipelineUnique: () => ({ nameUnique: true, urlUnique: true }),
 });
 
 export const useUserContext = () => useContext(UserContext);
@@ -46,8 +53,33 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
     }));
   };
 
+  const removeWatchedPipeline = (pipelineId: string) => {
+    setWatchedPipelines((prevPipelines) => {
+      const newPipelines = { ...prevPipelines };
+      delete newPipelines[pipelineId];
+      return newPipelines;
+    });
+  };
+
+  const isPipelineUnique = (name: string, url: string) => {
+    const nameUnique = !Object.values(watchedPipelines).some(
+      (p) => p.pipelineName === name
+    );
+    const urlUnique = !Object.values(watchedPipelines).some(
+      (p) => p.deploymentUrl === url
+    );
+    return { nameUnique, urlUnique };
+  };
+
   return (
-    <UserContext.Provider value={{ watchedPipelines, addWatchedPipeline }}>
+    <UserContext.Provider
+      value={{
+        watchedPipelines,
+        addWatchedPipeline,
+        removeWatchedPipeline,
+        isPipelineUnique,
+      }}
+    >
       {children}
     </UserContext.Provider>
   );

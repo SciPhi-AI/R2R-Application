@@ -1,6 +1,11 @@
 import url from 'url';
-
-import { R2RClient } from '../../r2r-js-client/r2rClient';
+import { R2RClient } from '../../r2r-ts-client/r2rClient';
+import {
+  R2RRAGRequest,
+  VectorSearchSettings,
+  KGSearchSettings,
+  GenerationConfig,
+} from '../../r2r-ts-client/models';
 
 export const config = {
   runtime: 'edge',
@@ -9,58 +14,48 @@ export const config = {
 export default async function handler(req) {
   const queryObject = url.parse(req.url, true).query;
   const client = new R2RClient(queryObject.apiUrl);
-  const message = queryObject.query;
+
   const searchFilters = queryObject.searchFilters
     ? JSON.parse(queryObject.searchFilters)
     : {};
   searchFilters['user_id'] = queryObject.userId;
-  const searchLimit = queryObject.searchLimit
-    ? parseInt(queryObject.searchLimit)
-    : 10;
-  const model = queryObject.model ? queryObject.model : 'gpt-4-turbo';
 
-  const streaming = true;
-  const generationConfig = { model: model }; // , "stream": streaming};
+  const generationConfig = {
+    temperature: parseFloat(queryObject.temperature) || 0.1,
+    top_p: parseFloat(queryObject.topP) || 1,
+    top_k: parseInt(queryObject.topK) || 100,
+    max_tokens_to_sample: parseInt(queryObject.max_tokens_to_sample) || 1024,
+    model: queryObject.model || 'gpt-4-turbo',
+    stream: true,
+  };
+
+  const vectorSearchSettings = {
+    use_vector_search: queryObject.vectorSearch !== 'false',
+    search_filters: searchFilters,
+    search_limit: parseInt(queryObject.searchLimit) || 10,
+    do_hybrid_search: queryObject.hybridSearch === 'true',
+  };
+
+  const kgSearchSettings = {
+    use_kg_search: queryObject.useKnowledgeGraph === 'true',
+    agent_generation_config: generationConfig,
+  };
+
+  const ragRequest = {
+    query: queryObject.query,
+    vector_search_settings: vectorSearchSettings,
+    kg_search_settings: kgSearchSettings,
+    rag_generation_config: generationConfig,
+  };
 
   try {
-    if (streaming) {
-      const responseStream = await client.rag(
-        message,
-        searchFilters,
-        searchLimit,
-        generationConfig,
-        streaming
-      );
+    const response = await client.rag(ragRequest);
 
-      const readableStream = new ReadableStream({
-        async start(controller) {
-          const reader = responseStream.getReader();
-
-          try {
-            while (true) {
-              const { value, done } = await reader.read();
-              if (done) break;
-              controller.enqueue(value);
-            }
-          } catch (error) {
-            controller.error(error);
-          } finally {
-            controller.close();
-          }
-        },
-      });
-
-      return new Response(readableStream, {
-        headers: { 'Content-Type': 'application/json' },
+    if (generationConfig.stream) {
+      return new Response(response, {
+        headers: { 'Content-Type': 'text/event-stream' },
       });
     } else {
-      const response = await client.rag(
-        message,
-        searchFilters,
-        searchLimit,
-        generationConfig,
-        streaming
-      );
       return new Response(JSON.stringify(response), {
         headers: { 'Content-Type': 'application/json' },
       });

@@ -8,4 +8,3 @@ export const METADATA_START_TOKEN = '<metadata>';
 export const METADATA_END_TOKEN = '</metadata>';
 
 export { R2RClient } from './r2rClient';
-export { generateIdFromLabel } from './utils';
