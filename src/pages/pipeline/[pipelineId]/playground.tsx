@@ -16,13 +16,6 @@ import {
 import { InfoIcon } from '@/components/ui/InfoIcon';
 import ModelSelector from '@/components/ui/ModelSelector';
 import UserSelector from '@/components/ui/UserSelector';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import Neo4jGraph from './Neo4jGraph';
 import { R2RDocumentsOverviewRequest } from '../../../r2r-ts-client/models';
 import { R2RClient } from '../../../r2r-ts-client';
@@ -204,10 +197,7 @@ const Index: React.FC = () => {
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <label
-                        htmlFor="temperature"
-                        className="text-sm font-medium text-zinc-300"
-                      >
+                      <label className="text-sm font-medium text-zinc-300">
                         Generation Configs
                       </label>
                       <ConfigurationSheet
@@ -249,31 +239,35 @@ const Index: React.FC = () => {
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <label
-                          htmlFor="model"
+                          htmlFor="model-selector"
                           className="text-sm font-medium text-zinc-300"
                         >
                           Model
                         </label>
                       </div>
-                      <ModelSelector
-                        selectedModel={selectedModel}
-                        setSelectedModel={setSelectedModel}
-                      />
+                      <div id="model-selector">
+                        <ModelSelector
+                          selectedModel={selectedModel}
+                          setSelectedModel={setSelectedModel}
+                        />
+                      </div>
                     </div>
 
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <label
-                          htmlFor="model"
+                          htmlFor="user-selector"
                           className="text-sm font-medium text-zinc-300"
                         >
                           User ID
                         </label>
                       </div>
-                      <UserSelector
-                        selectedUserId={userId}
-                        setSelectedUserId={setUserId}
-                      />
+                      <div id="user-selector">
+                        <UserSelector
+                          selectedUserId={userId}
+                          setSelectedUserId={setUserId}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>

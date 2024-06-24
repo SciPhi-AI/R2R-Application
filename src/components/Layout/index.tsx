@@ -13,10 +13,10 @@ type Props = {
 
 const Layout: React.FC<Props> = ({ children, localNav, pageTitle }) => {
   return (
-    <div className="w-full relative">
+    <div className="w-full min-h-screen flex flex-col">
       <Head>{pageTitle && <title>{pageTitle} | R2R</title>}</Head>
       <Navbar />
-      {children}
+      <main className="flex-grow">{children}</main>
       <Footer />
     </div>
   );
