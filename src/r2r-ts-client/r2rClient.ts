@@ -49,16 +49,16 @@ export class R2RClient {
   async updatePrompt(request: R2RUpdatePromptRequest): Promise<any> {
     try {
       const response = await this.axiosInstance.post('/update_prompt', request);
-      posthog.capture('TSClient Update Prompt Success');
+      posthog.capture('TSClient', { 'updatePrompt success': request });
       return response.data;
     } catch (error: unknown) {
       if (error instanceof Error) {
-        posthog.capture('TSClient Update Prompt Error', {
-          error: error.message,
+        posthog.capture('TSClientError', {
+          'updatePrompt error': error.message,
         });
       } else {
         posthog.capture('TSClient Update Prompt Error', {
-          error: 'An unknown error occurred',
+          error: 'An unknown error occurred in updatePrompt',
         });
       }
       throw error;
@@ -72,16 +72,16 @@ export class R2RClient {
         '/ingest_documents',
         request
       );
-      posthog.capture('TSClient Ingest Documents Success');
+      posthog.capture('TSClient', { 'ingestDocuments success': request });
       return response.data;
     } catch (error: unknown) {
       if (error instanceof Error) {
-        posthog.capture('TSClient Ingest Documents Error', {
-          error: error.message,
+        posthog.capture('TSClientError', {
+          'ingestDocuments error': error.message,
         });
       } else {
-        posthog.capture('TSClient Ingest Documents Error', {
-          error: 'An unknown error occurred',
+        posthog.capture('TSClientError', {
+          error: 'An unknown error occurred in ingestDocuments',
         });
       }
       throw error;
@@ -118,16 +118,16 @@ export class R2RClient {
           ],
         }
       );
-      posthog.capture('TSClient Ingest Files Success');
+      posthog.capture('TSClient', { 'ingestFiles success': request });
       return response.data;
     } catch (error: unknown) {
       if (error instanceof Error) {
-        posthog.capture('TSClient Ingest Files Error', {
-          error: error.message,
+        posthog.capture('TSClientError', {
+          'ingestFiles error': error.message,
         });
       } else {
-        posthog.capture('TSClient Ingest Files Error', {
-          error: 'An unknown error occurred',
+        posthog.capture('TSClientError', {
+          error: 'An unknown error occurred in ingestFiles',
         });
       }
       throw error;
@@ -141,16 +141,16 @@ export class R2RClient {
         '/update_documents',
         request
       );
-      posthog.capture('TSClient Update Documents Success');
+      posthog.capture('TSClient', { 'updateDocuments success': request });
       return response.data;
     } catch (error: unknown) {
       if (error instanceof Error) {
-        posthog.capture('TSClient Update Documents Error', {
-          error: error.message,
+        posthog.capture('TSClientError', {
+          'updateDocuments error': error.message,
         });
       } else {
-        posthog.capture('TSClient Update Documents Error', {
-          error: 'An unknown error occurred',
+        posthog.capture('TSClientError', {
+          error: 'An unknown error occurred in updateDocuments',
         });
       }
       throw error;
@@ -190,16 +190,16 @@ export class R2RClient {
           ],
         }
       );
-      posthog.capture('TSClient Update Files Success');
+      posthog.capture('TSClient', { 'updateFiles success': null });
       return response.data;
     } catch (error: unknown) {
       if (error instanceof Error) {
-        posthog.capture('TSClient Update Files Error', {
-          error: error.message,
+        posthog.capture('TSClientError', {
+          'updateFiles error': error.message,
         });
       } else {
-        posthog.capture('TSClient Update Files Error', {
-          error: 'An unknown error occurred',
+        posthog.capture('TSClientError', {
+          error: 'An unknown error occurred in updateFiles',
         });
       }
       throw error;
@@ -210,14 +210,14 @@ export class R2RClient {
   async search(request: R2RSearchRequest): Promise<any> {
     try {
       const response = await this.axiosInstance.post('/search', request);
-      posthog.capture('TSClient Search Success');
+      posthog.capture('TSClient', { 'saerch success': request });
       return response.data;
     } catch (error: unknown) {
       if (error instanceof Error) {
-        posthog.capture('TSClient Search Error', { error: error.message });
+        posthog.capture('TSClientError', { 'search error': error.message });
       } else {
-        posthog.capture('TSClient Search Error', {
-          error: 'An unknown error occurred',
+        posthog.capture('TSClientError', {
+          error: 'An unknown error occurred in search',
         });
       }
       throw error;
@@ -233,15 +233,15 @@ export class R2RClient {
           '/rag',
           JSON.stringify(request)
         );
-        posthog.capture('TSClient RAG Success');
+        posthog.capture('TSClient', { 'rag success': request });
         return response.data;
       }
     } catch (error: unknown) {
       if (error instanceof Error) {
-        posthog.capture('TSClient RAG Error', { error: error.message });
+        posthog.capture('TSClientError', { 'rag error': error.message });
       } else {
-        posthog.capture('TSClient RAG Error', {
-          error: 'An unknown error occurred',
+        posthog.capture('TSClientError', {
+          error: 'An unknown error occurred in rag',
         });
       }
       throw error;
@@ -261,10 +261,12 @@ export class R2RClient {
       return response.data;
     } catch (error: unknown) {
       if (error instanceof Error) {
-        posthog.capture('TSClient RAG Error', { error: error.message });
+        posthog.capture('TSClientError', {
+          'streamingRag error': error.message,
+        });
       } else {
-        posthog.capture('TSClient RAG Error', {
-          error: 'An unknown error occurred',
+        posthog.capture('TSClientError', {
+          error: 'An unknown error occurred in streamingRag',
         });
       }
       throw error;
@@ -282,14 +284,14 @@ export class R2RClient {
         },
         headers: { 'Content-Type': 'application/json' },
       });
-      posthog.capture('TSClient Delete Success');
+      posthog.capture('TSClient', { 'delete success': request });
       return response.data;
     } catch (error: unknown) {
       if (error instanceof Error) {
-        posthog.capture('TSClient Delete Error', { error: error.message });
+        posthog.capture('TSClientError', { 'delete error': error.message });
       } else {
-        posthog.capture('TSClient Delete Error', {
-          error: 'An unknown error occurred',
+        posthog.capture('TSClientError', {
+          error: 'An unknown error occurred in delete',
         });
       }
       throw error;
@@ -312,14 +314,14 @@ export class R2RClient {
           'Content-Type': 'application/json',
         },
       });
-      posthog.capture('TSClient Logs Success');
+      posthog.capture('TSClient', { 'logs success': request });
       return response.data;
     } catch (error: unknown) {
       if (error instanceof Error) {
-        posthog.capture('TSClient Logs Error', { error: error.message });
+        posthog.capture('TSClientError', { 'logs error': error.message });
       } else {
-        posthog.capture('TSClient Logs Error', {
-          error: 'An unknown error occurred',
+        posthog.capture('TSClientError', {
+          error: 'An unknown error occurred in logs',
         });
       }
       throw error;
@@ -329,16 +331,16 @@ export class R2RClient {
   async appSettings(): Promise<any> {
     try {
       const response = await this.axiosInstance.get('/app_settings');
-      posthog.capture('TSClient App Settings');
+      posthog.capture('TSClient', { 'appSettings success': null });
       return response.data;
     } catch (error: unknown) {
       if (error instanceof Error) {
-        posthog.capture('TSClient App Settings Error', {
-          error: error.message,
+        posthog.capture('TSClientError', {
+          'appSettings error': error.message,
         });
       } else {
-        posthog.capture('TSClient App Settings Error', {
-          error: 'An unknown error occurred',
+        posthog.capture('TSClientError', {
+          error: 'An unknown error occurred in appSettings',
         });
       }
       throw error;
@@ -352,14 +354,14 @@ export class R2RClient {
           'Content-Type': 'application/json',
         },
       });
-      posthog.capture('TSClient Analytics Success');
+      posthog.capture('TSClient', { 'analytics success': request });
       return response.data;
     } catch (error: unknown) {
       if (error instanceof Error) {
-        posthog.capture('TSClient Analytics Error', { error: error.message });
+        posthog.capture('TSClientError', { 'analytics error': error.message });
       } else {
-        posthog.capture('TSClient Analytics Error', {
-          error: 'An unknown error occurred',
+        posthog.capture('TSClientError', {
+          error: 'An unknown error occurred in analytics',
         });
       }
       throw error;
@@ -373,16 +375,16 @@ export class R2RClient {
       const response = await this.axiosInstance.get('/users_overview', {
         params: request,
       });
-      posthog.capture('TSClient Users Overview Success');
+      posthog.capture('TSClient', { 'usersOverview success': request });
       return response.data;
     } catch (error: unknown) {
       if (error instanceof Error) {
-        posthog.capture('TSClient Users Overview Error', {
-          error: error.message,
+        posthog.capture('TSClientError', {
+          'usersOverview error': error.message,
         });
       } else {
-        posthog.capture('TSClient Users Overview Error', {
-          error: 'An unknown error occurred',
+        posthog.capture('TSClientError', {
+          error: 'An unknown error occurred in usersOverview',
         });
       }
       throw error;
@@ -400,16 +402,16 @@ export class R2RClient {
           },
         }
       );
-      posthog.capture('TSClient Documents Overview Success');
+      posthog.capture('TSClient', { 'documentsOverview success': request });
       return response.data;
     } catch (error: unknown) {
       if (error instanceof Error) {
-        posthog.capture('TSClient Documents Overview Error', {
-          error: error.message,
+        posthog.capture('TSClientError', {
+          'documentsOvervuew error': error.message,
         });
       } else {
-        posthog.capture('TSClient Documents Overview Error', {
-          error: 'An unknown error occurred',
+        posthog.capture('TSClientError', {
+          error: 'An unknown error occurred in documentsOverview',
         });
       }
       throw error;
@@ -427,16 +429,16 @@ export class R2RClient {
           },
         }
       );
-      posthog.capture('TSClient Document Chunks Success');
+      posthog.capture('TSClient', { 'documentChunks success': request });
       return response.data;
     } catch (error: unknown) {
       if (error instanceof Error) {
-        posthog.capture('TSClient Document Chunks Error', {
-          error: error.message,
+        posthog.capture('TSClientError', {
+          'documentChunks error': error.message,
         });
       } else {
-        posthog.capture('TSClient Document Chunks Error', {
-          error: 'An unknown error occurred',
+        posthog.capture('TSClientError', {
+          error: 'An unknown error occurred in documentChunks',
         });
       }
       throw error;
