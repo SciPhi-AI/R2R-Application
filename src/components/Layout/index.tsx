@@ -4,6 +4,7 @@ import React, { ReactNode } from 'react';
 
 import { Footer } from '@/components/shared/Footer';
 import { Navbar } from '@/components/shared/NavBar';
+import { Toaster } from '@/components/ui/toaster';
 
 type Props = {
   children: ReactNode;
@@ -17,6 +18,7 @@ const Layout: React.FC<Props> = ({ children, localNav, pageTitle }) => {
       <Head>{pageTitle && <title>{pageTitle} | R2R</title>}</Head>
       <Navbar />
       <main className="flex-grow">{children}</main>
+      <Toaster />
       <Footer />
     </div>
   );

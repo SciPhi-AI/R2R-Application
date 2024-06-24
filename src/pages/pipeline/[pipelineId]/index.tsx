@@ -20,8 +20,11 @@ import {
   LinkIcon,
 } from '@heroicons/react/24/outline';
 
+import { useToast } from '@/components/ui/use-toast';
+
 const PipelinePage = () => {
   const [copied, setCopied] = useState(false);
+  const { toast } = useToast();
 
   const { watchedPipelines } = useUserContext();
   const router = useRouter();
@@ -60,6 +63,18 @@ const PipelinePage = () => {
           </code>
         </h1>
         <Separator />
+        <Button
+          onClick={() => {
+            toast({
+              title: 'Test Toast',
+              description: 'This is a test toast message.',
+              variant: 'default',
+            });
+          }}
+          className="mt-4"
+        >
+          Show Test Toast
+        </Button>
         <Alert variant="default" className="mt-3">
           <AlertTitle className="text-lg ">
             <div className="flex gap-2 text-xl">
@@ -69,7 +84,7 @@ const PipelinePage = () => {
                   href={`${pipeline?.pipelineId}/playground`}
                   className="text-blue-500 hover:text-blue-700"
                 >
-                  Test it out now in the playground!
+                  Test it out in the playground!
                 </a>
               </span>
             </div>
@@ -77,7 +92,7 @@ const PipelinePage = () => {
           <AlertDescription>
             <p className="mb-2">
               The R2R dashboard has a number of tools to help you manage your
-              RAG pipelines.
+              pipelines.
             </p>
             <div className="flex">
               <div className="text-left">
@@ -129,7 +144,7 @@ const PipelinePage = () => {
                   )
                 }
               >
-                Request a Feature
+                Feature Request
               </Button>
               <Button
                 className="h-10 w-40 py-2.5"
