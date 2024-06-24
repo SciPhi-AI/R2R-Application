@@ -2,6 +2,7 @@ import axios, { AxiosInstance } from 'axios';
 import FormData from 'form-data';
 import posthog from 'posthog-js';
 
+import { feature } from './feature';
 import {
   R2RUpdatePromptRequest,
   R2RIngestDocumentsRequest,
@@ -46,56 +47,23 @@ export class R2RClient {
 
   //TODO: This isn't implemented in the dashboard yet
   //NOQA
+  @feature('updatePrompt')
   async updatePrompt(request: R2RUpdatePromptRequest): Promise<any> {
-    try {
-      const response = await this.axiosInstance.post('/update_prompt', request);
-      posthog.capture('TSClient', { requestType: 'updatePrompt success' });
-      return response.data;
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        posthog.capture('TSClientError', {
-          requestType: 'updatePrompt',
-          requestTypeError: 'updatePrompt error',
-          error: error.message,
-        });
-      } else {
-        posthog.capture('TSClientError', {
-          requestType: 'updatePrompt',
-          requestTypeError: 'updatePrompt error',
-          error: 'An unknown error occurred in updatePrompt',
-        });
-      }
-      throw error;
-    }
+    const response = await this.axiosInstance.post('/update_prompt', request);
+    return response.data;
   }
 
   //NOQA
+  @feature('ingestDocuments')
   async ingestDocuments(request: R2RIngestDocumentsRequest): Promise<any> {
-    try {
-      const response = await this.axiosInstance.post(
-        '/ingest_documents',
-        request
-      );
-      posthog.capture('TSClient', { requestType: 'ingestDocuments success' });
-      return response.data;
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        posthog.capture('TSClientError', {
-          requestType: 'ingestDocuments',
-          requestTypeError: 'ingestDocuments error',
-          error: error.message,
-        });
-      } else {
-        posthog.capture('TSClientError', {
-          requestType: 'ingestDocuments',
-          requestTypeError: 'ingestDocuments error',
-          error: 'An unknown error occurred in ingestDocuments',
-        });
-      }
-      throw error;
-    }
+    const response = await this.axiosInstance.post(
+      '/ingest_documents',
+      request
+    );
+    return response.data;
   }
 
+  @feature('ingestFiles')
   async ingestFiles(
     files: File[],
     request: R2RIngestFilesRequest
@@ -110,69 +78,31 @@ export class R2RClient {
       formData.append(key, JSON.stringify(value));
     });
 
-    try {
-      const response = await this.axiosInstance.post(
-        '/ingest_files',
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-          transformRequest: [
-            (data, headers) => {
-              delete headers['Content-Type'];
-              return data;
-            },
-          ],
-        }
-      );
-      posthog.capture('TSClient', { requestType: 'ingestFiles success' });
-      return response.data;
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        posthog.capture('TSClientError', {
-          requestType: 'ingestFiles',
-          requestTypeError: 'ingestFiles error',
-          error: error.message,
-        });
-      } else {
-        posthog.capture('TSClientError', {
-          requestType: 'ingestFiles',
-          requestTypeError: 'ingestFiles error',
-          error: 'An unknown error occurred in ingestFiles',
-        });
-      }
-      throw error;
-    }
+    const response = await this.axiosInstance.post('/ingest_files', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      transformRequest: [
+        (data, headers) => {
+          delete headers['Content-Type'];
+          return data;
+        },
+      ],
+    });
+    return response.data;
   }
 
   //NOQA
+  @feature('updateDocuments')
   async updateDocuments(request: R2RUpdateDocumentsRequest): Promise<any> {
-    try {
-      const response = await this.axiosInstance.post(
-        '/update_documents',
-        request
-      );
-      posthog.capture('TSClient', { requestType: 'updateDocuments success' });
-      return response.data;
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        posthog.capture('TSClientError', {
-          requestType: 'updateDocuments',
-          requestTypeError: 'updateDocuments error',
-          error: error.message,
-        });
-      } else {
-        posthog.capture('TSClientError', {
-          requestType: 'updateDocuments',
-          requestTypeError: 'updateDocuments error',
-          error: 'An unknown error occurred in updateDocuments',
-        });
-      }
-      throw error;
-    }
+    const response = await this.axiosInstance.post(
+      '/update_documents',
+      request
+    );
+    return response.data;
   }
 
+  @feature('updateFiles')
   async updateFiles(
     files: File[],
     documentIds: string[],
@@ -190,327 +120,137 @@ export class R2RClient {
       formData.append('metadatas', JSON.stringify(metadatas));
     }
 
-    try {
-      const response = await this.axiosInstance.post(
-        '/update_files',
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-          transformRequest: [
-            (data, headers) => {
-              delete headers['Content-Type'];
-              return data;
-            },
-          ],
-        }
-      );
-      posthog.capture('TSClient', { requestType: 'updateFiles success' });
-      return response.data;
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        posthog.capture('TSClientError', {
-          requestType: 'updateFiles',
-          requestTypeError: 'updateFiles error',
-          error: error.message,
-        });
-      } else {
-        posthog.capture('TSClientError', {
-          requestType: 'updateFiles',
-          requestTypeError: 'updateFiles error',
-          error: 'An unknown error occurred in updateFiles',
-        });
-      }
-      throw error;
-    }
+    const response = await this.axiosInstance.post('/update_files', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      transformRequest: [
+        (data, headers) => {
+          delete headers['Content-Type'];
+          return data;
+        },
+      ],
+    });
+    return response.data;
   }
 
   //NOQA
+  @feature('search')
   async search(request: R2RSearchRequest): Promise<any> {
-    try {
-      const response = await this.axiosInstance.post('/search', request);
-      posthog.capture('TSClient', { requestType: 'search success' });
-      return response.data;
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        posthog.capture('TSClientError', {
-          requestType: 'search',
-          requestTypeError: 'search error',
-          error: error.message,
-        });
-      } else {
-        posthog.capture('TSClientError', {
-          requestType: 'search',
-          requestTypeError: 'search error',
-          error: 'An unknown error occurred in search',
-        });
-      }
-      throw error;
-    }
+    const response = await this.axiosInstance.post('/search', request);
+    return response.data;
   }
 
+  @feature('rag')
   async rag(request: R2RRAGRequest): Promise<any> {
-    try {
-      if (request.rag_generation_config?.stream) {
-        return this.streamRag(request);
-      } else {
-        const response = await this.axiosInstance.post(
-          '/rag',
-          JSON.stringify(request)
-        );
-        posthog.capture('TSClient', { requestType: 'rag success' });
-        return response.data;
-      }
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        posthog.capture('TSClientError', {
-          requestType: 'rag',
-          requestTypeError: 'rag error',
-          error: error.message,
-        });
-      } else {
-        posthog.capture('TSClientError', {
-          requestType: 'rag',
-          requestTypeError: 'rag error',
-          error: 'An unknown error occurred in rag',
-        });
-      }
-      throw error;
-    }
-  }
-
-  private async streamRag(request: R2RRAGRequest): Promise<any> {
-    try {
+    if (request.rag_generation_config?.stream) {
+      return this.streamRag(request);
+    } else {
       const response = await this.axiosInstance.post(
         '/rag',
-        JSON.stringify(request),
-        {
-          responseType: 'stream',
-        }
+        JSON.stringify(request)
       );
       return response.data;
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        posthog.capture('TSClientError', {
-          requestType: 'streamingRag',
-          requestTypeError: 'streamingRag error',
-          error: error.message,
-        });
-      } else {
-        posthog.capture('TSClientError', {
-          requestType: 'streamingRag',
-          requestTypeError: 'streamingRag error',
-          error: 'An unknown error occurred in streamingRag',
-        });
-      }
-      throw error;
     }
   }
 
+  @feature('streamingRag')
+  private async streamRag(request: R2RRAGRequest): Promise<any> {
+    const response = await this.axiosInstance.post(
+      '/rag',
+      JSON.stringify(request),
+      {
+        responseType: 'stream',
+      }
+    );
+    return response.data;
+  }
+
+  @feature('delete')
   async delete(request: R2RDeleteRequest): Promise<any> {
-    try {
-      const response = await this.axiosInstance({
-        method: 'delete',
-        url: '/delete',
-        data: {
-          keys: request.keys,
-          values: request.values,
-        },
-        headers: { 'Content-Type': 'application/json' },
-      });
-      posthog.capture('TSClient', { requestType: 'delete success' });
-      return response.data;
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        posthog.capture('TSClientError', {
-          requestType: 'delete',
-          requestTypeError: 'delete error',
-          error: error.message,
-        });
-      } else {
-        posthog.capture('TSClientError', {
-          requestType: 'delete',
-          requestTypeError: 'delete error',
-          error: 'An unknown error occurred in delete',
-        });
-      }
-      throw error;
-    }
+    const response = await this.axiosInstance({
+      method: 'delete',
+      url: '/delete',
+      data: {
+        keys: request.keys,
+        values: request.values,
+      },
+      headers: { 'Content-Type': 'application/json' },
+    });
+    return response.data;
   }
 
+  @feature('logs')
   async logs(request: R2RLogsRequest): Promise<any> {
-    try {
-      const payload = {
-        ...request,
-        log_type_filter:
-          request.log_type_filter === undefined
-            ? null
-            : request.log_type_filter,
-        max_runs_requested: request.max_runs_requested || 100,
-      };
+    const payload = {
+      ...request,
+      log_type_filter:
+        request.log_type_filter === undefined ? null : request.log_type_filter,
+      max_runs_requested: request.max_runs_requested || 100,
+    };
 
-      const response = await this.axiosInstance.post('/logs', payload, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      posthog.capture('TSClient', { requestType: 'logs success' });
-      return response.data;
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        posthog.capture('TSClientError', {
-          requestType: 'logs',
-          requestTypeError: 'logs error',
-          error: error.message,
-        });
-      } else {
-        posthog.capture('TSClientError', {
-          requestType: 'logs',
-          requestTypeError: 'logs error',
-          error: 'An unknown error occurred in logs',
-        });
-      }
-      throw error;
-    }
+    const response = await this.axiosInstance.post('/logs', payload, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data;
   }
 
+  @feature('appSettings')
   async appSettings(): Promise<any> {
-    try {
-      const response = await this.axiosInstance.get('/app_settings');
-      posthog.capture('TSClient', { requestType: 'appSettings success' });
-      return response.data;
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        posthog.capture('TSClientError', {
-          requestType: 'appSettings',
-          requestTypeError: 'appSettings error',
-          error: error.message,
-        });
-      } else {
-        posthog.capture('TSClientError', {
-          requestType: 'appSettings',
-          requestTypeError: 'appSettings error',
-          error: 'An unknown error occurred in appSettings',
-        });
-      }
-      throw error;
-    }
+    const response = await this.axiosInstance.get('/app_settings');
+    return response.data;
   }
 
+  @feature('analytics')
   async analytics(request: R2RAnalyticsRequest): Promise<any> {
-    try {
-      const response = await this.axiosInstance.post('/analytics', request, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      posthog.capture('TSClient', { requestType: 'analytics success' });
-      return response.data;
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        posthog.capture('TSClientError', {
-          requestType: 'analytics',
-          requestTypeError: 'analytics error',
-          error: error.message,
-        });
-      } else {
-        posthog.capture('TSClientError', {
-          requestType: 'analytics',
-          requestTypeError: 'analytics error',
-          error: 'An unknown error occurred in analytics',
-        });
-      }
-      throw error;
-    }
+    const response = await this.axiosInstance.post('/analytics', request, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    posthog.capture('TSClient', { requestType: 'analytics success' });
+    return response.data;
   }
 
   // TODO: This isn't implemented in the dashboard yet
   //NOQA
+  @feature('usersOverview')
   async usersOverview(request: R2RUsersOverviewRequest): Promise<any> {
-    try {
-      const response = await this.axiosInstance.get('/users_overview', {
-        params: request,
-      });
-      posthog.capture('TSClient', { requestType: 'usersOverview success' });
-      return response.data;
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        posthog.capture('TSClientError', {
-          requestType: 'usersOverview',
-          requestTypeError: 'usersOverview error',
-          error: error.message,
-        });
-      } else {
-        posthog.capture('TSClientError', {
-          requestType: 'usersOverview',
-          requestTypeError: 'usersOverview error',
-          error: 'An unknown error occurred in usersOverview',
-        });
-      }
-      throw error;
-    }
+    const response = await this.axiosInstance.get('/users_overview', {
+      params: request,
+    });
+    return response.data;
   }
 
+  @feature('documentsOverview')
   async documentsOverview(request: R2RDocumentsOverviewRequest): Promise<any> {
-    try {
-      const response = await this.axiosInstance.post(
-        '/documents_overview',
-        request,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-      posthog.capture('TSClient', { requestType: 'documentsOverview success' });
-      return response.data;
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        posthog.capture('TSClientError', {
-          requestType: 'documentsOverview',
-          requestTypeError: 'documentsOverview error',
-          error: error.message,
-        });
-      } else {
-        posthog.capture('TSClientError', {
-          requestType: 'documentsOverview',
-          requestTypeError: 'documentsOverview error',
-          error: 'An unknown error occurred in documentsOverview',
-        });
+    const response = await this.axiosInstance.post(
+      '/documents_overview',
+      request,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
       }
-      throw error;
-    }
+    );
+    return response.data;
   }
 
+  @feature('documentChunks')
   async documentChunks(request: R2RDocumentChunksRequest): Promise<any> {
-    try {
-      const response = await this.axiosInstance.post(
-        '/document_chunks',
-        request,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-      posthog.capture('TSClient', { requestType: 'documentChunks success' });
-      return response.data;
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        posthog.capture('TSClientError', {
-          requestType: 'documentChunks',
-          requestTypeError: 'documentChunks error',
-          error: error.message,
-        });
-      } else {
-        posthog.capture('TSClientError', {
-          requestType: 'documentChunks',
-          requestTypeError: 'documentChunks error',
-          error: 'An unknown error occurred in documentChunks',
-        });
+    const response = await this.axiosInstance.post(
+      '/document_chunks',
+      request,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
       }
-    }
+    );
+    posthog.capture('TSClient', { requestType: 'documentChunks success' });
+    return response.data;
   }
 }
 
