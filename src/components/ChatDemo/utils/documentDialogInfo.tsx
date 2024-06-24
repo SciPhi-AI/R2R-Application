@@ -7,8 +7,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-import { R2RDocumentChunksRequest } from '../../../r2r-ts-client/models';
 import { R2RClient } from '../../../r2r-ts-client';
+import { R2RDocumentChunksRequest } from '../../../r2r-ts-client/models';
 
 interface DocumentInfoDialogProps {
   documentId: string;

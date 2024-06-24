@@ -7,10 +7,8 @@ import {
 } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { FiExternalLink, FiX } from 'react-icons/fi';
-import { useUserContext } from '@/context/UserContext';
 
 import { GridPattern } from '@/components/shared/GridPattern';
-
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,6 +20,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { useUserContext } from '@/context/UserContext';
 
 const StopPropagationWrapper = ({
   children,

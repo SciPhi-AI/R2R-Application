@@ -1,8 +1,14 @@
+import {
+  CheckIcon,
+  ClipboardDocumentCheckIcon,
+  LinkIcon,
+} from '@heroicons/react/24/outline';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 
 import Layout from '@/components/Layout';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/Button';
 import {
   CardTitle,
   CardDescription,
@@ -12,19 +18,9 @@ import {
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useUserContext } from '@/context/UserContext';
-import { Button } from '@/components/ui/Button';
-
-import {
-  CheckIcon,
-  ClipboardDocumentCheckIcon,
-  LinkIcon,
-} from '@heroicons/react/24/outline';
-
-import { useToast } from '@/components/ui/use-toast';
 
 const PipelinePage = () => {
   const [copied, setCopied] = useState(false);
-  const { toast } = useToast();
 
   const { watchedPipelines } = useUserContext();
   const router = useRouter();
@@ -63,18 +59,6 @@ const PipelinePage = () => {
           </code>
         </h1>
         <Separator />
-        <Button
-          onClick={() => {
-            toast({
-              title: 'Test Toast',
-              description: 'This is a test toast message.',
-              variant: 'default',
-            });
-          }}
-          className="mt-4"
-        >
-          Show Test Toast
-        </Button>
         <Alert variant="default" className="mt-3">
           <AlertTitle className="text-lg ">
             <div className="flex gap-2 text-xl">

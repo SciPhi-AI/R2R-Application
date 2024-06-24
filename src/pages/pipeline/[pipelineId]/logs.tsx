@@ -7,8 +7,8 @@ import { LogTable } from '@/components/ChatDemo/logtable';
 import Layout from '@/components/Layout';
 import { useUserContext } from '@/context/UserContext';
 
-import { R2RLogsRequest } from '../../../r2r-ts-client/models';
 import { R2RClient } from '../../../r2r-ts-client';
+import { R2RLogsRequest } from '../../../r2r-ts-client/models';
 
 const Index: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);

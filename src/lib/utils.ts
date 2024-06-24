@@ -1,6 +1,6 @@
 import { type ClassValue, clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
 import { useState, useEffect } from 'react';
+import { twMerge } from 'tailwind-merge';
 import { v5 as uuidv5 } from 'uuid';
 
 export const setColor = (keyword: string): string => {
