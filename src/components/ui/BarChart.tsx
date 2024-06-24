@@ -1,4 +1,3 @@
-// components/ui/BarChart.tsx
 import {
   Chart,
   CategoryScale,
@@ -19,6 +18,15 @@ const fullConfig = resolveConfig(tailwindConfig);
 
 Chart.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
+interface BarChartProps {
+  data: {
+    filtered_logs?: {
+      [key: string]: Array<{ value: string }>;
+    };
+  };
+  selectedFilter: string;
+}
+
 const textColor = fullConfig.theme.colors.gray[300];
 
 const defaultColors = [
@@ -30,14 +38,22 @@ const defaultColors = [
   fullConfig.theme.colors.orange[500],
 ];
 
-const filterDisplayNames = {
+type FilterDisplayNames = {
+  [key: string]: string;
+  search_latency: string;
+  search_metrics: string;
+  rag_generation_latency: string;
+  error: string;
+};
+
+const filterDisplayNames: FilterDisplayNames = {
   search_latency: 'Search Latency',
   search_metrics: 'Search Metrics',
   rag_generation_latency: 'RAG Latency',
   error: 'Errors',
 };
 
-const createHistogramData = (data, label) => {
+const createHistogramData = (data: number[], label: string) => {
   if (!Array.isArray(data)) {
     console.error('Data passed to createHistogramData is not an array:', data);
     return {
@@ -79,7 +95,7 @@ const createHistogramData = (data, label) => {
   };
 };
 
-const BarChart = ({ data, selectedFilter }) => {
+const BarChart: React.FC<BarChartProps> = ({ data, selectedFilter }) => {
   const filteredLogs = data.filtered_logs?.[selectedFilter] || [];
 
   const values = filteredLogs.map((entry) => parseFloat(entry.value));

@@ -109,7 +109,7 @@ function MobileNavigationDialog({
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <Navbar />
+            <Navbar isConnected={true} />
           </Transition.Child>
 
           <Transition.Child

@@ -1,5 +1,3 @@
-import { UUID } from 'crypto';
-
 import { ChevronDoubleRightIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/router';
 import { useState } from 'react';

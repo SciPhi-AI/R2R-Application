@@ -172,7 +172,7 @@ const ConfigurationSheet: React.FC<GenerationConfig> = ({
         <SheetHeader>
           <SheetTitle>KG Agent Generation Config</SheetTitle>
           <SheetDescription>
-            Parameters for the knowledge graph don't have to match the
+            Parameters for the knowledge graph don&apos;t have to match the
             generation model.
           </SheetDescription>
         </SheetHeader>
