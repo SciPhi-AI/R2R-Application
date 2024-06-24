@@ -49,15 +49,19 @@ export class R2RClient {
   async updatePrompt(request: R2RUpdatePromptRequest): Promise<any> {
     try {
       const response = await this.axiosInstance.post('/update_prompt', request);
-      posthog.capture('TSClient', { 'updatePrompt success': request });
+      posthog.capture('TSClient', { requestType: 'updatePrompt success' });
       return response.data;
     } catch (error: unknown) {
       if (error instanceof Error) {
         posthog.capture('TSClientError', {
-          'updatePrompt error': error.message,
+          requestType: 'updatePrompt',
+          requestTypeError: 'updatePrompt error',
+          error: error.message,
         });
       } else {
-        posthog.capture('TSClient Update Prompt Error', {
+        posthog.capture('TSClientError', {
+          requestType: 'updatePrompt',
+          requestTypeError: 'updatePrompt error',
           error: 'An unknown error occurred in updatePrompt',
         });
       }
@@ -72,15 +76,19 @@ export class R2RClient {
         '/ingest_documents',
         request
       );
-      posthog.capture('TSClient', { 'ingestDocuments success': request });
+      posthog.capture('TSClient', { requestType: 'ingestDocuments success' });
       return response.data;
     } catch (error: unknown) {
       if (error instanceof Error) {
         posthog.capture('TSClientError', {
-          'ingestDocuments error': error.message,
+          requestType: 'ingestDocuments',
+          requestTypeError: 'ingestDocuments error',
+          error: error.message,
         });
       } else {
         posthog.capture('TSClientError', {
+          requestType: 'ingestDocuments',
+          requestTypeError: 'ingestDocuments error',
           error: 'An unknown error occurred in ingestDocuments',
         });
       }
@@ -118,15 +126,19 @@ export class R2RClient {
           ],
         }
       );
-      posthog.capture('TSClient', { 'ingestFiles success': request });
+      posthog.capture('TSClient', { requestType: 'ingestFiles success' });
       return response.data;
     } catch (error: unknown) {
       if (error instanceof Error) {
         posthog.capture('TSClientError', {
-          'ingestFiles error': error.message,
+          requestType: 'ingestFiles',
+          requestTypeError: 'ingestFiles error',
+          error: error.message,
         });
       } else {
         posthog.capture('TSClientError', {
+          requestType: 'ingestFiles',
+          requestTypeError: 'ingestFiles error',
           error: 'An unknown error occurred in ingestFiles',
         });
       }
@@ -141,15 +153,19 @@ export class R2RClient {
         '/update_documents',
         request
       );
-      posthog.capture('TSClient', { 'updateDocuments success': request });
+      posthog.capture('TSClient', { requestType: 'updateDocuments success' });
       return response.data;
     } catch (error: unknown) {
       if (error instanceof Error) {
         posthog.capture('TSClientError', {
-          'updateDocuments error': error.message,
+          requestType: 'updateDocuments',
+          requestTypeError: 'updateDocuments error',
+          error: error.message,
         });
       } else {
         posthog.capture('TSClientError', {
+          requestType: 'updateDocuments',
+          requestTypeError: 'updateDocuments error',
           error: 'An unknown error occurred in updateDocuments',
         });
       }
@@ -190,15 +206,19 @@ export class R2RClient {
           ],
         }
       );
-      posthog.capture('TSClient', { 'updateFiles success': null });
+      posthog.capture('TSClient', { requestType: 'updateFiles success' });
       return response.data;
     } catch (error: unknown) {
       if (error instanceof Error) {
         posthog.capture('TSClientError', {
-          'updateFiles error': error.message,
+          requestType: 'updateFiles',
+          requestTypeError: 'updateFiles error',
+          error: error.message,
         });
       } else {
         posthog.capture('TSClientError', {
+          requestType: 'updateFiles',
+          requestTypeError: 'updateFiles error',
           error: 'An unknown error occurred in updateFiles',
         });
       }
@@ -210,13 +230,19 @@ export class R2RClient {
   async search(request: R2RSearchRequest): Promise<any> {
     try {
       const response = await this.axiosInstance.post('/search', request);
-      posthog.capture('TSClient', { 'saerch success': request });
+      posthog.capture('TSClient', { requestType: 'search success' });
       return response.data;
     } catch (error: unknown) {
       if (error instanceof Error) {
-        posthog.capture('TSClientError', { 'search error': error.message });
+        posthog.capture('TSClientError', {
+          requestType: 'search',
+          requestTypeError: 'search error',
+          error: error.message,
+        });
       } else {
         posthog.capture('TSClientError', {
+          requestType: 'search',
+          requestTypeError: 'search error',
           error: 'An unknown error occurred in search',
         });
       }
@@ -233,14 +259,20 @@ export class R2RClient {
           '/rag',
           JSON.stringify(request)
         );
-        posthog.capture('TSClient', { 'rag success': request });
+        posthog.capture('TSClient', { requestType: 'rag success' });
         return response.data;
       }
     } catch (error: unknown) {
       if (error instanceof Error) {
-        posthog.capture('TSClientError', { 'rag error': error.message });
+        posthog.capture('TSClientError', {
+          requestType: 'rag',
+          requestTypeError: 'rag error',
+          error: error.message,
+        });
       } else {
         posthog.capture('TSClientError', {
+          requestType: 'rag',
+          requestTypeError: 'rag error',
           error: 'An unknown error occurred in rag',
         });
       }
@@ -257,15 +289,18 @@ export class R2RClient {
           responseType: 'stream',
         }
       );
-
       return response.data;
     } catch (error: unknown) {
       if (error instanceof Error) {
         posthog.capture('TSClientError', {
-          'streamingRag error': error.message,
+          requestType: 'streamingRag',
+          requestTypeError: 'streamingRag error',
+          error: error.message,
         });
       } else {
         posthog.capture('TSClientError', {
+          requestType: 'streamingRag',
+          requestTypeError: 'streamingRag error',
           error: 'An unknown error occurred in streamingRag',
         });
       }
@@ -284,13 +319,19 @@ export class R2RClient {
         },
         headers: { 'Content-Type': 'application/json' },
       });
-      posthog.capture('TSClient', { 'delete success': request });
+      posthog.capture('TSClient', { requestType: 'delete success' });
       return response.data;
     } catch (error: unknown) {
       if (error instanceof Error) {
-        posthog.capture('TSClientError', { 'delete error': error.message });
+        posthog.capture('TSClientError', {
+          requestType: 'delete',
+          requestTypeError: 'delete error',
+          error: error.message,
+        });
       } else {
         posthog.capture('TSClientError', {
+          requestType: 'delete',
+          requestTypeError: 'delete error',
           error: 'An unknown error occurred in delete',
         });
       }
@@ -314,13 +355,19 @@ export class R2RClient {
           'Content-Type': 'application/json',
         },
       });
-      posthog.capture('TSClient', { 'logs success': request });
+      posthog.capture('TSClient', { requestType: 'logs success' });
       return response.data;
     } catch (error: unknown) {
       if (error instanceof Error) {
-        posthog.capture('TSClientError', { 'logs error': error.message });
+        posthog.capture('TSClientError', {
+          requestType: 'logs',
+          requestTypeError: 'logs error',
+          error: error.message,
+        });
       } else {
         posthog.capture('TSClientError', {
+          requestType: 'logs',
+          requestTypeError: 'logs error',
           error: 'An unknown error occurred in logs',
         });
       }
@@ -331,15 +378,19 @@ export class R2RClient {
   async appSettings(): Promise<any> {
     try {
       const response = await this.axiosInstance.get('/app_settings');
-      posthog.capture('TSClient', { 'appSettings success': null });
+      posthog.capture('TSClient', { requestType: 'appSettings success' });
       return response.data;
     } catch (error: unknown) {
       if (error instanceof Error) {
         posthog.capture('TSClientError', {
-          'appSettings error': error.message,
+          requestType: 'appSettings',
+          requestTypeError: 'appSettings error',
+          error: error.message,
         });
       } else {
         posthog.capture('TSClientError', {
+          requestType: 'appSettings',
+          requestTypeError: 'appSettings error',
           error: 'An unknown error occurred in appSettings',
         });
       }
@@ -354,13 +405,19 @@ export class R2RClient {
           'Content-Type': 'application/json',
         },
       });
-      posthog.capture('TSClient', { 'analytics success': request });
+      posthog.capture('TSClient', { requestType: 'analytics success' });
       return response.data;
     } catch (error: unknown) {
       if (error instanceof Error) {
-        posthog.capture('TSClientError', { 'analytics error': error.message });
+        posthog.capture('TSClientError', {
+          requestType: 'analytics',
+          requestTypeError: 'analytics error',
+          error: error.message,
+        });
       } else {
         posthog.capture('TSClientError', {
+          requestType: 'analytics',
+          requestTypeError: 'analytics error',
           error: 'An unknown error occurred in analytics',
         });
       }
@@ -375,15 +432,19 @@ export class R2RClient {
       const response = await this.axiosInstance.get('/users_overview', {
         params: request,
       });
-      posthog.capture('TSClient', { 'usersOverview success': request });
+      posthog.capture('TSClient', { requestType: 'usersOverview success' });
       return response.data;
     } catch (error: unknown) {
       if (error instanceof Error) {
         posthog.capture('TSClientError', {
-          'usersOverview error': error.message,
+          requestType: 'usersOverview',
+          requestTypeError: 'usersOverview error',
+          error: error.message,
         });
       } else {
         posthog.capture('TSClientError', {
+          requestType: 'usersOverview',
+          requestTypeError: 'usersOverview error',
           error: 'An unknown error occurred in usersOverview',
         });
       }
@@ -402,15 +463,19 @@ export class R2RClient {
           },
         }
       );
-      posthog.capture('TSClient', { 'documentsOverview success': request });
+      posthog.capture('TSClient', { requestType: 'documentsOverview success' });
       return response.data;
     } catch (error: unknown) {
       if (error instanceof Error) {
         posthog.capture('TSClientError', {
-          'documentsOvervuew error': error.message,
+          requestType: 'documentsOverview',
+          requestTypeError: 'documentsOverview error',
+          error: error.message,
         });
       } else {
         posthog.capture('TSClientError', {
+          requestType: 'documentsOverview',
+          requestTypeError: 'documentsOverview error',
           error: 'An unknown error occurred in documentsOverview',
         });
       }
@@ -429,19 +494,22 @@ export class R2RClient {
           },
         }
       );
-      posthog.capture('TSClient', { 'documentChunks success': request });
+      posthog.capture('TSClient', { requestType: 'documentChunks success' });
       return response.data;
     } catch (error: unknown) {
       if (error instanceof Error) {
         posthog.capture('TSClientError', {
-          'documentChunks error': error.message,
+          requestType: 'documentChunks',
+          requestTypeError: 'documentChunks error',
+          error: error.message,
         });
       } else {
         posthog.capture('TSClientError', {
+          requestType: 'documentChunks',
+          requestTypeError: 'documentChunks error',
           error: 'An unknown error occurred in documentChunks',
         });
       }
-      throw error;
     }
   }
 }
