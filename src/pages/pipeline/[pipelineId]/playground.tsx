@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/router';
 import Layout from '@/components/Layout';
@@ -7,13 +7,6 @@ import SingleSwitch from '@/components/ChatDemo/SingleSwitch';
 import useSwitchManager from '@/components/ChatDemo/SwitchManager';
 import { useToast } from '@/components/ui/use-toast';
 import { useUserContext } from '@/context/UserContext';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
-import { InfoIcon } from '@/components/ui/InfoIcon';
 import ModelSelector from '@/components/ui/ModelSelector';
 import UserSelector from '@/components/ui/UserSelector';
 import Neo4jGraph from './Neo4jGraph';
@@ -56,6 +49,12 @@ const Index: React.FC = () => {
   const [kg_top_p, setKgTopP] = useState(1);
   const [kg_top_k, setKgTop_k] = useState(100);
   const [kg_max_tokens_to_sample, setKgMax_tokens_to_sample] = useState(1024);
+
+  const [graphDimensions, setGraphDimensions] = useState({
+    width: 0,
+    height: 0,
+  });
+  const contentAreaRef = useRef<HTMLDivElement>(null);
 
   const [userId, setUserId] = useState('063edaf8-3e63-4cb9-a4d6-a855f36376c3');
 
@@ -116,6 +115,22 @@ const Index: React.FC = () => {
     }
   }, [apiUrl]);
 
+  useEffect(() => {
+    const updateDimensions = () => {
+      if (contentAreaRef.current) {
+        setGraphDimensions({
+          width: contentAreaRef.current.offsetWidth,
+          height: contentAreaRef.current.offsetHeight,
+        });
+      }
+    };
+
+    updateDimensions();
+    window.addEventListener('resize', updateDimensions);
+
+    return () => window.removeEventListener('resize', updateDimensions);
+  }, []);
+
   return (
     <Layout>
       <main className="w-full flex flex-col min-h-screen">
@@ -133,20 +148,6 @@ const Index: React.FC = () => {
                       className="block text-sm font-medium text-zinc-300"
                     >
                       Pipeline URL
-                      <span className="inline-block ml-1 relative cursor-pointer">
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger>
-                              <InfoIcon width="w-5" height="h-5" />
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>
-                                The URL where your R2R pipeline is deployed.
-                              </p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </span>
                     </label>
                     <input
                       type="text"
@@ -272,7 +273,10 @@ const Index: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="flex-1 bg-zinc-800 rounded-r-2xl relative border-2 border-zinc-600 h-full overflow-hidden">
+                <div
+                  ref={contentAreaRef}
+                  className="flex-1 bg-zinc-800 rounded-r-2xl relative border-2 border-zinc-600 h-full overflow-hidden"
+                >
                   <div className="h-20 pointer-events-none w-full backdrop-filter absolute top-0"></div>
                   <div className="px-4 md:px-8 pt-6 pb-24 h-full">
                     {activeTab === 'query' && (
@@ -299,8 +303,11 @@ const Index: React.FC = () => {
                       </>
                     )}
                     {activeTab === 'graph' && (
-                      <div className="h-[calc(100vh-380px)] w-full">
-                        <Neo4jGraph width={200} height={300} />
+                      <div className="w-full h-full">
+                        <Neo4jGraph
+                          width={graphDimensions.width}
+                          height={graphDimensions.height}
+                        />
                       </div>
                     )}
                   </div>
