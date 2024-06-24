@@ -5,12 +5,14 @@ import { useEffect } from 'react';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { UserProvider } from '@/context/UserContext';
 import '@/styles/globals.css';
+import { initializePostHog } from '@/lib/posthog-client';
 
 function MyApp({ Component, pageProps }: AppProps) {
   const { setTheme } = useTheme();
 
   useEffect(() => {
     setTheme('dark');
+    initializePostHog();
   }, []);
 
   return (

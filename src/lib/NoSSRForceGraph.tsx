@@ -1,13 +1,15 @@
-import React, { forwardRef, useImperativeHandle } from 'react';
+import React, { forwardRef, useImperativeHandle, useRef } from 'react';
 import ForceGraph2D, {
   ForceGraphProps,
   ForceGraphMethods,
+  NodeObject,
+  LinkObject,
 } from 'react-force-graph-2d';
 
 interface NoSSRForceGraphProps extends Omit<ForceGraphProps, 'graphData'> {
   data: {
-    nodes: { id: string }[];
-    links: { source: string; target: string }[];
+    nodes: NodeObject[];
+    links: LinkObject[];
   };
 }
 
@@ -18,7 +20,7 @@ export interface NoSSRForceGraphRef {
 
 const NoSSRForceGraph = forwardRef<NoSSRForceGraphRef, NoSSRForceGraphProps>(
   (props, ref) => {
-    const forceGraphRef = React.useRef<ForceGraphMethods<any, any>>(null);
+    const forceGraphRef = useRef<ForceGraphMethods>();
 
     useImperativeHandle(ref, () => ({
       zoomToFit: (duration) => {
@@ -30,10 +32,15 @@ const NoSSRForceGraph = forwardRef<NoSSRForceGraphRef, NoSSRForceGraphProps>(
     }));
 
     return (
-      <ForceGraph2D ref={forceGraphRef} graphData={props.data} {...props} />
+      <ForceGraph2D
+        ref={forceGraphRef as React.MutableRefObject<ForceGraphMethods>}
+        graphData={props.data}
+        {...props}
+      />
     );
   }
 );
+
 NoSSRForceGraph.displayName = 'NoSSRForceGraph';
 
 export default NoSSRForceGraph;

@@ -1,4 +1,5 @@
 import { useRouter } from 'next/router';
+import posthog from 'posthog-js';
 import React from 'react';
 
 import { Button } from '@/components/ui/Button';
@@ -7,6 +8,7 @@ export function CreatePipelineHeader() {
   const router = useRouter();
 
   const createPipeline = async () => {
+    posthog.capture('Dashboard: WatchPipelineClicked');
     router.push('/watch');
   };
 
