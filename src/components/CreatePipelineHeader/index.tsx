@@ -17,7 +17,7 @@ export function CreatePipelineHeader() {
         variant={'filled'}
         onClick={createPipeline}
       >
-        Watch Pipeline
+        Watch a New Pipeline
       </Button>
     </div>
   );

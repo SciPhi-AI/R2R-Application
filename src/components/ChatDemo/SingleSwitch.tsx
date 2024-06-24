@@ -36,29 +36,25 @@ const SingleSwitch: React.FC<SingleSwitchProps> = ({
 
   return (
     <div className="flex justify-between items-center mt-4">
+      {label && (
+        <label htmlFor={id} className="mr-2 text-sm font-medium text-zinc-300">
+          {label}
+        </label>
+      )}
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger>
-            {label && (
-              <label
-                htmlFor={id}
-                className="mr-2 text-sm font-medium text-zinc-300"
-              >
-                {label}
-              </label>
-            )}
+            <Switch
+              id={id}
+              checked={isChecked}
+              onCheckedChange={handleSwitchChange}
+            />
           </TooltipTrigger>
           <TooltipContent>
             <p>{tooltipText}</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
-
-      <Switch
-        id={id}
-        checked={isChecked}
-        onCheckedChange={handleSwitchChange}
-      />
     </div>
   );
 };

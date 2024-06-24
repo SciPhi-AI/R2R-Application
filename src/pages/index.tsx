@@ -16,11 +16,11 @@ const Home: NextPage = () => {
         <div className="mb-8">
           <h1 className="text-3xl font-bold">R2R</h1>
           <p className="text-lg mt-2">
-            R2R (Rag to Riches) is the ultimate open-source framework for
-            building and deploying high-quality Retrieval-Augmented Generation
-            (RAG) systems. Designed to bridge the gap between local LLM
-            experimentation and scalable, production-ready applications, R2R
-            provides a comprehensive, feature-rich environment for developers.
+            R2R (RAG to Riches) - The ultimate open source AI powered answer
+            engine R2R bridges local LLM experiments with production-ready
+            Retrieval-Augmented Generation (RAG). It offers developers a
+            cutting-edge, comprehensive RAG system with a RESTful API for
+            seamless integration.
           </p>
         </div>
 
