@@ -1,6 +1,7 @@
 import { Loader } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/router';
+import { r2rClient } from 'r2r-js';
 import React, { useState, useEffect, useRef } from 'react';
 
 import ConfigurationSheet from '@/components/ChatDemo/ConfigurationSheet';
@@ -14,9 +15,6 @@ import ModelSelector from '@/components/ui/ModelSelector';
 import { useToast } from '@/components/ui/use-toast';
 import UserSelector from '@/components/ui/UserSelector';
 import { useUserContext } from '@/context/UserContext';
-
-import { R2RClient } from '../../../r2r-ts-client';
-import { R2RDocumentsOverviewRequest } from '../../../r2r-ts-client/models';
 
 import Neo4jGraph from './Neo4jGraph';
 
@@ -98,14 +96,10 @@ const Index: React.FC = () => {
 
   useEffect(() => {
     if (apiUrl) {
-      const documentsOverviewRequest: R2RDocumentsOverviewRequest = {
-        document_ids: [],
-        user_ids: [],
-      };
-      const client = new R2RClient(apiUrl);
+      const client = new r2rClient(apiUrl);
       setIsLoading(true);
       client
-        .documentsOverview(documentsOverviewRequest)
+        .documentsOverview()
         .then((documents) => {
           setUploadedDocuments(documents['results']);
         })

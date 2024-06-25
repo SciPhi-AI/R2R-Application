@@ -1,3 +1,4 @@
+import { r2rClient } from 'r2r-js';
 import React from 'react';
 
 import {
@@ -11,9 +12,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { R2RDeleteRequest } from '@/r2r-ts-client/models';
-
-import { R2RClient } from '../../r2r-ts-client';
 
 interface DeleteButtonProps {
   selectedDocumentIds: string[];
@@ -41,14 +39,12 @@ export const DeleteButton: React.FC<DeleteButtonProps> = ({
 
     if (apiUrl) {
       try {
-        const client = new R2RClient(apiUrl);
+        const client = new r2rClient(apiUrl);
 
-        const deleteRequest: R2RDeleteRequest = {
-          keys: selectedDocumentIds.map(() => 'document_id'),
-          values: selectedDocumentIds,
-        };
+        const keys = selectedDocumentIds.map(() => 'document_id');
+        const values = selectedDocumentIds;
 
-        await client.delete(deleteRequest);
+        await client.delete(keys, values);
         showToast({
           variant: 'success',
           title: 'Documents deleted',

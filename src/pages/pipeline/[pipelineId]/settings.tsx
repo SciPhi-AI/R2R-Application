@@ -1,10 +1,9 @@
 import { useRouter } from 'next/router';
+import { r2rClient } from 'r2r-js';
 import React, { useState, useEffect } from 'react';
 
 import Layout from '@/components/Layout';
 import { useUserContext } from '@/context/UserContext';
-
-import { R2RClient } from '../../../r2r-ts-client';
 
 type Prompt = {
   name: string;
@@ -64,7 +63,7 @@ const Index: React.FC = () => {
   const pipeline = watchedPipelines[pipelineId as string];
   const apiUrl = pipeline?.deploymentUrl;
 
-  const fetchAppData = (client: R2RClient) => {
+  const fetchAppData = (client: r2rClient) => {
     client
       .appSettings()
       .then((response) => {
@@ -88,7 +87,7 @@ const Index: React.FC = () => {
 
   useEffect(() => {
     if (apiUrl) {
-      const client = new R2RClient(apiUrl);
+      const client = new r2rClient(apiUrl);
       fetchAppData(client);
     }
   }, [apiUrl]);
