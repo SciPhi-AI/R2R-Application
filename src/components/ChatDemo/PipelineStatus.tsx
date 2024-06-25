@@ -1,6 +1,5 @@
+import { r2rClient } from 'r2r-js';
 import React, { useState, useEffect } from 'react';
-
-import { R2RClient } from '@/r2r-ts-client';
 
 async function checkPipelineStatus(
   deploymentUrl: string | undefined
@@ -10,7 +9,7 @@ async function checkPipelineStatus(
   }
 
   try {
-    const client = new R2RClient(deploymentUrl);
+    const client = new r2rClient(deploymentUrl);
     await client.healthCheck();
     return 'Connected';
   } catch (error) {

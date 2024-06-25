@@ -1,3 +1,4 @@
+import { r2rClient } from 'r2r-js';
 import React, { useEffect, useState } from 'react';
 
 import {
@@ -6,9 +7,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-
-import { R2RClient } from '../../../r2r-ts-client';
-import { R2RDocumentChunksRequest } from '../../../r2r-ts-client/models';
 
 interface DocumentInfoDialogProps {
   documentId: string;
@@ -33,12 +31,9 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
   useEffect(() => {
     const fetchDocumentChunks = async () => {
       try {
-        const client = new R2RClient(apiUrl);
+        const client = new r2rClient(apiUrl);
 
-        const documentChunksRequest: R2RDocumentChunksRequest = {
-          document_id: documentId,
-        };
-        const chunks = await client.documentChunks(documentChunksRequest);
+        const chunks = await client.documentChunks(documentId);
 
         setDocumentChunks(
           Array.isArray(chunks.results)

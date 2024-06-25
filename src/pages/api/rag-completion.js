@@ -1,4 +1,4 @@
-import { R2RClient } from '../../r2r-ts-client/r2rClient';
+import { r2rClient } from 'r2r-js';
 
 export const config = {
   runtime: 'edge',
@@ -7,7 +7,7 @@ export const config = {
 export default async function handler(req) {
   const url = new URL(req.url, `http://${req.headers.get('host')}`);
   const queryObject = Object.fromEntries(url.searchParams);
-  const client = new R2RClient(queryObject.apiUrl);
+  const client = new r2rClient(queryObject.apiUrl);
 
   const searchFilters = queryObject.searchFilters
     ? JSON.parse(queryObject.searchFilters)

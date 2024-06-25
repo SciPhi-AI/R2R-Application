@@ -1,9 +1,7 @@
+import { r2rClient } from 'r2r-js';
 import { useState, useRef } from 'react';
 
 import { generateIdFromLabel } from '@/lib/utils';
-
-import { R2RClient } from '../../r2r-ts-client';
-import { R2RIngestFilesRequest } from '../../r2r-ts-client/models';
 
 interface UploadButtonProps {
   userId: string;
@@ -39,7 +37,7 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
 
   const handleDocumentUpload = async (files: FileList) => {
     setIsUploading(true);
-    const client = new R2RClient(apiUrl);
+    const client = new r2rClient(apiUrl);
 
     try {
       if (!apiUrl) {
@@ -62,12 +60,10 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
         filesToUpload.push(file);
       }
 
-      const request: R2RIngestFilesRequest = {
+      await client.ingestFiles(filesToUpload, {
         metadatas: metadatas,
         user_ids: userIds,
-      };
-
-      await client.ingestFiles(filesToUpload, request);
+      });
 
       // Clean up temporary URLs
       filePaths.forEach(URL.revokeObjectURL);

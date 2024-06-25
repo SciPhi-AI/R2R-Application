@@ -1,4 +1,5 @@
 import { useRouter } from 'next/router';
+import { r2rClient, FilterCriteria, AnalysisTypes } from 'r2r-js';
 import React, { useState, useEffect } from 'react';
 
 import Layout from '@/components/Layout';
@@ -19,13 +20,6 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { useUserContext } from '@/context/UserContext';
-
-import { R2RClient } from '../../../r2r-ts-client';
-import {
-  R2RAnalyticsRequest,
-  FilterCriteria,
-  AnalysisTypes,
-} from '../../../r2r-ts-client/models';
 
 type FilterDisplayNameKeys =
   | 'search_latency'
@@ -265,7 +259,7 @@ const Analytics: React.FC = () => {
   const logsPerPage = 5;
   const apiUrl = pipeline?.deploymentUrl;
 
-  const fetchAnalytics = (client: R2RClient, filter: string) => {
+  const fetchAnalytics = (client: r2rClient, filter: string) => {
     const filters = { [filter]: filter };
     const metricsAnalysisTypes = {
       [filter]:
@@ -283,22 +277,13 @@ const Analytics: React.FC = () => {
           : ['basic_statistics', filter],
     };
 
-    const analyticsRequest: R2RAnalyticsRequest = {
-      filter_criteria,
-      analysis_types,
-    };
-
     Promise.all([
-      client.analytics(analyticsRequest),
+      client.analytics(filter_criteria, analysis_types),
       ...percentiles.map((percentile) => {
         const percentileAnalysisTypes: AnalysisTypes = {
           [filter]: ['percentile', filter, percentile.toString()],
         };
-        const percentileRequest: R2RAnalyticsRequest = {
-          filter_criteria,
-          analysis_types: percentileAnalysisTypes,
-        };
-        return client.analytics(percentileRequest);
+        return client.analytics(filter_criteria, percentileAnalysisTypes);
       }),
     ])
       .then(([metricsData, ...percentilesData]) => {
@@ -322,7 +307,7 @@ const Analytics: React.FC = () => {
 
   useEffect(() => {
     if (apiUrl) {
-      const client = new R2RClient(apiUrl);
+      const client = new r2rClient(apiUrl);
       fetchAnalytics(client, selectedFilter);
     }
   }, [apiUrl, selectedFilter]);
