@@ -19,7 +19,7 @@ type Log = {
 };
 
 const LogTable = ({ logs, loading }: { logs: Log[]; loading: boolean }) => {
-  const [sortField, setSortField] = useState('timestamp');
+  const [sortField, setSortField] = useState<keyof Log>('timestamp');
   const [sortDirection, setSortDirection] = useState('desc');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -30,12 +30,16 @@ const LogTable = ({ logs, loading }: { logs: Log[]; loading: boolean }) => {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = (logs || []).slice(indexOfFirstItem, indexOfLastItem);
 
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
   const sortedLogs = useMemo(() => {
     return [...currentItems].sort((a, b) => {
-      if (a[sortField] < b[sortField]) return sortDirection === 'asc' ? -1 : 1;
-      if (a[sortField] > b[sortField]) return sortDirection === 'asc' ? 1 : -1;
+      if (a[sortField as keyof Log] < b[sortField as keyof Log]) {
+        return sortDirection === 'asc' ? -1 : 1;
+      }
+      if (a[sortField as keyof Log] > b[sortField as keyof Log]) {
+        return sortDirection === 'asc' ? 1 : -1;
+      }
       return 0;
     });
   }, [currentItems, sortField, sortDirection]);

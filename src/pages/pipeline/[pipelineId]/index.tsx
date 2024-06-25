@@ -6,6 +6,7 @@ import {
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 
+import { PipelineStatus } from '@/components/ChatDemo/PipelineStatus';
 import Layout from '@/components/Layout';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/Button';
@@ -21,6 +22,7 @@ import { useUserContext } from '@/context/UserContext';
 
 const PipelinePage = () => {
   const [copied, setCopied] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
 
   const { watchedPipelines } = useUserContext();
   const router = useRouter();
@@ -50,7 +52,7 @@ const PipelinePage = () => {
   };
 
   return (
-    <Layout>
+    <Layout isConnected={isConnected}>
       <main className="w-full flex flex-col min-h-screen mt-[4rem] sm:mt-[6rem] container mb-[4rem] sm:mb-[6rem]">
         <h1 className="text-white text-2xl mb-4">
           Pipeline{' '}
@@ -153,6 +155,10 @@ const PipelinePage = () => {
                   <CardTitle className="text-xl">
                     {pipeline?.pipelineName}
                   </CardTitle>
+                  <PipelineStatus
+                    pipeline={pipeline}
+                    onStatusChange={setIsConnected}
+                  />
                   <CardDescription>
                     This is a deployment of an R2R RAG pipeline. Read the
                     default{' '}

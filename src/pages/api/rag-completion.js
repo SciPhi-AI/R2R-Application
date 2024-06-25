@@ -1,11 +1,3 @@
-import url from 'url';
-
-import {
-  R2RRAGRequest,
-  VectorSearchSettings,
-  KGSearchSettings,
-  GenerationConfig,
-} from '../../r2r-ts-client/models';
 import { R2RClient } from '../../r2r-ts-client/r2rClient';
 
 export const config = {
@@ -13,7 +5,8 @@ export const config = {
 };
 
 export default async function handler(req) {
-  const queryObject = url.parse(req.url, true).query;
+  const url = new URL(req.url, `http://${req.headers.get('host')}`);
+  const queryObject = Object.fromEntries(url.searchParams);
   const client = new R2RClient(queryObject.apiUrl);
 
   const searchFilters = queryObject.searchFilters

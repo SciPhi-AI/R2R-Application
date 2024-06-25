@@ -1,5 +1,5 @@
 'use client';
-import { useState, useRef } from 'react';
+import React, { useState, useRef, FormEvent, ChangeEvent } from 'react';
 
 import { R2RClient } from '../../r2r-ts-client';
 
@@ -25,7 +25,9 @@ export const UpdateButton: React.FC<UpdateButtonProps> = ({
   const [isUpdating, setIsUpdating] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleDocumentUpdate = async (event) => {
+  const handleDocumentUpdate = async (
+    event: FormEvent<HTMLFormElement> | ChangeEvent<HTMLInputElement>
+  ) => {
     event.preventDefault();
     if (
       fileInputRef.current &&
@@ -42,19 +44,23 @@ export const UpdateButton: React.FC<UpdateButtonProps> = ({
         }
         const metadata = { title: file.name };
 
-        await client.updateFiles([metadata], [file], [documentId], [userId]);
+        await client.updateFiles([file], [documentId], [metadata]);
         showToast({
           variant: 'success',
           title: 'Update Successful',
           description: 'The document has been updated',
         });
         onUpdateSuccess();
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Error updating file:', error);
+        let errorMessage = 'An unknown error occurred';
+        if (error instanceof Error) {
+          errorMessage = error.message;
+        }
         showToast({
           variant: 'destructive',
           title: 'Update Failed',
-          description: error.message,
+          description: errorMessage,
         });
       } finally {
         setIsUpdating(false);

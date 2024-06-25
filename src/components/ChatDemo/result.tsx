@@ -94,9 +94,9 @@ export const Result: FC<{
         buffer += decoder.decode(value, { stream: true });
 
         if (buffer.includes(SEARCH_END_TOKEN)) {
-          let [results, rest] = buffer.split(SEARCH_END_TOKEN);
-          results = results.replace(SEARCH_START_TOKEN, '');
-          setSources(results);
+          const [results, rest] = buffer.split(SEARCH_END_TOKEN);
+          const cleanedResults = results.replace(SEARCH_START_TOKEN, '');
+          setSources(cleanedResults);
           buffer = rest || '';
         }
 

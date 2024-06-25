@@ -24,9 +24,9 @@ export const PipelineProvider: React.FC<{ children: React.ReactNode }> = ({
       return;
     }
 
-    if (typeof pipeline.deployment === 'string') {
+    if (typeof pipeline.deploymentUrl === 'string') {
       try {
-        pipeline.deployment = JSON.parse(pipeline.deployment);
+        pipeline.deploymentUrl = JSON.parse(pipeline.deploymentUrl);
       } catch (e) {
         console.error('Error parsing deployment', { pipelineId, pipeline });
       }

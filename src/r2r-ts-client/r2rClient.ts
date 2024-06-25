@@ -1,8 +1,8 @@
-// R2RClient.ts
-
 import axios, { AxiosInstance } from 'axios';
 import FormData from 'form-data';
+import posthog from 'posthog-js';
 
+import { feature } from './feature';
 import {
   R2RUpdatePromptRequest,
   R2RIngestDocumentsRequest,
@@ -40,14 +40,21 @@ export class R2RClient {
     });
   }
 
+  async healthCheck(): Promise<any> {
+    const response = await this.axiosInstance.get('/health');
+    return response.data;
+  }
+
   //TODO: This isn't implemented in the dashboard yet
   //NOQA
+  @feature('updatePrompt')
   async updatePrompt(request: R2RUpdatePromptRequest): Promise<any> {
     const response = await this.axiosInstance.post('/update_prompt', request);
     return response.data;
   }
 
   //NOQA
+  @feature('ingestDocuments')
   async ingestDocuments(request: R2RIngestDocumentsRequest): Promise<any> {
     const response = await this.axiosInstance.post(
       '/ingest_documents',
@@ -56,6 +63,7 @@ export class R2RClient {
     return response.data;
   }
 
+  @feature('ingestFiles')
   async ingestFiles(
     files: File[],
     request: R2RIngestFilesRequest
@@ -70,35 +78,22 @@ export class R2RClient {
       formData.append(key, JSON.stringify(value));
     });
 
-    try {
-      const response = await this.axiosInstance.post(
-        '/ingest_files',
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-          transformRequest: [
-            (data, headers) => {
-              delete headers['Content-Type'];
-              return data;
-            },
-          ],
-        }
-      );
-      return response.data;
-    } catch (error) {
-      console.error('Error in ingestFiles:', error);
-      if (axios.isAxiosError(error) && error.response) {
-        console.error('Response data:', error.response.data);
-        console.error('Response status:', error.response.status);
-        console.error('Response headers:', error.response.headers);
-      }
-      throw error;
-    }
+    const response = await this.axiosInstance.post('/ingest_files', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      transformRequest: [
+        (data, headers) => {
+          delete headers['Content-Type'];
+          return data;
+        },
+      ],
+    });
+    return response.data;
   }
 
   //NOQA
+  @feature('updateDocuments')
   async updateDocuments(request: R2RUpdateDocumentsRequest): Promise<any> {
     const response = await this.axiosInstance.post(
       '/update_documents',
@@ -107,6 +102,7 @@ export class R2RClient {
     return response.data;
   }
 
+  @feature('updateFiles')
   async updateFiles(
     files: File[],
     documentIds: string[],
@@ -124,58 +120,41 @@ export class R2RClient {
       formData.append('metadatas', JSON.stringify(metadatas));
     }
 
-    try {
-      const response = await this.axiosInstance.post(
-        '/update_files',
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-          transformRequest: [
-            (data, headers) => {
-              delete headers['Content-Type'];
-              return data;
-            },
-          ],
-        }
-      );
-      return response.data;
-    } catch (error) {
-      console.error('Error in updateFiles:', error);
-      throw error;
-    }
+    const response = await this.axiosInstance.post('/update_files', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      transformRequest: [
+        (data, headers) => {
+          delete headers['Content-Type'];
+          return data;
+        },
+      ],
+    });
+    return response.data;
   }
 
   //NOQA
+  @feature('search')
   async search(request: R2RSearchRequest): Promise<any> {
     const response = await this.axiosInstance.post('/search', request);
     return response.data;
   }
 
+  @feature('rag')
   async rag(request: R2RRAGRequest): Promise<any> {
-    try {
-      if (request.rag_generation_config?.stream) {
-        return this.streamRag(request);
-      } else {
-        const response = await this.axiosInstance.post(
-          '/rag',
-          JSON.stringify(request)
-        );
-        return response.data;
-      }
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        console.error('Error response:', error.response.data);
-        console.error('Error status:', error.response.status);
-        console.error('Error headers:', error.response.headers);
-      } else {
-        console.error('Error:', error);
-      }
-      throw error;
+    if (request.rag_generation_config?.stream) {
+      return this.streamRag(request);
+    } else {
+      const response = await this.axiosInstance.post(
+        '/rag',
+        JSON.stringify(request)
+      );
+      return response.data;
     }
   }
 
+  @feature('streamingRag')
   private async streamRag(request: R2RRAGRequest): Promise<any> {
     const response = await this.axiosInstance.post(
       '/rag',
@@ -184,10 +163,10 @@ export class R2RClient {
         responseType: 'stream',
       }
     );
-
     return response.data;
   }
 
+  @feature('delete')
   async delete(request: R2RDeleteRequest): Promise<any> {
     const response = await this.axiosInstance({
       method: 'delete',
@@ -201,6 +180,7 @@ export class R2RClient {
     return response.data;
   }
 
+  @feature('logs')
   async logs(request: R2RLogsRequest): Promise<any> {
     const payload = {
       ...request,
@@ -214,26 +194,29 @@ export class R2RClient {
         'Content-Type': 'application/json',
       },
     });
-
     return response.data;
   }
 
+  @feature('appSettings')
   async appSettings(): Promise<any> {
     const response = await this.axiosInstance.get('/app_settings');
     return response.data;
   }
 
+  @feature('analytics')
   async analytics(request: R2RAnalyticsRequest): Promise<any> {
     const response = await this.axiosInstance.post('/analytics', request, {
       headers: {
         'Content-Type': 'application/json',
       },
     });
+    posthog.capture('TSClient', { requestType: 'analytics success' });
     return response.data;
   }
 
   // TODO: This isn't implemented in the dashboard yet
   //NOQA
+  @feature('usersOverview')
   async usersOverview(request: R2RUsersOverviewRequest): Promise<any> {
     const response = await this.axiosInstance.get('/users_overview', {
       params: request,
@@ -241,6 +224,7 @@ export class R2RClient {
     return response.data;
   }
 
+  @feature('documentsOverview')
   async documentsOverview(request: R2RDocumentsOverviewRequest): Promise<any> {
     const response = await this.axiosInstance.post(
       '/documents_overview',
@@ -254,6 +238,7 @@ export class R2RClient {
     return response.data;
   }
 
+  @feature('documentChunks')
   async documentChunks(request: R2RDocumentChunksRequest): Promise<any> {
     const response = await this.axiosInstance.post(
       '/document_chunks',
@@ -264,6 +249,7 @@ export class R2RClient {
         },
       }
     );
+    posthog.capture('TSClient', { requestType: 'documentChunks success' });
     return response.data;
   }
 }
