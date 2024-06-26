@@ -41,10 +41,12 @@ export const DeleteButton: React.FC<DeleteButtonProps> = ({
       try {
         const client = new r2rClient(apiUrl);
 
-        const keys = selectedDocumentIds.map(() => 'document_id');
-        const values = selectedDocumentIds;
+        for (let i = 0; i < selectedDocumentIds.length; i++) {
+          const key = 'document_id';
+          const value = selectedDocumentIds[i];
 
-        await client.delete(keys, values);
+          await client.delete([key], [value]);
+        }
         showToast({
           variant: 'success',
           title: 'Documents deleted',

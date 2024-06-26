@@ -43,7 +43,10 @@ export const UpdateButton: React.FC<UpdateButtonProps> = ({
         }
         const metadata = { title: file.name };
 
-        await client.updateFiles([file], [documentId]);
+        await client.updateFiles([file], {
+          document_ids: [documentId],
+          metadatas: [metadata],
+        });
         showToast({
           variant: 'success',
           title: 'Update Successful',
