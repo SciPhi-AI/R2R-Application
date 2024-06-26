@@ -272,42 +272,44 @@ const Index: React.FC = () => {
 
                 <div
                   ref={contentAreaRef}
-                  className="flex-1 bg-zinc-800 rounded-r-2xl relative border-2 border-zinc-600 h-full overflow-hidden"
+                  className="flex-1 bg-zinc-800 rounded-r-2xl relative border-2 border-zinc-600 h-full flex flex-col"
                 >
                   <div className="h-20 pointer-events-none w-full backdrop-filter absolute top-0"></div>
-                  <div className="px-4 md:px-8 pt-6 pb-24 h-full">
-                    {activeTab === 'query' && (
-                      <>
-                        <Title
-                          query={query}
-                          userId={userId}
-                          model={selectedModel}
-                          setModel={setSelectedModel}
-                        ></Title>
-                        <Result
-                          key={`${query}-${Date.now()}`}
-                          query={query}
-                          model={selectedModel}
-                          userId={userId}
-                          apiUrl={apiUrl}
-                          temperature={temperature}
-                          topP={topP}
-                          topK={top_k}
-                          maxTokensToSample={max_tokens_to_sample}
-                          uploadedDocuments={uploadedDocuments}
-                          setUploadedDocuments={setUploadedDocuments}
-                          switches={switches}
-                        ></Result>
-                      </>
-                    )}
-                    {activeTab === 'graph' && (
-                      <div className="w-full h-full">
-                        <Neo4jGraph
-                          width={graphDimensions.width}
-                          height={graphDimensions.height}
-                        />
-                      </div>
-                    )}
+                  <div className="flex-grow overflow-y-auto">
+                    <div className="px-4 md:px-8 pt-6 pb-24 h-full">
+                      {activeTab === 'query' && (
+                        <>
+                          <Title
+                            query={query}
+                            userId={userId}
+                            model={selectedModel}
+                            setModel={setSelectedModel}
+                          ></Title>
+                          <Result
+                            key={`${query}-${Date.now()}`}
+                            query={query}
+                            model={selectedModel}
+                            userId={userId}
+                            apiUrl={apiUrl}
+                            temperature={temperature}
+                            topP={topP}
+                            topK={top_k}
+                            maxTokensToSample={max_tokens_to_sample}
+                            uploadedDocuments={uploadedDocuments}
+                            setUploadedDocuments={setUploadedDocuments}
+                            switches={switches}
+                          ></Result>
+                        </>
+                      )}
+                      {activeTab === 'graph' && (
+                        <div className="w-full h-full">
+                          <Neo4jGraph
+                            width={graphDimensions.width}
+                            height={graphDimensions.height}
+                          />
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <div className="h-80 pointer-events-none w-full backdrop-filter absolute bottom-0 bg-gradient-to-b from-transparent to-zinc-900 [mask-image:linear-gradient(to_top,zinc-800,transparent)]"></div>
                   <div className="absolute inset-x-0 bottom-6 px-4 md:px-8">

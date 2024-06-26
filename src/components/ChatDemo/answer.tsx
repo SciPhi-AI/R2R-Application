@@ -65,7 +65,7 @@ export const Answer: FC<{
       }
       content={
         markdown ? (
-          <div className="prose prose-sm max-w-full text-zinc-300">
+          <div className="prose prose-sm max-w-full text-zinc-300 overflow-y-auto max-h-[700px]">
             <Markdown
               components={{
                 h1: ({ node, ...props }) => (
