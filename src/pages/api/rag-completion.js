@@ -34,11 +34,17 @@ export default async function handler(req) {
 
     if (generationConfig.stream) {
       return new Response(response, {
-        headers: { 'Content-Type': 'text/event-stream' },
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-store, max-age=0',
+        },
       });
     } else {
       return new Response(JSON.stringify(response), {
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-store, max-age=0',
+        },
       });
     }
   } catch (error) {

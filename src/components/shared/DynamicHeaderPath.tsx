@@ -10,9 +10,11 @@ const DynamicHeaderPath = () => {
   const router = useRouter();
 
   const isPipelineRoute = router.pathname.includes('/pipeline/');
+  const stripPath = router.asPath.split('?')[0];
   const pathSegments = isPipelineRoute
-    ? router.asPath.split('/').filter(Boolean)
+    ? stripPath.split('/').filter(Boolean)
     : [];
+
   const pipelineId = pathSegments.length > 1 ? pathSegments[1] : null;
   const afterPipelineSegment = pathSegments.length > 2 ? pathSegments[2] : null;
 

@@ -285,6 +285,7 @@ const Index: React.FC = () => {
                           setModel={setSelectedModel}
                         ></Title>
                         <Result
+                          key={`${query}-${Date.now()}`}
                           query={query}
                           model={selectedModel}
                           userId={userId}
