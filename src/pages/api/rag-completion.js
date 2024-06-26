@@ -1,4 +1,4 @@
-import { R2RClient } from '../../r2r-ts-client/r2rClient';
+import { r2rClient } from 'r2r-js';
 
 export const config = {
   runtime: 'edge',
@@ -7,43 +7,30 @@ export const config = {
 export default async function handler(req) {
   const url = new URL(req.url, `http://${req.headers.get('host')}`);
   const queryObject = Object.fromEntries(url.searchParams);
-  const client = new R2RClient(queryObject.apiUrl);
+  const client = new r2rClient(queryObject.apiUrl);
 
-  const searchFilters = queryObject.searchFilters
-    ? JSON.parse(queryObject.searchFilters)
-    : {};
-  searchFilters['user_id'] = queryObject.userId;
+  const searchFilters = { user_id: queryObject.userId };
 
   const generationConfig = {
     temperature: parseFloat(queryObject.temperature) || 0.1,
     top_p: parseFloat(queryObject.topP) || 1,
     top_k: parseInt(queryObject.topK) || 100,
-    max_tokens_to_sample: parseInt(queryObject.max_tokens_to_sample) || 1024,
+    max_tokens_to_sample: parseInt(queryObject.maxTokensToSample) || 1024,
     model: queryObject.model || 'gpt-4-turbo',
     stream: true,
   };
 
-  const vectorSearchSettings = {
-    use_vector_search: queryObject.vectorSearch !== 'false',
-    search_filters: searchFilters,
-    search_limit: parseInt(queryObject.searchLimit) || 10,
-    do_hybrid_search: queryObject.hybridSearch === 'true',
-  };
-
-  const kgSearchSettings = {
-    use_kg_search: queryObject.useKnowledgeGraph === 'true',
-    agent_generation_config: generationConfig,
-  };
-
-  const ragRequest = {
-    query: queryObject.query,
-    vector_search_settings: vectorSearchSettings,
-    kg_search_settings: kgSearchSettings,
-    rag_generation_config: generationConfig,
-  };
-
   try {
-    const response = await client.rag(ragRequest);
+    const response = await client.rag(
+      queryObject.query,
+      queryObject.vectorSearch === 'true',
+      searchFilters,
+      parseInt(queryObject.searchLimit) || 10,
+      queryObject.hybridSearch === 'true',
+      queryObject.useKnowledgeGraph === 'true',
+      generationConfig,
+      generationConfig
+    );
 
     if (generationConfig.stream) {
       return new Response(response, {
@@ -56,9 +43,16 @@ export default async function handler(req) {
     }
   } catch (error) {
     console.error('Error fetching data', error);
-    return new Response(JSON.stringify({ error: 'Error fetching data' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({
+        error: 'Error fetching data',
+        message: error.message,
+        stack: error.stack,
+      }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
   }
 }

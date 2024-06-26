@@ -1,12 +1,5 @@
 import { FC, useEffect, useState } from 'react';
 
-import {
-  LLM_START_TOKEN,
-  LLM_END_TOKEN,
-  SEARCH_START_TOKEN,
-  SEARCH_END_TOKEN,
-} from '../../r2r-ts-client';
-
 import { Answer } from './answer';
 import { Sources } from './sources';
 import { UploadButton } from './upload';
@@ -19,6 +12,15 @@ const markdownParse = (text: string) => {
     .replace(/\[[cC]itation:(\d+)]/g, '[citation]($1)')
     .replace('\n', '\\n');
 };
+
+const SEARCH_START_TOKEN = '<search>';
+const SEARCH_END_TOKEN = '</search>';
+
+const LLM_START_TOKEN = '<completion>';
+const LLM_END_TOKEN = '</completion>';
+
+const METADATA_START_TOKEN = '<metadata>';
+const METADATA_END_TOKEN = '</metadata>';
 
 export const Result: FC<{
   query: string;

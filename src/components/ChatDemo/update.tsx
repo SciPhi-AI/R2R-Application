@@ -1,7 +1,6 @@
 'use client';
+import { r2rClient } from 'r2r-js';
 import React, { useState, useRef, FormEvent, ChangeEvent } from 'react';
-
-import { R2RClient } from '../../r2r-ts-client';
 
 interface UpdateButtonProps {
   userId: string;
@@ -36,7 +35,7 @@ export const UpdateButton: React.FC<UpdateButtonProps> = ({
     ) {
       setIsUpdating(true);
       const file = fileInputRef.current.files[0];
-      const client = new R2RClient(apiUrl);
+      const client = new r2rClient(apiUrl);
 
       try {
         if (!apiUrl) {
@@ -44,7 +43,10 @@ export const UpdateButton: React.FC<UpdateButtonProps> = ({
         }
         const metadata = { title: file.name };
 
-        await client.updateFiles([file], [documentId], [metadata]);
+        await client.updateFiles([file], {
+          document_ids: [documentId],
+          metadatas: [metadata],
+        });
         showToast({
           variant: 'success',
           title: 'Update Successful',

@@ -1,10 +1,9 @@
 'use client';
 import { DocumentArrowUpIcon } from '@heroicons/react/24/outline';
+import { r2rClient } from 'r2r-js';
 import React, { useState, useRef } from 'react';
 
 import { Spinner } from '@/components/Spinner';
-
-import { R2RClient } from '../../r2r-ts-client';
 
 interface UpdateButtonContainerProps {
   apiUrl: string;
@@ -37,7 +36,7 @@ const UpdateButtonContainer: React.FC<UpdateButtonContainerProps> = ({
     ) {
       setIsUpdating(true);
       const file = fileInputRef.current.files[0];
-      const client = new R2RClient(apiUrl);
+      const client = new r2rClient(apiUrl);
 
       try {
         if (!apiUrl) {
@@ -45,11 +44,10 @@ const UpdateButtonContainer: React.FC<UpdateButtonContainerProps> = ({
         }
         const metadata = { title: file.name };
 
-        const response = await client.updateFiles(
-          [file],
-          [documentId],
-          [metadata]
-        );
+        await client.updateFiles([file], {
+          document_ids: [documentId],
+          metadatas: [metadata],
+        });
 
         showToast({
           variant: 'success',

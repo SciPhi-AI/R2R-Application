@@ -1,5 +1,6 @@
 import { DocumentMagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/router';
+import { r2rClient } from 'r2r-js';
 import React, { useState, useEffect } from 'react';
 
 import { DeleteButton } from '@/components/ChatDemo/deleteButton';
@@ -17,9 +18,6 @@ import {
 } from '@/components/ui/tooltip';
 import { toast, useToast } from '@/components/ui/use-toast';
 import { useUserContext } from '@/context/UserContext';
-
-import { R2RClient } from '../../../r2r-ts-client';
-import { R2RDocumentsOverviewRequest } from '../../../r2r-ts-client/models';
 
 class DocumentInfoType {
   document_id: string = '';
@@ -40,13 +38,9 @@ const Index: React.FC = () => {
 
   const documentsPerPage = 10;
 
-  const fetchDocuments = (client: R2RClient) => {
-    const documentsOverviewRequest: R2RDocumentsOverviewRequest = {
-      document_ids: [],
-      user_ids: [],
-    };
+  const fetchDocuments = (client: r2rClient) => {
     client
-      .documentsOverview(documentsOverviewRequest)
+      .documentsOverview([], [])
       .then((data) => {
         setDocuments(data.results);
       })
@@ -75,7 +69,7 @@ const Index: React.FC = () => {
 
   useEffect(() => {
     if (apiUrl) {
-      const client = new R2RClient(apiUrl);
+      const client = new r2rClient(apiUrl);
       fetchDocuments(client);
     }
   }, [apiUrl]);
@@ -199,7 +193,7 @@ const Index: React.FC = () => {
                         apiUrl={apiUrl}
                         documentId={doc.document_id}
                         onUpdateSuccess={() =>
-                          fetchDocuments(new R2RClient(apiUrl))
+                          fetchDocuments(new r2rClient(apiUrl))
                         }
                         showToast={toast}
                       />
@@ -278,7 +272,7 @@ const Index: React.FC = () => {
                   apiUrl={apiUrl}
                   uploadedDocuments={documents}
                   setUploadedDocuments={setDocuments}
-                  onUploadSuccess={() => fetchDocuments(new R2RClient(apiUrl))}
+                  onUploadSuccess={() => fetchDocuments(new r2rClient(apiUrl))}
                   showToast={toast}
                 />
               </div>
@@ -287,7 +281,7 @@ const Index: React.FC = () => {
                   selectedDocumentIds={selectedDocumentIds}
                   apiUrl={apiUrl}
                   onDelete={() => setSelectedDocumentIds([])}
-                  onSuccess={() => fetchDocuments(new R2RClient(apiUrl))}
+                  onSuccess={() => fetchDocuments(new r2rClient(apiUrl))}
                   showToast={toast}
                 />
               </div>

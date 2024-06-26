@@ -1,14 +1,12 @@
 'use client';
 import { Loader } from 'lucide-react';
 import { useRouter } from 'next/router';
+import { r2rClient } from 'r2r-js';
 import React, { useState, useEffect } from 'react';
 
 import { LogTable } from '@/components/ChatDemo/logtable';
 import Layout from '@/components/Layout';
 import { useUserContext } from '@/context/UserContext';
-
-import { R2RClient } from '../../../r2r-ts-client';
-import { R2RLogsRequest } from '../../../r2r-ts-client/models';
 
 const Index: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -27,11 +25,9 @@ const Index: React.FC = () => {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
-  const fetchLogs = async (client: R2RClient) => {
-    const request: R2RLogsRequest = {};
-
+  const fetchLogs = async (client: r2rClient) => {
     try {
-      const data = await client.logs(request);
+      const data = await client.logs();
       setLogs(data.results || []);
     } catch (error) {
       console.error('Error fetching logs:', error);
@@ -40,7 +36,7 @@ const Index: React.FC = () => {
 
   useEffect(() => {
     if (apiUrl) {
-      const client = new R2RClient(apiUrl);
+      const client = new r2rClient(apiUrl);
       fetchLogs(client);
       sleep(1000);
       setIsLoading(false);
