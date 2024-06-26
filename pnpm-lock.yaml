@@ -116,8 +116,8 @@ importers:
         specifier: ^1.141.4
         version: 1.141.4
       r2r-js:
-        specifier: ^1.0.24
-        version: 1.0.24
+        specifier: ^1.0.26
+        version: 1.0.26
       radix-ui:
         specifier: ^1.0.1
         version: 1.0.1(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -7144,10 +7144,10 @@ packages:
         integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==,
       }
 
-  r2r-js@1.0.24:
+  r2r-js@1.0.26:
     resolution:
       {
-        integrity: sha512-3LgsO/tPIVHiMoNhTgGXK5iXigfeu2POOCjT0Q+P7WUWf2U2RJPaXC5hnZP61MSiUYlV4urgE0hhEhMWUry8jQ==,
+        integrity: sha512-FvwC9JzYRlTd67PH0BIe3AIcw5PxmXz2kf/SeancvNkpl4KgM5FixY89U9H0xm1l73vxsTRbF5yGQszaThALzQ==,
       }
 
   radix-ui@1.0.1:
@@ -14329,7 +14329,7 @@ snapshots:
 
   queue-microtask@1.2.3: {}
 
-  r2r-js@1.0.24:
+  r2r-js@1.0.26:
     dependencies:
       axios: 1.7.2
       form-data: 4.0.0
