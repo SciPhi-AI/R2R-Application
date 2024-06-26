@@ -70,7 +70,7 @@ export const Sources: FC<{ sources: string | null }> = ({ sources }) => {
         </>
       }
       content={
-        <div className="grid gap-2">
+        <div className="grid gap-2 overflow-y-auto max-h-[700px]">
           {parsedSources && parsedSources.length > 0 ? (
             parsedSources.map((item) => (
               <SourceItem key={item.id} source={item}></SourceItem>
