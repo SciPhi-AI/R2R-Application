@@ -155,7 +155,7 @@ const Index: React.FC = () => {
                       className="text-gray-500 mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-2xl shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm cursor-not-allowed"
                     />
                   </div>
-                  <div className="ml-4">
+                  {/* <div className="ml-4">
                     <div className="flex">
                       <button
                         className={`px-4 py-2 rounded-l ${
@@ -178,7 +178,7 @@ const Index: React.FC = () => {
                         Graph
                       </button>
                     </div>
-                  </div>
+                  </div> */}
                 </div>
               </div>
 
@@ -252,7 +252,7 @@ const Index: React.FC = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <div className="flex items-center justify-between">
+                      {/* <div className="flex items-center justify-between">
                         <label
                           htmlFor="user-selector"
                           className="text-sm font-medium text-zinc-300"
@@ -265,7 +265,7 @@ const Index: React.FC = () => {
                           selectedUserId={userId}
                           setSelectedUserId={setUserId}
                         />
-                      </div>
+                      </div> */}
                     </div>
                   </div>
                 </div>

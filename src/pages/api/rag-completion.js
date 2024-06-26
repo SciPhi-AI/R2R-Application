@@ -9,7 +9,7 @@ export default async function handler(req) {
   const queryObject = Object.fromEntries(url.searchParams);
   const client = new r2rClient(queryObject.apiUrl);
 
-  const searchFilters = { user_id: queryObject.userId };
+  const searchFilters = {}; //  user_id: queryObject.userId };
 
   const generationConfig = {
     temperature: parseFloat(queryObject.temperature) || 0.1,

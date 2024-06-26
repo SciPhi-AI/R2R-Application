@@ -145,11 +145,11 @@ export const SubNavigationBar = forwardRef<
             label: 'Playground',
             disabled: !isConnected,
           },
-          {
-            path: `/pipeline/${pipelineId}/analytics`,
-            label: 'Analytics',
-            disabled: !isConnected,
-          },
+          // {
+          //   path: `/pipeline/${pipelineId}/analytics`,
+          //   label: 'Analytics',
+          //   disabled: !isConnected,
+          // },
           {
             path: `/pipeline/${pipelineId}/logs`,
             label: 'Logs',
