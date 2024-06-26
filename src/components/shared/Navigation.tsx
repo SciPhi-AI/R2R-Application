@@ -7,7 +7,6 @@ import { usePathname } from 'next/navigation';
 import { useRouter } from 'next/router';
 import { useRef } from 'react';
 
-import { useIsInsideMobileNavigation } from '@/components/shared/MobileNavigation';
 import { useSectionStore } from '@/components/shared/SectionProvider';
 import { SectionProvider } from '@/components/shared/SectionProvider'; // Adjust the import path as necessary
 import { Tag } from '@/components/shared/Tag';
@@ -60,7 +59,6 @@ function NavLink({
   children,
   tag,
   active = false,
-  isAnchorLink = false,
 }: {
   href: string;
   children: React.ReactNode;
@@ -74,7 +72,6 @@ function NavLink({
       aria-current={active ? 'page' : undefined}
       className={clsx(
         'flex justify-between gap-2 py-1 pr-3 text-sm transition',
-        isAnchorLink ? 'pl-7' : 'pl-4',
         active
           ? 'text-zinc-900 dark:text-white'
           : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white'
@@ -97,13 +94,10 @@ function VisibleSectionHighlight({
   group: NavGroup;
   pathname: string;
 }) {
-  const [sections, visibleSections] = useInitialValue(
-    [
-      useSectionStore((s) => s.sections),
-      useSectionStore((s) => s.visibleSections),
-    ],
-    useIsInsideMobileNavigation()
-  );
+  const [sections, visibleSections] = useInitialValue([
+    useSectionStore((s) => s.sections),
+    useSectionStore((s) => s.visibleSections),
+  ]);
 
   const isPresent = useIsPresent();
   const firstVisibleSectionIndex = Math.max(
@@ -165,14 +159,10 @@ function NavigationGroup({
   group: NavGroup;
   className?: string;
 }) {
-  // If this is the mobile navigation then we always render the initial
-  // state, so that the state does not change during the close animation.
-  // The state will still update when we re-open (re-render) the navigation.
-  const isInsideMobileNavigation = useIsInsideMobileNavigation();
-  const [pathname, sections] = useInitialValue(
-    [usePathname(), useSectionStore((s) => s.sections)],
-    isInsideMobileNavigation
-  );
+  const [pathname, sections] = useInitialValue([
+    usePathname(),
+    useSectionStore((s) => s.sections),
+  ]);
 
   const isActiveGroup =
     group.links.findIndex((link) => link.href === pathname) !== -1;
@@ -186,7 +176,7 @@ function NavigationGroup({
         {group.title}
       </motion.h2>
       <div className="relative mt-3 pl-2">
-        <AnimatePresence initial={!isInsideMobileNavigation}>
+        <AnimatePresence>
           {isActiveGroup && (
             <VisibleSectionHighlight group={group} pathname={pathname} />
           )}
@@ -262,11 +252,7 @@ export function Navigation(props: React.ComponentPropsWithoutRef<'nav'>) {
       <nav {...props}>
         <ul role="list">
           {navigation.map((group, groupIndex) => (
-            <NavigationGroup
-              key={group.title}
-              group={group}
-              className={groupIndex === 0 ? 'md:mt-0' : ''}
-            />
+            <NavigationGroup key={group.title} group={group} />
           ))}
         </ul>
       </nav>

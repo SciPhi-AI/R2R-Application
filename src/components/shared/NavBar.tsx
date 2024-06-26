@@ -6,11 +6,6 @@ import { forwardRef, useEffect, useState, useRef } from 'react';
 import { MdOutlineArticle } from 'react-icons/md';
 
 import { Logo } from '@/components/shared/Logo';
-import {
-  MobileNavigation,
-  useIsInsideMobileNavigation,
-  useMobileNavigationStore,
-} from '@/components/shared/MobileNavigation';
 import { Button } from '@/components/ui/Button';
 import { Pipeline } from '@/types';
 
@@ -53,8 +48,6 @@ export const Navbar = forwardRef<React.ElementRef<'div'>, NavbarProps>(
     const [pipelines, setPipelines] = useState<Pipeline[]>([]);
     const pipelinesRef = useRef(pipelines);
     const router = useRouter();
-    const { isOpen: mobileNavIsOpen } = useMobileNavigationStore();
-    const isInsideMobileNavigation = useIsInsideMobileNavigation();
 
     useEffect(() => {
       pipelinesRef.current = pipelines;
@@ -79,9 +72,7 @@ export const Navbar = forwardRef<React.ElementRef<'div'>, NavbarProps>(
           className={clsx(
             className,
             'fixed inset-x-0 top-0 z-50 flex h-12 items-center justify-between gap-12 px-6 transition lg:z-30 lg:px-8 backdrop-blur-sm dark:backdrop-blur',
-            isInsideMobileNavigation
-              ? 'bg-white dark:bg-zinc-900'
-              : 'bg-zinc-100 dark:bg-zinc-800'
+            'bg-zinc-100 dark:bg-zinc-800'
           )}
           style={
             {
@@ -91,7 +82,6 @@ export const Navbar = forwardRef<React.ElementRef<'div'>, NavbarProps>(
           }
         >
           <div className="flex items-center justify-between w-full md:hidden">
-            <MobileNavigation />
             <Logo className="h-6" onClick={() => router.push('/')} />
           </div>
           <div className="hidden md:flex items-center justify-between w-full">
