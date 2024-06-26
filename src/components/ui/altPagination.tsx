@@ -5,8 +5,15 @@ const Pagination: React.FC<{
   totalPages: number;
   onPageChange: (pageNumber: number) => void;
 }> = ({ currentPage, totalPages, onPageChange }) => {
+  if (totalPages <= 1) {
+    return (
+      <div className="flex justify-center items-center mt-4">
+        <span className="text-gray-500">Page 1 of 1</span>
+      </div>
+    );
+  }
   const isPreviousDisabled = currentPage === 1;
-  const isNextDisabled = currentPage === totalPages;
+  const isNextDisabled = currentPage === totalPages || totalPages === 1;
 
   const getPageNumbers = () => {
     const pageNumbers = [];
@@ -14,7 +21,7 @@ const Pagination: React.FC<{
     const halfMaxPages = Math.floor(maxPages / 2);
 
     let startPage = Math.max(currentPage - halfMaxPages, 2);
-    let endPage = Math.min(startPage + maxPages - 1, totalPages - 1);
+    const endPage = Math.min(startPage + maxPages - 1, totalPages - 1);
 
     if (endPage - startPage + 1 < maxPages) {
       startPage = Math.max(endPage - maxPages + 1, 2);
@@ -60,7 +67,9 @@ const Pagination: React.FC<{
       <button
         onClick={() => onPageChange(1)}
         className={`px-4 py-2 mx-1 rounded ${
-          currentPage === 1 ? 'bg-blue-500 text-white' : 'bg-zinc-800 text-zinc-400'
+          currentPage === 1
+            ? 'bg-blue-500 text-white'
+            : 'bg-zinc-800 text-zinc-400'
         }`}
       >
         1
@@ -84,7 +93,9 @@ const Pagination: React.FC<{
         <button
           onClick={() => onPageChange(totalPages)}
           className={`px-4 py-2 mx-1 rounded ${
-            currentPage === totalPages ? 'bg-blue-500 text-white' : 'bg-zinc-800 text-zinc-400'
+            currentPage === totalPages
+              ? 'bg-blue-500 text-white'
+              : 'bg-zinc-800 text-zinc-400'
           }`}
         >
           {totalPages}
