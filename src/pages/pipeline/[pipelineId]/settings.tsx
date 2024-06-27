@@ -1,8 +1,11 @@
+import { PencilSquareIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/router';
 import { r2rClient } from 'r2r-js';
 import React, { useState, useEffect } from 'react';
 
+import EditPromptDialog from '@/components/ChatDemo/utils/editPromptDialog';
 import Layout from '@/components/Layout';
+import { useToast } from '@/components/ui/use-toast';
 import { useUserContext } from '@/context/UserContext';
 
 type Prompt = {
@@ -56,6 +59,11 @@ const Index: React.FC = () => {
   const [appData, setAppData] = useState<AppData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('config');
+  const [selectedPromptName, setSelectedPromptName] = useState<string>('');
+  const [selectedPromptTemplate, setSelectedPromptTemplate] =
+    useState<string>('');
+  const [isEditPromptDialogOpen, setIsEditPromptDialogOpen] = useState(false);
+  const { toast } = useToast();
   const router = useRouter();
 
   const { pipelineId } = router.query;
@@ -93,6 +101,19 @@ const Index: React.FC = () => {
   }, [apiUrl]);
 
   const { config = {}, prompts = {} } = appData || {};
+
+  const handleEditPrompt = (name: string, template: string) => {
+    setSelectedPromptName(name);
+    setSelectedPromptTemplate(template);
+    setIsEditPromptDialogOpen(true);
+  };
+
+  const handleSaveSuccess = () => {
+    if (apiUrl) {
+      const client = new r2rClient(apiUrl);
+      fetchAppData(client);
+    }
+  };
 
   return (
     <Layout>
@@ -170,16 +191,24 @@ const Index: React.FC = () => {
                         Object.entries(prompts).map(([name, prompt]) => (
                           <tr key={name} className="border-t border-gray-600">
                             <td className="px-4 py-2 text-white">{name}</td>
-                            <td className="px-4 py-2 text-white">
-                              <pre className="whitespace-pre-wrap">
+                            <td className="px-4 py-2 text-white relative">
+                              <div className="whitespace-pre-wrap font-sans pr-8">
                                 {prompt.template}
-                              </pre>
+                              </div>
+                              <button
+                                onClick={() =>
+                                  handleEditPrompt(name, prompt.template)
+                                }
+                                className="absolute bottom-2 right-2 text-gray-400 cursor-pointer hover:text-blue-500"
+                              >
+                                <PencilSquareIcon className="h-5 w-5" />
+                              </button>
                             </td>
                           </tr>
                         ))
                       ) : (
                         <tr>
-                          <td colSpan={2} className="px-4 py-2 text-white">
+                          <td colSpan={3} className="px-4 py-2 text-white">
                             No prompts available
                           </td>
                         </tr>
@@ -192,6 +221,14 @@ const Index: React.FC = () => {
           </div>
         </div>
       </main>
+      <EditPromptDialog
+        open={isEditPromptDialogOpen}
+        onClose={() => setIsEditPromptDialogOpen(false)}
+        promptName={selectedPromptName}
+        promptTemplate={selectedPromptTemplate}
+        apiUrl={apiUrl}
+        onSaveSuccess={handleSaveSuccess}
+      />
     </Layout>
   );
 };
