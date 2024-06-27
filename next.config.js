@@ -1,5 +1,6 @@
 module.exports = {
   reactStrictMode: false,
+  output: 'standalone',
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.fallback = {
