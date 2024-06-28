@@ -10,23 +10,13 @@ const SourceItem: FC<{ source: Source }> = ({ source }) => {
 
   return (
     <div
-      className="relative text-xs py-3 px-3 bg-zinc-400 hover:bg-zinc-300 rounded-lg flex flex-col gap-2 max-w-full"
-      key={id}
+      className="bg-zinc-700 p-4 rounded-lg mb-2"
+      style={{ width: 'calc(100% - 50px)' }}
     >
-      <div className="font-medium text-zinc-950 text-ellipsis overflow-hidden break-words">
-        {score.toFixed(3) != '0.000' &&
-          `Document Title: ${metadata.title}, Similarity: ${score.toFixed(3)}, Id = 
-        ${id.slice(0, 8) + '...'}`}
-        {score.toFixed(3) == '0.000' &&
-          `Document Title: ${metadata.title}, Id = ${id.slice(0, 8) + '...'}`}
-      </div>
-      <div className="flex gap-2 items-center">
-        <div className="flex-1 overflow-hidden">
-          <div className="text-ellipsis break-all text-zinc-600 overflow-hidden w-full">
-            {metadata.text}
-          </div>
-        </div>
-      </div>
+      <h3 className="text-sm font-medium text-zinc-200 mb-1">
+        {metadata.title} (Similarity: {score.toFixed(3)})
+      </h3>
+      <p className="text-xs text-zinc-400">{metadata.text}</p>
     </div>
   );
 };
@@ -57,34 +47,18 @@ const parseSources = (sources: string | object): Source[] => {
 };
 
 export const Sources: FC<{ sources: string | null }> = ({ sources }) => {
-  let parsedSources: Source[] = [];
-  if (sources) {
-    parsedSources = parseSources(sources);
-  }
+  const parsedSources: Source[] = sources ? parseSources(sources) : [];
 
   return (
-    <Wrapper
-      title={
-        <>
-          <BookText></BookText> Sources
-        </>
-      }
-      content={
-        <div className="grid gap-2 overflow-y-auto max-h-[700px]">
-          {parsedSources && parsedSources.length > 0 ? (
-            parsedSources.map((item) => (
-              <SourceItem key={item.id} source={item}></SourceItem>
-            ))
-          ) : (
-            <div className="max-w-screen-sm">
-              <Skeleton className="h-16 bg-zinc-200/80"></Skeleton>
-              <Skeleton className="h-16 bg-zinc-200/80 mt-2"></Skeleton>
-              <Skeleton className="h-16 bg-zinc-200/80 mt-2"></Skeleton>
-              <Skeleton className="h-16 bg-zinc-200/80 mt-2"></Skeleton>
-            </div>
-          )}
-        </div>
-      }
-    ></Wrapper>
+    <div className="mt-4">
+      <h2 className="text-lg font-bold text-zinc-200 mb-2 flex items-center">
+        <BookText className="mr-2" /> Sources
+      </h2>
+      <div className="space-y-2">
+        {parsedSources.map((item) => (
+          <SourceItem key={item.id} source={item} />
+        ))}
+      </div>
+    </div>
   );
 };

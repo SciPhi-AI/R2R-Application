@@ -1,17 +1,10 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useState, useMemo } from 'react';
 
 import { Answer } from './answer';
+import { DefaultQueries } from './DefaultQueries';
 import { Sources } from './sources';
 import { UploadButton } from './upload';
-
-const markdownParse = (text: string) => {
-  return text
-    .replace(/\[\[([cC])itation/g, '[citation')
-    .replace(/[cC]itation:(\d+)]]/g, 'citation:$1]')
-    .replace(/\[\[([cC]itation:\d+)]](?!])/g, `[$1]`)
-    .replace(/\[[cC]itation:(\d+)]/g, '[citation]($1)')
-    .replace('\n', '\\n');
-};
+import { parseMarkdown } from './utils/parseMarkdown';
 
 const SEARCH_START_TOKEN = '<search>';
 const SEARCH_END_TOKEN = '</search>';
@@ -24,6 +17,7 @@ const METADATA_END_TOKEN = '</metadata>';
 
 export const Result: FC<{
   query: string;
+  setQuery: (query: string) => void;
   userId: string;
   apiUrl: string | undefined;
   temperature: number | null;
@@ -36,6 +30,7 @@ export const Result: FC<{
   switches: any;
 }> = ({
   query,
+  setQuery,
   userId,
   apiUrl,
   temperature,
@@ -67,15 +62,25 @@ export const Result: FC<{
     let inLLMResponse = false;
 
     try {
-      const response = await fetch(
-        `/api/rag-completion?query=${encodeURIComponent(query)}&userId=${encodeURIComponent(userId)}&apiUrl=${encodeURIComponent(apiUrl)}&model=${encodeURIComponent(model)}&temperature=${temperature}&topP=${topP}&topK=${topK}&maxTokensToSample=${maxTokensToSample}&hybridSearch=${switches.hybrid_search?.checked}&vectorSearch=${switches.vector_search?.checked}&useKnowledgeGraph=${switches.knowledge_graph_search?.checked}`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      const response = await fetch(`/api/rag-completion`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query,
+          userId,
+          apiUrl,
+          model,
+          temperature,
+          topP,
+          topK,
+          maxTokensToSample,
+          hybridSearch: switches.hybrid_search?.checked,
+          vectorSearch: switches.vector_search?.checked,
+          useKnowledgeGraph: switches.knowledge_graph_search?.checked,
+        }),
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -155,16 +160,23 @@ export const Result: FC<{
     };
   }, [query, userId, apiUrl]);
 
+  const parsedMarkdown = useMemo(() => parseMarkdown(markdown), [markdown]);
+
   return (
     <div className="flex flex-col gap-8">
-      <Answer
-        markdown={markdownParse(markdown)}
-        sources={sources}
-        isStreaming={isStreaming}
-      ></Answer>
-      <Sources sources={sources}></Sources>
-
-      {error && <div className="text-red-500">Error: {error}</div>}
+      {query ? (
+        <>
+          <Answer
+            markdown={parsedMarkdown}
+            sources={sources}
+            isStreaming={isStreaming}
+          />
+          <Sources sources={sources} />
+          {error && <div className="text-red-500">Error: {error}</div>}
+        </>
+      ) : (
+        <DefaultQueries setQuery={setQuery} />
+      )}
 
       {uploadedDocuments?.length === 0 && apiUrl && (
         <div className="absolute inset-4 flex items-center justify-center bg-white/40 backdrop-blur-sm">
@@ -176,14 +188,6 @@ export const Result: FC<{
               uploadedDocuments={uploadedDocuments}
               setUploadedDocuments={setUploadedDocuments}
             />
-          </div>
-        </div>
-      )}
-
-      {uploadedDocuments?.length !== 0 && query === '' && (
-        <div className="absolute inset-4 flex items-center justify-center bg-white/40 backdrop-blur-sm">
-          <div className="p-4 bg-white shadow-2xl rounded text-blue-500 font-medium flex gap-4">
-            Please submit a query.
           </div>
         </div>
       )}

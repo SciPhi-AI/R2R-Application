@@ -25,7 +25,7 @@ const DynamicHeaderPath = () => {
   return (
     <div>
       <ul role="list" className="flex items-center gap-3 pt-2">
-        <Logo width={38} height={38} />
+        <Logo width={25} height={25} />
         <Code onClick={redirectToHome} style={{ cursor: 'pointer' }}>
           <span className="text-zinc-800 dark:text-zinc-400 ">
             R2R Dashboard
