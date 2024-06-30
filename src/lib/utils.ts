@@ -34,7 +34,7 @@ export const setTextColor = (keyword: string): string => {
 export const isValidUrl = (value: string) => {
   const urlPattern = new RegExp(
     '^https?:\\/\\/' + // must start with http:// or https://
-      '((([a-zA-Z0-9-_]+\\.)+[a-zA-Z]{2,})|([a-zA-Z0-9-_]+))' + // domain name or IP address
+      '((([a-zA-Z0-9-_]+\\.)+[a-zA-Z]{2,})|((\\d{1,3}\\.){3}\\d{1,3}))' + // domain name or IP address
       '(\\:\\d+)?' + // optional port
       '(\\/.*)?' + // optional path
       '$' // end of string
