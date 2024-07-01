@@ -1,3 +1,4 @@
+'use client';
 import { Loader } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/router';
@@ -15,6 +16,7 @@ import Layout from '@/components/Layout';
 import ModelSelector from '@/components/ui/ModelSelector';
 import { useToast } from '@/components/ui/use-toast';
 import UserSelector from '@/components/ui/UserSelector';
+import { usePipelineInfo } from '@/context/PipelineInfo';
 import { useUserContext } from '@/context/UserContext';
 
 import Neo4jGraph from './Neo4jGraph';
@@ -35,10 +37,7 @@ const Index: React.FC = () => {
   const [selectedModel, setSelectedModel] = useState('gpt-4-turbo');
   const [uploadedDocuments, setUploadedDocuments] = useState([]);
 
-  const { pipelineId } = router.query;
-  const { watchedPipelines } = useUserContext();
-  const pipeline = watchedPipelines[pipelineId as string];
-  const apiUrl = pipeline?.deploymentUrl;
+  const { pipeline, isLoading: isPipelineLoading } = usePipelineInfo();
 
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('query');
@@ -98,8 +97,8 @@ const Index: React.FC = () => {
   };
 
   useEffect(() => {
-    if (apiUrl) {
-      const client = new r2rClient(apiUrl);
+    if (pipeline?.deploymentUrl) {
+      const client = new r2rClient(pipeline?.deploymentUrl);
       setIsLoading(true);
       client
         .documentsOverview()
@@ -113,7 +112,7 @@ const Index: React.FC = () => {
           setIsLoading(false);
         });
     }
-  }, [apiUrl]);
+  }, [pipeline?.deploymentUrl]);
 
   useEffect(() => {
     const updateDimensions = () => {
@@ -201,7 +200,7 @@ const Index: React.FC = () => {
               setQuery={setQuery}
               model={selectedModel}
               userId={userId}
-              apiUrl={apiUrl}
+              apiUrl={pipeline?.deploymentUrl}
               temperature={temperature}
               topP={topP}
               topK={top_k}
@@ -214,7 +213,7 @@ const Index: React.FC = () => {
 
           {/* Search Bar */}
           <div className="p-4 bg-zinc-800">
-            <Search pipeline={pipeline} setQuery={setQuery} />
+            <Search pipeline={pipeline || undefined} setQuery={setQuery} />
           </div>
         </div>
       </div>

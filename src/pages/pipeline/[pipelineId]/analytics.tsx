@@ -19,6 +19,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { usePipelineInfo } from '@/context/PipelineInfo';
 import { useUserContext } from '@/context/UserContext';
 
 type FilterDisplayNameKeys =
@@ -250,14 +251,11 @@ const AnalysisResults: React.FC<{
 const Analytics: React.FC = () => {
   const [analyticsData, setAnalyticsData] = useState<any>({});
   const router = useRouter();
+  const { pipeline, isLoading: isPipelineLoading } = usePipelineInfo();
 
-  const { pipelineId } = router.query;
-  const { watchedPipelines } = useUserContext();
-  const pipeline = watchedPipelines[pipelineId as string];
   const [selectedFilter, setSelectedFilter] = useState('search_latency');
   const [currentPage, setCurrentPage] = useState(1);
   const logsPerPage = 5;
-  const apiUrl = pipeline?.deploymentUrl;
 
   const fetchAnalytics = (client: r2rClient, filter: string) => {
     const filters = { [filter]: filter };
@@ -306,11 +304,11 @@ const Analytics: React.FC = () => {
   };
 
   useEffect(() => {
-    if (apiUrl) {
-      const client = new r2rClient(apiUrl);
+    if (pipeline?.deploymentUrl) {
+      const client = new r2rClient(pipeline?.deploymentUrl);
       fetchAnalytics(client, selectedFilter);
     }
-  }, [apiUrl, selectedFilter]);
+  }, [pipeline?.deploymentUrl, selectedFilter]);
 
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);

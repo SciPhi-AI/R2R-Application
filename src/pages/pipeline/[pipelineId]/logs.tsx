@@ -6,17 +6,14 @@ import React, { useState, useEffect } from 'react';
 
 import { LogTable } from '@/components/ChatDemo/logtable';
 import Layout from '@/components/Layout';
+import { usePipelineInfo } from '@/context/PipelineInfo';
 import { useUserContext } from '@/context/UserContext';
 
 const Index: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   const router = useRouter();
-
-  const { pipelineId } = router.query;
-  const { watchedPipelines } = useUserContext();
-  const pipeline = watchedPipelines[pipelineId as string];
-  const apiUrl = pipeline?.deploymentUrl;
+  const { pipeline, isLoading: isPipelineLoading } = usePipelineInfo();
 
   const [selectedLogs, setSelectedLogs] = useState('ALL');
   const [logs, setLogs] = useState<any[]>([]);
@@ -35,13 +32,13 @@ const Index: React.FC = () => {
   };
 
   useEffect(() => {
-    if (apiUrl) {
-      const client = new r2rClient(apiUrl);
+    if (pipeline?.deploymentUrl) {
+      const client = new r2rClient(pipeline?.deploymentUrl);
       fetchLogs(client);
       sleep(1000);
       setIsLoading(false);
     }
-  }, [apiUrl, selectedLogs]);
+  }, [pipeline?.deploymentUrl, selectedLogs]);
 
   return (
     <Layout>

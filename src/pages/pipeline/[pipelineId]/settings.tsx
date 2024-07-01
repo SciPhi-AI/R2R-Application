@@ -6,6 +6,7 @@ import React, { useState, useEffect } from 'react';
 import EditPromptDialog from '@/components/ChatDemo/utils/editPromptDialog';
 import Layout from '@/components/Layout';
 import { useToast } from '@/components/ui/use-toast';
+import { usePipelineInfo } from '@/context/PipelineInfo';
 import { useUserContext } from '@/context/UserContext';
 
 type Prompt = {
@@ -65,11 +66,7 @@ const Index: React.FC = () => {
   const [isEditPromptDialogOpen, setIsEditPromptDialogOpen] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
-
-  const { pipelineId } = router.query;
-  const { watchedPipelines } = useUserContext();
-  const pipeline = watchedPipelines[pipelineId as string];
-  const apiUrl = pipeline?.deploymentUrl;
+  const { pipeline, isLoading: isPipelineLoading } = usePipelineInfo();
 
   const fetchAppData = (client: r2rClient) => {
     client
@@ -94,11 +91,11 @@ const Index: React.FC = () => {
   };
 
   useEffect(() => {
-    if (apiUrl) {
-      const client = new r2rClient(apiUrl);
+    if (pipeline?.deploymentUrl) {
+      const client = new r2rClient(pipeline?.deploymentUrl);
       fetchAppData(client);
     }
-  }, [apiUrl]);
+  }, [pipeline?.deploymentUrl]);
 
   const { config = {}, prompts = {} } = appData || {};
 
@@ -109,8 +106,8 @@ const Index: React.FC = () => {
   };
 
   const handleSaveSuccess = () => {
-    if (apiUrl) {
-      const client = new r2rClient(apiUrl);
+    if (pipeline?.deploymentUrl) {
+      const client = new r2rClient(pipeline?.deploymentUrl);
       fetchAppData(client);
     }
   };
@@ -226,7 +223,7 @@ const Index: React.FC = () => {
         onClose={() => setIsEditPromptDialogOpen(false)}
         promptName={selectedPromptName}
         promptTemplate={selectedPromptTemplate}
-        apiUrl={apiUrl}
+        apiUrl={pipeline?.deploymentUrl || ''}
         onSaveSuccess={handleSaveSuccess}
       />
     </Layout>
