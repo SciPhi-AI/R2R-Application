@@ -1,3 +1,4 @@
+'use client';
 import { DocumentMagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/router';
 import { r2rClient } from 'r2r-js';
@@ -17,7 +18,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { toast, useToast } from '@/components/ui/use-toast';
-import { useUserContext } from '@/context/UserContext';
+import { usePipelineInfo } from '@/context/PipelineInfo';
 
 class DocumentInfoType {
   document_id: string = '';
@@ -49,11 +50,7 @@ const Index: React.FC = () => {
       });
   };
 
-  // OSS specific pipeline logic
-  const { pipelineId } = router.query;
-  const { watchedPipelines } = useUserContext();
-  const pipeline = watchedPipelines[pipelineId as string];
-  const apiUrl = pipeline?.deploymentUrl;
+  const { pipeline, isLoading } = usePipelineInfo();
 
   const userId = '063edaf8-3e63-4cb9-a4d6-a855f36376c3';
 
@@ -68,11 +65,11 @@ const Index: React.FC = () => {
   );
 
   useEffect(() => {
-    if (apiUrl) {
-      const client = new r2rClient(apiUrl);
+    if (pipeline?.deploymentUrl && !isLoading) {
+      const client = new r2rClient(pipeline.deploymentUrl);
       fetchDocuments(client);
     }
-  }, [apiUrl]);
+  }, [pipeline?.deploymentUrl, isLoading]);
 
   useEffect(() => {
     if (currentPage > totalPages) {
@@ -196,10 +193,11 @@ const Index: React.FC = () => {
                   <Tooltip>
                     <TooltipTrigger>
                       <UpdateButtonContainer
-                        apiUrl={apiUrl}
+                        apiUrl={pipeline?.deploymentUrl || ''}
                         documentId={doc.document_id}
                         onUpdateSuccess={() =>
-                          fetchDocuments(new r2rClient(apiUrl))
+                          pipeline?.deploymentUrl &&
+                          fetchDocuments(new r2rClient(pipeline?.deploymentUrl))
                         }
                         showToast={toast}
                       />
@@ -275,19 +273,25 @@ const Index: React.FC = () => {
               <div className="mt-6 pr-2">
                 <UploadButton
                   userId={userId}
-                  apiUrl={apiUrl}
+                  apiUrl={pipeline?.deploymentUrl || ''}
                   uploadedDocuments={documents}
                   setUploadedDocuments={setDocuments}
-                  onUploadSuccess={() => fetchDocuments(new r2rClient(apiUrl))}
+                  onUploadSuccess={() =>
+                    pipeline?.deploymentUrl &&
+                    fetchDocuments(new r2rClient(pipeline?.deploymentUrl))
+                  }
                   showToast={toast}
                 />
               </div>
               <div className="mt-6 pr-2">
                 <DeleteButton
                   selectedDocumentIds={selectedDocumentIds}
-                  apiUrl={apiUrl}
+                  apiUrl={pipeline?.deploymentUrl || ''}
                   onDelete={() => setSelectedDocumentIds([])}
-                  onSuccess={() => fetchDocuments(new r2rClient(apiUrl))}
+                  onSuccess={() =>
+                    pipeline?.deploymentUrl &&
+                    fetchDocuments(new r2rClient(pipeline?.deploymentUrl))
+                  }
                   showToast={toast}
                 />
               </div>
@@ -331,7 +335,7 @@ const Index: React.FC = () => {
       </main>
       <DocumentInfoDialog
         documentId={selectedDocumentId}
-        apiUrl={apiUrl}
+        apiUrl={pipeline?.deploymentUrl || ''}
         open={isDocumentInfoDialogOpen}
         onClose={() => setIsDocumentInfoDialogOpen(false)}
       />
