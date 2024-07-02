@@ -44,10 +44,10 @@ const Index: React.FC = () => {
 
   const { switches, initializeSwitch, updateSwitch } = useSwitchManager();
 
-  const [temperature, setTemperature] = useState(0.1);
-  const [topP, setTopP] = useState(1);
-  const [top_k, setTop_k] = useState(100);
-  const [max_tokens_to_sample, setMax_tokens_to_sample] = useState(1024);
+  const [rag_temperature, setRagTemperature] = useState(0.1);
+  const [rag_topP, setRagTopP] = useState(1);
+  const [rag_top_k, setRagTop_k] = useState(100);
+  const [rag_max_tokens_to_sample, setRagMax_tokens_to_sample] = useState(1024);
   const [kg_temperature, setKgTemperature] = useState(0.1);
   const [kg_top_p, setKgTopP] = useState(1);
   const [kg_top_k, setKgTop_k] = useState(100);
@@ -142,14 +142,14 @@ const Index: React.FC = () => {
           {/* Configuration */}
           <div className="mb-4">
             <ConfigurationSheet
-              temperature={temperature}
-              setTemperature={setTemperature}
-              top_p={topP}
-              setTopP={setTopP}
-              top_k={top_k}
-              setTop_k={setTop_k}
-              max_tokens_to_sample={max_tokens_to_sample}
-              setMax_tokens_to_sample={setMax_tokens_to_sample}
+              temperature={rag_temperature}
+              setTemperature={setRagTemperature}
+              top_p={rag_topP}
+              setTopP={setRagTopP}
+              top_k={rag_top_k}
+              setTop_k={setRagTop_k}
+              max_tokens_to_sample={rag_max_tokens_to_sample}
+              setMax_tokens_to_sample={setRagMax_tokens_to_sample}
               kg_temperature={kg_temperature}
               setKgTemperature={setKgTemperature}
               kg_top_p={kg_top_p}
@@ -201,10 +201,15 @@ const Index: React.FC = () => {
               model={selectedModel}
               userId={userId}
               apiUrl={pipeline?.deploymentUrl}
-              temperature={temperature}
-              topP={topP}
-              topK={top_k}
-              maxTokensToSample={max_tokens_to_sample}
+              search_limit={10}
+              rag_temperature={rag_temperature}
+              rag_topP={rag_topP}
+              rag_topK={rag_top_k}
+              rag_maxTokensToSample={rag_max_tokens_to_sample}
+              kg_temperature={kg_temperature}
+              kg_topP={kg_top_p}
+              kg_topK={kg_top_k}
+              kg_maxTokensToSample={kg_max_tokens_to_sample}
               uploadedDocuments={uploadedDocuments}
               setUploadedDocuments={setUploadedDocuments}
               switches={switches}

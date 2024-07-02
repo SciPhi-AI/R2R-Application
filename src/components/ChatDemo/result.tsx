@@ -20,10 +20,15 @@ export const Result: FC<{
   setQuery: (query: string) => void;
   userId: string;
   apiUrl: string | undefined;
-  temperature: number | null;
-  topP: number | null;
-  topK: number | null;
-  maxTokensToSample: number | null;
+  search_limit: number | undefined;
+  rag_temperature: number | null;
+  rag_topP: number | null;
+  rag_topK: number | null;
+  rag_maxTokensToSample: number | null;
+  kg_temperature: number | null;
+  kg_topP: number | null;
+  kg_topK: number | null;
+  kg_maxTokensToSample: number | null;
   model: string;
   uploadedDocuments: string[];
   setUploadedDocuments: any;
@@ -33,10 +38,15 @@ export const Result: FC<{
   setQuery,
   userId,
   apiUrl,
-  temperature,
-  topP,
-  topK,
-  maxTokensToSample,
+  search_limit,
+  rag_temperature,
+  rag_topP,
+  rag_topK,
+  rag_maxTokensToSample,
+  kg_temperature,
+  kg_topP,
+  kg_topK,
+  kg_maxTokensToSample,
   model,
   uploadedDocuments,
   setUploadedDocuments,
@@ -72,10 +82,15 @@ export const Result: FC<{
           userId,
           apiUrl,
           model,
-          temperature,
-          topP,
-          topK,
-          maxTokensToSample,
+          search_limit,
+          rag_temperature,
+          rag_topP,
+          rag_topK,
+          rag_maxTokensToSample,
+          kg_temperature,
+          kg_topP,
+          kg_topK,
+          kg_maxTokensToSample,
           hybridSearch: switches.hybrid_search?.checked,
           vectorSearch: switches.vector_search?.checked,
           useKnowledgeGraph: switches.knowledge_graph_search?.checked,
