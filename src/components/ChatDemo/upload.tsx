@@ -4,7 +4,7 @@ import { useState, useRef } from 'react';
 import { generateIdFromLabel } from '@/lib/utils';
 
 interface UploadButtonProps {
-  userId: string;
+  userId: string | null;
   apiUrl: string;
   uploadedDocuments: any[];
   onUploadSuccess?: () => void;

@@ -5,27 +5,25 @@ import { useRouter } from 'next/router';
 import { r2rClient } from 'r2r-js';
 import React, { useState, useEffect, useRef } from 'react';
 
-import ConfigurationSheet from '@/components/ChatDemo/ConfigurationSheet';
 import { Result } from '@/components/ChatDemo/result';
 import { Search } from '@/components/ChatDemo/search';
 import SingleSwitch from '@/components/ChatDemo/SingleSwitch';
-import { Sources } from '@/components/ChatDemo/sources';
 import useSwitchManager from '@/components/ChatDemo/SwitchManager';
 import { Title } from '@/components/ChatDemo/title';
 import Layout from '@/components/Layout';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import ModelSelector from '@/components/ui/ModelSelector';
+import { Slider } from '@/components/ui/slider';
 import { useToast } from '@/components/ui/use-toast';
-import UserSelector from '@/components/ui/UserSelector';
 import { usePipelineInfo } from '@/context/PipelineInfo';
-import { useUserContext } from '@/context/UserContext';
-
-import Neo4jGraph from './Neo4jGraph';
 
 const Index: React.FC = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { toast } = useToast();
   const [query, setQuery] = useState('');
+  const [hasAttemptedFetch, setHasAttemptedFetch] = useState(false);
 
   useEffect(() => {
     if (searchParams) {
@@ -44,10 +42,10 @@ const Index: React.FC = () => {
 
   const { switches, initializeSwitch, updateSwitch } = useSwitchManager();
 
-  const [rag_temperature, setRagTemperature] = useState(0.1);
-  const [rag_topP, setRagTopP] = useState(1);
-  const [rag_top_k, setRagTop_k] = useState(100);
-  const [rag_max_tokens_to_sample, setRagMax_tokens_to_sample] = useState(1024);
+  const [temperature, setTemperature] = useState(0.1);
+  const [topP, setTopP] = useState(1);
+  const [top_k, setTop_k] = useState(100);
+  const [max_tokens_to_sample, setMax_tokens_to_sample] = useState(1024);
   const [kg_temperature, setKgTemperature] = useState(0.1);
   const [kg_top_p, setKgTopP] = useState(1);
   const [kg_top_k, setKgTop_k] = useState(100);
@@ -59,7 +57,7 @@ const Index: React.FC = () => {
   });
   const contentAreaRef = useRef<HTMLDivElement>(null);
 
-  const [userId, setUserId] = useState('063edaf8-3e63-4cb9-a4d6-a855f36376c3');
+  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
     initializeSwitch(
@@ -73,12 +71,6 @@ const Index: React.FC = () => {
       false,
       'Hybrid Search',
       'Hybrid search is a search method that combines multiple search methods to provide more accurate and relevant search results.'
-    );
-    initializeSwitch(
-      'knowledge_graph_search',
-      false,
-      'Knowledge Graph Search',
-      'Knowledge graph search is a search method that uses knowledge graphs to provide more accurate and relevant search results.'
     );
   }, [initializeSwitch]);
 
@@ -98,7 +90,7 @@ const Index: React.FC = () => {
 
   useEffect(() => {
     if (pipeline?.deploymentUrl) {
-      const client = new r2rClient(pipeline?.deploymentUrl);
+      const client = new r2rClient(pipeline.deploymentUrl);
       setIsLoading(true);
       client
         .documentsOverview()
@@ -110,6 +102,7 @@ const Index: React.FC = () => {
         })
         .finally(() => {
           setIsLoading(false);
+          setHasAttemptedFetch(true);
         });
     }
   }, [pipeline?.deploymentUrl]);
@@ -131,94 +124,147 @@ const Index: React.FC = () => {
   }, []);
 
   return (
-    <Layout isConnected={true} pageTitle="Playground">
+    <Layout pageTitle="Playground" includeFooter={false}>
       <div className="flex h-[calc(100vh)] pt-16">
         {/* Sidebar */}
-        <div className="w-80 bg-zinc-800 p-4 flex flex-col">
+        <div className="w-80 bg-zinc-800 p-4 flex flex-col overflow-y-auto">
           <h2 className="text-xl font-bold text-blue-500 mb-4">
             Control Panel
           </h2>
 
-          {/* Configuration */}
-          <div className="mb-4">
-            <ConfigurationSheet
-              temperature={rag_temperature}
-              setTemperature={setRagTemperature}
-              top_p={rag_topP}
-              setTopP={setRagTopP}
-              top_k={rag_top_k}
-              setTop_k={setRagTop_k}
-              max_tokens_to_sample={rag_max_tokens_to_sample}
-              setMax_tokens_to_sample={setRagMax_tokens_to_sample}
-              kg_temperature={kg_temperature}
-              setKgTemperature={setKgTemperature}
-              kg_top_p={kg_top_p}
-              setKgTopP={setKgTopP}
-              kg_top_k={kg_top_k}
-              setKgTop_k={setKgTop_k}
-              kg_max_tokens_to_sample={kg_max_tokens_to_sample}
-              setKgMax_tokens_to_sample={setKgMax_tokens_to_sample}
-            />
-          </div>
+          {/* Configuration Fields */}
+          <div className="space-y-4 mb-4">
+            <h3 className="text-lg font-semibold text-blue-400 mt-2">
+              Search Settings
+            </h3>
 
-          {/* Switches */}
-          <div className="space-y-2 mb-4">
-            {Object.keys(switches).map((id) => (
-              <SingleSwitch
-                key={id}
-                id={id}
-                initialChecked={switches[id].checked}
-                onChange={handleSwitchChange}
-                label={switches[id].label}
-                tooltipText={switches[id].tooltipText}
-              />
-            ))}
+            {/* Switches */}
+            <div className="space-y-2 mb-4">
+              {Object.keys(switches).map((id) => (
+                <SingleSwitch
+                  key={id}
+                  id={id}
+                  initialChecked={switches[id].checked}
+                  onChange={handleSwitchChange}
+                  label={switches[id].label}
+                  tooltipText={switches[id].tooltipText}
+                />
+              ))}
+            </div>
+            <h3 className="text-lg font-semibold text-blue-400 pt-4">
+              RAG Generation Config
+            </h3>
+            <div className="space-y-2">
+              <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="selectedModel">Selected Model</Label>
+                  <Input
+                    id="selectedModel"
+                    type="string"
+                    value={selectedModel}
+                    // className="w-24"
+                    onChange={(e) => setSelectedModel(e.target.value)}
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="top_k">Top K</Label>
+                  <Input
+                    id="top_k"
+                    type="number"
+                    value={top_k}
+                    // className="w-60"
+                    onChange={(e) => setTop_k(Number(e.target.value))}
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="max_tokens_to_sample">
+                    Max Tokens to Sample
+                  </Label>
+                  <Input
+                    id="max_tokens_to_sample"
+                    type="number"
+                    value={max_tokens_to_sample}
+                    // className="w-24"
+                    onChange={(e) =>
+                      setMax_tokens_to_sample(Number(e.target.value))
+                    }
+                  />
+                </div>
+
+                <Label htmlFor="temperature">Temperature</Label>
+                <div className="flex items-center gap-2">
+                  <Slider
+                    id="temperature"
+                    value={[temperature]}
+                    max={2}
+                    step={0.01}
+                    className="w-60"
+                    onValueChange={(value) => setTemperature(value[0])}
+                  />
+                  <span className="text-sm">{temperature.toFixed(2)}</span>
+                </div>
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="top_p">Top P</Label>
+                <div className="flex items-center gap-2">
+                  <Slider
+                    id="top_p"
+                    value={[topP]}
+                    max={1}
+                    step={0.01}
+                    className="w-60"
+                    onValueChange={(value) => setTopP(value[0])}
+                  />
+                  <span className="text-sm">{topP.toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="mt-auto">
             {/* Pipeline URL */}
+            Pipeline URL:
             <input
               type="text"
-              value={pipeline?.deploymentUrl}
+              value={pipeline?.deploymentUrl || ''}
               disabled={true}
               className="w-full bg-zinc-700 text-zinc-300 p-2 rounded"
             />
             {/* Model Selector */}
-            <ModelSelector
+            {/* <ModelSelector
               selectedModel={selectedModel}
               setSelectedModel={setSelectedModel}
-            />
+            /> */}
           </div>
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col">
-          {/* Chat Interface */}
-          <div className="flex-1 overflow-auto p-4 mt-5">
-            <Result
-              query={query}
-              setQuery={setQuery}
-              model={selectedModel}
-              userId={userId}
-              apiUrl={pipeline?.deploymentUrl}
-              search_limit={10}
-              rag_temperature={rag_temperature}
-              rag_topP={rag_topP}
-              rag_topK={rag_top_k}
-              rag_maxTokensToSample={rag_max_tokens_to_sample}
-              kg_temperature={kg_temperature}
-              kg_topP={kg_top_p}
-              kg_topK={kg_top_k}
-              kg_maxTokensToSample={kg_max_tokens_to_sample}
-              uploadedDocuments={uploadedDocuments}
-              setUploadedDocuments={setUploadedDocuments}
-              switches={switches}
-            />
-          </div>
+        <div className="flex-1 flex flex-col items-center overflow-hidden">
+          <div className="w-full max-w-4xl flex flex-col flex-grow overflow-hidden">
+            {/* Chat Interface */}
+            <div className="flex-1 overflow-auto p-4 mt-5">
+              <Result
+                query={query}
+                setQuery={setQuery}
+                model={selectedModel}
+                userId={userId}
+                apiUrl={pipeline?.deploymentUrl}
+                search_limit={10}
+                rag_temperature={temperature}
+                rag_topP={topP}
+                rag_topK={top_k}
+                rag_maxTokensToSample={max_tokens_to_sample}
+                uploadedDocuments={uploadedDocuments}
+                setUploadedDocuments={setUploadedDocuments}
+                switches={switches}
+                hasAttemptedFetch={hasAttemptedFetch}
+              />
+            </div>
 
-          {/* Search Bar */}
-          <div className="p-4 bg-zinc-800">
-            <Search pipeline={pipeline || undefined} setQuery={setQuery} />
+            {/* Search Bar */}
+            <div className="p-4 bg-zinc-800 w-full">
+              <Search pipeline={pipeline || undefined} setQuery={setQuery} />
+            </div>
           </div>
         </div>
       </div>

@@ -31,13 +31,26 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [watchedPipelines, setWatchedPipelines] = useState<
     Record<string, Pipeline>
-  >({});
+  >({
+    '1': {
+      pipelineName: 'Local Pipeline',
+      deploymentUrl: 'http://0.0.0.0:8000/',
+      pipelineId: 'e67897b9-5f80-4f6a-8f2f-0c80ad106865',
+    },
+  });
 
   // Load data from local storage on initial render
   useEffect(() => {
     const storedPipelines = localStorage.getItem('watchedPipelines');
     if (storedPipelines) {
-      setWatchedPipelines(JSON.parse(storedPipelines));
+      setWatchedPipelines({
+        '1': {
+          pipelineName: 'Local Pipeline',
+          deploymentUrl: 'http://0.0.0.0:8000/',
+          pipelineId: 'e67897b9-5f80-4f6a-8f2f-0c80ad106865',
+        },
+        ...JSON.parse(storedPipelines),
+      });
     }
   }, []);
 
