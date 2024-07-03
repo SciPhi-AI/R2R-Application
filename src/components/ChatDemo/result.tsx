@@ -90,6 +90,7 @@ export const Result: FC<{
         top_p: rag_topP ?? 1.0,
         top_k: rag_topK ?? 100,
         max_tokens_to_sample: rag_maxTokensToSample ?? 1024,
+        model: model,
         stream: true,
       };
 
