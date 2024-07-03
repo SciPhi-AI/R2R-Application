@@ -1,3 +1,4 @@
+import { r2rClient } from 'r2r-js';
 import { FC, useEffect, useState, useMemo } from 'react';
 
 import { Answer } from './answer';
@@ -72,39 +73,40 @@ export const Result: FC<{
     let inLLMResponse = false;
 
     try {
-      const response = await fetch(`/api/rag-completion`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query,
-          userId,
-          apiUrl,
-          model,
-          search_limit,
-          rag_temperature,
-          rag_topP,
-          rag_topK,
-          rag_maxTokensToSample,
-          kg_temperature,
-          kg_topP,
-          kg_topK,
-          kg_maxTokensToSample,
-          hybridSearch: switches.hybrid_search?.checked,
-          vectorSearch: switches.vector_search?.checked,
-          useKnowledgeGraph: switches.knowledge_graph_search?.checked,
-        }),
+      const client = new r2rClient(apiUrl);
+
+      const kgGenerationConfig = {
+        temperature: kg_temperature ?? 0.1,
+        top_p: kg_topP ?? 1.0,
+        top_k: kg_topK ?? 100,
+        max_tokens_to_sample: kg_maxTokensToSample ?? 1024,
+        stream: true,
+      };
+
+      const ragGenerationConfig = {
+        temperature: rag_temperature ?? 0.1,
+        top_p: rag_topP ?? 1.0,
+        top_k: rag_topK ?? 100,
+        max_tokens_to_sample: rag_maxTokensToSample ?? 1024,
+        stream: true,
+      };
+
+      const response = await client.rag({
+        query: query,
+        use_vector_search: switches.vector_search?.checked ?? true,
+        search_filters: {},
+        search_limit: search_limit,
+        do_hybrid_search: switches.hybrid_search?.checked ?? false,
+        use_kg_search: switches.knowledge_graph_search?.checked ?? false,
+        kg_generation_config: kgGenerationConfig,
+        rag_generation_config: ragGenerationConfig,
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      if (!response.body) {
-        throw new Error('Response body is null');
+      if (!response || !response.getReader) {
+        throw new Error('Invalid response from r2rClient');
       }
 
-      const reader = response.body.getReader();
+      const reader = response.getReader();
       const decoder = new TextDecoder();
 
       while (true) {
