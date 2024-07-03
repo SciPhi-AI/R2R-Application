@@ -1,267 +1,214 @@
-import React, { useState } from 'react';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+import {
+  ChevronDown,
+  ChevronRight,
+  ChevronLeft,
+  ChevronRight as ChevronRightIcon,
+} from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 
-interface LogEntry {
-  key: string;
-  value: any;
-}
+import { Button } from '@/components/ui/Button';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
-interface LogType {
-  run_id: string;
-  run_type: string;
-  entries: LogEntry[];
-}
+const COLLAPSIBLE_THRESHOLD = 100;
+const LOGS_PER_PAGE = 5;
 
-interface CollapsedStates {
-  [key: string]: boolean;
-}
-
-export function LogTable({ logs }: { logs: LogType[] }) {
-  const [collapsedStates, setCollapsedStates] = useState<CollapsedStates>({});
+const LogTable = ({ logs }: { logs: LogType[] }) => {
+  const [expandedCells, setExpandedCells] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedLogs, setSelectedLogs] = useState('ALL');
-  const logsPerPage = 1;
+  const [paginatedLogs, setPaginatedLogs] = useState([]);
 
-  const toggleCollapse = (logIndex: number, entryIndex: number) => {
-    const key = `${logIndex}-${entryIndex}`;
-    setCollapsedStates((prevState) => ({
-      ...prevState,
-      [key]: !prevState[key],
-    }));
+  const toggleCell = (rowId: str) => {
+    setExpandedCells((prev) => ({ ...prev, [rowId]: !prev[rowId] }));
   };
 
-  const formatLogEntry = (log: LogType, logIndex: number) => {
-    if (log.entries) {
-      return log.entries.map((entry, entryIndex) => {
-        const key = `${logIndex}-${entryIndex}`;
-        const isCollapsed = collapsedStates[key];
-        const contentHeight =
-          entry.key === 'search_results' ? 'auto' : 'inherit';
-
-        return (
-          <React.Fragment key={entryIndex}>
-            <tr className="border-t border-gray-600">
-              <td
-                className="px-4 py-2 text-white break-all align-top"
-                style={{ width: '200px' }}
-              >
-                {entry.key.toUpperCase()}
-              </td>
-              <td
-                className="px-4 py-2 text-white break-all"
-                style={{ maxHeight: contentHeight, overflow: 'hidden' }}
-              >
-                {entry.key === 'search_results' ? (
-                  <>
-                    <div
-                      style={{
-                        maxHeight: isCollapsed ? 'none' : '125px',
-                        overflow: 'hidden',
-                      }}
-                    >
-                      <ul className="no-list-style">
-                        {Array.isArray(entry.value) &&
-                        entry.value.length > 0 ? (
-                          entry.value.map((result: any, idx: number) => (
-                            <li key={idx} className={idx > 0 ? 'pt-2' : ''}>
-                              {result?.metadata?.title && (
-                                <p className="text-zinc-200">
-                                  <strong>[{idx + 1}] </strong> Title:{' '}
-                                  {result.metadata.title}
-                                </p>
-                              )}
-                              {result?.metadata?.text && (
-                                <p className="text-zinc-300">
-                                  {result.metadata.text}{' '}
-                                  {isCollapsed ? '' : ' ...'}
-                                </p>
-                              )}
-                            </li>
-                          ))
-                        ) : (
-                          <p>No search results found.</p>
-                        )}
-                      </ul>
-                    </div>
-                    <button
-                      onClick={() => toggleCollapse(logIndex, entryIndex)}
-                      className="text-blue-500 hover:underline mt-2"
-                    >
-                      {isCollapsed ? 'Show Less' : 'Show More'}
-                    </button>
-                  </>
-                ) : typeof entry.value === 'string' ? (
-                  entry.value
-                ) : (
-                  JSON.stringify(entry.value, null, 2)
-                )}
-              </td>
-            </tr>
-          </React.Fragment>
-        );
-      });
-    }
-    return null;
-  };
-
-  const handlePageChange = (pageNumber: number) => {
-    setCurrentPage(pageNumber);
-  };
-
-  const handlePreviousPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
-
-  const handleNextPage = () => {
-    if (currentPage < Math.ceil(filteredLogs.length / logsPerPage)) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
-
-  const handleSkipBack = () => {
-    setCurrentPage(Math.max(1, currentPage - 10));
-  };
-
-  const handleSkipForward = () => {
-    setCurrentPage(
-      Math.min(Math.ceil(filteredLogs.length / logsPerPage), currentPage + 10)
-    );
-  };
-
-  const filterLogs = (logs: LogType[], filter: string) => {
-    if (filter === 'ALL') {
-      return logs;
-    }
-    return logs.filter((log) => log.run_type.toUpperCase() === filter);
-  };
-
-  const filteredLogs = filterLogs(logs, selectedLogs);
-  const totalPages = Math.ceil(filteredLogs.length / logsPerPage);
-  const currentLogs = filteredLogs.slice(
-    (currentPage - 1) * logsPerPage,
-    currentPage * logsPerPage
+  const flattenedLogs = logs.flatMap((log) =>
+    log.entries.map((entry, index) => ({
+      id: `${log.run_id}-${index}`,
+      run_id: log.run_id,
+      run_type: log.run_type,
+      key: entry.key,
+      value: entry.value,
+    }))
   );
 
-  const getPageRange = () => {
-    const start = Math.max(1, currentPage - 5);
-    const end = Math.min(totalPages, currentPage + 4);
-    const range = [];
-
-    for (let i = start; i <= end; i++) {
-      range.push(i);
+  const groupedLogs = flattenedLogs.reduce((acc, log) => {
+    if (!acc[log.run_id]) {
+      acc[log.run_id] = [];
     }
-    return range;
+    acc[log.run_id].push(log);
+    return acc;
+  }, {});
+
+  const totalPages = Math.ceil(Object.keys(groupedLogs).length / LOGS_PER_PAGE);
+
+  useEffect(() => {
+    const startIndex = (currentPage - 1) * LOGS_PER_PAGE;
+    const endIndex = startIndex + LOGS_PER_PAGE;
+    const paginatedEntries = Object.entries(groupedLogs).slice(
+      startIndex,
+      endIndex
+    );
+    setPaginatedLogs(
+      paginatedEntries.map(([runId, logs]) => ({ runId, logs }))
+    );
+  }, [currentPage, logs]);
+
+  const truncateValue = (value, maxLength = 50) => {
+    if (typeof value === 'string' && value.length > maxLength) {
+      return value.substring(0, maxLength) + '...';
+    }
+    return value;
   };
 
-  const pageRange = getPageRange();
+  const prettifyJSON = (value, indent = 0) => {
+    if (typeof value !== 'string') return value;
+
+    try {
+      const outerArray = JSON.parse(value);
+      const parsedArray = outerArray.map((item) => {
+        if (typeof item === 'string') {
+          try {
+            return JSON.parse(item);
+          } catch (e) {
+            return item;
+          }
+        }
+        return item;
+      });
+
+      return formatObject(parsedArray, indent);
+    } catch (e) {
+      return value;
+    }
+  };
+
+  const formatObject = (obj, indent = 0) => {
+    if (typeof obj !== 'object' || obj === null) {
+      return JSON.stringify(obj);
+    }
+
+    const isArray = Array.isArray(obj);
+    const brackets = isArray ? ['[', ']'] : ['{', '}'];
+    const indentStr = '  '.repeat(indent);
+    const nextIndentStr = '  '.repeat(indent + 1);
+
+    const formatted = Object.entries(obj)
+      .map(([key, value]) => {
+        const formattedValue = formatObject(value, indent + 1);
+        return isArray
+          ? `${nextIndentStr}${formattedValue}`
+          : `${nextIndentStr}"${key}": ${formattedValue}`;
+      })
+      .join(',\n');
+
+    return `${brackets[0]}\n${formatted}\n${indentStr}${brackets[1]}`;
+  };
+
+  const renderValue = (log) => {
+    const isCollapsible =
+      typeof log.value === 'string' && log.value.length > COLLAPSIBLE_THRESHOLD;
+    const prettyValue = prettifyJSON(log.value);
+
+    if (isCollapsible) {
+      return (
+        <Collapsible open={expandedCells[log.id]}>
+          <CollapsibleTrigger
+            onClick={() => toggleCell(log.id)}
+            className="flex items-center w-full text-left"
+          >
+            {expandedCells[log.id] ? (
+              <ChevronDown className="mr-2 flex-shrink-0" />
+            ) : (
+              <ChevronRight className="mr-2 flex-shrink-0" />
+            )}
+            <span className="truncate">{truncateValue(prettyValue)}</span>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <pre className="mt-2 whitespace-pre-wrap overflow-x-auto text-xs">
+              {prettyValue}
+            </pre>
+          </CollapsibleContent>
+        </Collapsible>
+      );
+    } else {
+      return (
+        <pre className="whitespace-pre-wrap overflow-x-auto text-xs">
+          {prettyValue}
+        </pre>
+      );
+    }
+  };
 
   return (
-    <div className="mt-8">
-      <div className="flex justify-between items-center">
-        <h3 className="text-2xl font-bold text-blue-500 pl-4">Logs</h3>
-        <div className="flex space-x-4 pr-2">
-          {['ALL', 'RAG', 'INGESTION'].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => {
-                setSelectedLogs(tab);
-                setCurrentPage(1);
-              }}
-              className={`px-4 py-2 rounded ${
-                selectedLogs === tab
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-zinc-800 text-zinc-400'
-              }`}
-            >
-              {tab}
-            </button>
+    <div className="overflow-x-auto">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-1/6">Run ID</TableHead>
+            <TableHead className="w-1/6">Run Type</TableHead>
+            <TableHead className="w-1/6">Key</TableHead>
+            <TableHead className="w-1/2">Value</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {paginatedLogs.map(({ runId, logs }) => (
+            <React.Fragment key={runId}>
+              <TableRow className="bg-muted/50">
+                <TableCell colSpan={4} className="font-semibold">
+                  Run ID: {runId} ({logs[0].run_type})
+                </TableCell>
+              </TableRow>
+              {logs.map((log) => (
+                <TableRow key={log.id} className="align-top">
+                  <TableCell className="w-1/6"></TableCell>
+                  <TableCell className="w-1/6"></TableCell>
+                  <TableCell className="w-1/6 pt-3">{log.key}</TableCell>
+                  <TableCell className="w-1/2">{renderValue(log)}</TableCell>
+                </TableRow>
+              ))}
+            </React.Fragment>
           ))}
+        </TableBody>
+      </Table>
+      <div className="flex items-center justify-end space-x-2 py-4">
+        <Button
+          variant="outline"
+          onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+          disabled={currentPage === 1}
+        >
+          <ChevronLeft className="h-4 w-4" />
+          Previous
+        </Button>
+        <div className="text-sm font-medium">
+          Page {currentPage} of {totalPages}
         </div>
-      </div>
-
-      <div className="flex justify-center mb-4">
-        <button
-          onClick={handleSkipBack}
-          className="px-4 py-2 mx-1 rounded bg-zinc-800 text-zinc-400"
-          disabled={currentPage === 1}
-        >
-          &lt;&lt;
-        </button>
-        <button
-          onClick={handlePreviousPage}
-          className="px-4 py-2 mx-1 rounded bg-zinc-800 text-zinc-400"
-          disabled={currentPage === 1}
-        >
-          &lt; Previous
-        </button>
-        {pageRange.map((page) => (
-          <button
-            key={page}
-            onClick={() => handlePageChange(page)}
-            className={`px-4 py-2 mx-1 rounded ${
-              currentPage === page
-                ? 'bg-blue-500 text-white'
-                : 'bg-zinc-800 text-zinc-400'
-            }`}
-          >
-            {page}
-          </button>
-        ))}
-        <button
-          onClick={handleNextPage}
-          className="px-4 py-2 mx-1 rounded bg-zinc-800 text-zinc-400"
+        <Button
+          variant="outline"
+          onClick={() =>
+            setCurrentPage((page) => Math.min(totalPages, page + 1))
+          }
           disabled={currentPage === totalPages}
         >
-          Next &gt;
-        </button>
-        <button
-          onClick={handleSkipForward}
-          className="px-4 py-2 mx-1 rounded bg-zinc-800 text-zinc-400"
-          disabled={currentPage === totalPages}
-        >
-          &gt;&gt;
-        </button>
-      </div>
-
-      <div
-        className="overflow-auto max-h-96 mt-4"
-        style={{ maxHeight: '80vh' }}
-      >
-        <table className="min-w-full bg-zinc-800 border border-gray-600">
-          <thead>
-            <tr className="border-b border-gray-600">
-              <th
-                className="px-4 py-2 text-left text-white"
-                style={{ width: '200px' }}
-              >
-                Key
-              </th>
-              <th className="px-4 py-2 text-left text-white">Value</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentLogs && currentLogs.length > 0 ? (
-              currentLogs.map((log: LogType, logIndex: number) => (
-                <React.Fragment key={logIndex}>
-                  <tr className="bg-zinc-900 border-t border-gray-600">
-                    <td colSpan={2} className="px-4 py-2 text-blue-400">
-                      Run ID: {log.run_id} (Type: {log.run_type.toUpperCase()})
-                    </td>
-                  </tr>
-                  {formatLogEntry(log, logIndex)}
-                </React.Fragment>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={2} className="px-4 py-2 text-center text-white">
-                  No logs available.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+          Next
+          <ChevronRightIcon className="h-4 w-4" />
+        </Button>
       </div>
     </div>
   );
-}
+};
+
+export default LogTable;

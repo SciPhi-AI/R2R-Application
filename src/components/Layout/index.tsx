@@ -10,6 +10,7 @@ type Props = {
   localNav?: ReactNode;
   pageTitle?: string; // Optional prop for setting the page title
   isConnected?: boolean;
+  includeFooter?: boolean;
 };
 
 const Layout: React.FC<Props> = ({
@@ -17,6 +18,7 @@ const Layout: React.FC<Props> = ({
   localNav,
   pageTitle,
   isConnected,
+  includeFooter = true,
 }) => {
   return (
     <div className="w-full min-h-screen flex flex-col">
@@ -24,7 +26,7 @@ const Layout: React.FC<Props> = ({
       <Navbar isConnected={isConnected || true} />
       <main className="flex-grow">{children}</main>
       <Toaster />
-      <Footer />
+      {includeFooter && <Footer />}
     </div>
   );
 };

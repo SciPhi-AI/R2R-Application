@@ -1,8 +1,9 @@
-'use client';
 import { DocumentMagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { format, parseISO } from 'date-fns'; // Import date-fns functions
+import { ClipboardCopyIcon } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { r2rClient } from 'r2r-js';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 import { DeleteButton } from '@/components/ChatDemo/deleteButton';
 import UpdateButtonContainer from '@/components/ChatDemo/UpdateButtonContainer';
@@ -30,29 +31,61 @@ class DocumentInfoType {
   metadata: any = null;
 }
 
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 2000; // 2 seconds
+const TRANSITION_DELAY = 500; // 0.5 seconds
+
 const Index: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [documents, setDocuments] = useState<DocumentInfoType[]>([]);
   const [selectedDocumentIds, setSelectedDocumentIds] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const { toast } = useToast();
 
   const documentsPerPage = 10;
 
-  const fetchDocuments = (client: r2rClient) => {
-    client
-      .documentsOverview([], [])
-      .then((data) => {
+  const { pipeline, isLoading: isPipelineLoading } = usePipelineInfo();
+  const userId = null;
+
+  const fetchDocuments = useCallback(
+    async (client: r2rClient, retryCount = 0) => {
+      try {
+        const data = await client.documentsOverview([], []);
         setDocuments(data.results);
-      })
-      .catch((error) => {
+        setIsTransitioning(true);
+        setTimeout(() => {
+          setIsLoading(false);
+          setIsTransitioning(false);
+        }, TRANSITION_DELAY);
+        setError(null);
+      } catch (error) {
         console.error('Error fetching documents:', error);
-      });
-  };
+        if (retryCount < MAX_RETRIES) {
+          setTimeout(() => fetchDocuments(client, retryCount + 1), RETRY_DELAY);
+        } else {
+          setIsLoading(false);
+          setError('Failed to fetch documents. Please try again later.');
+        }
+      }
+    },
+    []
+  );
+  const InfoIcon = () => (
+    <div className="flex items-center justify-center w-6 h-6 bg-blue-500 text-white rounded-full ml-2">
+      i
+    </div>
+  );
 
-  const { pipeline, isLoading } = usePipelineInfo();
-
-  const userId = '063edaf8-3e63-4cb9-a4d6-a855f36376c3';
+  console.log('pipeline = ', pipeline);
+  useEffect(() => {
+    if (pipeline?.deploymentUrl) {
+      const client = new r2rClient(pipeline?.deploymentUrl);
+      fetchDocuments(client);
+    }
+  }, [pipeline?.deploymentUrl, isPipelineLoading, fetchDocuments]);
 
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
@@ -65,13 +98,6 @@ const Index: React.FC = () => {
   );
 
   useEffect(() => {
-    if (pipeline?.deploymentUrl && !isLoading) {
-      const client = new r2rClient(pipeline.deploymentUrl);
-      fetchDocuments(client);
-    }
-  }, [pipeline?.deploymentUrl, isLoading]);
-
-  useEffect(() => {
     if (currentPage > totalPages) {
       setCurrentPage(Math.max(1, totalPages));
     }
@@ -81,10 +107,70 @@ const Index: React.FC = () => {
   const [isDocumentInfoDialogOpen, setIsDocumentInfoDialogOpen] =
     useState(false);
 
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text).then(
+      () => {
+        toast({
+          title: 'Copied!',
+          description: 'Document ID copied to clipboard',
+        });
+      },
+      (err) => {
+        console.error('Could not copy text: ', err);
+      }
+    );
+  };
+
+  const copyUserToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text).then(
+      () => {
+        toast({
+          title: 'Copied!',
+          description: 'User ID copied to clipboard',
+        });
+      },
+      (err) => {
+        console.error('Could not copy text: ', err);
+      }
+    );
+  };
+
+  const formatDate = (dateString: string) => {
+    if (
+      dateString !== null &&
+      dateString !== undefined &&
+      dateString.length > 0
+    ) {
+      const date = parseISO(dateString);
+      return format(date, 'MMM d, yyyy HH:mm'); // Format: "Jun 5, 2024 16:26"
+    } else {
+      return 'N/A';
+    }
+  };
+
   const renderTableRows = () => {
     const rows = [];
 
-    if (documents.length === 0) {
+    if (isLoading) {
+      rows.push(
+        <tr key="loading">
+          <td colSpan={8} className="px-4 py-2 text-center text-white">
+            <div className="flex justify-center items-center space-x-2">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+              <span>Loading documents...</span>
+            </div>
+          </td>
+        </tr>
+      );
+    } else if (error) {
+      rows.push(
+        <tr key="error">
+          <td colSpan={8} className="px-4 py-2 text-center text-white">
+            {error}
+          </td>
+        </tr>
+      );
+    } else if (documents.length === 0) {
       rows.push(
         <tr key="no-docs">
           <td colSpan={8} className="px-4 py-2 text-center text-white">
@@ -92,30 +178,11 @@ const Index: React.FC = () => {
           </td>
         </tr>
       );
-
-      // Calculate the number of empty rows needed
-      const emptyRowsCount = documentsPerPage - 1;
-
-      // Render empty rows
-      for (let i = 0; i < emptyRowsCount; i++) {
-        rows.push(
-          <tr key={`empty-${i}`} style={{ height: '50px' }}>
-            <td colSpan={8} className="px-4 py-2 text-center text-white">
-              <div
-                className="flex justify-center items-center space-x-2"
-                style={{ width: '1300px' }}
-              >
-                &nbsp;
-              </div>
-            </td>
-          </tr>
-        );
-      }
     } else {
-      // Render rows for current documents
       currentDocuments.forEach((doc) => {
+        console.log('doc = ', doc);
         rows.push(
-          <tr key={doc.document_id} style={{ height: '50px' }}>
+          <tr key={doc.document_id}>
             <td className="px-4 py-2 text-white">
               <div className="flex items-center">
                 <Checkbox
@@ -137,36 +204,47 @@ const Index: React.FC = () => {
                 />
                 <div
                   className="overflow-x-auto whitespace-nowrap ml-4"
-                  style={{ width: '225px' }}
+                  style={{ width: '125px' }}
                 >
-                  {doc.document_id}
+                  {/* {doc.document_id} */}
+                  <div
+                    className="overflow-x-auto whitespace-nowrap ml-4 cursor-pointer flex items-center"
+                    style={{ width: '125px' }}
+                    onClick={() => copyToClipboard(doc.document_id)}
+                  >
+                    {doc.document_id.substring(0, 4)}...
+                    {doc.document_id.substring(
+                      doc.document_id.length - 4,
+                      doc.document_id.length
+                    )}
+                    {/* <ClipboardCopyIcon className="h-4 w-4 ml-2" /> */}
+                  </div>
                 </div>
               </div>
             </td>
             <td className="px-4 py-2 text-white">
               <div
-                className="overflow-x-auto whitespace-nowrap"
-                style={{ width: '150px' }}
+                className="overflow-x-auto whitespace-nowrap cursor-pointer"
+                style={{ width: '100px' }}
+                onClick={() => copyUserToClipboard(doc.user_id)}
               >
-                {doc.user_id !== null && doc.user_id !== undefined
-                  ? doc.user_id
+                {doc.user_id
+                  ? `${doc.user_id.substring(0, 4)}...${doc.user_id.substring(doc.user_id.length - 4, doc.user_id.length)}`
                   : 'N/A'}
               </div>
             </td>
             <td className="px-4 py-2 text-white">
               <div
                 className="overflow-x-auto whitespace-nowrap"
-                style={{ width: '150px' }}
+                style={{ width: '175px' }}
               >
-                {doc.title !== null && doc.title !== undefined
-                  ? doc.title
-                  : 'N/A'}
+                {doc.title || 'N/A'}
               </div>
             </td>
             <td className="px-4 py-2 text-white">
               <div
                 className="overflow-x-auto whitespace-nowrap"
-                style={{ width: '50px' }}
+                style={{ width: '75px' }}
               >
                 {doc.version}
               </div>
@@ -174,9 +252,9 @@ const Index: React.FC = () => {
             <td className="px-4 py-2 text-white">
               <div
                 className="overflow-x-auto whitespace-nowrap"
-                style={{ width: '150px' }}
+                style={{ width: '175px' }}
               >
-                {doc.updated_at}
+                {formatDate(doc.updated_at)}
               </div>
             </td>
             <td className="px-4 py-2 text-white">
@@ -231,7 +309,7 @@ const Index: React.FC = () => {
             <td className="px-4 py-2 text-white">
               <div
                 className="overflow-x-auto whitespace-nowrap"
-                style={{ width: '200px' }}
+                style={{ width: '100px' }}
               >
                 {doc.updated_at}
               </div>
@@ -239,25 +317,23 @@ const Index: React.FC = () => {
           </tr>
         );
       });
+    }
 
-      // Calculate the number of empty rows needed
-      const emptyRowsCount = documentsPerPage - currentDocuments.length;
-
-      // Render empty rows
-      for (let i = 0; i < emptyRowsCount; i++) {
-        rows.push(
-          <tr key={`empty-${i}`} style={{ height: '50px' }}>
-            <td colSpan={8} className="px-4 py-2 text-center text-white">
-              <div
-                className="flex justify-center items-center space-x-2"
-                style={{ width: '1300px' }}
-              >
-                &nbsp;
-              </div>
-            </td>
-          </tr>
-        );
-      }
+    // Add empty rows to maintain table height
+    const emptyRowsCount = documentsPerPage - rows.length;
+    for (let i = 0; i < emptyRowsCount; i++) {
+      rows.push(
+        <tr key={`empty-${i}`} style={{ height: '50px' }}>
+          <td colSpan={8} className="px-4 py-2 text-center text-white">
+            <div
+              className="flex justify-center items-center space-x-2"
+              style={{ width: '1160px' }}
+            >
+              &nbsp;
+            </div>
+          </td>
+        </tr>
+      );
     }
 
     return rows;
@@ -265,10 +341,12 @@ const Index: React.FC = () => {
 
   return (
     <Layout>
-      <main className="w-full flex flex-col min-h-screen container">
+      <main className="max-w-7xl flex flex-col min-h-screen container">
         <div className="mt-[5rem] sm:mt-[5rem]">
           <div className="flex justify-between items-center">
-            <h3 className="text-2xl font-bold text-blue-500 pl-4">Documents</h3>
+            <h3 className="text-2xl font-bold text-blue-500 pl-4 pt-8">
+              Documents
+            </h3>
             <div className="flex justify-center mt-4">
               <div className="mt-6 pr-2">
                 <UploadButton
@@ -304,7 +382,18 @@ const Index: React.FC = () => {
                 <thead>
                   <tr className="border-b border-gray-600">
                     <th className="px-4 py-2 text-left text-white">
-                      Document ID
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="pl-11">Document ID </div>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>
+                              Click on a Document ID to copy it to clipboard
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     </th>
                     <th className="px-4 py-2 text-left text-white">User ID</th>
                     <th className="px-4 py-2 text-left text-white">Title</th>
@@ -319,18 +408,24 @@ const Index: React.FC = () => {
                     <th className="px-4 py-2 text-left text-white">Metadata</th>
                   </tr>
                 </thead>
-                <tbody>{renderTableRows()}</tbody>
+                <tbody
+                  className={`transition-opacity duration-500 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}
+                >
+                  {renderTableRows()}
+                </tbody>
               </table>
             </div>
           </div>
 
-          <div className="flex justify-center mt-4">
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={handlePageChange}
-            />
-          </div>
+          {!isLoading && !error && documents.length > 0 && (
+            <div className="flex justify-center mt-4">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
+            </div>
+          )}
         </div>
       </main>
       <DocumentInfoDialog

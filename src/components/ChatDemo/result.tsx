@@ -19,20 +19,21 @@ const METADATA_END_TOKEN = '</metadata>';
 export const Result: FC<{
   query: string;
   setQuery: (query: string) => void;
-  userId: string;
+  userId: string | null;
   apiUrl: string | undefined;
   search_limit: number | undefined;
   rag_temperature: number | null;
   rag_topP: number | null;
   rag_topK: number | null;
   rag_maxTokensToSample: number | null;
-  kg_temperature: number | null;
-  kg_topP: number | null;
-  kg_topK: number | null;
-  kg_maxTokensToSample: number | null;
+  // kg_temperature: number | null;
+  // kg_topP: number | null;
+  // kg_topK: number | null;
+  // kg_maxTokensToSample: number | null;
   model: string;
   uploadedDocuments: string[];
   setUploadedDocuments: any;
+  hasAttemptedFetch: boolean;
   switches: any;
 }> = ({
   query,
@@ -44,13 +45,14 @@ export const Result: FC<{
   rag_topP,
   rag_topK,
   rag_maxTokensToSample,
-  kg_temperature,
-  kg_topP,
-  kg_topK,
-  kg_maxTokensToSample,
+  // kg_temperature,
+  // kg_topP,
+  // kg_topK,
+  // kg_maxTokensToSample,
   model,
   uploadedDocuments,
   setUploadedDocuments,
+  hasAttemptedFetch,
   switches,
 }) => {
   const [sources, setSources] = useState<string | null>(null);
@@ -62,7 +64,7 @@ export const Result: FC<{
 
   const parseStreaming = async (
     query: string,
-    userId: string,
+    userId: string | null,
     apiUrl: string
   ) => {
     setSources(null);
@@ -75,19 +77,20 @@ export const Result: FC<{
     try {
       const client = new r2rClient(apiUrl);
 
-      const kgGenerationConfig = {
-        temperature: kg_temperature ?? 0.1,
-        top_p: kg_topP ?? 1.0,
-        top_k: kg_topK ?? 100,
-        max_tokens_to_sample: kg_maxTokensToSample ?? 1024,
-        stream: true,
-      };
+      // const kgGenerationConfig = {
+      //   temperature: kg_temperature ?? 0.1,
+      //   top_p: kg_topP ?? 1.0,
+      //   top_k: kg_topK ?? 100,
+      //   max_tokens_to_sample: kg_maxTokensToSample ?? 1024,
+      //   stream: true,
+      // };
 
       const ragGenerationConfig = {
         temperature: rag_temperature ?? 0.1,
         top_p: rag_topP ?? 1.0,
         top_k: rag_topK ?? 100,
         max_tokens_to_sample: rag_maxTokensToSample ?? 1024,
+        model: model,
         stream: true,
       };
 
@@ -98,7 +101,7 @@ export const Result: FC<{
         search_limit: search_limit,
         do_hybrid_search: switches.hybrid_search?.checked ?? false,
         use_kg_search: switches.knowledge_graph_search?.checked ?? false,
-        kg_generation_config: kgGenerationConfig,
+        // kg_generation_config: kgGenerationConfig,
         rag_generation_config: ragGenerationConfig,
       });
 
@@ -195,7 +198,7 @@ export const Result: FC<{
         <DefaultQueries setQuery={setQuery} />
       )}
 
-      {uploadedDocuments?.length === 0 && apiUrl && (
+      {hasAttemptedFetch && uploadedDocuments?.length === 0 && apiUrl && (
         <div className="absolute inset-4 flex items-center justify-center bg-white/40 backdrop-blur-sm">
           <div className="flex items-center p-4 bg-white shadow-2xl rounded text-blue-500 font-medium gap-4">
             Please upload at least one document to submit queries.{' '}

@@ -9,6 +9,7 @@ import { useUserContext } from '@/context/UserContext';
 
 const Home: NextPage = () => {
   const { watchedPipelines } = useUserContext();
+  console.log('watchedPipelines = ', watchedPipelines);
 
   return (
     <Layout>
