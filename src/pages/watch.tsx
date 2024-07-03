@@ -44,6 +44,7 @@ function PipelineMenu({
   const router = useRouter();
 
   const handleSubmit = async () => {
+    [];
     setIsLoading(true);
     const { nameUnique, urlUnique } = isPipelineUnique(
       pipelineName,
@@ -83,10 +84,10 @@ function PipelineMenu({
     isValid: isDeploymentUrlValid,
     errorMessage: deploymentUrlError,
   } = useValidation(deploymentUrl, [
-    (value) => ({
-      isValid: isValidUrl(value),
-      message: 'Invalid or Empty URL',
-    }),
+    // (value) => ({
+    //   isValid: isValidUrl(value),
+    //   message: 'Invalid or Empty URL',
+    // }),
     (value) => ({
       isValid: isPipelineUnique(pipelineName, value).urlUnique,
       message: 'Deployment URL already exists',
