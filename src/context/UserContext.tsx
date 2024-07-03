@@ -34,7 +34,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   >({
     '1': {
       pipelineName: 'Local Pipeline',
-      deploymentUrl: 'http://0.0.0.0:8000/',
+      deploymentUrl: 'http://0.0.0.0:8000',
       pipelineId: 'e67897b9-5f80-4f6a-8f2f-0c80ad106865',
     },
   });
@@ -46,7 +46,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
       setWatchedPipelines({
         '1': {
           pipelineName: 'Local Pipeline',
-          deploymentUrl: 'http://0.0.0.0:8000/',
+          deploymentUrl: 'http://0.0.0.0:8000',
           pipelineId: 'e67897b9-5f80-4f6a-8f2f-0c80ad106865',
         },
         ...JSON.parse(storedPipelines),
