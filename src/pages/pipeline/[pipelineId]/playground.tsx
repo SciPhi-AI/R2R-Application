@@ -1,7 +1,5 @@
 'use client';
-import { Loader } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
-import { useRouter } from 'next/router';
 import { r2rClient } from 'r2r-js';
 import React, { useState, useEffect, useRef } from 'react';
 
@@ -9,7 +7,6 @@ import { Result } from '@/components/ChatDemo/result';
 import { Search } from '@/components/ChatDemo/search';
 import SingleSwitch from '@/components/ChatDemo/SingleSwitch';
 import useSwitchManager from '@/components/ChatDemo/SwitchManager';
-import { Title } from '@/components/ChatDemo/title';
 import Layout from '@/components/Layout';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,10 +14,10 @@ import ModelSelector from '@/components/ui/ModelSelector';
 import { Slider } from '@/components/ui/slider';
 import { useToast } from '@/components/ui/use-toast';
 import { usePipelineInfo } from '@/context/PipelineInfo';
+import { useUserContext } from '@/context/UserContext';
 
 const Index: React.FC = () => {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const { toast } = useToast();
   const [query, setQuery] = useState('');
   const [hasAttemptedFetch, setHasAttemptedFetch] = useState(false);
@@ -31,8 +28,7 @@ const Index: React.FC = () => {
     }
   }, [searchParams]);
 
-  const [sidebarWidth, setSidebarWidth] = useState(300);
-  const [selectedModel, setSelectedModel] = useState('gpt-4-turbo');
+  const { selectedModel } = useUserContext();
   const [uploadedDocuments, setUploadedDocuments] = useState([]);
 
   const { pipeline, isLoading: isPipelineLoading } = usePipelineInfo();
@@ -158,13 +154,8 @@ const Index: React.FC = () => {
               <div className="flex flex-col gap-2">
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="selectedModel">Selected Model</Label>
-                  <Input
-                    id="selectedModel"
-                    type="string"
-                    value={selectedModel}
-                    // className="w-24"
-                    onChange={(e) => setSelectedModel(e.target.value)}
-                  />
+                  {/* Model Selector */}
+                  <ModelSelector id={selectedModel} />
                 </div>
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="top_k">Top K</Label>
@@ -230,11 +221,6 @@ const Index: React.FC = () => {
               disabled={true}
               className="w-full bg-zinc-700 text-zinc-300 p-2 rounded"
             />
-            {/* Model Selector */}
-            {/* <ModelSelector
-              selectedModel={selectedModel}
-              setSelectedModel={setSelectedModel}
-            /> */}
           </div>
         </div>
 
