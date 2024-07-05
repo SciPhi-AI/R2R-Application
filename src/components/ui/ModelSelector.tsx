@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useUserContext } from '@/context/UserContext';
 
 interface ModelSelectorProps {
   id?: string;
@@ -21,11 +22,8 @@ interface ModelSelectorProps {
   setSelectedModel: (model: string) => void;
 }
 
-const ModelSelector: React.FC<ModelSelectorProps> = ({
-  id,
-  selectedModel,
-  setSelectedModel,
-}) => {
+const ModelSelector: React.FC<{ id?: string }> = ({ id }) => {
+  const { selectedModel, setSelectedModel } = useUserContext();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [customModelValue, setCustomModelValue] = useState('');
 
@@ -56,10 +54,10 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
             <SelectValue>{selectedModel || 'Select a model'}</SelectValue>
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="gpt-4o">GPT-4o</SelectItem>
             <SelectItem value="gpt-4-turbo">GPT-4 Turbo</SelectItem>
-            <SelectItem value="gpt-4">GPT-4</SelectItem>
             <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>
-            <SelectItem value="llama-2">Llama-2</SelectItem>
+            <SelectItem value="ollama/llama2">Llama 2</SelectItem>
             <SelectItem value="customModel">Add another model</SelectItem>
           </SelectContent>
         </Select>
