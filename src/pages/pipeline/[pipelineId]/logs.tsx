@@ -25,7 +25,6 @@ const Index: React.FC = () => {
   const fetchLogs = async (client: r2rClient) => {
     try {
       const data = await client.logs();
-      console.log('data = ', data.results);
       setLogs(data.results || []);
     } catch (error) {
       console.error('Error fetching logs:', error);

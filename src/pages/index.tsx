@@ -9,8 +9,6 @@ import { useUserContext } from '@/context/UserContext';
 
 const Home: NextPage = () => {
   const { watchedPipelines } = useUserContext();
-  console.log('watchedPipelines = ', watchedPipelines);
-
   return (
     <Layout>
       <main className="w-full flex flex-col min-h-screen mt-[4rem] sm:mt-[6rem] container">
