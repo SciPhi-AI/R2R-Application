@@ -33,7 +33,9 @@ export const useUserContext = () => useContext(UserContext);
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [watchedPipelines, setWatchedPipelines] = useState<Record<string, Pipeline>>({});
+  const [watchedPipelines, setWatchedPipelines] = useState<
+    Record<string, Pipeline>
+  >({});
 
   const [selectedModel, setSelectedModel] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -56,9 +58,17 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
       deploymentUrl: 'http://0.0.0.0:8000',
       pipelineId: 'e67897b9-5f80-4f6a-8f2f-0c80ad106865',
     };
-    
-    if (isPipelineUnique(preWatchedPipeline.pipelineName, preWatchedPipeline.deploymentUrl).nameUnique &&
-        isPipelineUnique(preWatchedPipeline.pipelineName, preWatchedPipeline.deploymentUrl).urlUnique) {
+
+    if (
+      isPipelineUnique(
+        preWatchedPipeline.pipelineName,
+        preWatchedPipeline.deploymentUrl
+      ).nameUnique &&
+      isPipelineUnique(
+        preWatchedPipeline.pipelineName,
+        preWatchedPipeline.deploymentUrl
+      ).urlUnique
+    ) {
       addWatchedPipeline(preWatchedPipeline.pipelineId, preWatchedPipeline);
     }
   }, []);
