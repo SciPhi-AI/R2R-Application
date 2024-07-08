@@ -79,7 +79,6 @@ const Index: React.FC = () => {
     </div>
   );
 
-  console.log('pipeline = ', pipeline);
   useEffect(() => {
     if (pipeline?.deploymentUrl) {
       const client = new r2rClient(pipeline?.deploymentUrl);
@@ -180,7 +179,6 @@ const Index: React.FC = () => {
       );
     } else {
       currentDocuments.forEach((doc) => {
-        console.log('doc = ', doc);
         rows.push(
           <tr key={doc.document_id}>
             <td className="px-4 py-2 text-white">
