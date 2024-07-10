@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-
 import {
   Dialog,
   DialogContent,
@@ -18,19 +17,18 @@ import { useUserContext } from '@/context/UserContext';
 
 interface ModelSelectorProps {
   id?: string;
-  selectedModel: string;
-  setSelectedModel: (model: string) => void;
 }
 
-const ModelSelector: React.FC<{ id?: string }> = ({ id }) => {
+const ModelSelector: React.FC<ModelSelectorProps> = ({ id }) => {
   const { selectedModel, setSelectedModel } = useUserContext();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [customModelValue, setCustomModelValue] = useState('');
 
   const handleValueChange = (value: string) => {
-    setSelectedModel(value);
     if (value === 'customModel') {
       setIsDialogOpen(true);
+    } else {
+      setSelectedModel(value);
     }
   };
 
@@ -51,13 +49,14 @@ const ModelSelector: React.FC<{ id?: string }> = ({ id }) => {
       <div id={id}>
         <Select value={selectedModel} onValueChange={handleValueChange}>
           <SelectTrigger>
-            <SelectValue>{selectedModel || 'Select a model'}</SelectValue>
+            <SelectValue placeholder="Select a model" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="null">Select a model</SelectItem>
             <SelectItem value="gpt-4o">GPT-4o</SelectItem>
             <SelectItem value="gpt-4-turbo">GPT-4 Turbo</SelectItem>
             <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>
-            <SelectItem value="ollama/llama2">Llama 2</SelectItem>
+            <SelectItem value="ollama/llama3">Llama 3</SelectItem>
             <SelectItem value="customModel">Add another model</SelectItem>
           </SelectContent>
         </Select>
