@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+
 import {
   Dialog,
   DialogContent,
@@ -55,7 +56,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ id }) => {
     if (trimmedValue !== '') {
       console.log('Adding custom model:', trimmedValue);
       const newModel = { value: trimmedValue, label: trimmedValue };
-      setAllModels(prevModels => [...prevModels, newModel]);
+      setAllModels((prevModels) => [...prevModels, newModel]);
       setSelectedModel(trimmedValue);
       setCustomModelValue('');
       setIsDialogOpen(false);

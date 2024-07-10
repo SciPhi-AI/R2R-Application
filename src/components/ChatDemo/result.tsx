@@ -31,7 +31,7 @@ export const Result: FC<{
   userId: string | null;
   apiUrl: string | null;
   search_limit: number;
-  search_filters: Object;
+  search_filters: Record<string, unknown>;
   rag_temperature: number | null;
   rag_topP: number | null;
   rag_topK: number | null;
@@ -89,15 +89,17 @@ export const Result: FC<{
       const client = new r2rClient(apiUrl);
 
       const ragGenerationConfig: RagGenerationConfig = {
-        stream: true
+        stream: true,
       };
-            
-      if (rag_temperature !== undefined) ragGenerationConfig.temperature = rag_temperature;
+
+      if (rag_temperature !== undefined)
+        ragGenerationConfig.temperature = rag_temperature;
       if (rag_topP !== undefined) ragGenerationConfig.top_p = rag_topP;
       if (rag_topK !== undefined) ragGenerationConfig.top_k = rag_topK;
-      if (rag_maxTokensToSample !== undefined) ragGenerationConfig.max_tokens_to_sample = rag_maxTokensToSample;
+      if (rag_maxTokensToSample !== undefined)
+        ragGenerationConfig.max_tokens_to_sample = rag_maxTokensToSample;
       if (model !== 'null') ragGenerationConfig.model = model;
-      
+
       const response = await client.rag({
         query: query,
         use_vector_search: switches.vector_search?.checked ?? true,

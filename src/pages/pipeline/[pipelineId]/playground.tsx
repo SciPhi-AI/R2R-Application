@@ -3,25 +3,25 @@ import { useSearchParams } from 'next/navigation';
 import { r2rClient } from 'r2r-js';
 import React, { useState, useEffect, useRef } from 'react';
 
-import { InfoIcon } from '@/components/ui/InfoIcon';
 import { Result } from '@/components/ChatDemo/result';
 import { Search } from '@/components/ChatDemo/search';
 import SingleSwitch from '@/components/ChatDemo/SingleSwitch';
 import useSwitchManager from '@/components/ChatDemo/SwitchManager';
 import Layout from '@/components/Layout';
+import { InfoIcon } from '@/components/ui/InfoIcon';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import ModelSelector from '@/components/ui/ModelSelector';
 import { Slider } from '@/components/ui/slider';
-import { useToast } from '@/components/ui/use-toast';
-import { usePipelineInfo } from '@/context/PipelineInfo';
-import { useUserContext } from '@/context/UserContext';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { useToast } from '@/components/ui/use-toast';
+import { usePipelineInfo } from '@/context/PipelineInfo';
+import { useUserContext } from '@/context/UserContext';
 
 const Index: React.FC = () => {
   const searchParams = useSearchParams();
@@ -177,7 +177,7 @@ const Index: React.FC = () => {
 
             {/* New Search Filters Input */}
             <div className="flex flex-col gap-2">
-            <Label htmlFor="searchFilters">Search Filters</Label>
+              <Label htmlFor="searchFilters">Search Filters</Label>
               {/* <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -189,7 +189,7 @@ const Index: React.FC = () => {
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider> */}
-              
+
               <Input
                 id="searchFilters"
                 type="text"
