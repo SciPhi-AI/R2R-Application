@@ -22,19 +22,21 @@ const Home: NextPage = () => {
           </p>
         </div>
 
-        <div style={{
-        backgroundColor: '#3f54be',
-        // color: '#856404',
-        padding: '12px',
-        borderRadius: '4px',
-        marginBottom: '20px',
-        border: '1px solid #384bb4'
-      }}>
-        Note: R2R is connected at 'http://localhost:8000' by default. 
-        <br/>
-        You may need to attempt connections with 'http://0.0.0.0:8000' or 'http://127.0.0.1', depending on your network settings.
-      </div>
-
+        <div
+          style={{
+            backgroundColor: '#3f54be',
+            // color: '#856404',
+            padding: '12px',
+            borderRadius: '4px',
+            marginBottom: '20px',
+            border: '1px solid #384bb4',
+          }}
+        >
+          Note: R2R is connected at 'http://localhost:8000' by default.
+          <br />
+          You may need to attempt connections with 'http://0.0.0.0:8000' or
+          'http://127.0.0.1', depending on your network settings.
+        </div>
 
         <Separator className="mb-8" />
 
