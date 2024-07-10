@@ -3,6 +3,7 @@ import { useSearchParams } from 'next/navigation';
 import { r2rClient } from 'r2r-js';
 import React, { useState, useEffect, useRef } from 'react';
 
+import { InfoIcon } from '@/components/ui/InfoIcon';
 import { Result } from '@/components/ChatDemo/result';
 import { Search } from '@/components/ChatDemo/search';
 import SingleSwitch from '@/components/ChatDemo/SingleSwitch';
@@ -15,12 +16,20 @@ import { Slider } from '@/components/ui/slider';
 import { useToast } from '@/components/ui/use-toast';
 import { usePipelineInfo } from '@/context/PipelineInfo';
 import { useUserContext } from '@/context/UserContext';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 const Index: React.FC = () => {
   const searchParams = useSearchParams();
   const { toast } = useToast();
   const [query, setQuery] = useState('');
   const [hasAttemptedFetch, setHasAttemptedFetch] = useState(false);
+  const [searchLimit, setSearchLimit] = useState(10);
+  const [searchFilters, setSearchFilters] = useState('{}');
 
   useEffect(() => {
     if (searchParams) {
@@ -119,6 +128,15 @@ const Index: React.FC = () => {
     return () => window.removeEventListener('resize', updateDimensions);
   }, []);
 
+  const safeJsonParse = (jsonString: string) => {
+    try {
+      return JSON.parse(jsonString);
+    } catch (error) {
+      console.warn('Invalid JSON input:', error);
+      return {};
+    }
+  };
+
   return (
     <Layout pageTitle="Playground" includeFooter={false}>
       <div className="flex h-[calc(100vh)] pt-16">
@@ -147,6 +165,39 @@ const Index: React.FC = () => {
                 />
               ))}
             </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="searchLimit">Search Results Limit</Label>
+              <Input
+                id="searchLimit"
+                // type="number"
+                value={searchLimit}
+                onChange={(e) => setSearchLimit(Number(e.target.value))}
+              />
+            </div>
+
+            {/* New Search Filters Input */}
+            <div className="flex flex-col gap-2">
+            <Label htmlFor="searchFilters">Search Filters</Label>
+              {/* <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                   
+                    <InfoIcon />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>A dictionary of filters like {`{"document_id": ...}`}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider> */}
+              
+              <Input
+                id="searchFilters"
+                type="text"
+                value={searchFilters}
+                onChange={(e) => setSearchFilters(e.target.value)}
+              />
+            </div>
+
             <h3 className="text-lg font-semibold text-blue-400 pt-4">
               RAG Generation Config
             </h3>
@@ -235,7 +286,8 @@ const Index: React.FC = () => {
                 model={selectedModel}
                 userId={userId}
                 apiUrl={pipeline?.deploymentUrl}
-                search_limit={10}
+                search_limit={searchLimit}
+                search_filters={safeJsonParse(searchFilters)}
                 rag_temperature={temperature}
                 rag_topP={topP}
                 rag_topK={top_k}

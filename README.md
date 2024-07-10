@@ -3,7 +3,7 @@ R2R Dashboard
 </h2>
 <img src="https://raw.githubusercontent.com/SciPhi-AI/R2R/main/assets/r2r.png" alt="Sciphi Framework">
 <h3 align="center">
-Manage and Monitor Your R2R RAG Pipelines with Ease
+Manage and Monitor Your R2R RAG Applications with Ease
 </h3>
 
 # About

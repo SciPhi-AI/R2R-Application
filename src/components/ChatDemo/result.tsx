@@ -16,12 +16,22 @@ const LLM_END_TOKEN = '</completion>';
 const METADATA_START_TOKEN = '<metadata>';
 const METADATA_END_TOKEN = '</metadata>';
 
+interface RagGenerationConfig {
+  temperature?: number;
+  top_p?: number;
+  top_k?: number;
+  max_tokens_to_sample?: number;
+  model?: string;
+  stream: boolean;
+}
+
 export const Result: FC<{
   query: string;
   setQuery: (query: string) => void;
   userId: string | null;
-  apiUrl: string | undefined;
-  search_limit: number | undefined;
+  apiUrl: string | null;
+  search_limit: number;
+  search_filters: Object;
   rag_temperature: number | null;
   rag_topP: number | null;
   rag_topK: number | null;
@@ -30,7 +40,7 @@ export const Result: FC<{
   // kg_topP: number | null;
   // kg_topK: number | null;
   // kg_maxTokensToSample: number | null;
-  model: string;
+  model: string | null;
   uploadedDocuments: string[];
   setUploadedDocuments: any;
   hasAttemptedFetch: boolean;
@@ -41,6 +51,7 @@ export const Result: FC<{
   userId,
   apiUrl,
   search_limit,
+  search_filters,
   rag_temperature,
   rag_topP,
   rag_topK,
@@ -77,27 +88,20 @@ export const Result: FC<{
     try {
       const client = new r2rClient(apiUrl);
 
-      // const kgGenerationConfig = {
-      //   temperature: kg_temperature ?? 0.1,
-      //   top_p: kg_topP ?? 1.0,
-      //   top_k: kg_topK ?? 100,
-      //   max_tokens_to_sample: kg_maxTokensToSample ?? 1024,
-      //   stream: true,
-      // };
-
-      const ragGenerationConfig = {
-        temperature: rag_temperature ?? 0.1,
-        top_p: rag_topP ?? 1.0,
-        top_k: rag_topK ?? 100,
-        max_tokens_to_sample: rag_maxTokensToSample ?? 1024,
-        model: model,
-        stream: true,
+      const ragGenerationConfig: RagGenerationConfig = {
+        stream: true
       };
-
+            
+      if (rag_temperature !== undefined) ragGenerationConfig.temperature = rag_temperature;
+      if (rag_topP !== undefined) ragGenerationConfig.top_p = rag_topP;
+      if (rag_topK !== undefined) ragGenerationConfig.top_k = rag_topK;
+      if (rag_maxTokensToSample !== undefined) ragGenerationConfig.max_tokens_to_sample = rag_maxTokensToSample;
+      if (model !== 'null') ragGenerationConfig.model = model;
+      
       const response = await client.rag({
         query: query,
         use_vector_search: switches.vector_search?.checked ?? true,
-        search_filters: {},
+        search_filters: search_filters,
         search_limit: search_limit,
         do_hybrid_search: switches.hybrid_search?.checked ?? false,
         use_kg_search: switches.knowledge_graph_search?.checked ?? false,

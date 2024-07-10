@@ -24,7 +24,7 @@ const UserContext = createContext<UserContextProps>({
   addWatchedPipeline: () => {},
   removeWatchedPipeline: () => {},
   isPipelineUnique: () => ({ nameUnique: true, urlUnique: true }),
-  selectedModel: 'gpt-4o',
+  selectedModel: 'null',
   setSelectedModel: () => {},
 });
 
@@ -39,9 +39,9 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const [selectedModel, setSelectedModel] = useState(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('selectedModel') || 'gpt-4-turbo';
+      return localStorage.getItem('selectedModel') || 'null';
     }
-    return 'gpt-4-turbo';
+    return 'null';
   });
 
   // Load data from local storage on initial render
@@ -55,7 +55,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     const preWatchedPipeline = {
       pipelineName: 'Local Pipeline',
-      deploymentUrl: 'http://0.0.0.0:8000',
+      deploymentUrl: 'http://localhost:8000',
       pipelineId: 'e67897b9-5f80-4f6a-8f2f-0c80ad106865',
     };
 
