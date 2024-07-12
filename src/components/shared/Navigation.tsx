@@ -4,13 +4,11 @@ import clsx from 'clsx';
 import { AnimatePresence, motion, useIsPresent } from 'framer-motion';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useRouter } from 'next/router';
 import { useRef } from 'react';
 
 import { useSectionStore } from '@/components/shared/SectionProvider';
 import { SectionProvider } from '@/components/shared/SectionProvider'; // Adjust the import path as necessary
 import { Tag } from '@/components/shared/Tag';
-import { Button } from '@/components/ui/Button';
 import { remToPx } from '@/lib/remToPx';
 
 interface NavGroup {

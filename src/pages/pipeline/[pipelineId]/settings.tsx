@@ -1,11 +1,9 @@
 import { PencilSquareIcon } from '@heroicons/react/24/outline';
-import { useRouter } from 'next/router';
 import { r2rClient } from 'r2r-js';
 import React, { useState, useEffect } from 'react';
 
 import EditPromptDialog from '@/components/ChatDemo/utils/editPromptDialog';
 import Layout from '@/components/Layout';
-import { useToast } from '@/components/ui/use-toast';
 import { usePipelineInfo } from '@/context/PipelineInfo';
 
 type Prompt = {
@@ -57,15 +55,12 @@ const renderNestedConfig = (config: Record<string, any>, depth = 0) => {
 
 const Index: React.FC = () => {
   const [appData, setAppData] = useState<AppData | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('config');
   const [selectedPromptName, setSelectedPromptName] = useState<string>('');
   const [selectedPromptTemplate, setSelectedPromptTemplate] =
     useState<string>('');
   const [isEditPromptDialogOpen, setIsEditPromptDialogOpen] = useState(false);
-  const { toast } = useToast();
-  const router = useRouter();
-  const { pipeline, isLoading: isPipelineLoading } = usePipelineInfo();
+  const { pipeline } = usePipelineInfo();
 
   const fetchAppData = (client: r2rClient) => {
     client
@@ -83,9 +78,6 @@ const Index: React.FC = () => {
       })
       .catch((err) => {
         console.error('Error fetching app data:', err);
-        setError(
-          err instanceof Error ? err.message : 'An unknown error occurred'
-        );
       });
   };
 

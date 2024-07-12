@@ -1,5 +1,4 @@
 'use client';
-import { RefreshCcw } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 import { getSearchUrl } from './utils/get-search-url';

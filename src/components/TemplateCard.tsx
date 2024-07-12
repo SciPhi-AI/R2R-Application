@@ -6,7 +6,6 @@ import {
   MotionValue,
   useMotionValue,
 } from 'framer-motion';
-import { useRouter } from 'next/router';
 
 import { GridPattern } from '@/components/shared/GridPattern';
 
@@ -65,7 +64,6 @@ export function TemplateCard({
   className?: string;
   handleClick: any;
 }) {
-  const router = useRouter();
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
