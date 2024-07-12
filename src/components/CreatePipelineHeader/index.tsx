@@ -19,7 +19,7 @@ export function CreatePipelineHeader() {
         variant={'filled'}
         onClick={createPipeline}
       >
-        Watch a New Pipeline
+        Connect to R2R
       </Button>
     </div>
   );
