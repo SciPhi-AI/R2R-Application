@@ -1,7 +1,9 @@
 import { r2rClient } from 'r2r-js';
-import { useState, useRef } from 'react';
+import React, { useState } from 'react';
 
 import { generateIdFromLabel } from '@/lib/utils';
+
+import { UploadDialog } from './UploadDialog';
 
 interface UploadButtonProps {
   userId: string | null;
@@ -25,17 +27,9 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
   showToast = () => {},
 }) => {
   const [isUploading, setIsUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const handleFileChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    if (event.target.files && event.target.files.length > 0) {
-      await handleDocumentUpload(event.target.files);
-    }
-  };
-
-  const handleDocumentUpload = async (files: FileList) => {
+  const handleDocumentUpload = async (files: File[]) => {
     setIsUploading(true);
     const client = new r2rClient(apiUrl);
 
@@ -46,33 +40,24 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
       const uploadedFiles: any[] = [];
       const metadatas: Record<string, any>[] = [];
       const userIds: (string | null)[] = [];
-      const filePaths: string[] = [];
-      const filesToUpload: File[] = [];
 
-      for (const file of Array.from(files)) {
-        if (!file) {
-          continue;
-        }
+      for (const file of files) {
         const fileId = generateIdFromLabel(file.name);
         uploadedFiles.push({ document_id: fileId, title: file.name });
         metadatas.push({ title: file.name });
         userIds.push(userId);
-        filesToUpload.push(file);
       }
 
-      await client.ingestFiles(filesToUpload, {
+      await client.ingestFiles(files, {
         metadatas: metadatas,
         user_ids: userIds,
       });
-
-      // Clean up temporary URLs
-      filePaths.forEach(URL.revokeObjectURL);
 
       setUploadedDocuments([...uploadedDocuments, ...uploadedFiles]);
       showToast({
         variant: 'success',
         title: 'Upload Successful',
-        description: 'The document has been uploaded',
+        description: 'The documents have been uploaded',
       });
       if (onUploadSuccess) {
         onUploadSuccess();
@@ -86,30 +71,14 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
       });
     } finally {
       setIsUploading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    }
-  };
-
-  const handleUploadButtonClick = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
     }
   };
 
   return (
-    <div style={{ zIndex: 1000 }}>
-      <input
-        type="file"
-        multiple
-        ref={fileInputRef}
-        style={{ display: 'none' }}
-        onChange={handleFileChange}
-      />
+    <>
       <button
         type="button"
-        onClick={handleUploadButtonClick}
+        onClick={() => setIsDialogOpen(true)}
         disabled={isUploading}
         className={`pl-2 pr-2 text-white py-2 px-4 rounded-full ${
           isUploading
@@ -119,6 +88,11 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
       >
         {isUploading ? 'Uploading...' : 'Upload File(s)'}
       </button>
-    </div>
+      <UploadDialog
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        onUpload={handleDocumentUpload}
+      />
+    </>
   );
 };
