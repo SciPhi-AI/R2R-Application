@@ -29,7 +29,7 @@ export const Result: FC<{
   query: string;
   setQuery: (query: string) => void;
   userId: string | null;
-  apiUrl: string | null;
+  apiUrl: string | null | undefined;
   search_limit: number;
   search_filters: Record<string, unknown>;
   rag_temperature: number | null;
@@ -92,13 +92,24 @@ export const Result: FC<{
         stream: true,
       };
 
-      if (rag_temperature !== undefined)
+      if (rag_temperature !== null && rag_temperature !== undefined) {
         ragGenerationConfig.temperature = rag_temperature;
-      if (rag_topP !== undefined) ragGenerationConfig.top_p = rag_topP;
-      if (rag_topK !== undefined) ragGenerationConfig.top_k = rag_topK;
-      if (rag_maxTokensToSample !== undefined)
+      }
+      if (rag_topP !== null && rag_topP !== undefined) {
+        ragGenerationConfig.top_p = rag_topP;
+      }
+      if (rag_topK !== null && rag_topK !== undefined) {
+        ragGenerationConfig.top_k = rag_topK;
+      }
+      if (
+        rag_maxTokensToSample !== null &&
+        rag_maxTokensToSample !== undefined
+      ) {
         ragGenerationConfig.max_tokens_to_sample = rag_maxTokensToSample;
-      if (model !== 'null') ragGenerationConfig.model = model;
+      }
+      if (model !== 'null' && model !== null) {
+        ragGenerationConfig.model = model;
+      }
 
       const response = await client.rag({
         query: query,
