@@ -9,6 +9,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint --fix .",
+    "lint:verbose": "eslint --config .eslintrc.verbose.json .",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

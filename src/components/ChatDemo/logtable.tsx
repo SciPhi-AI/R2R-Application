@@ -75,7 +75,9 @@ const LogTable = ({ logs }: { logs: LogType[] }) => {
   };
 
   const prettifyJSON = (value, indent = 0) => {
-    if (typeof value !== 'string') return value;
+    if (typeof value !== 'string') {
+      return value;
+    }
 
     try {
       const outerArray = JSON.parse(value);

@@ -1,7 +1,5 @@
 import { DocumentMagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { format, parseISO } from 'date-fns'; // Import date-fns functions
-import { ClipboardCopyIcon } from 'lucide-react';
-import { useRouter } from 'next/router';
 import { r2rClient } from 'r2r-js';
 import React, { useState, useEffect, useCallback } from 'react';
 
@@ -18,7 +16,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { toast, useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/components/ui/use-toast';
 import { usePipelineInfo } from '@/context/PipelineInfo';
 
 class DocumentInfoType {
@@ -42,7 +40,6 @@ const Index: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
   const { toast } = useToast();
 
   const documentsPerPage = 10;
@@ -72,11 +69,6 @@ const Index: React.FC = () => {
       }
     },
     []
-  );
-  const InfoIcon = () => (
-    <div className="flex items-center justify-center w-6 h-6 bg-blue-500 text-white rounded-full ml-2">
-      i
-    </div>
   );
 
   useEffect(() => {

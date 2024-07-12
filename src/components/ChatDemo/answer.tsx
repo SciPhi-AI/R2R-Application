@@ -14,7 +14,7 @@ function formatMarkdownNewLines(markdown: string) {
     .join('  \n')
     .replace(/\[(\d+)]/g, '[$1]($1)')
     .split(`"queries":`)[0]
-    .replace(/\\u[\dA-F]{4}/gi, (match: any) => {
+    .replace(/\\u[\dA-F]{4}/gi, (match: string) => {
       return String.fromCharCode(parseInt(match.replace(/\\u/g, ''), 16));
     });
 }
@@ -60,7 +60,7 @@ export const Answer: FC<{
     <Wrapper
       title={
         <>
-          <BookOpenText></BookOpenText> Answer
+          <BookOpenText /> Answer
         </>
       }
       content={
@@ -68,52 +68,30 @@ export const Answer: FC<{
           <div className="prose prose-sm max-w-full text-zinc-300 overflow-y-auto max-h-[700px]">
             <Markdown
               components={{
-                h1: ({ node, ...props }) => (
-                  <h1 style={{ color: 'white' }} {...props} />
-                ),
-                h2: ({ node, ...props }) => (
-                  <h2 style={{ color: 'white' }} {...props} />
-                ),
-                h3: ({ node, ...props }) => (
-                  <h3 style={{ color: 'white' }} {...props} />
-                ),
-                h4: ({ node, ...props }) => (
-                  <h4 style={{ color: 'white' }} {...props} />
-                ),
-                h5: ({ node, ...props }) => (
-                  <h5 style={{ color: 'white' }} {...props} />
-                ),
-                h6: ({ node, ...props }) => (
-                  <h6 style={{ color: 'white' }} {...props} />
-                ),
-                strong: ({ node, ...props }) => (
+                h1: (props) => <h1 style={{ color: 'white' }} {...props} />,
+                h2: (props) => <h2 style={{ color: 'white' }} {...props} />,
+                h3: (props) => <h3 style={{ color: 'white' }} {...props} />,
+                h4: (props) => <h4 style={{ color: 'white' }} {...props} />,
+                h5: (props) => <h5 style={{ color: 'white' }} {...props} />,
+                h6: (props) => <h6 style={{ color: 'white' }} {...props} />,
+                strong: (props) => (
                   <strong
                     style={{ color: 'white', fontWeight: 'bold' }}
                     {...props}
                   />
                 ),
-                p: ({ node, ...props }) => (
-                  <p style={{ color: 'white' }} {...props} />
-                ),
-                li: ({ node, ...props }) => (
-                  <li style={{ color: 'white' }} {...props} />
-                ),
-                blockquote: ({ node, ...props }) => (
+                p: (props) => <p style={{ color: 'white' }} {...props} />,
+                li: (props) => <li style={{ color: 'white' }} {...props} />,
+                blockquote: (props) => (
                   <blockquote style={{ color: 'white' }} {...props} />
                 ),
-                em: ({ node, ...props }) => (
-                  <em style={{ color: 'white' }} {...props} />
-                ),
-                code: ({ node, ...props }) => (
-                  <code style={{ color: 'white' }} {...props} />
-                ),
-                pre: ({ node, ...props }) => (
-                  <pre style={{ color: 'white' }} {...props} />
-                ),
-                a: ({ node: _, ...props }) => {
-                  if (!props.href) return <></>;
-                  const source = parsedSources[+props.href - 1];
-                  if (!source) return <></>;
+                em: (props) => <em style={{ color: 'white' }} {...props} />,
+                code: (props) => <code style={{ color: 'white' }} {...props} />,
+                pre: (props) => <pre style={{ color: 'white' }} {...props} />,
+                a: ({ href, ...props }) => {
+                  if (!href) return null;
+                  const source = parsedSources[+href - 1];
+                  if (!source) return null;
                   const metadata = source.metadata;
                   return (
                     <span className="inline-block w-4">
@@ -123,11 +101,11 @@ export const Answer: FC<{
                             title={metadata?.title}
                             className="inline-block cursor-pointer transform scale-[60%] no-underline font-medium bg-zinc-700 hover:bg-zinc-500 w-6 text-center h-6 rounded-full origin-top-left"
                           >
-                            {props.href}
+                            {href}
                           </span>
                         </PopoverTrigger>
                         <PopoverContent
-                          align={'start'}
+                          align="start"
                           className="max-w-screen-md flex flex-col gap-2 bg-zinc-800 shadow-transparent ring-zinc-600 border-zinc-600 ring-4 text-xs"
                         >
                           <div className="text-zinc-200 text-ellipsis overflow-hidden whitespace-nowrap font-medium">
@@ -139,10 +117,10 @@ export const Answer: FC<{
                           <div className="flex gap-4">
                             <div className="flex-1">
                               <div className="line-clamp-4 text-zinc-300 break-words">
-                                {metadata?.snippet ? metadata?.snippet : ''}
+                                {metadata?.snippet ?? ''}
                               </div>
                               <div className="line-clamp-4 text-zinc-300 break-words">
-                                {metadata?.text ? metadata?.text : ''}
+                                {metadata?.text ?? ''}
                               </div>
                             </div>
                           </div>
@@ -158,13 +136,13 @@ export const Answer: FC<{
           </div>
         ) : (
           <div className="flex flex-col gap-2 -mt-8">
-            <Skeleton className="max-w-lg h-4 bg-zinc-20"></Skeleton>
-            <Skeleton className="max-w-2xl h-4 bg-zinc-200"></Skeleton>
-            <Skeleton className="max-w-lg h-4 bg-zinc-200"></Skeleton>
-            <Skeleton className="max-w-xl h-4 bg-zinc-200"></Skeleton>
+            <Skeleton className="max-w-lg h-4 bg-zinc-20" />
+            <Skeleton className="max-w-2xl h-4 bg-zinc-200" />
+            <Skeleton className="max-w-lg h-4 bg-zinc-200" />
+            <Skeleton className="max-w-xl h-4 bg-zinc-200" />
           </div>
         )
       }
-    ></Wrapper>
+    />
   );
 };

@@ -13,9 +13,6 @@ const SEARCH_END_TOKEN = '</search>';
 const LLM_START_TOKEN = '<completion>';
 const LLM_END_TOKEN = '</completion>';
 
-const METADATA_START_TOKEN = '<metadata>';
-const METADATA_END_TOKEN = '</metadata>';
-
 interface RagGenerationConfig {
   temperature?: number;
   top_p?: number;

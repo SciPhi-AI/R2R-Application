@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/tooltip';
 import { WatchButton } from '@/components/ui/WatchButton';
 import { useUserContext } from '@/context/UserContext';
-import { isValidUrl, useValidation } from '@/lib/utils';
+import { useValidation } from '@/lib/utils';
 
 type PipelineMenuProps = {
   pipelineName: string;
@@ -188,7 +188,6 @@ function PipelineMenu({
 export default function Watch() {
   const [deploymentUrl, setDeploymentUrl] = useState('');
   const [pipelineName, setPipelineName] = useState('');
-  const router = useRouter();
 
   return (
     <Layout>
