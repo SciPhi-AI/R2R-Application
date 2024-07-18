@@ -10,7 +10,7 @@ async function checkPipelineStatus(
 
   try {
     const client = new r2rClient(deploymentUrl);
-    await client.healthCheck();
+    await client.health();
     return 'Connected';
   } catch (error) {
     console.error('Health check failed:', error);
