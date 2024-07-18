@@ -1,15 +1,37 @@
-import { DocumentMagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import {
+  DocumentMagnifyingGlassIcon,
+  FunnelIcon,
+} from '@heroicons/react/24/outline';
 import { format, parseISO } from 'date-fns'; // Import date-fns functions
 import { r2rClient } from 'r2r-js';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 
 import { DeleteButton } from '@/components/ChatDemo/deleteButton';
 import UpdateButtonContainer from '@/components/ChatDemo/UpdateButtonContainer';
 import { UploadButton } from '@/components/ChatDemo/upload';
 import DocumentInfoDialog from '@/components/ChatDemo/utils/documentDialogInfo';
+import { getFilteredAndSortedDocuments } from '@/components/ChatDemo/utils/documentSorter';
 import Layout from '@/components/Layout';
 import Pagination from '@/components/ui/altPagination';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Menubar,
+  MenubarContent,
+  MenubarItem,
+  MenubarMenu,
+  MenubarSeparator,
+  MenubarTrigger,
+  MenubarSub,
+  MenubarSubContent,
+  MenubarSubTrigger,
+} from '@/components/ui/MenuBar';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Tooltip,
   TooltipContent,
@@ -18,16 +40,7 @@ import {
 } from '@/components/ui/tooltip';
 import { useToast } from '@/components/ui/use-toast';
 import { usePipelineInfo } from '@/context/PipelineInfo';
-
-class DocumentInfoType {
-  document_id: string = '';
-  user_id: string = '';
-  title: string = '';
-  version: string = '';
-  updated_at: string = '';
-  size_in_bytes: number = 0;
-  metadata: any = null;
-}
+import { DocumentFilterCriteria, DocumentInfoType } from '@/types';
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 2000; // 2 seconds
@@ -36,6 +49,10 @@ const TRANSITION_DELAY = 500; // 0.5 seconds
 const Index: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [documents, setDocuments] = useState<DocumentInfoType[]>([]);
+  const [filterCriteria, setFilterCriteria] = useState<DocumentFilterCriteria>({
+    sort: 'title',
+    order: 'asc',
+  });
   const [selectedDocumentIds, setSelectedDocumentIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -82,17 +99,32 @@ const Index: React.FC = () => {
     setCurrentPage(pageNumber);
   };
 
-  const totalPages = Math.ceil((documents.length || 0) / documentsPerPage);
-  const currentDocuments = documents.slice(
+  const filteredAndSortedDocuments = useMemo(
+    () => getFilteredAndSortedDocuments(documents, filterCriteria),
+    [documents, filterCriteria]
+  );
+
+  const totalPages = Math.ceil(
+    (filteredAndSortedDocuments.length || 0) / documentsPerPage
+  );
+  const currentDocuments = filteredAndSortedDocuments.slice(
     (currentPage - 1) * documentsPerPage,
     currentPage * documentsPerPage
   );
 
   useEffect(() => {
-    if (currentPage > totalPages) {
-      setCurrentPage(Math.max(1, totalPages));
+    if (
+      currentPage >
+      Math.ceil(filteredAndSortedDocuments.length / documentsPerPage)
+    ) {
+      setCurrentPage(
+        Math.max(
+          1,
+          Math.ceil(filteredAndSortedDocuments.length / documentsPerPage)
+        )
+      );
     }
-  }, [totalPages, currentPage]);
+  }, [filteredAndSortedDocuments.length, currentPage, documentsPerPage]);
 
   const [selectedDocumentId, setSelectedDocumentId] = useState('');
   const [isDocumentInfoDialogOpen, setIsDocumentInfoDialogOpen] =
@@ -337,6 +369,60 @@ const Index: React.FC = () => {
             <h3 className="text-2xl font-bold text-blue-500 pl-4 pt-8">
               Documents
             </h3>
+            <div className="flex items-center space-x-4">
+              <Menubar>
+                <MenubarMenu>
+                  <MenubarTrigger className="p-2">
+                    <FunnelIcon className="h-5 w-5" />
+                  </MenubarTrigger>
+                  <MenubarContent>
+                    <MenubarItem
+                      onClick={() =>
+                        setFilterCriteria((prev) => ({
+                          ...prev,
+                          sort: 'title',
+                        }))
+                      }
+                    >
+                      Sort by Title
+                    </MenubarItem>
+                    <MenubarItem
+                      onClick={() =>
+                        setFilterCriteria((prev) => ({ ...prev, sort: 'date' }))
+                      }
+                    >
+                      Sort by Date
+                    </MenubarItem>
+                    <MenubarSeparator />
+                    <MenubarSub>
+                      <MenubarSubTrigger>Order</MenubarSubTrigger>
+                      <MenubarSubContent>
+                        <MenubarItem
+                          onClick={() =>
+                            setFilterCriteria((prev) => ({
+                              ...prev,
+                              order: 'asc',
+                            }))
+                          }
+                        >
+                          Ascending
+                        </MenubarItem>
+                        <MenubarItem
+                          onClick={() =>
+                            setFilterCriteria((prev) => ({
+                              ...prev,
+                              order: 'desc',
+                            }))
+                          }
+                        >
+                          Descending
+                        </MenubarItem>
+                      </MenubarSubContent>
+                    </MenubarSub>
+                  </MenubarContent>
+                </MenubarMenu>
+              </Menubar>
+            </div>
             <div className="flex justify-center mt-4">
               <div className="mt-6 pr-2">
                 <UploadButton
@@ -407,7 +493,7 @@ const Index: React.FC = () => {
             </div>
           </div>
 
-          {!isLoading && !error && documents.length > 0 && (
+          {!isLoading && !error && filteredAndSortedDocuments.length > 0 && (
             <div className="flex justify-center mt-4">
               <Pagination
                 currentPage={currentPage}
