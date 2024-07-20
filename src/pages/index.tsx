@@ -1,31 +1,45 @@
 import type { NextPage } from 'next';
+import { useRouter } from 'next/router';
 
 import { CreatePipelineHeader } from '@/components/CreatePipelineHeader';
 import Layout from '@/components/Layout';
 import { PipeCard } from '@/components/PipelineCard';
+import ProtectedRoute from '@/components/ProtectedRoute';
 import { Separator } from '@/components/ui/separator';
 import 'react-tippy/dist/tippy.css';
 import { useUserContext } from '@/context/UserContext';
 
 const Home: NextPage = () => {
-  const { watchedPipelines } = useUserContext();
+  const { watchedPipelines, logout } = useUserContext();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await logout();
+    router.push('/login');
+  };
+
   return (
     <Layout>
       <main className="w-full flex flex-col min-h-screen mt-[4rem] sm:mt-[6rem] container">
-        <div className="mb-8">
+        <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">R2R</h1>
-          <p className="text-lg mt-2">
-            R2R was designed to bridge the gap between local LLM experimentation
-            and scalable, production-ready Retrieval-Augmented Generation (RAG).
-            R2R provides a comprehensive and SOTA RAG system for developers,
-            built around a RESTful API for ease of use.
-          </p>
+          <button
+            onClick={handleLogout}
+            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+          >
+            Logout
+          </button>
         </div>
+        <p className="text-lg mt-2 mb-8">
+          R2R was designed to bridge the gap between local LLM experimentation
+          and scalable, production-ready Retrieval-Augmented Generation (RAG).
+          R2R provides a comprehensive and SOTA RAG system for developers, built
+          around a RESTful API for ease of use.
+        </p>
 
         <div
           style={{
             backgroundColor: '#3f54be',
-            // color: '#856404',
             padding: '12px',
             borderRadius: '4px',
             marginBottom: '20px',
@@ -67,4 +81,4 @@ const Home: NextPage = () => {
   );
 };
 
-export default Home;
+export default ProtectedRoute(Home);

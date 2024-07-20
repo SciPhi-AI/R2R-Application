@@ -1,10 +1,10 @@
 import { PencilSquareIcon } from '@heroicons/react/24/outline';
-import { r2rClient } from 'r2r-js';
 import React, { useState, useEffect } from 'react';
 
 import EditPromptDialog from '@/components/ChatDemo/utils/editPromptDialog';
 import Layout from '@/components/Layout';
 import { usePipelineInfo } from '@/context/PipelineInfo';
+import { useUserContext } from '@/context/UserContext';
 
 type Prompt = {
   name: string;
@@ -61,32 +61,40 @@ const Index: React.FC = () => {
     useState<string>('');
   const [isEditPromptDialogOpen, setIsEditPromptDialogOpen] = useState(false);
   const { pipeline } = usePipelineInfo();
+  const { getClient } = useUserContext();
 
-  const fetchAppData = (client: r2rClient) => {
-    client
-      .appSettings()
-      .then((response) => {
-        if (response && response.results) {
-          const { config, prompts } = response.results;
-          setAppData({
-            config: typeof config === 'string' ? JSON.parse(config) : config,
-            prompts: prompts || {},
-          });
-        } else {
-          throw new Error('Unexpected response structure');
-        }
-      })
-      .catch((err) => {
-        console.error('Error fetching app data:', err);
-      });
+  const fetchAppData = async () => {
+    if (!pipeline?.pipelineId) {
+      console.error('No pipeline ID available');
+      return;
+    }
+
+    try {
+      const client = await getClient(pipeline.pipelineId);
+      if (!client) {
+        throw new Error('Failed to get authenticated client');
+      }
+
+      const response = await client.appSettings();
+      if (response && response.results) {
+        const { config, prompts } = response.results;
+        setAppData({
+          config: typeof config === 'string' ? JSON.parse(config) : config,
+          prompts: prompts || {},
+        });
+      } else {
+        throw new Error('Unexpected response structure');
+      }
+    } catch (err) {
+      console.error('Error fetching app data:', err);
+    }
   };
 
   useEffect(() => {
-    if (pipeline?.deploymentUrl) {
-      const client = new r2rClient(pipeline?.deploymentUrl);
-      fetchAppData(client);
+    if (pipeline?.pipelineId) {
+      fetchAppData();
     }
-  }, [pipeline?.deploymentUrl]);
+  }, [pipeline?.pipelineId]);
 
   const { config = {}, prompts = {} } = appData || {};
 
@@ -97,9 +105,8 @@ const Index: React.FC = () => {
   };
 
   const handleSaveSuccess = () => {
-    if (pipeline?.deploymentUrl) {
-      const client = new r2rClient(pipeline?.deploymentUrl);
-      fetchAppData(client);
+    if (pipeline?.pipelineId) {
+      fetchAppData();
     }
   };
 
@@ -220,7 +227,7 @@ const Index: React.FC = () => {
         onClose={() => setIsEditPromptDialogOpen(false)}
         promptName={selectedPromptName}
         promptTemplate={selectedPromptTemplate}
-        apiUrl={pipeline?.deploymentUrl || ''}
+        pipelineId={pipeline?.pipelineId || ''}
         onSaveSuccess={handleSaveSuccess}
       />
     </Layout>

@@ -1,12 +1,12 @@
 'use client';
 import { DocumentArrowUpIcon } from '@heroicons/react/24/outline';
-import { r2rClient } from 'r2r-js';
 import React, { useState, useRef } from 'react';
 
 import { Spinner } from '@/components/Spinner';
+import { useUserContext } from '@/context/UserContext';
 
 interface UpdateButtonContainerProps {
-  apiUrl: string;
+  pipelineId: string;
   documentId: string;
   onUpdateSuccess: () => void;
   showToast: (message: {
@@ -17,13 +17,14 @@ interface UpdateButtonContainerProps {
 }
 
 const UpdateButtonContainer: React.FC<UpdateButtonContainerProps> = ({
-  apiUrl,
+  pipelineId,
   documentId,
   onUpdateSuccess,
   showToast,
 }) => {
   const [isUpdating, setIsUpdating] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { getClient } = useUserContext();
 
   const handleDocumentUpdate = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -36,12 +37,13 @@ const UpdateButtonContainer: React.FC<UpdateButtonContainerProps> = ({
     ) {
       setIsUpdating(true);
       const file = fileInputRef.current.files[0];
-      const client = new r2rClient(apiUrl);
 
       try {
-        if (!apiUrl) {
-          throw new Error('API URL is not defined');
+        const client = await getClient(pipelineId);
+        if (!client) {
+          throw new Error('Failed to get authenticated client');
         }
+
         const metadata = { title: file.name };
 
         await client.updateFiles([file], {

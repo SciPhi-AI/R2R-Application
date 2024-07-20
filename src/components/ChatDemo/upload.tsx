@@ -1,13 +1,13 @@
-import { r2rClient } from 'r2r-js';
 import React, { useState } from 'react';
 
+import { useUserContext } from '@/context/UserContext';
 import { generateIdFromLabel } from '@/lib/utils';
 
 import { UploadDialog } from './UploadDialog';
 
 interface UploadButtonProps {
   userId: string | null;
-  apiUrl: string;
+  pipelineId: string;
   uploadedDocuments: any[];
   onUploadSuccess?: () => void;
   setUploadedDocuments: (docs: any[]) => void;
@@ -20,7 +20,7 @@ interface UploadButtonProps {
 
 export const UploadButton: React.FC<UploadButtonProps> = ({
   userId,
-  apiUrl,
+  pipelineId,
   uploadedDocuments,
   setUploadedDocuments,
   onUploadSuccess,
@@ -28,15 +28,16 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
 }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { getClient } = useUserContext();
 
   const handleDocumentUpload = async (files: File[]) => {
     setIsUploading(true);
-    const client = new r2rClient(apiUrl);
+    const client = await getClient(pipelineId);
+    if (!client) {
+      throw new Error('Failed to get authenticated client');
+    }
 
     try {
-      if (!apiUrl) {
-        throw new Error('API URL is not defined');
-      }
       const uploadedFiles: any[] = [];
       const metadatas: Record<string, any>[] = [];
       const userIds: (string | null)[] = [];

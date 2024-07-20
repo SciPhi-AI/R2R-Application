@@ -1,4 +1,3 @@
-import { r2rClient } from 'r2r-js';
 import React, { useEffect, useState } from 'react';
 
 import {
@@ -7,10 +6,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { useUserContext } from '@/context/UserContext';
 
 interface DocumentInfoDialogProps {
   documentId: string;
-  apiUrl: string;
+  pipelineId: string;
   open: boolean;
   onClose: () => void;
 }
@@ -22,16 +22,25 @@ interface DocumentChunk {
 
 const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
   documentId,
-  apiUrl,
+  pipelineId,
   open,
   onClose,
 }) => {
   const [documentChunks, setDocumentChunks] = useState<DocumentChunk[]>([]);
+  const { getClient } = useUserContext();
 
   useEffect(() => {
     const fetchDocumentChunks = async () => {
+      if (!pipelineId) {
+        console.error('No pipeline ID available');
+        return;
+      }
+
       try {
-        const client = new r2rClient(apiUrl);
+        const client = await getClient(pipelineId);
+        if (!client) {
+          throw new Error('Failed to get authenticated client');
+        }
 
         const chunks = await client.documentChunks(documentId);
 
@@ -49,7 +58,7 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
     if (open && documentId) {
       fetchDocumentChunks();
     }
-  }, [open, documentId, apiUrl]);
+  }, [open, documentId, pipelineId, getClient]);
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
