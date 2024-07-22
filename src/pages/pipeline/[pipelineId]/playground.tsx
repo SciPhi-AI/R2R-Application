@@ -1,6 +1,5 @@
 'use client';
 import { useSearchParams } from 'next/navigation';
-import { r2rClient } from 'r2r-js';
 import React, { useState, useEffect, useRef } from 'react';
 
 import { Result } from '@/components/ChatDemo/result';
@@ -63,6 +62,7 @@ const Index: React.FC = () => {
   const contentAreaRef = useRef<HTMLDivElement>(null);
 
   const [userId, setUserId] = useState(null);
+  const { getClient } = useUserContext();
 
   useEffect(() => {
     initializeSwitch(
@@ -94,23 +94,27 @@ const Index: React.FC = () => {
   };
 
   useEffect(() => {
-    if (pipeline?.deploymentUrl) {
-      const client = new r2rClient(pipeline.deploymentUrl);
-      setIsLoading(true);
-      client
-        .documentsOverview()
-        .then((documents) => {
+    const fetchDocuments = async () => {
+      if (pipeline?.pipelineId) {
+        try {
+          const client = await getClient(pipeline.pipelineId);
+          if (!client) {
+            throw new Error('Failed to get authenticated client');
+          }
+          setIsLoading(true);
+          const documents = await client.documentsOverview();
           setUploadedDocuments(documents['results']);
-        })
-        .catch((error) => {
+        } catch (error) {
           console.error('Error fetching user documents:', error);
-        })
-        .finally(() => {
+        } finally {
           setIsLoading(false);
           setHasAttemptedFetch(true);
-        });
-    }
-  }, [pipeline?.deploymentUrl]);
+        }
+      }
+    };
+
+    fetchDocuments();
+  }, [pipeline?.pipelineId, getClient]);
 
   useEffect(() => {
     const updateDimensions = () => {
@@ -285,7 +289,7 @@ const Index: React.FC = () => {
                 setQuery={setQuery}
                 model={selectedModel}
                 userId={userId}
-                apiUrl={pipeline?.deploymentUrl}
+                pipelineId={pipeline?.pipelineId || ''}
                 search_limit={searchLimit}
                 search_filters={safeJsonParse(searchFilters)}
                 rag_temperature={temperature}

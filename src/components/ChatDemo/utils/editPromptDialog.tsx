@@ -1,4 +1,3 @@
-import { r2rClient } from 'r2r-js';
 import React, { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/Button';
@@ -10,13 +9,14 @@ import {
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
+import { useUserContext } from '@/context/UserContext';
 
 interface EditPromptDialogProps {
   open: boolean;
   onClose: () => void;
   promptName: string;
   promptTemplate: string;
-  apiUrl: string;
+  pipelineId: string;
   onSaveSuccess: () => void;
 }
 
@@ -25,19 +25,33 @@ const EditPromptDialog: React.FC<EditPromptDialogProps> = ({
   onClose,
   promptName,
   promptTemplate,
-  apiUrl,
+  pipelineId,
   onSaveSuccess,
 }) => {
   const [editedTemplate, setEditedTemplate] = useState(promptTemplate);
   const { toast } = useToast();
+  const { getClient } = useUserContext();
 
   useEffect(() => {
     setEditedTemplate(promptTemplate);
   }, [promptTemplate]);
 
   const handleSave = async () => {
+    if (!pipelineId) {
+      toast({
+        title: 'Error',
+        description: 'No pipeline ID available. Please try again.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     try {
-      const client = new r2rClient(apiUrl);
+      const client = await getClient(pipelineId);
+      if (!client) {
+        throw new Error('Failed to get authenticated client');
+      }
+
       await client.updatePrompt(promptName, editedTemplate);
       toast({
         title: 'Prompt updated',

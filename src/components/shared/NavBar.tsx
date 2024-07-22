@@ -3,40 +3,14 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { forwardRef, useEffect, useState, useRef } from 'react';
-import { MdOutlineArticle } from 'react-icons/md';
 
 import { Logo } from '@/components/shared/Logo';
 import { Button } from '@/components/ui/Button';
+import { useUserContext } from '@/context/UserContext';
 import { Pipeline } from '@/types';
 
 import DynamicHeaderPath from './DynamicHeaderPath';
 import { SubNavigationBar } from './SubNavigationBar';
-
-function TopLevelNavItem({
-  href,
-  children,
-  target,
-  rel,
-}: {
-  href: string;
-  children: React.ReactNode;
-  target?: string;
-  rel?: string;
-}) {
-  return (
-    <li>
-      <Link href={href} passHref legacyBehavior>
-        <a
-          className="text-sm leading-5 text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-          target={target}
-          rel={rel}
-        >
-          {children}
-        </a>
-      </Link>
-    </li>
-  );
-}
 
 interface NavbarProps {
   className?: string;
@@ -45,6 +19,7 @@ interface NavbarProps {
 
 export const Navbar = forwardRef<React.ElementRef<'div'>, NavbarProps>(
   function Header({ className, isConnected }, ref) {
+    const { watchedPipelines, logout, isAuthenticated } = useUserContext();
     const [pipelines, setPipelines] = useState<Pipeline[]>([]);
     const pipelinesRef = useRef(pipelines);
     const router = useRouter();
@@ -52,6 +27,11 @@ export const Navbar = forwardRef<React.ElementRef<'div'>, NavbarProps>(
     useEffect(() => {
       pipelinesRef.current = pipelines;
     }, [pipelines]);
+
+    const handleLogout = async () => {
+      await logout();
+      router.push('/login');
+    };
 
     const { scrollY } = useScroll();
     const bgOpacityLight = useTransform(scrollY, [0, 72], [0.5, 0.9]);
@@ -91,21 +71,26 @@ export const Navbar = forwardRef<React.ElementRef<'div'>, NavbarProps>(
             <div className="flex items-center gap-5">
               <nav className="hidden md:flex">
                 <ul role="list" className="flex items-center gap-8">
-                  <TopLevelNavItem
-                    href="https://r2r-docs.sciphi.ai/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
+                  <div className="flex items-center space-x-4">
                     <Button
                       className="rounded-md py-1 px-3 w-30"
-                      variant="primary"
+                      variant="filled"
+                      onClick={() =>
+                        window.open('https://r2r-docs.sciphi.ai', '_blank')
+                      }
                     >
-                      <div className="mt-1">
-                        <MdOutlineArticle />
-                      </div>
                       Docs
                     </Button>
-                  </TopLevelNavItem>
+                    {isAuthenticated && (
+                      <Button
+                        onClick={handleLogout}
+                        variant="danger"
+                        className="rounded-md py-1 px-3 w-30"
+                      >
+                        Logout
+                      </Button>
+                    )}
+                  </div>
                 </ul>
               </nav>
               <div className="flex gap-4">
