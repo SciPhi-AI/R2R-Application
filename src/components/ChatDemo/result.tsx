@@ -123,18 +123,14 @@ export const Result: FC<{
         rag_generation_config: ragGenerationConfig,
       });
 
-      if (!(streamResponse instanceof ReadableStream)) {
-        throw new Error(
-          `Invalid response from r2rClient: expected ReadableStream, got ${typeof streamResponse}`
-        );
-      }
-
       const reader = streamResponse.getReader();
       const decoder = new TextDecoder();
 
       while (true) {
         const { done, value } = await reader.read();
-        if (done) break;
+        if (done) {
+          break;
+        }
 
         buffer += decoder.decode(value, { stream: true });
 

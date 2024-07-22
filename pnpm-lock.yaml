@@ -123,8 +123,8 @@ importers:
         specifier: ^1.148.0
         version: 1.148.0
       r2r-js:
-        specifier: ^1.2.5
-        version: 1.2.5
+        specifier: ^1.2.9
+        version: 1.2.9
       radix-ui:
         specifier: ^1.0.1
         version: 1.0.1(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -4574,8 +4574,8 @@ packages:
   queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
 
-  r2r-js@1.2.5:
-    resolution: {integrity: sha512-7HQ95Ux+epWEvVkg7U2xwt6wpa9krVGGkp5aeGf3EgPJHXSn/rzBjmSC/vfVhkHgYCE9V4sUvXfhu9jS8ocRSA==}
+  r2r-js@1.2.9:
+    resolution: {integrity: sha512-Uy1wI91CT/vqTH7n6YLkd5DGj1I/AACoPo/xIIg+lxgsnbBUq7eg47Gpu++zxs4+4ZuLErlfgVUijg5e+THFHg==}
 
   radix-ui@1.0.1:
     resolution: {integrity: sha512-qfGibbqtbOlxP3b+1JjbLUc8Q7+e9DL8gFycLtkBkoAQyUkKuHAEBfFUcyG5MaQHjqRuML+YLtt/R1/dUYQafQ==}
@@ -11259,7 +11259,7 @@ snapshots:
 
   queue-microtask@1.2.3: {}
 
-  r2r-js@1.2.5:
+  r2r-js@1.2.9:
     dependencies:
       axios: 1.7.2
       form-data: 4.0.0

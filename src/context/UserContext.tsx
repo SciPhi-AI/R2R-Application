@@ -1,5 +1,6 @@
 import { r2rClient } from 'r2r-js';
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
 interface Pipeline {
   pipelineName: string;
@@ -24,7 +25,11 @@ interface UserContextProps {
   selectedModel: string;
   setSelectedModel: (model: string) => void;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (
+    email: string,
+    password: string,
+    instanceUrl: string
+  ) => Promise<void>;
   logout: () => Promise<void>;
   getClient: (pipelineId: string) => Promise<r2rClient | null>;
 }
@@ -109,14 +114,16 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
     return { nameUnique, urlUnique };
   };
 
-  const login = async (email: string, password: string) => {
-    // We'll use the first pipeline for initial authentication
-    const firstPipeline = Object.values(watchedPipelines)[0];
-    if (!firstPipeline) {
-      throw new Error('No pipelines available');
-    }
+  const findPipelineByUrl = (url: string): Pipeline | undefined => {
+    return Object.values(watchedPipelines).find((p) => p.deploymentUrl === url);
+  };
 
-    const client = new r2rClient(firstPipeline.deploymentUrl);
+  const login = async (
+    email: string,
+    password: string,
+    instanceUrl: string
+  ) => {
+    const client = new r2rClient(instanceUrl);
     try {
       await client.login(email, password);
       const newAuthState: AuthState = {
@@ -126,6 +133,16 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
       };
       setAuthState(newAuthState);
       localStorage.setItem('authState', JSON.stringify(newAuthState));
+
+      const existingPipeline = findPipelineByUrl(instanceUrl);
+      if (!existingPipeline) {
+        const pipelineId = uuidv4();
+        addWatchedPipeline(pipelineId, {
+          pipelineName: `R2R Pipeline`,
+          deploymentUrl: instanceUrl,
+          pipelineId,
+        });
+      }
     } catch (error) {
       console.error('Login failed:', error);
       throw error;
