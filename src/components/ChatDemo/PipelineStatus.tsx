@@ -1,6 +1,8 @@
 import { r2rClient } from 'r2r-js';
 import React, { useState, useEffect } from 'react';
 
+import { useUserContext } from '@/context/UserContext';
+
 async function checkPipelineStatus(
   deploymentUrl: string | undefined
 ): Promise<'Connected' | 'No Connection'> {
@@ -47,18 +49,15 @@ export function useConnectionStatus(
 }
 
 interface PipelineStatusProps {
-  pipeline: {
-    deploymentUrl: string;
-  };
   className?: string;
   onStatusChange?: (isConnected: boolean) => void;
 }
 
 export function PipelineStatus({
-  pipeline,
   className = '',
   onStatusChange,
 }: PipelineStatusProps) {
+  const { pipeline } = useUserContext();
   const isConnected = useConnectionStatus(
     pipeline?.deploymentUrl,
     onStatusChange

@@ -15,15 +15,13 @@ type Props = {
 
 const Layout: React.FC<Props> = ({
   children,
-  localNav,
   pageTitle,
-  isConnected,
   includeFooter = true,
 }) => {
   return (
     <div className="w-full min-h-screen flex flex-col">
       <Head>{pageTitle && <title>{pageTitle} | R2R</title>}</Head>
-      <Navbar isConnected={isConnected || true} />
+      <Navbar />
       <main className="flex-grow">{children}</main>
       <Toaster />
       {includeFooter && <Footer />}

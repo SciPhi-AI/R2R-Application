@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 
 import EditPromptDialog from '@/components/ChatDemo/utils/editPromptDialog';
 import Layout from '@/components/Layout';
-import { usePipelineInfo } from '@/context/PipelineInfo';
 import { useUserContext } from '@/context/UserContext';
 
 type Prompt = {
@@ -60,17 +59,11 @@ const Index: React.FC = () => {
   const [selectedPromptTemplate, setSelectedPromptTemplate] =
     useState<string>('');
   const [isEditPromptDialogOpen, setIsEditPromptDialogOpen] = useState(false);
-  const { pipeline } = usePipelineInfo();
-  const { getClient } = useUserContext();
+  const { pipeline, getClient } = useUserContext();
 
   const fetchAppData = async () => {
-    if (!pipeline?.pipelineId) {
-      console.error('No pipeline ID available');
-      return;
-    }
-
     try {
-      const client = await getClient(pipeline.pipelineId);
+      const client = await getClient();
       if (!client) {
         throw new Error('Failed to get authenticated client');
       }
@@ -91,10 +84,10 @@ const Index: React.FC = () => {
   };
 
   useEffect(() => {
-    if (pipeline?.pipelineId) {
+    if (pipeline?.deploymentUrl) {
       fetchAppData();
     }
-  }, [pipeline?.pipelineId]);
+  }, [pipeline?.deploymentUrl]);
 
   const { config = {}, prompts = {} } = appData || {};
 
@@ -105,7 +98,7 @@ const Index: React.FC = () => {
   };
 
   const handleSaveSuccess = () => {
-    if (pipeline?.pipelineId) {
+    if (pipeline?.deploymentUrl) {
       fetchAppData();
     }
   };
@@ -227,7 +220,6 @@ const Index: React.FC = () => {
         onClose={() => setIsEditPromptDialogOpen(false)}
         promptName={selectedPromptName}
         promptTemplate={selectedPromptTemplate}
-        pipelineId={pipeline?.pipelineId || ''}
         onSaveSuccess={handleSaveSuccess}
       />
     </Layout>

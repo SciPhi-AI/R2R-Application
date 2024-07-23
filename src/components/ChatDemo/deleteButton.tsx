@@ -15,7 +15,6 @@ import { useUserContext } from '@/context/UserContext';
 
 interface DeleteButtonProps {
   selectedDocumentIds: string[];
-  pipelineId: string;
   onDelete: () => void;
   onSuccess: () => void;
   showToast: (message: {
@@ -27,7 +26,6 @@ interface DeleteButtonProps {
 
 export const DeleteButton: React.FC<DeleteButtonProps> = ({
   selectedDocumentIds,
-  pipelineId,
   onDelete,
   onSuccess,
   showToast,
@@ -40,7 +38,7 @@ export const DeleteButton: React.FC<DeleteButtonProps> = ({
     }
 
     try {
-      const client = await getClient(pipelineId);
+      const client = await getClient();
       if (!client) {
         throw new Error('Failed to get authenticated client');
       }

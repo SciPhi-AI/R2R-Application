@@ -10,7 +10,6 @@ import { useUserContext } from '@/context/UserContext';
 
 interface DocumentInfoDialogProps {
   documentId: string;
-  pipelineId: string;
   open: boolean;
   onClose: () => void;
 }
@@ -22,7 +21,6 @@ interface DocumentChunk {
 
 const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
   documentId,
-  pipelineId,
   open,
   onClose,
 }) => {
@@ -31,13 +29,8 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
 
   useEffect(() => {
     const fetchDocumentChunks = async () => {
-      if (!pipelineId) {
-        console.error('No pipeline ID available');
-        return;
-      }
-
       try {
-        const client = await getClient(pipelineId);
+        const client = await getClient();
         if (!client) {
           throw new Error('Failed to get authenticated client');
         }
@@ -58,7 +51,7 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
     if (open && documentId) {
       fetchDocumentChunks();
     }
-  }, [open, documentId, pipelineId, getClient]);
+  }, [open, documentId, getClient]);
 
   return (
     <Dialog open={open} onOpenChange={onClose}>

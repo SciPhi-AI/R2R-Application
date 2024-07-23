@@ -27,7 +27,7 @@ export const Result: FC<{
   query: string;
   setQuery: (query: string) => void;
   userId: string | null;
-  pipelineId: string | null;
+  pipelineUrl: string | null;
   search_limit: number;
   search_filters: Record<string, unknown>;
   rag_temperature: number | null;
@@ -47,7 +47,7 @@ export const Result: FC<{
   query,
   setQuery,
   userId,
-  pipelineId,
+  pipelineUrl,
   search_limit,
   search_filters,
   rag_temperature,
@@ -72,11 +72,7 @@ export const Result: FC<{
 
   let timeout: NodeJS.Timeout;
 
-  const parseStreaming = async (
-    query: string,
-    userId: string | null,
-    pipelineId: string
-  ) => {
+  const parseStreaming = async (query: string, userId: string | null) => {
     setSources(null);
     setMarkdown('');
     setIsStreaming(true);
@@ -85,7 +81,7 @@ export const Result: FC<{
     let inLLMResponse = false;
 
     try {
-      const client = await getClient(pipelineId);
+      const client = await getClient();
       if (!client) {
         throw new Error('Failed to get authenticated client');
       }
@@ -176,14 +172,14 @@ export const Result: FC<{
   };
 
   useEffect(() => {
-    if (query === '' || !pipelineId) {
+    if (query === '' || !pipelineUrl) {
       return;
     }
 
     const debouncedParseStreaming = () => {
       clearTimeout(timeout);
       timeout = setTimeout(() => {
-        parseStreaming(query, userId, pipelineId);
+        parseStreaming(query, userId);
       }, 500);
     };
 
@@ -192,7 +188,7 @@ export const Result: FC<{
     return () => {
       clearTimeout(timeout);
     };
-  }, [query, userId, pipelineId, getClient]);
+  }, [query, userId, pipelineUrl, getClient]);
 
   const parsedMarkdown = useMemo(() => parseMarkdown(markdown), [markdown]);
 
@@ -212,13 +208,12 @@ export const Result: FC<{
         <DefaultQueries setQuery={setQuery} />
       )}
 
-      {hasAttemptedFetch && uploadedDocuments?.length === 0 && pipelineId && (
+      {hasAttemptedFetch && uploadedDocuments?.length === 0 && pipelineUrl && (
         <div className="absolute inset-4 flex items-center justify-center bg-white/40 backdrop-blur-sm">
           <div className="flex items-center p-4 bg-white shadow-2xl rounded text-blue-500 font-medium gap-4">
             Please upload at least one document to submit queries.{' '}
             <UploadButton
               userId={userId}
-              pipelineId={pipelineId}
               uploadedDocuments={uploadedDocuments}
               setUploadedDocuments={setUploadedDocuments}
             />

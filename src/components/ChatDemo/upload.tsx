@@ -7,7 +7,6 @@ import { UploadDialog } from './UploadDialog';
 
 interface UploadButtonProps {
   userId: string | null;
-  pipelineId: string;
   uploadedDocuments: any[];
   onUploadSuccess?: () => void;
   setUploadedDocuments: (docs: any[]) => void;
@@ -20,7 +19,6 @@ interface UploadButtonProps {
 
 export const UploadButton: React.FC<UploadButtonProps> = ({
   userId,
-  pipelineId,
   uploadedDocuments,
   setUploadedDocuments,
   onUploadSuccess,
@@ -32,7 +30,7 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
 
   const handleDocumentUpload = async (files: File[]) => {
     setIsUploading(true);
-    const client = await getClient(pipelineId);
+    const client = await getClient();
     if (!client) {
       throw new Error('Failed to get authenticated client');
     }

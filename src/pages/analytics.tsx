@@ -19,7 +19,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { usePipelineInfo } from '@/context/PipelineInfo';
 import { useUserContext } from '@/context/UserContext';
 
 type FilterDisplayNameKeys =
@@ -251,7 +250,7 @@ const AnalysisResults: React.FC<{
 const Analytics: React.FC = () => {
   const [analyticsData, setAnalyticsData] = useState<any>({});
   const router = useRouter();
-  const { pipeline, isLoading: isPipelineLoading } = usePipelineInfo();
+  const { pipeline } = useUserContext();
 
   const [selectedFilter, setSelectedFilter] = useState('search_latency');
   const [currentPage, setCurrentPage] = useState(1);

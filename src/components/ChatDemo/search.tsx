@@ -29,9 +29,7 @@ export const Search: FC<SearchProps> = ({ pipeline, setQuery }) => {
   const navigateToSearch = useCallback(
     debounce((searchValue: string) => {
       if (pipeline) {
-        router.push(
-          `/pipeline/${pipeline.pipelineId}/playground/?q=${encodeURIComponent(searchValue)}`
-        );
+        router.push(`/playground/?q=${encodeURIComponent(searchValue)}`);
       }
     }, 50),
     [router, pipeline]

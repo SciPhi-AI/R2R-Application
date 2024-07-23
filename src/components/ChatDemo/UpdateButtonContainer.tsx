@@ -6,7 +6,6 @@ import { Spinner } from '@/components/Spinner';
 import { useUserContext } from '@/context/UserContext';
 
 interface UpdateButtonContainerProps {
-  pipelineId: string;
   documentId: string;
   onUpdateSuccess: () => void;
   showToast: (message: {
@@ -17,7 +16,6 @@ interface UpdateButtonContainerProps {
 }
 
 const UpdateButtonContainer: React.FC<UpdateButtonContainerProps> = ({
-  pipelineId,
   documentId,
   onUpdateSuccess,
   showToast,
@@ -39,7 +37,7 @@ const UpdateButtonContainer: React.FC<UpdateButtonContainerProps> = ({
       const file = fileInputRef.current.files[0];
 
       try {
-        const client = await getClient(pipelineId);
+        const client = await getClient();
         if (!client) {
           throw new Error('Failed to get authenticated client');
         }

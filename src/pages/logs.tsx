@@ -1,39 +1,25 @@
 'use client';
 import { Loader } from 'lucide-react';
-import { useRouter } from 'next/router';
 import React, { useState, useEffect } from 'react';
 
 import LogTable from '@/components/ChatDemo/logtable';
 import Layout from '@/components/Layout';
-import { usePipelineInfo } from '@/context/PipelineInfo';
 import { useUserContext } from '@/context/UserContext';
 
 const Index: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
-
-  const router = useRouter();
-
-  const { pipeline, isLoading: isPipelineLoading } = usePipelineInfo();
-
-  const [selectedLogs, setSelectedLogs] = useState('ALL');
   const [logs, setLogs] = useState<any[]>([]);
-  const { getClient } = useUserContext();
+  const { getClient, pipeline } = useUserContext();
 
   function sleep(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   const fetchLogs = async () => {
-    if (!pipeline?.pipelineId) {
-      console.error('No pipeline ID available');
-      return;
-    }
-
     try {
-      const client = await getClient(pipeline.pipelineId);
+      const client = await getClient();
       if (!client) {
-        console.error('Failed to get authenticated client');
-        return;
+        throw new Error('Failed to get authenticated client');
       }
 
       const data = await client.logs();
@@ -44,11 +30,11 @@ const Index: React.FC = () => {
   };
 
   useEffect(() => {
-    if (pipeline?.pipelineId) {
+    if (pipeline?.deploymentUrl) {
       fetchLogs();
       sleep(1000).then(() => setIsLoading(false));
     }
-  }, [pipeline?.pipelineId, selectedLogs]);
+  }, [pipeline?.deploymentUrl]);
 
   return (
     <Layout includeFooter={false}>

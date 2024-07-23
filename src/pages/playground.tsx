@@ -8,7 +8,6 @@ import useSwitchManager from '@/components/ChatDemo/SwitchManager';
 import Layout from '@/components/Layout';
 import Sidebar from '@/components/Sidebar';
 import { useToast } from '@/components/ui/use-toast';
-import { usePipelineInfo } from '@/context/PipelineInfo';
 import { useUserContext } from '@/context/UserContext';
 
 const Index: React.FC = () => {
@@ -25,10 +24,8 @@ const Index: React.FC = () => {
     }
   }, [searchParams]);
 
-  const { selectedModel } = useUserContext();
-  const [uploadedDocuments, setUploadedDocuments] = useState([]);
+  const { pipeline, getClient, selectedModel } = useUserContext();
 
-  const { pipeline, isLoading: isPipelineLoading } = usePipelineInfo();
   const [sidebarIsOpen, setSidebarIsOpen] = useState(true);
 
   const toggleSidebar = () => {
@@ -54,9 +51,9 @@ const Index: React.FC = () => {
     height: 0,
   });
   const contentAreaRef = useRef<HTMLDivElement>(null);
+  const [uploadedDocuments, setUploadedDocuments] = useState([]);
 
   const [userId, setUserId] = useState(null);
-  const { getClient } = useUserContext();
 
   useEffect(() => {
     initializeSwitch(
@@ -89,9 +86,9 @@ const Index: React.FC = () => {
 
   useEffect(() => {
     const fetchDocuments = async () => {
-      if (pipeline?.pipelineId) {
+      if (pipeline) {
         try {
-          const client = await getClient(pipeline.pipelineId);
+          const client = await getClient();
           if (!client) {
             throw new Error('Failed to get authenticated client');
           }
@@ -108,7 +105,7 @@ const Index: React.FC = () => {
     };
 
     fetchDocuments();
-  }, [pipeline?.pipelineId, getClient]);
+  }, [pipeline, getClient]);
 
   useEffect(() => {
     const updateDimensions = () => {
@@ -176,7 +173,7 @@ const Index: React.FC = () => {
                 setQuery={setQuery}
                 model={selectedModel}
                 userId={userId}
-                pipelineId={pipeline?.pipelineId || ''}
+                pipelineUrl={pipeline?.deploymentUrl || ''}
                 search_limit={searchLimit}
                 search_filters={safeJsonParse(searchFilters)}
                 rag_temperature={temperature}

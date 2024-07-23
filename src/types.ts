@@ -1,7 +1,5 @@
 export type Pipeline = {
-  pipelineName: string;
   deploymentUrl: string;
-  pipelineId: string;
 };
 export interface Document {
   id: string;
