@@ -30,6 +30,7 @@ interface UserContextProps {
   ) => Promise<void>;
   logout: () => Promise<void>;
   getClient: () => Promise<r2rClient | null>;
+  refreshAuth: () => Promise<void>;
 }
 
 const UserContext = createContext<UserContextProps>({
@@ -41,6 +42,7 @@ const UserContext = createContext<UserContextProps>({
   login: async () => {},
   logout: async () => {},
   getClient: async () => null,
+  refreshAuth: async () => {},
 });
 
 export const useUserContext = () => useContext(UserContext);
@@ -130,7 +132,25 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [authState, pipeline]);
 
-  const getClient = async (): Promise<r2rClient | null> => {
+  const refreshAuth = useCallback(async () => {
+    if (
+      authState.isAuthenticated &&
+      pipeline &&
+      authState.email &&
+      authState.password
+    ) {
+      try {
+        const client = new r2rClient(pipeline.deploymentUrl);
+        await client.login(authState.email, authState.password);
+        await client.refreshAccessToken();
+      } catch (error) {
+        console.error('Failed to refresh authentication:', error);
+        await logout();
+      }
+    }
+  }, [authState, pipeline, logout]);
+
+  const getClient = useCallback(async (): Promise<r2rClient | null> => {
     if (
       pipeline &&
       authState.isAuthenticated &&
@@ -143,12 +163,12 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
         return client;
       } catch (error) {
         console.error('Failed to authenticate client:', error);
-        await logout();
+        await refreshAuth();
         return null;
       }
     }
     return null;
-  };
+  }, [authState, pipeline, refreshAuth]);
 
   useEffect(() => {
     let refreshInterval: NodeJS.Timeout;
@@ -176,6 +196,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
         login,
         logout,
         getClient,
+        refreshAuth,
       }}
     >
       {children}

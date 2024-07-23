@@ -15,8 +15,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-
-import { Source } from './interfaces/source';
+import { Message } from '@/types';
+import { Source } from '@/types';
 
 const SourceItem: FC<{ source: Source }> = ({ source }) => {
   const { id, score, metadata } = source;
@@ -70,18 +70,17 @@ const parseSources = (sources: string | object): Source[] => {
 };
 
 export const Answer: FC<{
-  markdown: string;
-  sources: string | null;
+  message: Message;
   isStreaming: boolean;
   isSearching: boolean;
-}> = ({ markdown, sources, isStreaming, isSearching }) => {
+}> = ({ message, isStreaming, isSearching }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [parsedSources, setParsedSources] = useState<Source[]>([]);
 
   useEffect(() => {
-    if (sources) {
+    if (message.sources) {
       try {
-        const parsed = parseSources(sources);
+        const parsed = parseSources(message.sources);
         setParsedSources(parsed);
       } catch (error) {
         console.error('Failed to parse sources:', error);
@@ -90,7 +89,7 @@ export const Answer: FC<{
     } else {
       setParsedSources([]);
     }
-  }, [sources]);
+  }, [message.sources]);
 
   return (
     <div className="mt-4">
@@ -141,7 +140,7 @@ export const Answer: FC<{
       </Accordion>
 
       <div className="space-y-4 mt-4">
-        {markdown ? (
+        {message.content ? (
           <div className="prose prose-sm max-w-full text-zinc-300 overflow-y-auto max-h-[700px]">
             <Markdown
               components={{
@@ -208,7 +207,7 @@ export const Answer: FC<{
                 },
               }}
             >
-              {formatMarkdownNewLines(markdown)}
+              {formatMarkdownNewLines(message.content)}
             </Markdown>
           </div>
         ) : (

@@ -46,10 +46,12 @@ const LoginPage: React.FC = () => {
             </label>
             <Input
               id="instanceUrl"
+              name="instanceUrl"
               type="text"
               placeholder="Instance URL"
               value={instanceUrl}
               onChange={(e) => setInstanceUrl(e.target.value)}
+              autoComplete="url"
             />
           </div>
           <div className="mb-4">
@@ -65,6 +67,7 @@ const LoginPage: React.FC = () => {
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
             />
           </div>
           <div className="mb-6">
@@ -77,11 +80,13 @@ const LoginPage: React.FC = () => {
             <div className="relative">
               <Input
                 id="password"
+                name="password"
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="pr-10"
+                autoComplete="current-password"
               />
               <button
                 type="button"
