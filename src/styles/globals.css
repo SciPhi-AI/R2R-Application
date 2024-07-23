@@ -4,6 +4,8 @@
 
 @layer base {
   :root {
+    --header-height: 4.5rem;
+
     --shiki-color-text: theme('colors.white');
     --shiki-token-constant: theme('colors.emerald.300');
     --shiki-token-string: theme('colors.emerald.300');

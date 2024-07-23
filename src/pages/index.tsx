@@ -18,7 +18,9 @@ const Home: NextPage = () => {
   }, []);
 
   const pipelineCards = useMemo(() => {
-    if (!isClient) return null;
+    if (!isClient) {
+      return null;
+    }
     return Object.values(watchedPipelines).map((pipeline) => {
       if (pipeline.pipelineId) {
         return (

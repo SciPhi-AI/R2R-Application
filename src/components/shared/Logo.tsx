@@ -8,6 +8,7 @@ interface LogoProps {
   className?: string;
   onClick?: () => void;
   disableLink?: boolean;
+  priority?: boolean;
 }
 
 export function Logo({
@@ -16,6 +17,7 @@ export function Logo({
   className = '',
   onClick,
   disableLink = false,
+  priority = true,
   ...rest
 }: LogoProps) {
   const handleClick = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
@@ -32,6 +34,7 @@ export function Logo({
       width={width}
       height={height}
       className="w-full h-full"
+      priority={priority}
       {...rest}
     />
   );

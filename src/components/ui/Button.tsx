@@ -1,5 +1,6 @@
 import clsx from 'clsx';
 import Link from 'next/link';
+import React from 'react';
 
 const variantStyles = {
   primary:
@@ -23,9 +24,7 @@ type ButtonProps = {
   className?: string;
   href?: string;
   disabled?: boolean;
-  target?: string;
-  rel?: string;
-} & React.ComponentPropsWithoutRef<'button'>;
+} & React.ButtonHTMLAttributes<HTMLButtonElement>;
 
 export function Button({
   variant = 'primary',
@@ -33,31 +32,33 @@ export function Button({
   children,
   href,
   disabled = false,
-  target,
-  rel,
   ...props
 }: ButtonProps) {
-  className = clsx(
+  const buttonClassName = clsx(
     'rounded-md inline-flex gap-0.5 justify-center overflow-hidden font-medium transition',
     variantStyles[variant],
     className
   );
 
-  // Render a link with a button inside if href is provided
+  const commonProps = {
+    className: buttonClassName,
+    disabled: disabled,
+  };
+
   if (href && !disabled) {
-    // Check disabled state
     return (
-      <Link href={href}>
-        <button className={className} {...props}>
-          {children}
-        </button>
+      <Link
+        href={href}
+        {...commonProps}
+        {...(props as React.AnchorHTMLAttributes<HTMLAnchorElement>)}
+      >
+        {children}
       </Link>
     );
   }
 
-  // Render a button if no href is provided
   return (
-    <button className={className} disabled={disabled} {...props}>
+    <button {...commonProps} {...props}>
       {children}
     </button>
   );
