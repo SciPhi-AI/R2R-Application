@@ -4,7 +4,6 @@ import { useUserContext } from '@/context/UserContext';
 
 import { Answer } from './answer';
 import { DefaultQueries } from './DefaultQueries';
-import { Sources } from './sources';
 import { UploadButton } from './upload';
 import { parseMarkdown } from './utils/parseMarkdown';
 
@@ -201,7 +200,6 @@ export const Result: FC<{
             sources={sources}
             isStreaming={isStreaming}
           />
-          <Sources sources={sources} />
           {error && <div className="text-red-500">Error: {error}</div>}
         </>
       ) : (

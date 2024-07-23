@@ -153,7 +153,6 @@ const Index: React.FC = () => {
           setTemperature={setTemperature}
           topP={topP}
           setTopP={setTopP}
-          pipelineUrl={pipeline?.deploymentUrl || ''}
         />
 
         {/* Main Content */}

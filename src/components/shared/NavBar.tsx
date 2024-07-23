@@ -15,7 +15,7 @@ interface NavbarProps {
 
 export const Navbar = forwardRef<React.ElementRef<'div'>, NavbarProps>(
   function Header({ className }, ref) {
-    const { logout, isAuthenticated, pipeline } = useUserContext();
+    const { logout, isAuthenticated } = useUserContext();
     const router = useRouter();
 
     const handleLogout = async () => {
@@ -57,8 +57,6 @@ export const Navbar = forwardRef<React.ElementRef<'div'>, NavbarProps>(
                 R2R Dashboard
               </span>
             </Code>
-          </div>
-          <div className="flex items-center gap-5">
             <nav>
               <ul role="list" className="flex items-center gap-6">
                 {navItems.map((item) => (
@@ -73,26 +71,26 @@ export const Navbar = forwardRef<React.ElementRef<'div'>, NavbarProps>(
                 ))}
               </ul>
             </nav>
-            <div className="flex items-center space-x-4">
+          </div>
+          <div className="flex items-center space-x-4">
+            <Button
+              className="rounded-md py-1 px-3 w-30"
+              variant="filled"
+              onClick={() =>
+                window.open('https://r2r-docs.sciphi.ai', '_blank')
+              }
+            >
+              Docs
+            </Button>
+            {isAuthenticated && (
               <Button
+                onClick={handleLogout}
+                variant="danger"
                 className="rounded-md py-1 px-3 w-30"
-                variant="filled"
-                onClick={() =>
-                  window.open('https://r2r-docs.sciphi.ai', '_blank')
-                }
               >
-                Docs
+                Logout
               </Button>
-              {isAuthenticated && (
-                <Button
-                  onClick={handleLogout}
-                  variant="danger"
-                  className="rounded-md py-1 px-3 w-30"
-                >
-                  Logout
-                </Button>
-              )}
-            </div>
+            )}
           </div>
         </div>
       </motion.div>

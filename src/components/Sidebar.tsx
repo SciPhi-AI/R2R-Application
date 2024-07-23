@@ -25,7 +25,6 @@ interface SidebarProps {
   setTemperature: (value: number) => void;
   topP: number;
   setTopP: (value: number) => void;
-  pipelineUrl: string;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -46,17 +45,15 @@ const Sidebar: React.FC<SidebarProps> = ({
   setTemperature,
   topP,
   setTopP,
-  pipelineUrl,
 }) => {
   return (
     <>
       <div
-        className={`fixed left-0 top-0 z-50 h-full w-80 bg-zinc-800 transition-transform duration-300 ease-in-out overflow-hidden`}
+        className={`fixed left-0 top-16 z-50 h-[calc(100%-4rem)] w-80 bg-zinc-800 transition-transform duration-300 ease-in-out overflow-hidden`}
         style={{
           transform: isOpen ? 'translateX(0)' : 'translateX(-100%)',
         }}
       >
-        <div className="h-[var(--header-height)]" />
         <div className="p-4 overflow-y-auto h-[calc(100%-var(--header-height))]">
           <h2 className="text-xl font-bold text-blue-500 mb-4">
             Control Panel

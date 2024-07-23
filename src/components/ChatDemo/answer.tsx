@@ -1,11 +1,31 @@
-import { BookOpenText } from 'lucide-react';
-import React from 'react';
+import { BookOpenText, BookText } from 'lucide-react';
+import React, { useState } from 'react';
 import { FC } from 'react';
 import Markdown from 'react-markdown';
+
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 
 import { Source } from './interfaces/source';
 import { Popover, PopoverContent, PopoverTrigger } from './popover';
 import { Skeleton } from './skeleton';
+
+const SourceItem: FC<{ source: Source }> = ({ source }) => {
+  const { id, score, metadata } = source;
+
+  return (
+    <div className="bg-zinc-700 p-3 rounded-lg mb-2" style={{ width: '100%' }}>
+      <h3 className="text-xs font-medium text-zinc-200 mb-1">
+        {metadata.title} (Similarity: {score.toFixed(3)})
+      </h3>
+      <p className="text-xs text-zinc-400">{metadata.text}</p>
+    </div>
+  );
+};
 
 function formatMarkdownNewLines(markdown: string) {
   return markdown
@@ -49,18 +69,51 @@ export const Answer: FC<{
   markdown: string;
   sources: string | null;
   isStreaming: boolean;
-}> = ({ markdown, sources }) => {
+}> = ({ markdown, sources, isStreaming }) => {
   let parsedSources: Source[] = [];
   if (sources) {
     parsedSources = parseSources(sources);
   }
 
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
     <div className="mt-4">
-      <h2 className="text-lg font-bold text-zinc-200 mb-2 flex items-center">
-        <BookOpenText className="mr-2" /> Answer
-      </h2>
-      <div className="space-y-2">
+      <Accordion
+        type="single"
+        collapsible
+        className="w-full"
+        onValueChange={(value) => setIsOpen(value === 'answer')}
+      >
+        <AccordionItem value="answer">
+          <AccordionTrigger className="py-2 text-lg font-bold text-zinc-200 hover:no-underline">
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center">
+                {isOpen ? (
+                  <BookOpenText className="mr-2" />
+                ) : (
+                  <BookText className="mr-2" />
+                )}
+                Answer
+              </div>
+              <span className="text-sm font-normal">
+                {isOpen ? 'Hide Sources' : 'View Sources'}
+              </span>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent>
+            <div className="space-y-2 pt-2">
+              <div className="space-y-2 max-h-60 overflow-y-auto">
+                {parsedSources.map((item) => (
+                  <SourceItem key={item.id} source={item} />
+                ))}
+              </div>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+
+      <div className="space-y-4 mt-4">
         {markdown ? (
           <div className="prose prose-sm max-w-full text-zinc-300 overflow-y-auto max-h-[700px]">
             <Markdown
