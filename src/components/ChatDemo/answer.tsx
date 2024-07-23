@@ -1,8 +1,14 @@
 import { BookOpenText, BookText } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FC } from 'react';
 import Markdown from 'react-markdown';
 
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ChatDemo/popover';
+import { Skeleton } from '@/components/ChatDemo/skeleton';
 import {
   Accordion,
   AccordionContent,
@@ -11,8 +17,6 @@ import {
 } from '@/components/ui/accordion';
 
 import { Source } from './interfaces/source';
-import { Popover, PopoverContent, PopoverTrigger } from './popover';
-import { Skeleton } from './skeleton';
 
 const SourceItem: FC<{ source: Source }> = ({ source }) => {
   const { id, score, metadata } = source;
@@ -69,13 +73,24 @@ export const Answer: FC<{
   markdown: string;
   sources: string | null;
   isStreaming: boolean;
-}> = ({ markdown, sources, isStreaming }) => {
-  let parsedSources: Source[] = [];
-  if (sources) {
-    parsedSources = parseSources(sources);
-  }
-
+  isSearching: boolean;
+}> = ({ markdown, sources, isStreaming, isSearching }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [parsedSources, setParsedSources] = useState<Source[]>([]);
+
+  useEffect(() => {
+    if (sources) {
+      try {
+        const parsed = parseSources(sources);
+        setParsedSources(parsed);
+      } catch (error) {
+        console.error('Failed to parse sources:', error);
+        setParsedSources([]);
+      }
+    } else {
+      setParsedSources([]);
+    }
+  }, [sources]);
 
   return (
     <div className="mt-4">
@@ -97,14 +112,26 @@ export const Answer: FC<{
                 Answer
               </div>
               <span className="text-sm font-normal">
-                {isOpen ? 'Hide Sources' : 'View Sources'}
+                {isSearching ? (
+                  <span className="searching-animation">
+                    Searching over sources...
+                  </span>
+                ) : parsedSources.length === 0 ? (
+                  <span className="searching-animation">
+                    Searching over sources...
+                  </span>
+                ) : isOpen ? (
+                  'Hide Sources'
+                ) : (
+                  `View ${parsedSources.length} Sources`
+                )}
               </span>
             </div>
           </AccordionTrigger>
           <AccordionContent>
             <div className="space-y-2 pt-2">
               <div className="space-y-2 max-h-60 overflow-y-auto">
-                {parsedSources.map((item) => (
+                {parsedSources.map((item: Source) => (
                   <SourceItem key={item.id} source={item} />
                 ))}
               </div>

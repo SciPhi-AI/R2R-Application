@@ -1,4 +1,4 @@
-import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import React from 'react';
 
 import SingleSwitch from '@/components/ChatDemo/SingleSwitch';
@@ -166,9 +166,9 @@ const Sidebar: React.FC<SidebarProps> = ({
         onClick={onToggle}
       >
         {isOpen ? (
-          <ChevronLeftIcon className="h-6 w-6 text-white" />
+          <ChevronLeft className="h-6 w-6 text-white" />
         ) : (
-          <ChevronRightIcon className="h-6 w-6 text-white" />
+          <ChevronRight className="h-6 w-6 text-white" />
         )}
       </button>
     </>

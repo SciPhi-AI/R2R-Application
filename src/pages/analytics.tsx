@@ -323,7 +323,7 @@ const Analytics: React.FC = () => {
   );
 
   return (
-    <Layout>
+    <Layout pageTitle="Analytics">
       <main className="w-full flex flex-col min-h-screen container">
         <div className="mt-[5rem] sm:mt-[5rem]">
           <div className="flex justify-between items-center">

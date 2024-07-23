@@ -1,5 +1,11 @@
 import { r2rClient } from 'r2r-js';
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from 'react';
 
 interface Pipeline {
   deploymentUrl: string;
@@ -111,6 +117,19 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
     localStorage.removeItem('authState');
   };
 
+  const refreshTokenPeriodically = useCallback(async () => {
+    if (authState.isAuthenticated && pipeline) {
+      try {
+        const client = new r2rClient(pipeline.deploymentUrl);
+        await client.login(authState.email!, authState.password!);
+        await client.refreshAccessToken();
+      } catch (error) {
+        console.error('Failed to refresh token:', error);
+        await logout();
+      }
+    }
+  }, [authState, pipeline]);
+
   const getClient = async (): Promise<r2rClient | null> => {
     if (
       pipeline &&
@@ -130,6 +149,21 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
     }
     return null;
   };
+
+  useEffect(() => {
+    let refreshInterval: NodeJS.Timeout;
+
+    if (authState.isAuthenticated) {
+      refreshTokenPeriodically();
+      refreshInterval = setInterval(refreshTokenPeriodically, 10 * 60 * 1000);
+    }
+
+    return () => {
+      if (refreshInterval) {
+        clearInterval(refreshInterval);
+      }
+    };
+  }, [authState.isAuthenticated, refreshTokenPeriodically]);
 
   return (
     <UserContext.Provider

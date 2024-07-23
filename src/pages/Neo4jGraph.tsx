@@ -1,8 +1,4 @@
-import {
-  HomeIcon,
-  MagnifyingGlassPlusIcon,
-  MagnifyingGlassMinusIcon,
-} from '@heroicons/react/24/outline';
+import { Locate, ZoomIn, ZoomOut } from 'lucide-react';
 import neo4j from 'neo4j-driver';
 import dynamic from 'next/dynamic';
 import React, { useState, useEffect, useRef } from 'react';
@@ -157,19 +153,19 @@ const Neo4jGraph: React.FC<Neo4jGraphProps> = ({ width, height }) => {
               className="bg-white rounded-full p-2 hover:bg-blue-100 focus:outline-none"
               onClick={handleHome}
             >
-              <HomeIcon className="h-6 w-6 text-blue-500" />
+              <Locate className="h-6 w-6 text-blue-500" />
             </button>
             <button
               className="bg-white rounded-full p-2 hover:bg-blue-100 focus:outline-none"
               onClick={handleZoomIn}
             >
-              <MagnifyingGlassPlusIcon className="h-6 w-6 text-blue-500" />
+              <ZoomIn className="h-6 w-6 text-blue-500" />
             </button>
             <button
               className="bg-white rounded-full p-2 hover:bg-blue-100 focus:outline-none"
               onClick={handleZoomOut}
             >
-              <MagnifyingGlassMinusIcon className="h-6 w-6 text-blue-500" />
+              <ZoomOut className="h-6 w-6 text-blue-500" />
             </button>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import { AdjustmentsHorizontalIcon } from '@heroicons/react/24/outline';
+import { SlidersHorizontal } from 'lucide-react';
 import React from 'react';
 
 import { Input } from '@/components/ui/input';
@@ -96,7 +96,7 @@ const ConfigurationSheet: React.FC<GenerationConfig> = ({
   return (
     <Sheet>
       <SheetTrigger>
-        <AdjustmentsHorizontalIcon className="h-8 w-8 mb-3" />
+        <SlidersHorizontal className="h-8 w-8 mb-3" />
       </SheetTrigger>
       <SheetContent side="left">
         <SheetHeader>

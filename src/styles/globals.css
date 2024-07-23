@@ -145,3 +145,25 @@ a {
     @apply border-[1px] border-red-500;
   }
 }
+
+@keyframes searchingAnimation {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.searching-animation {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    #ffffff 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: searchingAnimation 1.5s infinite;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}

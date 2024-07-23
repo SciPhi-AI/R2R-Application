@@ -37,7 +37,7 @@ const Index: React.FC = () => {
   }, [pipeline?.deploymentUrl]);
 
   return (
-    <Layout includeFooter={false}>
+    <Layout pageTitle="Logs" includeFooter={false}>
       <main className="w-full flex flex-col min-h-screen container">
         <div className="absolute inset-0 bg-zinc-900 mt-[5rem] sm:mt-[5rem] ">
           <div className="mx-auto max-w-6xl mb-12 mt-4 absolute inset-4 md:inset-1">

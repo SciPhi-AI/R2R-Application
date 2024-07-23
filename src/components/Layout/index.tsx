@@ -8,13 +8,14 @@ import { Toaster } from '@/components/ui/toaster';
 type Props = {
   children: ReactNode;
   localNav?: ReactNode;
-  pageTitle?: string; // Optional prop for setting the page title
+  pageTitle?: string;
   isConnected?: boolean;
   includeFooter?: boolean;
 };
 
 const Layout: React.FC<Props> = ({
   children,
+  localNav,
   pageTitle,
   includeFooter = true,
 }) => {

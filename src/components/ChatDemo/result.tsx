@@ -67,6 +67,8 @@ export const Result: FC<{
   const [markdown, setMarkdown] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [isStreaming, setIsStreaming] = useState<boolean>(false);
+  const [isSearching, setIsSearching] = useState<boolean>(false);
+  const [sourceCount, setSourceCount] = useState<number>(0);
   const { getClient } = useUserContext();
 
   let timeout: NodeJS.Timeout;
@@ -75,6 +77,8 @@ export const Result: FC<{
     setSources(null);
     setMarkdown('');
     setIsStreaming(true);
+    setIsSearching(true);
+    setSourceCount(0);
     setError(null);
     let buffer = '';
     let inLLMResponse = false;
@@ -133,6 +137,19 @@ export const Result: FC<{
           const [results, rest] = buffer.split(SEARCH_END_TOKEN);
           const cleanedResults = results.replace(SEARCH_START_TOKEN, '');
           setSources(cleanedResults);
+          setIsSearching(false);
+
+          try {
+            const parsedSources = JSON.parse(cleanedResults);
+            const sourceCount = Array.isArray(parsedSources)
+              ? parsedSources.length
+              : 0;
+            setSourceCount(sourceCount);
+          } catch (error) {
+            console.error('Failed to parse sources for count:', error);
+            setSourceCount(0);
+          }
+
           buffer = rest || '';
         }
 
@@ -164,6 +181,7 @@ export const Result: FC<{
       setError(err instanceof Error ? err.message : String(err));
     } finally {
       setIsStreaming(false);
+      setIsSearching(false);
       if (buffer.length > 0) {
         setMarkdown((prev) => prev + buffer);
       }
@@ -199,6 +217,7 @@ export const Result: FC<{
             markdown={parsedMarkdown}
             sources={sources}
             isStreaming={isStreaming}
+            isSearching={isSearching}
           />
           {error && <div className="text-red-500">Error: {error}</div>}
         </>

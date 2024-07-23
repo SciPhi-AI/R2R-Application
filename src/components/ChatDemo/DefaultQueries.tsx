@@ -1,9 +1,4 @@
-import {
-  LightBulbIcon,
-  BeakerIcon,
-  FireIcon,
-  GlobeEuropeAfricaIcon,
-} from '@heroicons/react/24/solid';
+import { Lightbulb, FlaskConical, Flame, Earth } from 'lucide-react';
 import { FC } from 'react';
 
 import { Logo } from '@/components/shared/Logo';
@@ -17,19 +12,19 @@ export const DefaultQueries: FC<DefaultQueriesProps> = ({ setQuery }) => {
   const defaultQueries = [
     {
       query: 'What is the main topic of the uploaded documents?',
-      icon: <LightBulbIcon className="h-6 w-6 text-yellow-400" />,
+      icon: <Lightbulb className="h-6 w-6 text-yellow-400" />,
     },
     {
       query: 'Summarize key points for me.',
-      icon: <BeakerIcon className="h-6 w-6 text-purple-400" />,
+      icon: <FlaskConical className="h-6 w-6 text-purple-400" />,
     },
     {
       query: 'What issues do you see with the documents?',
-      icon: <FireIcon className="h-6 w-6 text-red-400" />,
+      icon: <Flame className="h-6 w-6 text-red-400" />,
     },
     {
       query: 'How are these documents interrelated?',
-      icon: <GlobeEuropeAfricaIcon className="h-6 w-6 text-green-400" />,
+      icon: <Earth className="h-6 w-6 text-green-400" />,
     },
   ];
 

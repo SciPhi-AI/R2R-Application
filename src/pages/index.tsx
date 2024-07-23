@@ -1,10 +1,6 @@
-import {
-  CheckIcon,
-  ClipboardDocumentCheckIcon,
-  LinkIcon,
-} from '@heroicons/react/24/outline';
+import { Check, ClipboardCheck, Link } from 'lucide-react';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import { PipelineStatus } from '@/components/ChatDemo/PipelineStatus';
 import Layout from '@/components/Layout';
@@ -21,11 +17,20 @@ import { Separator } from '@/components/ui/separator';
 import { useUserContext } from '@/context/UserContext';
 
 const PipelinePage = () => {
+  const router = useRouter();
+  const { isAuthenticated, pipeline } = useUserContext();
   const [copied, setCopied] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
 
-  const { pipeline } = useUserContext();
-  const router = useRouter();
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/login');
+    }
+  }, [isAuthenticated, router]);
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   const handleCopy = (text: string) => {
     if (!navigator.clipboard) {
@@ -164,15 +169,15 @@ const PipelinePage = () => {
                 <CardContent className="pt-0">
                   <div className="grid gap-4" />
                   <div className="flex items-center gap-2 pt-4">
-                    <LinkIcon width="20" height="20" />
+                    <Link width="20" height="20" />
                     <span className="text-sm text-gray-500 dark:text-gray-400">
                       {pipeline?.deploymentUrl}
                     </span>
 
                     {copied ? (
-                      <CheckIcon className="w-4 h-4" />
+                      <Check className="w-4 h-4" />
                     ) : (
-                      <ClipboardDocumentCheckIcon
+                      <ClipboardCheck
                         className="w-4 h-4 cursor-pointer"
                         onClick={() => {
                           handleCopy(pipeline!.deploymentUrl);

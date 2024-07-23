@@ -1,4 +1,4 @@
-import { PencilSquareIcon } from '@heroicons/react/24/outline';
+import { SquarePen } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 
 import EditPromptDialog from '@/components/ChatDemo/utils/editPromptDialog';
@@ -104,7 +104,7 @@ const Index: React.FC = () => {
   };
 
   return (
-    <Layout>
+    <Layout pageTitle="Settings">
       <main className="w-full flex flex-col min-h-screen container bg-zinc-900 text-white p-4 mt-4">
         <div className="mx-auto max-w-6xl mb-12 mt-4">
           <div className="mt-8">
@@ -195,7 +195,7 @@ const Index: React.FC = () => {
                                 }
                                 className="absolute bottom-2 right-2 text-gray-400 cursor-pointer hover:text-blue-500"
                               >
-                                <PencilSquareIcon className="h-5 w-5" />
+                                <SquarePen className="h-5 w-5" />
                               </button>
                             </td>
                           </tr>

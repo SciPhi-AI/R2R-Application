@@ -1,5 +1,5 @@
-import { DocumentMagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { format, parseISO } from 'date-fns'; // Import date-fns functions
+import { FileSearch2 } from 'lucide-react';
 import React, { useState, useEffect, useCallback } from 'react';
 
 import { DeleteButton } from '@/components/ChatDemo/deleteButton';
@@ -291,7 +291,7 @@ const Index: React.FC = () => {
                         }}
                         className="info-button hover:bg-blue-700 bg-blue-500 text-white font-bold rounded flex items-center justify-center"
                       >
-                        <DocumentMagnifyingGlassIcon className="h-8 w-8" />
+                        <FileSearch2 className="h-8 w-8" />
                       </button>
                     </TooltipTrigger>
                     <TooltipContent>
@@ -335,7 +335,7 @@ const Index: React.FC = () => {
   };
 
   return (
-    <Layout>
+    <Layout pageTitle="Documents">
       <main className="max-w-7xl flex flex-col min-h-screen container">
         <div className="mt-[5rem] sm:mt-[5rem]">
           <div className="flex justify-between items-center">

@@ -1,4 +1,4 @@
-import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { Eye, EyeOff } from 'lucide-react';
 import { useRouter } from 'next/router';
 import React, { useState } from 'react';
 
@@ -31,7 +31,7 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <Layout pageTitle="Login" includeFooter={false}>
+    <Layout includeFooter={false}>
       <div className="flex flex-col justify-center items-center min-h-screen bg-white dark:bg-zinc-900">
         <form
           onSubmit={handleSubmit}
@@ -81,7 +81,7 @@ const LoginPage: React.FC = () => {
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="pr-10" // Add right padding to make room for the icon
+                className="pr-10"
               />
               <button
                 type="button"
@@ -89,9 +89,9 @@ const LoginPage: React.FC = () => {
                 className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
               >
                 {showPassword ? (
-                  <EyeSlashIcon className="h-5 w-5" aria-hidden="true" />
+                  <EyeOff className="h-5 w-5" aria-hidden="true" />
                 ) : (
-                  <EyeIcon className="h-5 w-5" aria-hidden="true" />
+                  <Eye className="h-5 w-5" aria-hidden="true" />
                 )}
               </button>
             </div>

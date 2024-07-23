@@ -1,5 +1,5 @@
 'use client';
-import { DocumentArrowUpIcon } from '@heroicons/react/24/outline';
+import { FileUp } from 'lucide-react';
 import React, { useState, useRef } from 'react';
 
 import { Spinner } from '@/components/Spinner';
@@ -92,7 +92,7 @@ const UpdateButtonContainer: React.FC<UpdateButtonContainerProps> = ({
         {isUpdating ? (
           <Spinner className="h-5 w-5 text-white" />
         ) : (
-          <DocumentArrowUpIcon className="h-8 w-8" />
+          <FileUp className="h-8 w-8" />
         )}
       </button>
       <input
