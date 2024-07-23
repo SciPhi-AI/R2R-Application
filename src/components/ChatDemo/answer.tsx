@@ -6,7 +6,6 @@ import Markdown from 'react-markdown';
 import { Source } from './interfaces/source';
 import { Popover, PopoverContent, PopoverTrigger } from './popover';
 import { Skeleton } from './skeleton';
-import { Wrapper } from './wrapper';
 
 function formatMarkdownNewLines(markdown: string) {
   return markdown
@@ -57,14 +56,12 @@ export const Answer: FC<{
   }
 
   return (
-    <Wrapper
-      title={
-        <>
-          <BookOpenText /> Answer
-        </>
-      }
-      content={
-        markdown ? (
+    <div className="mt-4">
+      <h2 className="text-lg font-bold text-zinc-200 mb-2 flex items-center">
+        <BookOpenText className="mr-2" /> Answer
+      </h2>
+      <div className="space-y-2">
+        {markdown ? (
           <div className="prose prose-sm max-w-full text-zinc-300 overflow-y-auto max-h-[700px]">
             <Markdown
               components={{
@@ -135,14 +132,14 @@ export const Answer: FC<{
             </Markdown>
           </div>
         ) : (
-          <div className="flex flex-col gap-2 -mt-8">
-            <Skeleton className="max-w-lg h-4 bg-zinc-20" />
+          <div className="flex flex-col gap-2">
+            <Skeleton className="max-w-lg h-4 bg-zinc-200" />
             <Skeleton className="max-w-2xl h-4 bg-zinc-200" />
             <Skeleton className="max-w-lg h-4 bg-zinc-200" />
             <Skeleton className="max-w-xl h-4 bg-zinc-200" />
           </div>
-        )
-      }
-    />
+        )}
+      </div>
+    </div>
   );
 };

@@ -163,7 +163,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
       <button
-        className={`fixed left-0 top-1/2 z-50 bg-zinc-800 p-2 rounded-r-md transition-all duration-300 ease-in-out ${
+        className={`fixed left-0 top-0 z-50 h-full w-6 bg-zinc-1000 flex items-center justify-center transition-transform duration-300 ease-in-out ${
           isOpen ? 'translate-x-80' : 'translate-x-0'
         }`}
         onClick={onToggle}

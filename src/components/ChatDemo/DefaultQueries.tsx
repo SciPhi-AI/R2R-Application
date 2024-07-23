@@ -24,7 +24,7 @@ export const DefaultQueries: FC<DefaultQueriesProps> = ({ setQuery }) => {
       icon: <BeakerIcon className="h-6 w-6 text-purple-400" />,
     },
     {
-      query: 'What are the potential risks associated with the documents?',
+      query: 'What issues do you see with the documents?',
       icon: <FireIcon className="h-6 w-6 text-red-400" />,
     },
     {

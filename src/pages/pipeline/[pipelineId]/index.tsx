@@ -65,7 +65,7 @@ const PipelinePage = () => {
           <AlertTitle className="text-lg ">
             <div className="flex gap-2 text-xl">
               <span className="text-gray-500 dark:text-gray-200">
-                👀 You're now watching a pipeline!{' '}
+                You're now connected to your R2R deployment!{' '}
                 <a
                   href={`${pipeline?.pipelineId}/playground`}
                   className="text-blue-500 hover:text-blue-700"

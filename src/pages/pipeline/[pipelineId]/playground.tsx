@@ -1,25 +1,12 @@
 'use client';
-import { ChevronRightIcon, ChevronLeftIcon } from '@heroicons/react/24/outline';
 import { useSearchParams } from 'next/navigation';
 import React, { useState, useEffect, useRef } from 'react';
 
 import { Result } from '@/components/ChatDemo/result';
 import { Search } from '@/components/ChatDemo/search';
-import SingleSwitch from '@/components/ChatDemo/SingleSwitch';
 import useSwitchManager from '@/components/ChatDemo/SwitchManager';
 import Layout from '@/components/Layout';
 import Sidebar from '@/components/Sidebar';
-import { InfoIcon } from '@/components/ui/InfoIcon';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import ModelSelector from '@/components/ui/ModelSelector';
-import { Slider } from '@/components/ui/slider';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
 import { useToast } from '@/components/ui/use-toast';
 import { usePipelineInfo } from '@/context/PipelineInfo';
 import { useUserContext } from '@/context/UserContext';
@@ -204,7 +191,7 @@ const Index: React.FC = () => {
             </div>
 
             {/* Search Bar */}
-            <div className="p-4 bg-zinc-800 w-full">
+            <div className="p-4 w-full">
               <Search pipeline={pipeline || undefined} setQuery={setQuery} />
             </div>
           </div>

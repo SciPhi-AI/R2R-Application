@@ -8,8 +8,8 @@ import { Input } from '@/components/ui/input';
 import { useUserContext } from '@/context/UserContext';
 
 const LoginPage: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('admin@example.com');
+  const [password, setPassword] = useState('change_me_immediately');
   const [instanceUrl, setInstanceUrl] = useState('http://localhost:8000');
   const [showPassword, setShowPassword] = useState(false);
   const { login } = useUserContext();
@@ -33,21 +33,6 @@ const LoginPage: React.FC = () => {
   return (
     <Layout pageTitle="Login" includeFooter={false}>
       <div className="flex flex-col justify-center items-center min-h-screen bg-white dark:bg-zinc-900">
-        <div className="mb-8 p-4 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-md w-full max-w-md text-center">
-          <p>
-            {' '}
-            <b>First time logging in? Try these credentials:</b>
-          </p>
-          <p>
-            {' '}
-            <b>Email:</b> admin@example.com
-          </p>
-          <p>
-            {' '}
-            <b>Password:</b> change_me_immediately
-          </p>
-        </div>
-
         <form
           onSubmit={handleSubmit}
           className="bg-zinc-100 dark:bg-zinc-800 shadow-md rounded px-8 pt-6 pb-8 mb-4 w-full max-w-md"
