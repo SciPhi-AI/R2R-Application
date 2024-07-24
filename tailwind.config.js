@@ -61,11 +61,17 @@ module.exports = {
           DEFAULT: 'var(--card)',
           foreground: 'var(--card-foreground)',
         },
+        link: 'var(--link)',
+        'link-hover': 'var(--link-hover)',
       },
       backgroundColor: {
         'primary-custom': 'var(--sciphi-primary)',
         'secondary-custom': 'var(--sciphi-secondary)',
         'accent-custom': 'var(--sciphi-accent)',
+      },
+      textColor: {
+        link: 'var(--link)',
+        'link-hover': 'var(--link-hover)',
       },
       borderRadius: {
         lg: 'var(--radius)',

@@ -1,6 +1,7 @@
 import clsx from 'clsx';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useRouter } from 'next/router';
 import { forwardRef } from 'react';
 
@@ -12,6 +13,8 @@ import { NavbarProps } from '@/types';
 
 export const Navbar = forwardRef<React.ElementRef<'div'>, NavbarProps>(
   function Header({ className }, ref) {
+    const pathname = usePathname();
+    const isHomePage = pathname === '/';
     const { logout, isAuthenticated } = useUserContext();
     const router = useRouter();
 
@@ -28,6 +31,7 @@ export const Navbar = forwardRef<React.ElementRef<'div'>, NavbarProps>(
     const navItems = [
       { path: '/documents', label: 'Documents' },
       { path: '/playground', label: 'Playground' },
+      { path: '/users', label: 'Users' },
       { path: '/logs', label: 'Logs' },
       { path: '/settings', label: 'Settings' },
     ];
@@ -52,25 +56,39 @@ export const Navbar = forwardRef<React.ElementRef<'div'>, NavbarProps>(
             <Logo width={25} height={25} onClick={handleHomeClick} />
             <Link href="/" onClick={handleHomeClick}>
               <Code>
-                <span className="text-zinc-800 dark:text-zinc-400 cursor-pointer">
+                <span
+                  className={clsx(
+                    'text-sm leading-5 transition',
+                    isHomePage
+                      ? 'text-link'
+                      : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white'
+                  )}
+                >
                   R2R Dashboard
                 </span>
               </Code>
             </Link>
-            <nav>
-              <ul role="list" className="flex items-center gap-6">
-                {navItems.map((item) => (
-                  <li key={item.path}>
-                    <Link
-                      href={item.path}
-                      className="text-sm leading-5 transition text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-                    >
-                      <Code>{item.label}</Code>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </nav>
+            {isAuthenticated && (
+              <nav>
+                <ul role="list" className="flex items-center gap-6">
+                  {navItems.map((item) => (
+                    <li key={item.path}>
+                      <Link
+                        href={item.path}
+                        className={clsx(
+                          'text-sm leading-5 transition',
+                          pathname === item.path
+                            ? 'text-link'
+                            : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white'
+                        )}
+                      >
+                        <Code>{item.label}</Code>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            )}
           </div>
           <div className="flex items-center space-x-4">
             <Button

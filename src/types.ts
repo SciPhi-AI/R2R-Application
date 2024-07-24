@@ -267,6 +267,7 @@ export interface UserContextProps {
     instanceUrl: string
   ) => Promise<void>;
   logout: () => Promise<void>;
-  getClient: () => Promise<r2rClient | null>;
-  refreshAuth: () => Promise<void>;
+  authState: AuthState;
+  getClient: () => r2rClient | null;
+  client: r2rClient | null;
 }

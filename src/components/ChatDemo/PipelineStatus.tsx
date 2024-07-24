@@ -9,7 +9,7 @@ const RETRY_DELAY = 2000;
 
 async function checkPipelineStatus(
   deploymentUrl: string | undefined,
-  getClient: () => Promise<r2rClient | null>
+  getClient: () => r2rClient | null
 ): Promise<'Connected' | 'No Connection'> {
   if (!deploymentUrl) {
     return 'No Connection';
@@ -17,7 +17,7 @@ async function checkPipelineStatus(
 
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     try {
-      const client = await getClient();
+      const client = getClient();
       if (!client) {
         return 'No Connection';
       }
@@ -39,7 +39,7 @@ export function useConnectionStatus(
   deploymentUrl?: string,
   onStatusChange?: (isConnected: boolean) => void
 ) {
-  const { getClient, refreshAuth } = useUserContext();
+  const { getClient } = useUserContext();
   const [isConnected, setIsConnected] = useState(false);
 
   const checkStatus = useCallback(async () => {
@@ -48,20 +48,11 @@ export function useConnectionStatus(
       const newConnectionStatus = status === 'Connected';
       setIsConnected(newConnectionStatus);
       onStatusChange?.(newConnectionStatus);
-
-      if (!newConnectionStatus) {
-        // Attempt to refresh authentication if connection is lost
-        try {
-          await refreshAuth();
-        } catch (error) {
-          console.error('Failed to refresh authentication:', error);
-        }
-      }
     } else {
       setIsConnected(false);
       onStatusChange?.(false);
     }
-  }, [deploymentUrl, getClient, onStatusChange, refreshAuth]);
+  }, [deploymentUrl, getClient, onStatusChange]);
 
   useEffect(() => {
     checkStatus();

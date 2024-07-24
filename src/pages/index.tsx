@@ -66,7 +66,7 @@ const PipelinePage = () => {
                 You're now connected to your R2R deployment!{' '}
                 <a
                   href={`/playground`}
-                  className="text-blue-500 hover:text-blue-700"
+                  className="text-link hover:text-link-hover"
                 >
                   Test it out in the playground!
                 </a>
@@ -157,7 +157,7 @@ const PipelinePage = () => {
                     default{' '}
                     <a
                       href="https://r2r-docs.sciphi.ai/deep-dive/rag"
-                      className="text-blue-500 hover:text-blue-700"
+                      className="text-link hover:text-link-hover"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
