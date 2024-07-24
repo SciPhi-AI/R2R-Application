@@ -12,20 +12,13 @@ import React from 'react';
 import { Bar } from 'react-chartjs-2';
 import resolveConfig from 'tailwindcss/resolveConfig';
 
+import { BarChartProps } from '@/types';
+
 import tailwindConfig from '../../../tailwind.config';
 
 const fullConfig = resolveConfig(tailwindConfig);
 
 Chart.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
-
-interface BarChartProps {
-  data: {
-    filtered_logs?: {
-      [key: string]: Array<{ value: string }>;
-    };
-  };
-  selectedFilter: string;
-}
 
 const textColor = fullConfig.theme.colors.gray[300];
 

@@ -1,4 +1,4 @@
-import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { Eye, EyeOff } from 'lucide-react';
 import { useRouter } from 'next/router';
 import React, { useState } from 'react';
 
@@ -8,8 +8,8 @@ import { Input } from '@/components/ui/input';
 import { useUserContext } from '@/context/UserContext';
 
 const LoginPage: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('admin@example.com');
+  const [password, setPassword] = useState('change_me_immediately');
   const [instanceUrl, setInstanceUrl] = useState('http://localhost:8000');
   const [showPassword, setShowPassword] = useState(false);
   const { login } = useUserContext();
@@ -31,23 +31,8 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <Layout pageTitle="Login" includeFooter={false}>
+    <Layout includeFooter={false}>
       <div className="flex flex-col justify-center items-center min-h-screen bg-white dark:bg-zinc-900">
-        <div className="mb-8 p-4 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-md w-full max-w-md text-center">
-          <p>
-            {' '}
-            <b>First time logging in? Try these credentials:</b>
-          </p>
-          <p>
-            {' '}
-            <b>Email:</b> admin@example.com
-          </p>
-          <p>
-            {' '}
-            <b>Password:</b> change_me_immediately
-          </p>
-        </div>
-
         <form
           onSubmit={handleSubmit}
           className="bg-zinc-100 dark:bg-zinc-800 shadow-md rounded px-8 pt-6 pb-8 mb-4 w-full max-w-md"
@@ -61,10 +46,12 @@ const LoginPage: React.FC = () => {
             </label>
             <Input
               id="instanceUrl"
+              name="instanceUrl"
               type="text"
               placeholder="Instance URL"
               value={instanceUrl}
               onChange={(e) => setInstanceUrl(e.target.value)}
+              autoComplete="url"
             />
           </div>
           <div className="mb-4">
@@ -80,6 +67,7 @@ const LoginPage: React.FC = () => {
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
             />
           </div>
           <div className="mb-6">
@@ -92,11 +80,13 @@ const LoginPage: React.FC = () => {
             <div className="relative">
               <Input
                 id="password"
+                name="password"
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="pr-10" // Add right padding to make room for the icon
+                className="pr-10"
+                autoComplete="current-password"
               />
               <button
                 type="button"
@@ -104,15 +94,19 @@ const LoginPage: React.FC = () => {
                 className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
               >
                 {showPassword ? (
-                  <EyeSlashIcon className="h-5 w-5" aria-hidden="true" />
+                  <EyeOff className="h-5 w-5" aria-hidden="true" />
                 ) : (
-                  <EyeIcon className="h-5 w-5" aria-hidden="true" />
+                  <Eye className="h-5 w-5" aria-hidden="true" />
                 )}
               </button>
             </div>
           </div>
           <div className="flex items-center justify-between">
-            <Button type="submit" variant="filled" className="w-full">
+            <Button
+              type="submit"
+              variant="filled"
+              className="rounded-md py-1 px-3 w-full"
+            >
               Sign In
             </Button>
           </div>

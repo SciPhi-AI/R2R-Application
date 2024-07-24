@@ -7,23 +7,20 @@ import { Toaster } from '@/components/ui/toaster';
 
 type Props = {
   children: ReactNode;
-  localNav?: ReactNode;
-  pageTitle?: string; // Optional prop for setting the page title
+  pageTitle?: string;
   isConnected?: boolean;
   includeFooter?: boolean;
 };
 
 const Layout: React.FC<Props> = ({
   children,
-  localNav,
   pageTitle,
-  isConnected,
   includeFooter = true,
 }) => {
   return (
     <div className="w-full min-h-screen flex flex-col">
       <Head>{pageTitle && <title>{pageTitle} | R2R</title>}</Head>
-      <Navbar isConnected={isConnected || true} />
+      <Navbar />
       <main className="flex-grow">{children}</main>
       <Toaster />
       {includeFooter && <Footer />}

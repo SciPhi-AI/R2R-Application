@@ -2,25 +2,12 @@ import React, { useState } from 'react';
 
 import { useUserContext } from '@/context/UserContext';
 import { generateIdFromLabel } from '@/lib/utils';
+import { UploadButtonProps } from '@/types';
 
 import { UploadDialog } from './UploadDialog';
 
-interface UploadButtonProps {
-  userId: string | null;
-  pipelineId: string;
-  uploadedDocuments: any[];
-  onUploadSuccess?: () => void;
-  setUploadedDocuments: (docs: any[]) => void;
-  showToast?: (message: {
-    title: string;
-    description: string;
-    variant: 'default' | 'destructive' | 'success';
-  }) => void;
-}
-
 export const UploadButton: React.FC<UploadButtonProps> = ({
   userId,
-  pipelineId,
   uploadedDocuments,
   setUploadedDocuments,
   onUploadSuccess,
@@ -32,7 +19,7 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
 
   const handleDocumentUpload = async (files: File[]) => {
     setIsUploading(true);
-    const client = await getClient(pipelineId);
+    const client = await getClient();
     if (!client) {
       throw new Error('Failed to get authenticated client');
     }

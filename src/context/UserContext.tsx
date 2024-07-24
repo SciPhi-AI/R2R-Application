@@ -1,50 +1,25 @@
 import { r2rClient } from 'r2r-js';
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { v4 as uuidv4 } from 'uuid';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from 'react';
 
-interface Pipeline {
-  pipelineName: string;
-  deploymentUrl: string;
-  pipelineId: string;
-}
-
-interface AuthState {
-  isAuthenticated: boolean;
-  email: string | null;
-  password: string | null;
-}
-
-interface UserContextProps {
-  watchedPipelines: Record<string, Pipeline>;
-  addWatchedPipeline: (pipelineId: string, pipeline: Pipeline) => void;
-  removeWatchedPipeline: (pipelineId: string) => void;
-  isPipelineUnique: (
-    name: string,
-    url: string
-  ) => { nameUnique: boolean; urlUnique: boolean };
-  selectedModel: string;
-  setSelectedModel: (model: string) => void;
-  isAuthenticated: boolean;
-  login: (
-    email: string,
-    password: string,
-    instanceUrl: string
-  ) => Promise<void>;
-  logout: () => Promise<void>;
-  getClient: (pipelineId: string) => Promise<r2rClient | null>;
-}
+import { NetworkError, AuthenticationError } from '@/lib/CustomErrors';
+import { AuthState, Pipeline, UserContextProps } from '@/types';
 
 const UserContext = createContext<UserContextProps>({
-  watchedPipelines: {},
-  addWatchedPipeline: () => {},
-  removeWatchedPipeline: () => {},
-  isPipelineUnique: () => ({ nameUnique: true, urlUnique: true }),
+  pipeline: null,
+  setPipeline: () => {},
   selectedModel: 'null',
   setSelectedModel: () => {},
   isAuthenticated: false,
   login: async () => {},
   logout: async () => {},
   getClient: async () => null,
+  refreshAuth: async () => {},
 });
 
 export const useUserContext = () => useContext(UserContext);
@@ -52,12 +27,11 @@ export const useUserContext = () => useContext(UserContext);
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [watchedPipelines, setWatchedPipelines] = useState<
-    Record<string, Pipeline>
-  >({});
+  const [pipeline, setPipeline] = useState<Pipeline | null>(null);
+
   const [selectedModel, setSelectedModel] = useState(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('selectedModel') || 'null';
+      return localStorage.getItem('selectedModel') || 'gpt-4o';
     }
     return 'null';
   });
@@ -75,49 +49,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
     };
   });
 
-  // Load data from local storage on initial render
-  useEffect(() => {
-    const storedPipelines = localStorage.getItem('watchedPipelines');
-    if (storedPipelines) {
-      setWatchedPipelines(JSON.parse(storedPipelines));
-    }
-  }, []);
-
-  // Save data to local storage whenever watchedPipelines or authState change
-  useEffect(() => {
-    localStorage.setItem('watchedPipelines', JSON.stringify(watchedPipelines));
-    localStorage.setItem('authState', JSON.stringify(authState));
-  }, [watchedPipelines, authState]);
-
-  const addWatchedPipeline = (pipelineId: string, pipeline: Pipeline) => {
-    setWatchedPipelines((prevPipelines) => ({
-      ...prevPipelines,
-      [pipelineId]: pipeline,
-    }));
-  };
-
-  const removeWatchedPipeline = (pipelineId: string) => {
-    setWatchedPipelines((prevPipelines) => {
-      const newPipelines = { ...prevPipelines };
-      delete newPipelines[pipelineId];
-      return newPipelines;
-    });
-  };
-
-  const isPipelineUnique = (name: string, url: string) => {
-    const nameUnique = !Object.values(watchedPipelines).some(
-      (p) => p.pipelineName === name
-    );
-    const urlUnique = !Object.values(watchedPipelines).some(
-      (p) => p.deploymentUrl === url
-    );
-    return { nameUnique, urlUnique };
-  };
-
-  const findPipelineByUrl = (url: string): Pipeline | undefined => {
-    return Object.values(watchedPipelines).find((p) => p.deploymentUrl === url);
-  };
-
   const login = async (
     email: string,
     password: string,
@@ -134,47 +65,14 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
       setAuthState(newAuthState);
       localStorage.setItem('authState', JSON.stringify(newAuthState));
 
-      const existingPipeline = findPipelineByUrl(instanceUrl);
-      if (!existingPipeline) {
-        const pipelineId = uuidv4();
-        addWatchedPipeline(pipelineId, {
-          pipelineName: `R2R Pipeline`,
-          deploymentUrl: instanceUrl,
-          pipelineId,
-        });
-      }
+      setPipeline({ deploymentUrl: instanceUrl });
     } catch (error) {
       console.error('Login failed:', error);
       throw error;
     }
   };
 
-  const logout = async () => {
-    // Logout from all pipelines
-    for (const pipeline of Object.values(watchedPipelines)) {
-      const client = new r2rClient(pipeline.deploymentUrl);
-      if (authState.isAuthenticated && authState.email && authState.password) {
-        try {
-          await client.login(authState.email, authState.password);
-          await client.logout();
-        } catch (error) {
-          console.error(
-            `Logout failed for pipeline ${pipeline.pipelineName}:`,
-            error
-          );
-        }
-      }
-    }
-    setAuthState({
-      isAuthenticated: false,
-      email: null,
-      password: null,
-    });
-    localStorage.removeItem('authState');
-  };
-
-  const getClient = async (pipelineId: string): Promise<r2rClient | null> => {
-    const pipeline = watchedPipelines[pipelineId];
+  const logout = useCallback(async () => {
     if (
       pipeline &&
       authState.isAuthenticated &&
@@ -184,30 +82,119 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
       const client = new r2rClient(pipeline.deploymentUrl);
       try {
         await client.login(authState.email, authState.password);
-        return client;
+        await client.logout();
       } catch (error) {
-        console.error('Failed to authenticate client:', error);
-        // If authentication fails, clear the auth state
-        await logout();
-        return null;
+        console.error(`Logout failed:`, error);
       }
     }
+    setAuthState({
+      isAuthenticated: false,
+      email: null,
+      password: null,
+    });
+    setPipeline(null);
+    localStorage.removeItem('authState');
+  }, [pipeline, authState]);
+
+  const refreshTokenPeriodically = useCallback(async () => {
+    if (authState.isAuthenticated && pipeline) {
+      try {
+        const client = new r2rClient(pipeline.deploymentUrl);
+        await client.login(authState.email!, authState.password!);
+        await client.refreshAccessToken();
+      } catch (error) {
+        console.error('Failed to refresh token:', error);
+        await logout();
+      }
+    }
+  }, [authState, pipeline]);
+
+  const refreshAuth = useCallback(async () => {
+    if (
+      authState.isAuthenticated &&
+      pipeline &&
+      authState.email &&
+      authState.password
+    ) {
+      try {
+        const client = new r2rClient(pipeline.deploymentUrl);
+        await client.login(authState.email, authState.password);
+        await client.refreshAccessToken();
+      } catch (error) {
+        console.error('Failed to refresh authentication:', error);
+        await logout();
+      }
+    }
+  }, [authState, pipeline, logout]);
+
+  const getClient = useCallback(async (): Promise<r2rClient | null> => {
+    if (
+      pipeline &&
+      authState.isAuthenticated &&
+      authState.email &&
+      authState.password
+    ) {
+      const client = new r2rClient(pipeline.deploymentUrl);
+      const MAX_RETRIES = 3;
+      let retries = 0;
+
+      while (retries < MAX_RETRIES) {
+        try {
+          await client.login(authState.email, authState.password);
+          return client;
+        } catch (error) {
+          console.error(`Authentication attempt ${retries + 1} failed:`, error);
+
+          if (error instanceof NetworkError) {
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+          } else if (error instanceof AuthenticationError) {
+            try {
+              await refreshAuth();
+              retries++;
+              continue;
+            } catch (refreshError) {
+              console.error('Failed to refresh authentication:', refreshError);
+              break;
+            }
+          } else {
+            break;
+          }
+        }
+      }
+
+      console.error('Failed to authenticate client after multiple attempts');
+      return null;
+    }
     return null;
-  };
+  }, [authState, pipeline, refreshAuth, logout]);
+
+  useEffect(() => {
+    let refreshInterval: NodeJS.Timeout;
+
+    if (authState.isAuthenticated) {
+      refreshTokenPeriodically();
+      refreshInterval = setInterval(refreshTokenPeriodically, 10 * 60 * 1000);
+    }
+
+    return () => {
+      if (refreshInterval) {
+        clearInterval(refreshInterval);
+      }
+    };
+  }, [authState.isAuthenticated, refreshTokenPeriodically]);
 
   return (
     <UserContext.Provider
       value={{
-        watchedPipelines,
-        addWatchedPipeline,
-        removeWatchedPipeline,
-        isPipelineUnique,
+        pipeline,
+        setPipeline,
         selectedModel,
         setSelectedModel,
         isAuthenticated: authState.isAuthenticated,
         login,
         logout,
         getClient,
+        refreshAuth,
       }}
     >
       {children}

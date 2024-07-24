@@ -1,23 +1,12 @@
 'use client';
-import { DocumentArrowUpIcon } from '@heroicons/react/24/outline';
+import { FileUp } from 'lucide-react';
 import React, { useState, useRef } from 'react';
 
 import { Spinner } from '@/components/Spinner';
 import { useUserContext } from '@/context/UserContext';
-
-interface UpdateButtonContainerProps {
-  pipelineId: string;
-  documentId: string;
-  onUpdateSuccess: () => void;
-  showToast: (message: {
-    title: string;
-    description: string;
-    variant: 'default' | 'destructive' | 'success';
-  }) => void;
-}
+import { UpdateButtonContainerProps } from '@/types';
 
 const UpdateButtonContainer: React.FC<UpdateButtonContainerProps> = ({
-  pipelineId,
   documentId,
   onUpdateSuccess,
   showToast,
@@ -39,7 +28,7 @@ const UpdateButtonContainer: React.FC<UpdateButtonContainerProps> = ({
       const file = fileInputRef.current.files[0];
 
       try {
-        const client = await getClient(pipelineId);
+        const client = await getClient();
         if (!client) {
           throw new Error('Failed to get authenticated client');
         }
@@ -94,7 +83,7 @@ const UpdateButtonContainer: React.FC<UpdateButtonContainerProps> = ({
         {isUpdating ? (
           <Spinner className="h-5 w-5 text-white" />
         ) : (
-          <DocumentArrowUpIcon className="h-8 w-8" />
+          <FileUp className="h-8 w-8" />
         )}
       </button>
       <input

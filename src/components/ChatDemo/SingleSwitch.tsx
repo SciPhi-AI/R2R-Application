@@ -7,14 +7,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-
-interface SingleSwitchProps {
-  id: string;
-  initialChecked: boolean;
-  onChange: (id: string, checked: boolean) => void;
-  label: string;
-  tooltipText: string;
-}
+import { SingleSwitchProps } from '@/types';
 
 const SingleSwitch: React.FC<SingleSwitchProps> = ({
   id,

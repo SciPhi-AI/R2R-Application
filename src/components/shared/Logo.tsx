@@ -2,13 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
 
-interface LogoProps {
-  width?: number;
-  height?: number;
-  className?: string;
-  onClick?: () => void;
-  disableLink?: boolean;
-}
+import { LogoProps } from '@/types';
 
 export function Logo({
   width = 25,
@@ -16,6 +10,7 @@ export function Logo({
   className = '',
   onClick,
   disableLink = false,
+  priority = true,
   ...rest
 }: LogoProps) {
   const handleClick = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
@@ -32,6 +27,7 @@ export function Logo({
       width={width}
       height={height}
       className="w-full h-full"
+      priority={priority}
       {...rest}
     />
   );

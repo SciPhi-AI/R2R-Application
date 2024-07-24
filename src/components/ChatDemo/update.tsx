@@ -2,22 +2,9 @@
 import React, { useState, useRef, FormEvent, ChangeEvent } from 'react';
 
 import { useUserContext } from '@/context/UserContext';
-
-interface UpdateButtonProps {
-  userId: string;
-  pipelineId: string;
-  documentId: string;
-  onUpdateSuccess: () => void;
-  showToast?: (message: {
-    title: string;
-    description: string;
-    variant: 'default' | 'destructive' | 'success';
-  }) => void;
-}
+import { UpdateButtonProps } from '@/types';
 
 export const UpdateButton: React.FC<UpdateButtonProps> = ({
-  userId,
-  pipelineId,
   documentId,
   onUpdateSuccess,
   showToast = () => {},
@@ -39,7 +26,7 @@ export const UpdateButton: React.FC<UpdateButtonProps> = ({
       const file = fileInputRef.current.files[0];
 
       try {
-        const client = await getClient(pipelineId);
+        const client = await getClient();
         if (!client) {
           throw new Error('Failed to get authenticated client');
         }

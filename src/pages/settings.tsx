@@ -1,9 +1,8 @@
-import { PencilSquareIcon } from '@heroicons/react/24/outline';
-import React, { useState, useEffect } from 'react';
+import { SquarePen } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 import EditPromptDialog from '@/components/ChatDemo/utils/editPromptDialog';
 import Layout from '@/components/Layout';
-import { usePipelineInfo } from '@/context/PipelineInfo';
 import { useUserContext } from '@/context/UserContext';
 
 type Prompt = {
@@ -60,17 +59,11 @@ const Index: React.FC = () => {
   const [selectedPromptTemplate, setSelectedPromptTemplate] =
     useState<string>('');
   const [isEditPromptDialogOpen, setIsEditPromptDialogOpen] = useState(false);
-  const { pipeline } = usePipelineInfo();
-  const { getClient } = useUserContext();
+  const { pipeline, getClient } = useUserContext();
 
-  const fetchAppData = async () => {
-    if (!pipeline?.pipelineId) {
-      console.error('No pipeline ID available');
-      return;
-    }
-
+  const fetchAppData = useCallback(async () => {
     try {
-      const client = await getClient(pipeline.pipelineId);
+      const client = await getClient();
       if (!client) {
         throw new Error('Failed to get authenticated client');
       }
@@ -88,13 +81,13 @@ const Index: React.FC = () => {
     } catch (err) {
       console.error('Error fetching app data:', err);
     }
-  };
+  }, [getClient]);
 
   useEffect(() => {
-    if (pipeline?.pipelineId) {
+    if (pipeline?.deploymentUrl) {
       fetchAppData();
     }
-  }, [pipeline?.pipelineId]);
+  }, [pipeline?.deploymentUrl, fetchAppData]);
 
   const { config = {}, prompts = {} } = appData || {};
 
@@ -105,13 +98,13 @@ const Index: React.FC = () => {
   };
 
   const handleSaveSuccess = () => {
-    if (pipeline?.pipelineId) {
+    if (pipeline?.deploymentUrl) {
       fetchAppData();
     }
   };
 
   return (
-    <Layout>
+    <Layout pageTitle="Settings">
       <main className="w-full flex flex-col min-h-screen container bg-zinc-900 text-white p-4 mt-4">
         <div className="mx-auto max-w-6xl mb-12 mt-4">
           <div className="mt-8">
@@ -202,7 +195,7 @@ const Index: React.FC = () => {
                                 }
                                 className="absolute bottom-2 right-2 text-gray-400 cursor-pointer hover:text-blue-500"
                               >
-                                <PencilSquareIcon className="h-5 w-5" />
+                                <SquarePen className="h-5 w-5" />
                               </button>
                             </td>
                           </tr>
@@ -227,7 +220,6 @@ const Index: React.FC = () => {
         onClose={() => setIsEditPromptDialogOpen(false)}
         promptName={selectedPromptName}
         promptTemplate={selectedPromptTemplate}
-        pipelineId={pipeline?.pipelineId || ''}
         onSaveSuccess={handleSaveSuccess}
       />
     </Layout>

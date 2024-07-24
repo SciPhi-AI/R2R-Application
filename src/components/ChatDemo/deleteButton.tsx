@@ -12,22 +12,10 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { useUserContext } from '@/context/UserContext';
-
-interface DeleteButtonProps {
-  selectedDocumentIds: string[];
-  pipelineId: string;
-  onDelete: () => void;
-  onSuccess: () => void;
-  showToast: (message: {
-    title: string;
-    description: string;
-    variant: 'default' | 'destructive' | 'success';
-  }) => void;
-}
+import { DeleteButtonProps } from '@/types';
 
 export const DeleteButton: React.FC<DeleteButtonProps> = ({
   selectedDocumentIds,
-  pipelineId,
   onDelete,
   onSuccess,
   showToast,
@@ -40,7 +28,7 @@ export const DeleteButton: React.FC<DeleteButtonProps> = ({
     }
 
     try {
-      const client = await getClient(pipelineId);
+      const client = await getClient();
       if (!client) {
         throw new Error('Failed to get authenticated client');
       }

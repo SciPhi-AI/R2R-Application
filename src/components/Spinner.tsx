@@ -1,8 +1,6 @@
 import React from 'react';
 
-interface SpinnerProps {
-  className?: string;
-}
+import { SpinnerProps } from '@/types';
 
 export const Spinner: React.FC<SpinnerProps> = ({ className }) => {
   return (

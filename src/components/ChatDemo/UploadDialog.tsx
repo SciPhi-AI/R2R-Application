@@ -8,12 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-
-interface UploadDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onUpload: (files: File[]) => void;
-}
+import { UploadDialogProps } from '@/types';
 
 export const UploadDialog: React.FC<UploadDialogProps> = ({
   isOpen,

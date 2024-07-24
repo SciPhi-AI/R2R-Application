@@ -1,10 +1,12 @@
-import { FC, useEffect, useState, useMemo } from 'react';
+import React, { FC, useEffect, useState, useMemo, useRef } from 'react';
 
 import { useUserContext } from '@/context/UserContext';
+import { Message } from '@/types';
+import { RagGenerationConfig } from '@/types';
 
 import { Answer } from './answer';
 import { DefaultQueries } from './DefaultQueries';
-import { Sources } from './sources';
+import MessageBubble from './MessageBubble';
 import { UploadButton } from './upload';
 import { parseMarkdown } from './utils/parseMarkdown';
 
@@ -14,20 +16,11 @@ const SEARCH_END_TOKEN = '</search>';
 const LLM_START_TOKEN = '<completion>';
 const LLM_END_TOKEN = '</completion>';
 
-interface RagGenerationConfig {
-  temperature?: number;
-  top_p?: number;
-  top_k?: number;
-  max_tokens_to_sample?: number;
-  model?: string;
-  stream: boolean;
-}
-
 export const Result: FC<{
   query: string;
   setQuery: (query: string) => void;
   userId: string | null;
-  pipelineId: string | null;
+  pipelineUrl: string | null;
   search_limit: number;
   search_filters: Record<string, unknown>;
   rag_temperature: number | null;
@@ -47,7 +40,7 @@ export const Result: FC<{
   query,
   setQuery,
   userId,
-  pipelineId,
+  pipelineUrl,
   search_limit,
   search_filters,
   rag_temperature,
@@ -68,50 +61,76 @@ export const Result: FC<{
   const [markdown, setMarkdown] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [isStreaming, setIsStreaming] = useState<boolean>(false);
+  const [isSearching, setIsSearching] = useState<boolean>(false);
+  const [sourceCount, setSourceCount] = useState<number>(0);
   const { getClient } = useUserContext();
+
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [currentAssistantMessage, setCurrentAssistantMessage] =
+    useState<string>('');
+  const [isProcessingQuery, setIsProcessingQuery] = useState(false);
+
+  useEffect(() => {
+    setMessages([]);
+    return () => {
+      setMessages([]);
+    };
+  }, []);
 
   let timeout: NodeJS.Timeout;
 
-  const parseStreaming = async (
-    query: string,
-    userId: string | null,
-    pipelineId: string
-  ) => {
+  const parseStreaming = async (query: string, userId: string | null) => {
+    if (isProcessingQuery) {
+      return;
+    }
+    setIsProcessingQuery(true);
+
     setSources(null);
     setMarkdown('');
     setIsStreaming(true);
+    setIsSearching(true);
+    setSourceCount(0);
     setError(null);
+
+    const newUserMessage: Message = {
+      id: Date.now().toString(),
+      content: query,
+      sender: 'user',
+      timestamp: Date.now(),
+    };
+
+    const newAssistantMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      content: '',
+      sender: 'assistant',
+      timestamp: Date.now() + 1,
+      isStreaming: true,
+      sources: null,
+    };
+
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      newUserMessage,
+      newAssistantMessage,
+    ]);
+
     let buffer = '';
     let inLLMResponse = false;
 
     try {
-      const client = await getClient(pipelineId);
+      const client = await getClient();
       if (!client) {
         throw new Error('Failed to get authenticated client');
       }
 
       const ragGenerationConfig: RagGenerationConfig = {
         stream: true,
+        temperature: rag_temperature ?? undefined,
+        top_p: rag_topP ?? undefined,
+        top_k: rag_topK ?? undefined,
+        max_tokens_to_sample: rag_maxTokensToSample ?? undefined,
+        model: model !== 'null' && model !== null ? model : undefined,
       };
-
-      if (rag_temperature !== null && rag_temperature !== undefined) {
-        ragGenerationConfig.temperature = rag_temperature;
-      }
-      if (rag_topP !== null && rag_topP !== undefined) {
-        ragGenerationConfig.top_p = rag_topP;
-      }
-      if (rag_topK !== null && rag_topK !== undefined) {
-        ragGenerationConfig.top_k = rag_topK;
-      }
-      if (
-        rag_maxTokensToSample !== null &&
-        rag_maxTokensToSample !== undefined
-      ) {
-        ragGenerationConfig.max_tokens_to_sample = rag_maxTokensToSample;
-      }
-      if (model !== 'null' && model !== null) {
-        ragGenerationConfig.model = model;
-      }
 
       const streamResponse = await client.rag({
         query: query,
@@ -137,7 +156,16 @@ export const Result: FC<{
         if (buffer.includes(SEARCH_END_TOKEN)) {
           const [results, rest] = buffer.split(SEARCH_END_TOKEN);
           const cleanedResults = results.replace(SEARCH_START_TOKEN, '');
-          setSources(cleanedResults);
+
+          setMessages((prevMessages) => {
+            const updatedMessages = [...prevMessages];
+            const lastMessage = updatedMessages[updatedMessages.length - 1];
+            if (lastMessage.sender === 'assistant' && lastMessage.isStreaming) {
+              lastMessage.sources = cleanedResults;
+            }
+            return updatedMessages;
+          });
+
           buffer = rest || '';
         }
 
@@ -148,20 +176,26 @@ export const Result: FC<{
 
         if (inLLMResponse) {
           const endTokenIndex = buffer.indexOf(LLM_END_TOKEN);
+          let chunk = '';
+
           if (endTokenIndex !== -1) {
-            const chunk = buffer.slice(0, endTokenIndex);
-            setMarkdown((prev) => prev + chunk);
+            chunk = buffer.slice(0, endTokenIndex);
             buffer = buffer.slice(endTokenIndex + LLM_END_TOKEN.length);
             inLLMResponse = false;
           } else {
-            // Only append complete words
-            const lastSpaceIndex = buffer.lastIndexOf(' ');
-            if (lastSpaceIndex !== -1) {
-              const chunk = buffer.slice(0, lastSpaceIndex);
-              setMarkdown((prev) => prev + chunk + ' ');
-              buffer = buffer.slice(lastSpaceIndex + 1);
-            }
+            chunk = buffer;
+            buffer = '';
           }
+
+          setMarkdown((prev) => prev + chunk);
+          setMessages((prevMessages) => {
+            const updatedMessages = [...prevMessages];
+            const lastMessage = updatedMessages[updatedMessages.length - 1];
+            if (lastMessage.sender === 'assistant' && lastMessage.isStreaming) {
+              lastMessage.content += chunk;
+            }
+            return updatedMessages;
+          });
         }
       }
     } catch (err: unknown) {
@@ -169,21 +203,29 @@ export const Result: FC<{
       setError(err instanceof Error ? err.message : String(err));
     } finally {
       setIsStreaming(false);
-      if (buffer.length > 0) {
-        setMarkdown((prev) => prev + buffer);
-      }
+      setIsSearching(false);
+      setIsProcessingQuery(false);
+
+      setMessages((prevMessages) => {
+        const updatedMessages = [...prevMessages];
+        const lastMessage = updatedMessages[updatedMessages.length - 1];
+        if (lastMessage.sender === 'assistant' && lastMessage.isStreaming) {
+          lastMessage.isStreaming = false;
+        }
+        return updatedMessages;
+      });
     }
   };
 
   useEffect(() => {
-    if (query === '' || !pipelineId) {
+    if (query === '' || !pipelineUrl) {
       return;
     }
 
     const debouncedParseStreaming = () => {
       clearTimeout(timeout);
       timeout = setTimeout(() => {
-        parseStreaming(query, userId, pipelineId);
+        parseStreaming(query, userId);
       }, 500);
     };
 
@@ -192,33 +234,50 @@ export const Result: FC<{
     return () => {
       clearTimeout(timeout);
     };
-  }, [query, userId, pipelineId, getClient]);
+  }, [query, userId, pipelineUrl]);
+
+  useEffect(() => {
+    localStorage.setItem('chatMessages', JSON.stringify(messages));
+  }, [messages]);
 
   const parsedMarkdown = useMemo(() => parseMarkdown(markdown), [markdown]);
 
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(scrollToBottom, [messages]);
+
   return (
     <div className="flex flex-col gap-8">
-      {query ? (
-        <>
-          <Answer
-            markdown={parsedMarkdown}
-            sources={sources}
-            isStreaming={isStreaming}
-          />
-          <Sources sources={sources} />
-          {error && <div className="text-red-500">Error: {error}</div>}
-        </>
-      ) : (
-        <DefaultQueries setQuery={setQuery} />
-      )}
-
-      {hasAttemptedFetch && uploadedDocuments?.length === 0 && pipelineId && (
+      <div className="flex flex-col space-y-8 mb-4">
+        {messages.map((message, index) => (
+          <React.Fragment key={message.id}>
+            {message.sender === 'user' ? (
+              <MessageBubble message={message} />
+            ) : (
+              <Answer
+                message={message}
+                isStreaming={message.isStreaming || false}
+                isSearching={
+                  index === messages.length - 1 ? isSearching : false
+                }
+              />
+            )}
+          </React.Fragment>
+        ))}
+        <div ref={messagesEndRef} />
+      </div>
+      {error && <div className="text-red-500">Error: {error}</div>}
+      {!query && <DefaultQueries setQuery={setQuery} />}
+      {hasAttemptedFetch && uploadedDocuments?.length === 0 && pipelineUrl && (
         <div className="absolute inset-4 flex items-center justify-center bg-white/40 backdrop-blur-sm">
           <div className="flex items-center p-4 bg-white shadow-2xl rounded text-blue-500 font-medium gap-4">
             Please upload at least one document to submit queries.{' '}
             <UploadButton
               userId={userId}
-              pipelineId={pipelineId}
               uploadedDocuments={uploadedDocuments}
               setUploadedDocuments={setUploadedDocuments}
             />

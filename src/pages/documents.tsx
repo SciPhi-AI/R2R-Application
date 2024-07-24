@@ -1,5 +1,5 @@
-import { DocumentMagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { format, parseISO } from 'date-fns'; // Import date-fns functions
+import { FileSearch2 } from 'lucide-react';
 import React, { useState, useEffect, useCallback } from 'react';
 
 import { DeleteButton } from '@/components/ChatDemo/deleteButton';
@@ -16,7 +16,6 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { useToast } from '@/components/ui/use-toast';
-import { usePipelineInfo } from '@/context/PipelineInfo';
 import { useUserContext } from '@/context/UserContext';
 
 class DocumentInfoType {
@@ -41,22 +40,21 @@ const Index: React.FC = () => {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
-  const { getClient } = useUserContext();
+  const { getClient, pipeline } = useUserContext();
 
   const documentsPerPage = 10;
 
-  const { pipeline, isLoading: isPipelineLoading } = usePipelineInfo();
   const userId = null;
 
   const fetchDocuments = useCallback(
     async (retryCount = 0) => {
-      if (!pipeline?.pipelineId) {
-        console.error('No pipeline ID available');
+      if (!pipeline?.deploymentUrl) {
+        console.error('No pipeline deployment URL available');
         return;
       }
 
       try {
-        const client = await getClient(pipeline.pipelineId);
+        const client = await getClient();
         if (!client) {
           console.error('Failed to get authenticated client');
           return;
@@ -80,7 +78,7 @@ const Index: React.FC = () => {
         }
       }
     },
-    [pipeline?.pipelineId, getClient]
+    [pipeline?.deploymentUrl, getClient]
   );
 
   const handlePageChange = (pageNumber: number) => {
@@ -88,10 +86,10 @@ const Index: React.FC = () => {
   };
 
   useEffect(() => {
-    if (pipeline?.pipelineId) {
+    if (pipeline?.deploymentUrl) {
       fetchDocuments();
     }
-  }, [pipeline?.pipelineId, fetchDocuments]);
+  }, [pipeline?.deploymentUrl, fetchDocuments]);
 
   const totalPages = Math.ceil((documents.length || 0) / documentsPerPage);
   const currentDocuments = documents.slice(
@@ -272,16 +270,8 @@ const Index: React.FC = () => {
                   <Tooltip>
                     <TooltipTrigger>
                       <UpdateButtonContainer
-                        pipelineId={pipeline?.pipelineId || ''}
                         documentId={doc.document_id}
-                        onUpdateSuccess={async () => {
-                          if (pipeline?.pipelineId) {
-                            const client = await getClient(pipeline.pipelineId);
-                            if (client) {
-                              fetchDocuments();
-                            }
-                          }
-                        }}
+                        onUpdateSuccess={fetchDocuments}
                         showToast={toast}
                       />
                     </TooltipTrigger>
@@ -301,7 +291,7 @@ const Index: React.FC = () => {
                         }}
                         className="info-button hover:bg-blue-700 bg-blue-500 text-white font-bold rounded flex items-center justify-center"
                       >
-                        <DocumentMagnifyingGlassIcon className="h-8 w-8" />
+                        <FileSearch2 className="h-8 w-8" />
                       </button>
                     </TooltipTrigger>
                     <TooltipContent>
@@ -345,7 +335,7 @@ const Index: React.FC = () => {
   };
 
   return (
-    <Layout>
+    <Layout pageTitle="Documents">
       <main className="max-w-7xl flex flex-col min-h-screen container">
         <div className="mt-[5rem] sm:mt-[5rem]">
           <div className="flex justify-between items-center">
@@ -356,24 +346,15 @@ const Index: React.FC = () => {
               <div className="mt-6 pr-2">
                 <UploadButton
                   userId={userId}
-                  pipelineId={pipeline?.pipelineId || ''}
                   uploadedDocuments={documents}
                   setUploadedDocuments={setDocuments}
-                  onUploadSuccess={async () => {
-                    if (pipeline?.pipelineId) {
-                      const client = await getClient(pipeline.pipelineId);
-                      if (client) {
-                        fetchDocuments();
-                      }
-                    }
-                  }}
+                  onUploadSuccess={fetchDocuments}
                   showToast={toast}
                 />
               </div>
               <div className="mt-6 pr-2">
                 <DeleteButton
                   selectedDocumentIds={selectedDocumentIds}
-                  pipelineId={pipeline?.pipelineId || ''}
                   onDelete={() => setSelectedDocumentIds([])}
                   onSuccess={() => fetchDocuments()}
                   showToast={toast}
@@ -436,7 +417,6 @@ const Index: React.FC = () => {
       </main>
       <DocumentInfoDialog
         documentId={selectedDocumentId}
-        pipelineId={pipeline?.pipelineId || ''}
         open={isDocumentInfoDialogOpen}
         onClose={() => setIsDocumentInfoDialogOpen(false)}
       />
