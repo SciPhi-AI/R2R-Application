@@ -23,6 +23,7 @@ export const Navbar = forwardRef<React.ElementRef<'div'>, NavbarProps>(
     const { scrollY } = useScroll();
     const bgOpacityLight = useTransform(scrollY, [0, 72], [0.5, 0.9]);
     const bgOpacityDark = useTransform(scrollY, [0, 72], [0.2, 0.8]);
+    const handleHomeClick = () => router.push('/');
 
     const navItems = [
       { path: '/documents', label: 'Documents' },
@@ -48,12 +49,14 @@ export const Navbar = forwardRef<React.ElementRef<'div'>, NavbarProps>(
       >
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center space-x-4">
-            <Logo width={25} height={25} onClick={() => router.push('/')} />
-            <Code>
-              <span className="text-zinc-800 dark:text-zinc-400">
-                R2R Dashboard
-              </span>
-            </Code>
+            <Logo width={25} height={25} onClick={handleHomeClick} />
+            <Link href="/" onClick={handleHomeClick}>
+              <Code>
+                <span className="text-zinc-800 dark:text-zinc-400 cursor-pointer">
+                  R2R Dashboard
+                </span>
+              </Code>
+            </Link>
             <nav>
               <ul role="list" className="flex items-center gap-6">
                 {navItems.map((item) => (
