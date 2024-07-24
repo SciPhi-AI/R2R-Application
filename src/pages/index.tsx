@@ -57,7 +57,7 @@ const PipelinePage = () => {
   return (
     <Layout isConnected={isConnected}>
       <main className="w-full flex flex-col min-h-screen mt-[4rem] sm:mt-[6rem] container mb-[4rem] sm:mb-[6rem]">
-        <h1 className="text-white text-2xl mb-4">Placeholder text</h1>
+        <h1 className="text-white text-2xl mb-4">R2R Dashboard</h1>
         <Separator />
         <Alert variant="default" className="mt-3">
           <AlertTitle className="text-lg ">
