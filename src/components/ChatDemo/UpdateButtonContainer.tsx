@@ -4,16 +4,7 @@ import React, { useState, useRef } from 'react';
 
 import { Spinner } from '@/components/Spinner';
 import { useUserContext } from '@/context/UserContext';
-
-interface UpdateButtonContainerProps {
-  documentId: string;
-  onUpdateSuccess: () => void;
-  showToast: (message: {
-    title: string;
-    description: string;
-    variant: 'default' | 'destructive' | 'success';
-  }) => void;
-}
+import { UpdateButtonContainerProps } from '@/types';
 
 const UpdateButtonContainer: React.FC<UpdateButtonContainerProps> = ({
   documentId,

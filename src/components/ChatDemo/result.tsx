@@ -2,6 +2,7 @@ import React, { FC, useEffect, useState, useMemo, useRef } from 'react';
 
 import { useUserContext } from '@/context/UserContext';
 import { Message } from '@/types';
+import { RagGenerationConfig } from '@/types';
 
 import { Answer } from './answer';
 import { DefaultQueries } from './DefaultQueries';
@@ -14,15 +15,6 @@ const SEARCH_END_TOKEN = '</search>';
 
 const LLM_START_TOKEN = '<completion>';
 const LLM_END_TOKEN = '</completion>';
-
-interface RagGenerationConfig {
-  temperature?: number;
-  top_p?: number;
-  top_k?: number;
-  max_tokens_to_sample?: number;
-  model?: string;
-  stream: boolean;
-}
 
 export const Result: FC<{
   query: string;

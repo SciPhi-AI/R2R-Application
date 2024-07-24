@@ -7,31 +7,8 @@ import React, {
   useCallback,
 } from 'react';
 
-interface Pipeline {
-  deploymentUrl: string;
-}
-
-interface AuthState {
-  isAuthenticated: boolean;
-  email: string | null;
-  password: string | null;
-}
-
-interface UserContextProps {
-  pipeline: Pipeline | null;
-  setPipeline: (pipeline: Pipeline) => void;
-  selectedModel: string;
-  setSelectedModel: (model: string) => void;
-  isAuthenticated: boolean;
-  login: (
-    email: string,
-    password: string,
-    instanceUrl: string
-  ) => Promise<void>;
-  logout: () => Promise<void>;
-  getClient: () => Promise<r2rClient | null>;
-  refreshAuth: () => Promise<void>;
-}
+import { NetworkError, AuthenticationError } from '@/lib/CustomErrors';
+import { AuthState, Pipeline, UserContextProps } from '@/types';
 
 const UserContext = createContext<UserContextProps>({
   pipeline: null,
@@ -95,7 +72,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     if (
       pipeline &&
       authState.isAuthenticated &&
@@ -117,7 +94,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
     });
     setPipeline(null);
     localStorage.removeItem('authState');
-  };
+  }, [pipeline, authState]);
 
   const refreshTokenPeriodically = useCallback(async () => {
     if (authState.isAuthenticated && pipeline) {
@@ -158,17 +135,38 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
       authState.password
     ) {
       const client = new r2rClient(pipeline.deploymentUrl);
-      try {
-        await client.login(authState.email, authState.password);
-        return client;
-      } catch (error) {
-        console.error('Failed to authenticate client:', error);
-        await refreshAuth();
-        return null;
+      const MAX_RETRIES = 3;
+      let retries = 0;
+
+      while (retries < MAX_RETRIES) {
+        try {
+          await client.login(authState.email, authState.password);
+          return client;
+        } catch (error) {
+          console.error(`Authentication attempt ${retries + 1} failed:`, error);
+
+          if (error instanceof NetworkError) {
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+          } else if (error instanceof AuthenticationError) {
+            try {
+              await refreshAuth();
+              retries++;
+              continue;
+            } catch (refreshError) {
+              console.error('Failed to refresh authentication:', refreshError);
+              break;
+            }
+          } else {
+            break;
+          }
+        }
       }
+
+      console.error('Failed to authenticate client after multiple attempts');
+      return null;
     }
     return null;
-  }, [authState, pipeline, refreshAuth]);
+  }, [authState, pipeline, refreshAuth, logout]);
 
   useEffect(() => {
     let refreshInterval: NodeJS.Timeout;

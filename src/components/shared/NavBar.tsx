@@ -8,10 +8,7 @@ import { Logo } from '@/components/shared/Logo';
 import { Button } from '@/components/ui/Button';
 import { Code } from '@/components/ui/Code';
 import { useUserContext } from '@/context/UserContext';
-
-interface NavbarProps {
-  className?: string;
-}
+import { NavbarProps } from '@/types';
 
 export const Navbar = forwardRef<React.ElementRef<'div'>, NavbarProps>(
   function Header({ className }, ref) {

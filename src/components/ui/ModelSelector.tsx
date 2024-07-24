@@ -15,10 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useUserContext } from '@/context/UserContext';
-
-interface ModelSelectorProps {
-  id?: string;
-}
+import { ModelSelectorProps } from '@/types';
 
 const predefinedModels = [
   { value: 'gpt-4o-mini', label: 'GPT-4o-mini' },

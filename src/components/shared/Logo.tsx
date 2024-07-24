@@ -2,14 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
 
-interface LogoProps {
-  width?: number;
-  height?: number;
-  className?: string;
-  onClick?: () => void;
-  disableLink?: boolean;
-  priority?: boolean;
-}
+import { LogoProps } from '@/types';
 
 export function Logo({
   width = 25,

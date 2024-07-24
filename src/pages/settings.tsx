@@ -1,5 +1,5 @@
 import { SquarePen } from 'lucide-react';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 import EditPromptDialog from '@/components/ChatDemo/utils/editPromptDialog';
 import Layout from '@/components/Layout';
@@ -61,7 +61,7 @@ const Index: React.FC = () => {
   const [isEditPromptDialogOpen, setIsEditPromptDialogOpen] = useState(false);
   const { pipeline, getClient } = useUserContext();
 
-  const fetchAppData = async () => {
+  const fetchAppData = useCallback(async () => {
     try {
       const client = await getClient();
       if (!client) {
@@ -81,13 +81,13 @@ const Index: React.FC = () => {
     } catch (err) {
       console.error('Error fetching app data:', err);
     }
-  };
+  }, [getClient]);
 
   useEffect(() => {
     if (pipeline?.deploymentUrl) {
       fetchAppData();
     }
-  }, [pipeline?.deploymentUrl]);
+  }, [pipeline?.deploymentUrl, fetchAppData]);
 
   const { config = {}, prompts = {} } = appData || {};
 

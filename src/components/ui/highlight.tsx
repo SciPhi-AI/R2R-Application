@@ -1,10 +1,6 @@
 import React from 'react';
 
-interface HighlightProps {
-  color: string; // Accept any string
-  textColor: string;
-  children: React.ReactNode;
-}
+import { HighlightProps } from '@/types';
 
 const Highlight: React.FC<HighlightProps> = ({
   color,

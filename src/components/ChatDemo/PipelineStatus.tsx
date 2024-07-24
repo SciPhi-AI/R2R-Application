@@ -2,6 +2,7 @@ import { r2rClient } from 'r2r-js';
 import React, { useState, useEffect, useCallback } from 'react';
 
 import { useUserContext } from '@/context/UserContext';
+import { PipelineStatusProps } from '@/types';
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 2000;
@@ -70,11 +71,6 @@ export function useConnectionStatus(
   }, [checkStatus]);
 
   return isConnected;
-}
-
-interface PipelineStatusProps {
-  className?: string;
-  onStatusChange?: (isConnected: boolean) => void;
 }
 
 export function PipelineStatus({

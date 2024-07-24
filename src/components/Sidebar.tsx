@@ -6,26 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import ModelSelector from '@/components/ui/ModelSelector';
 import { Slider } from '@/components/ui/slider';
-
-interface SidebarProps {
-  isOpen: boolean;
-  onToggle: () => void;
-  switches: any;
-  handleSwitchChange: (id: string, checked: boolean) => void;
-  searchLimit: number;
-  setSearchLimit: (limit: number) => void;
-  searchFilters: string;
-  setSearchFilters: (filters: string) => void;
-  selectedModel: string;
-  top_k: number;
-  setTop_k: (value: number) => void;
-  max_tokens_to_sample: number;
-  setMax_tokens_to_sample: (value: number) => void;
-  temperature: number;
-  setTemperature: (value: number) => void;
-  topP: number;
-  setTopP: (value: number) => void;
-}
+import { SidebarProps } from '@/types';
 
 const Sidebar: React.FC<SidebarProps> = ({
   isOpen,

@@ -7,7 +7,6 @@ import { Toaster } from '@/components/ui/toaster';
 
 type Props = {
   children: ReactNode;
-  localNav?: ReactNode;
   pageTitle?: string;
   isConnected?: boolean;
   includeFooter?: boolean;
@@ -15,7 +14,6 @@ type Props = {
 
 const Layout: React.FC<Props> = ({
   children,
-  localNav,
   pageTitle,
   includeFooter = true,
 }) => {

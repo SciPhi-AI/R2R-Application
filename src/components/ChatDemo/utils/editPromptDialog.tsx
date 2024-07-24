@@ -10,14 +10,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 import { useUserContext } from '@/context/UserContext';
-
-interface EditPromptDialogProps {
-  open: boolean;
-  onClose: () => void;
-  promptName: string;
-  promptTemplate: string;
-  onSaveSuccess: () => void;
-}
+import { EditPromptDialogProps } from '@/types';
 
 const EditPromptDialog: React.FC<EditPromptDialogProps> = ({
   open,

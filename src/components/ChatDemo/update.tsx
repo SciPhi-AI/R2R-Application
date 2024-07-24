@@ -2,17 +2,7 @@
 import React, { useState, useRef, FormEvent, ChangeEvent } from 'react';
 
 import { useUserContext } from '@/context/UserContext';
-
-interface UpdateButtonProps {
-  userId: string;
-  documentId: string;
-  onUpdateSuccess: () => void;
-  showToast?: (message: {
-    title: string;
-    description: string;
-    variant: 'default' | 'destructive' | 'success';
-  }) => void;
-}
+import { UpdateButtonProps } from '@/types';
 
 export const UpdateButton: React.FC<UpdateButtonProps> = ({
   documentId,

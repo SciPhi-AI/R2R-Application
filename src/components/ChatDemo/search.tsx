@@ -2,7 +2,7 @@ import { ArrowRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { FC, useState, useCallback } from 'react';
 
-import { Pipeline } from '../../types';
+import { SearchProps } from '@/types';
 
 function debounce<T extends (...args: any[]) => void>(
   func: T,
@@ -15,11 +15,6 @@ function debounce<T extends (...args: any[]) => void>(
     }
     timeout = setTimeout(() => func.apply(this, args), wait);
   };
-}
-
-interface SearchProps {
-  pipeline?: Pipeline;
-  setQuery: (query: string) => void;
 }
 
 export const Search: FC<SearchProps> = ({ pipeline, setQuery }) => {

@@ -7,17 +7,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useUserContext } from '@/context/UserContext';
-
-interface DocumentInfoDialogProps {
-  documentId: string;
-  open: boolean;
-  onClose: () => void;
-}
-
-interface DocumentChunk {
-  chunk_order: number;
-  text: string;
-}
+import { DocumentInfoDialogProps, DocumentChunk } from '@/types';
 
 const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
   documentId,

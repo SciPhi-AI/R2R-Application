@@ -3,10 +3,7 @@ import { FC } from 'react';
 
 import { Logo } from '@/components/shared/Logo';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-
-interface DefaultQueriesProps {
-  setQuery: (query: string) => void;
-}
+import { DefaultQueriesProps } from '@/types';
 
 export const DefaultQueries: FC<DefaultQueriesProps> = ({ setQuery }) => {
   const defaultQueries = [
