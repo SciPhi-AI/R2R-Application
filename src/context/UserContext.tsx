@@ -22,6 +22,7 @@ const UserContext = createContext<UserContextProps>({
     isAuthenticated: false,
     email: null,
     password: null,
+    userRole: null,
   },
   getClient: () => null,
   client: null,
@@ -52,6 +53,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
       isAuthenticated: false,
       email: null,
       password: null,
+      userRole: null,
     };
   });
 
@@ -65,10 +67,26 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
     const newClient = new r2rClient(instanceUrl);
     try {
       await newClient.login(email, password);
+
+      // Determine user role
+      let userRole: 'admin' | 'user' = 'user'; // Default to 'user'
+      try {
+        await newClient.appSettings();
+        userRole = 'admin';
+      } catch (error) {
+        // If it's a 403 error, we just keep the role as 'user'
+        if (
+          !(error instanceof Error && 'status' in error && error.status === 403)
+        ) {
+          console.error('Unexpected error when checking user role:', error);
+        }
+      }
+
       const newAuthState: AuthState = {
         isAuthenticated: true,
         email,
         password,
+        userRole,
       };
       setAuthState(newAuthState);
       setLastLoginTime(Date.now());
@@ -93,6 +111,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
       isAuthenticated: false,
       email: null,
       password: null,
+      userRole: null,
     });
     setPipeline(null);
     setClient(null);

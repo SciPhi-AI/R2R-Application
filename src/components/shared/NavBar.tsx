@@ -8,15 +8,89 @@ import { forwardRef } from 'react';
 import { Logo } from '@/components/shared/Logo';
 import { Button } from '@/components/ui/Button';
 import { Code } from '@/components/ui/Code';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { useUserContext } from '@/context/UserContext';
-import { NavbarProps } from '@/types';
+import { AdminBadgeProps, NavbarProps, NavItemsProps } from '@/types';
+
+const NavItems: React.FC<NavItemsProps> = ({
+  isAuthenticated,
+  isAdmin,
+  pathname,
+}) => {
+  const commonItems = [
+    { path: '/documents', label: 'Documents' },
+    { path: '/playground', label: 'Playground' },
+  ];
+
+  const adminItems = [
+    { path: '/users', label: 'Users' },
+    { path: '/logs', label: 'Logs' },
+    { path: '/settings', label: 'Settings' },
+  ];
+
+  const items = isAdmin ? [...commonItems, ...adminItems] : commonItems;
+
+  if (!isAuthenticated) {
+    return null;
+  }
+
+  return (
+    <nav>
+      <ul role="list" className="flex items-center gap-6">
+        {items.map((item) => (
+          <li key={item.path}>
+            <Link
+              href={item.path}
+              className={clsx(
+                'text-sm leading-5 transition',
+                pathname === item.path
+                  ? 'text-link'
+                  : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white'
+              )}
+            >
+              <Code>{item.label}</Code>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+};
+
+const AdminBadge: React.FC<AdminBadgeProps> = ({ isAdmin }) => {
+  if (!isAdmin) {
+    return null;
+  }
+
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger>
+          <Button className="rounded-md py-1 px-3 w-30" variant="filled">
+            Admin View
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>You're interacting as an administrator.</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+};
 
 export const Navbar = forwardRef<React.ElementRef<'div'>, NavbarProps>(
   function Header({ className }, ref) {
     const pathname = usePathname();
     const isHomePage = pathname === '/';
-    const { logout, isAuthenticated } = useUserContext();
+    const { logout, isAuthenticated, authState } = useUserContext();
     const router = useRouter();
+
+    const isAdmin = isAuthenticated && authState.userRole === 'admin';
 
     const handleLogout = async () => {
       await logout();
@@ -27,14 +101,6 @@ export const Navbar = forwardRef<React.ElementRef<'div'>, NavbarProps>(
     const bgOpacityLight = useTransform(scrollY, [0, 72], [0.5, 0.9]);
     const bgOpacityDark = useTransform(scrollY, [0, 72], [0.2, 0.8]);
     const handleHomeClick = () => router.push('/');
-
-    const navItems = [
-      { path: '/documents', label: 'Documents' },
-      { path: '/playground', label: 'Playground' },
-      { path: '/users', label: 'Users' },
-      { path: '/logs', label: 'Logs' },
-      { path: '/settings', label: 'Settings' },
-    ];
 
     return (
       <motion.div
@@ -68,29 +134,14 @@ export const Navbar = forwardRef<React.ElementRef<'div'>, NavbarProps>(
                 </span>
               </Code>
             </Link>
-            {isAuthenticated && (
-              <nav>
-                <ul role="list" className="flex items-center gap-6">
-                  {navItems.map((item) => (
-                    <li key={item.path}>
-                      <Link
-                        href={item.path}
-                        className={clsx(
-                          'text-sm leading-5 transition',
-                          pathname === item.path
-                            ? 'text-link'
-                            : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white'
-                        )}
-                      >
-                        <Code>{item.label}</Code>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </nav>
-            )}
+            <NavItems
+              isAuthenticated={isAuthenticated}
+              isAdmin={isAdmin}
+              pathname={pathname}
+            />
           </div>
           <div className="flex items-center space-x-4">
+            <AdminBadge isAdmin={isAdmin} />
             <Button
               className="rounded-md py-1 px-3 w-30"
               variant="filled"

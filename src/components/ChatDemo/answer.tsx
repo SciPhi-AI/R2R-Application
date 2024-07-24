@@ -102,7 +102,7 @@ export const Answer: FC<{
         <AccordionItem value="answer">
           <AccordionTrigger className="py-2 text-lg font-bold text-zinc-200 hover:no-underline">
             <div className="flex items-center justify-between w-full">
-              <Logo width={25} />
+              <Logo width={25} disableLink={true} />
               <span className="text-sm font-normal">
                 {isSearching && parsedSources.length === 0 ? (
                   <span className="searching-animation">

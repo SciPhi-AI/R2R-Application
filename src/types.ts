@@ -1,9 +1,14 @@
 import { r2rClient } from 'r2r-js';
 
+export interface AdminBadgeProps {
+  isAdmin: boolean;
+}
+
 export interface AuthState {
   isAuthenticated: boolean;
   email: string | null;
   password: string | null;
+  userRole: 'admin' | 'user' | null;
 }
 
 export interface BarChartProps {
@@ -130,6 +135,12 @@ export interface ModelSelectorProps {
 
 export interface NavbarProps {
   className?: string;
+}
+
+export interface NavItemsProps {
+  isAuthenticated: boolean;
+  isAdmin: boolean;
+  pathname: string;
 }
 
 export interface Pipeline {
