@@ -19,7 +19,7 @@ import { AdminBadgeProps, NavbarProps, NavItemsProps } from '@/types';
 
 const NavItems: React.FC<NavItemsProps> = ({
   isAuthenticated,
-  isAdmin,
+  effectiveRole,
   pathname,
 }) => {
   const commonItems = [
@@ -33,7 +33,8 @@ const NavItems: React.FC<NavItemsProps> = ({
     { path: '/settings', label: 'Settings' },
   ];
 
-  const items = isAdmin ? [...commonItems, ...adminItems] : commonItems;
+  const items =
+    effectiveRole === 'admin' ? [...commonItems, ...adminItems] : commonItems;
 
   if (!isAuthenticated) {
     return null;
@@ -62,7 +63,11 @@ const NavItems: React.FC<NavItemsProps> = ({
   );
 };
 
-const AdminBadge: React.FC<AdminBadgeProps> = ({ isAdmin }) => {
+const AdminBadge: React.FC<AdminBadgeProps> = ({
+  isAdmin,
+  viewMode,
+  onToggle,
+}) => {
   if (!isAdmin) {
     return null;
   }
@@ -71,12 +76,20 @@ const AdminBadge: React.FC<AdminBadgeProps> = ({ isAdmin }) => {
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger>
-          <Button className="rounded-md py-1 px-3 w-30" variant="filled">
-            Admin View
+          <Button
+            className="rounded-md py-1 px-3 w-30"
+            variant="filled"
+            onClick={onToggle}
+          >
+            {viewMode === 'admin' ? 'Admin View' : 'User View'}
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>You're interacting as an administrator.</p>
+          <p>
+            {viewMode === 'admin'
+              ? "You're interacting as an administrator."
+              : "You're viewing as a regular user."}
+          </p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
@@ -87,10 +100,17 @@ export const Navbar = forwardRef<React.ElementRef<'div'>, NavbarProps>(
   function Header({ className }, ref) {
     const pathname = usePathname();
     const isHomePage = pathname === '/';
-    const { logout, isAuthenticated, authState } = useUserContext();
+    const { logout, isAuthenticated, authState, viewMode, setViewMode } =
+      useUserContext();
     const router = useRouter();
 
     const isAdmin = isAuthenticated && authState.userRole === 'admin';
+    const effectiveRole =
+      viewMode === 'user' ? 'user' : authState.userRole || 'user';
+
+    const toggleViewMode = () => {
+      setViewMode(viewMode === 'admin' ? 'user' : 'admin');
+    };
 
     const handleLogout = async () => {
       await logout();
@@ -136,12 +156,16 @@ export const Navbar = forwardRef<React.ElementRef<'div'>, NavbarProps>(
             </Link>
             <NavItems
               isAuthenticated={isAuthenticated}
-              isAdmin={isAdmin}
+              effectiveRole={effectiveRole}
               pathname={pathname}
             />
           </div>
           <div className="flex items-center space-x-4">
-            <AdminBadge isAdmin={isAdmin} />
+            <AdminBadge
+              isAdmin={isAdmin}
+              viewMode={viewMode}
+              onToggle={toggleViewMode}
+            />
             <Button
               className="rounded-md py-1 px-3 w-30"
               variant="filled"

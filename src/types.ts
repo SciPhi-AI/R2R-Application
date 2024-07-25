@@ -2,6 +2,8 @@ import { r2rClient } from 'r2r-js';
 
 export interface AdminBadgeProps {
   isAdmin: boolean;
+  viewMode: 'admin' | 'user';
+  onToggle: () => void;
 }
 
 export interface AuthState {
@@ -139,7 +141,7 @@ export interface NavbarProps {
 
 export interface NavItemsProps {
   isAuthenticated: boolean;
-  isAdmin: boolean;
+  effectiveRole: 'admin' | 'user';
   pathname: string;
 }
 
@@ -281,4 +283,6 @@ export interface UserContextProps {
   authState: AuthState;
   getClient: () => r2rClient | null;
   client: r2rClient | null;
+  viewMode: 'admin' | 'user';
+  setViewMode: React.Dispatch<React.SetStateAction<'admin' | 'user'>>;
 }

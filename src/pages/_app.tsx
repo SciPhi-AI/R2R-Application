@@ -10,7 +10,7 @@ import { initializePostHog } from '@/lib/posthog-client';
 
 function MyAppContent({ Component, pageProps }: AppProps) {
   const { setTheme } = useTheme();
-  const { isAuthenticated, authState } = useUserContext();
+  const { isAuthenticated, authState, viewMode } = useUserContext();
   const router = useRouter();
 
   useEffect(() => {
@@ -32,12 +32,12 @@ function MyAppContent({ Component, pageProps }: AppProps) {
       router.replace('/login');
     } else if (
       isAuthenticated &&
-      authState.userRole !== 'admin' &&
+      (authState.userRole !== 'admin' || viewMode === 'user') &&
       adminRoutes.includes(router.pathname)
     ) {
       router.replace('/');
     }
-  }, [isAuthenticated, authState.userRole, router]);
+  }, [isAuthenticated, authState.userRole, viewMode, router]);
 
   return <Component {...pageProps} />;
 }

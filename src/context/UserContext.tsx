@@ -26,6 +26,8 @@ const UserContext = createContext<UserContextProps>({
   },
   getClient: () => null,
   client: null,
+  viewMode: 'admin',
+  setViewMode: () => {},
 });
 
 export const useUserContext = () => useContext(UserContext);
@@ -35,6 +37,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [client, setClient] = useState<r2rClient | null>(null);
   const [pipeline, setPipeline] = useState<Pipeline | null>(null);
+  const [viewMode, setViewMode] = useState<'admin' | 'user'>('admin');
 
   const [selectedModel, setSelectedModel] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -68,13 +71,11 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       await newClient.login(email, password);
 
-      // Determine user role
-      let userRole: 'admin' | 'user' = 'user'; // Default to 'user'
+      let userRole: 'admin' | 'user' = 'user';
       try {
         await newClient.appSettings();
         userRole = 'admin';
       } catch (error) {
-        // If it's a 403 error, we just keep the role as 'user'
         if (
           !(error instanceof Error && 'status' in error && error.status === 403)
         ) {
@@ -159,7 +160,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
           refreshTokenPeriodically();
           refreshInterval = setInterval(
             refreshTokenPeriodically,
-            10 * 60 * 1000
+            55 * 60 * 1000
           );
         },
         5 * 60 * 1000
@@ -187,6 +188,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
         logout,
         getClient,
         client,
+        viewMode,
+        setViewMode,
       }}
     >
       {children}
