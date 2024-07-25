@@ -1,9 +1,16 @@
 import { r2rClient } from 'r2r-js';
 
+export interface AdminBadgeProps {
+  isAdmin: boolean;
+  viewMode: 'admin' | 'user';
+  onToggle: () => void;
+}
+
 export interface AuthState {
   isAuthenticated: boolean;
   email: string | null;
   password: string | null;
+  userRole: 'admin' | 'user' | null;
 }
 
 export interface BarChartProps {
@@ -130,6 +137,12 @@ export interface ModelSelectorProps {
 
 export interface NavbarProps {
   className?: string;
+}
+
+export interface NavItemsProps {
+  isAuthenticated: boolean;
+  effectiveRole: 'admin' | 'user';
+  pathname: string;
 }
 
 export interface Pipeline {
@@ -267,6 +280,9 @@ export interface UserContextProps {
     instanceUrl: string
   ) => Promise<void>;
   logout: () => Promise<void>;
-  getClient: () => Promise<r2rClient | null>;
-  refreshAuth: () => Promise<void>;
+  authState: AuthState;
+  getClient: () => r2rClient | null;
+  client: r2rClient | null;
+  viewMode: 'admin' | 'user';
+  setViewMode: React.Dispatch<React.SetStateAction<'admin' | 'user'>>;
 }

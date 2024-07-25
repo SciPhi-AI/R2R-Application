@@ -1,19 +1,116 @@
 import clsx from 'clsx';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useRouter } from 'next/router';
 import { forwardRef } from 'react';
 
 import { Logo } from '@/components/shared/Logo';
 import { Button } from '@/components/ui/Button';
 import { Code } from '@/components/ui/Code';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { useUserContext } from '@/context/UserContext';
-import { NavbarProps } from '@/types';
+import { AdminBadgeProps, NavbarProps, NavItemsProps } from '@/types';
+
+const NavItems: React.FC<NavItemsProps> = ({
+  isAuthenticated,
+  effectiveRole,
+  pathname,
+}) => {
+  const commonItems = [
+    { path: '/documents', label: 'Documents' },
+    { path: '/playground', label: 'Playground' },
+  ];
+
+  const adminItems = [
+    { path: '/users', label: 'Users' },
+    { path: '/logs', label: 'Logs' },
+    { path: '/settings', label: 'Settings' },
+  ];
+
+  const items =
+    effectiveRole === 'admin' ? [...commonItems, ...adminItems] : commonItems;
+
+  if (!isAuthenticated) {
+    return null;
+  }
+
+  return (
+    <nav>
+      <ul role="list" className="flex items-center gap-6">
+        {items.map((item) => (
+          <li key={item.path}>
+            <Link
+              href={item.path}
+              className={clsx(
+                'text-sm leading-5 transition',
+                pathname === item.path
+                  ? 'text-link'
+                  : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white'
+              )}
+            >
+              <Code>{item.label}</Code>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+};
+
+const AdminBadge: React.FC<AdminBadgeProps> = ({
+  isAdmin,
+  viewMode,
+  onToggle,
+}) => {
+  if (!isAdmin) {
+    return null;
+  }
+
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger>
+          <Button
+            className="rounded-md py-1 px-3 w-30"
+            variant="filled"
+            onClick={onToggle}
+          >
+            {viewMode === 'admin' ? 'Admin View' : 'User View'}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>
+            {viewMode === 'admin'
+              ? "You're interacting as an administrator."
+              : "You're viewing as a regular user."}
+          </p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+};
 
 export const Navbar = forwardRef<React.ElementRef<'div'>, NavbarProps>(
   function Header({ className }, ref) {
-    const { logout, isAuthenticated } = useUserContext();
+    const pathname = usePathname();
+    const isHomePage = pathname === '/';
+    const { logout, isAuthenticated, authState, viewMode, setViewMode } =
+      useUserContext();
     const router = useRouter();
+
+    const isAdmin = isAuthenticated && authState.userRole === 'admin';
+    const effectiveRole =
+      viewMode === 'user' ? 'user' : authState.userRole || 'user';
+
+    const toggleViewMode = () => {
+      setViewMode(viewMode === 'admin' ? 'user' : 'admin');
+    };
 
     const handleLogout = async () => {
       await logout();
@@ -24,13 +121,6 @@ export const Navbar = forwardRef<React.ElementRef<'div'>, NavbarProps>(
     const bgOpacityLight = useTransform(scrollY, [0, 72], [0.5, 0.9]);
     const bgOpacityDark = useTransform(scrollY, [0, 72], [0.2, 0.8]);
     const handleHomeClick = () => router.push('/');
-
-    const navItems = [
-      { path: '/documents', label: 'Documents' },
-      { path: '/playground', label: 'Playground' },
-      { path: '/logs', label: 'Logs' },
-      { path: '/settings', label: 'Settings' },
-    ];
 
     return (
       <motion.div
@@ -52,27 +142,30 @@ export const Navbar = forwardRef<React.ElementRef<'div'>, NavbarProps>(
             <Logo width={25} height={25} onClick={handleHomeClick} />
             <Link href="/" onClick={handleHomeClick}>
               <Code>
-                <span className="text-zinc-800 dark:text-zinc-400 cursor-pointer">
+                <span
+                  className={clsx(
+                    'text-sm leading-5 transition',
+                    isHomePage
+                      ? 'text-link'
+                      : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white'
+                  )}
+                >
                   R2R Dashboard
                 </span>
               </Code>
             </Link>
-            <nav>
-              <ul role="list" className="flex items-center gap-6">
-                {navItems.map((item) => (
-                  <li key={item.path}>
-                    <Link
-                      href={item.path}
-                      className="text-sm leading-5 transition text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-                    >
-                      <Code>{item.label}</Code>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </nav>
+            <NavItems
+              isAuthenticated={isAuthenticated}
+              effectiveRole={effectiveRole}
+              pathname={pathname}
+            />
           </div>
           <div className="flex items-center space-x-4">
+            <AdminBadge
+              isAdmin={isAdmin}
+              viewMode={viewMode}
+              onToggle={toggleViewMode}
+            />
             <Button
               className="rounded-md py-1 px-3 w-30"
               variant="filled"

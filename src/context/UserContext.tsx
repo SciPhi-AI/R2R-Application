@@ -7,7 +7,7 @@ import React, {
   useCallback,
 } from 'react';
 
-import { NetworkError, AuthenticationError } from '@/lib/CustomErrors';
+import { AuthenticationError } from '@/lib/CustomErrors';
 import { AuthState, Pipeline, UserContextProps } from '@/types';
 
 const UserContext = createContext<UserContextProps>({
@@ -18,8 +18,16 @@ const UserContext = createContext<UserContextProps>({
   isAuthenticated: false,
   login: async () => {},
   logout: async () => {},
-  getClient: async () => null,
-  refreshAuth: async () => {},
+  authState: {
+    isAuthenticated: false,
+    email: null,
+    password: null,
+    userRole: null,
+  },
+  getClient: () => null,
+  client: null,
+  viewMode: 'admin',
+  setViewMode: () => {},
 });
 
 export const useUserContext = () => useContext(UserContext);
@@ -27,7 +35,9 @@ export const useUserContext = () => useContext(UserContext);
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  const [client, setClient] = useState<r2rClient | null>(null);
   const [pipeline, setPipeline] = useState<Pipeline | null>(null);
+  const [viewMode, setViewMode] = useState<'admin' | 'user'>('admin');
 
   const [selectedModel, setSelectedModel] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -46,26 +56,44 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
       isAuthenticated: false,
       email: null,
       password: null,
+      userRole: null,
     };
   });
+
+  const [lastLoginTime, setLastLoginTime] = useState<number | null>(null);
 
   const login = async (
     email: string,
     password: string,
     instanceUrl: string
   ) => {
-    const client = new r2rClient(instanceUrl);
+    const newClient = new r2rClient(instanceUrl);
     try {
-      await client.login(email, password);
+      await newClient.login(email, password);
+
+      let userRole: 'admin' | 'user' = 'user';
+      try {
+        await newClient.appSettings();
+        userRole = 'admin';
+      } catch (error) {
+        if (
+          !(error instanceof Error && 'status' in error && error.status === 403)
+        ) {
+          console.error('Unexpected error when checking user role:', error);
+        }
+      }
+
       const newAuthState: AuthState = {
         isAuthenticated: true,
         email,
         password,
+        userRole,
       };
       setAuthState(newAuthState);
+      setLastLoginTime(Date.now());
       localStorage.setItem('authState', JSON.stringify(newAuthState));
-
       setPipeline({ deploymentUrl: instanceUrl });
+      setClient(newClient);
     } catch (error) {
       console.error('Login failed:', error);
       throw error;
@@ -73,15 +101,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const logout = useCallback(async () => {
-    if (
-      pipeline &&
-      authState.isAuthenticated &&
-      authState.email &&
-      authState.password
-    ) {
-      const client = new r2rClient(pipeline.deploymentUrl);
+    if (client && authState.isAuthenticated) {
       try {
-        await client.login(authState.email, authState.password);
         await client.logout();
       } catch (error) {
         console.error(`Logout failed:`, error);
@@ -91,96 +112,67 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
       isAuthenticated: false,
       email: null,
       password: null,
+      userRole: null,
     });
     setPipeline(null);
+    setClient(null);
     localStorage.removeItem('authState');
-  }, [pipeline, authState]);
+  }, [client, authState]);
 
   const refreshTokenPeriodically = useCallback(async () => {
-    if (authState.isAuthenticated && pipeline) {
+    if (authState.isAuthenticated && client) {
+      if (lastLoginTime && Date.now() - lastLoginTime < 5 * 60 * 1000) {
+        return;
+      }
       try {
-        const client = new r2rClient(pipeline.deploymentUrl);
-        await client.login(authState.email!, authState.password!);
         await client.refreshAccessToken();
+        setLastLoginTime(Date.now());
       } catch (error) {
         console.error('Failed to refresh token:', error);
-        await logout();
-      }
-    }
-  }, [authState, pipeline]);
-
-  const refreshAuth = useCallback(async () => {
-    if (
-      authState.isAuthenticated &&
-      pipeline &&
-      authState.email &&
-      authState.password
-    ) {
-      try {
-        const client = new r2rClient(pipeline.deploymentUrl);
-        await client.login(authState.email, authState.password);
-        await client.refreshAccessToken();
-      } catch (error) {
-        console.error('Failed to refresh authentication:', error);
-        await logout();
-      }
-    }
-  }, [authState, pipeline, logout]);
-
-  const getClient = useCallback(async (): Promise<r2rClient | null> => {
-    if (
-      pipeline &&
-      authState.isAuthenticated &&
-      authState.email &&
-      authState.password
-    ) {
-      const client = new r2rClient(pipeline.deploymentUrl);
-      const MAX_RETRIES = 3;
-      let retries = 0;
-
-      while (retries < MAX_RETRIES) {
-        try {
-          await client.login(authState.email, authState.password);
-          return client;
-        } catch (error) {
-          console.error(`Authentication attempt ${retries + 1} failed:`, error);
-
-          if (error instanceof NetworkError) {
-            await new Promise((resolve) => setTimeout(resolve, 2000));
-          } else if (error instanceof AuthenticationError) {
-            try {
-              await refreshAuth();
-              retries++;
-              continue;
-            } catch (refreshError) {
-              console.error('Failed to refresh authentication:', refreshError);
-              break;
-            }
-          } else {
-            break;
+        if (error instanceof AuthenticationError) {
+          try {
+            await login(
+              authState.email!,
+              authState.password!,
+              pipeline!.deploymentUrl
+            );
+          } catch (loginError) {
+            console.error('Failed to re-authenticate:', loginError);
+            await logout();
           }
+        } else {
+          await logout();
         }
       }
-
-      console.error('Failed to authenticate client after multiple attempts');
-      return null;
     }
-    return null;
-  }, [authState, pipeline, refreshAuth, logout]);
+  }, [authState, client, login, logout, lastLoginTime, pipeline]);
+
+  const getClient = useCallback((): r2rClient | null => {
+    return client;
+  }, [client]);
 
   useEffect(() => {
     let refreshInterval: NodeJS.Timeout;
 
     if (authState.isAuthenticated) {
-      refreshTokenPeriodically();
-      refreshInterval = setInterval(refreshTokenPeriodically, 10 * 60 * 1000);
-    }
+      const initialDelay = setTimeout(
+        () => {
+          refreshTokenPeriodically();
+          refreshInterval = setInterval(
+            refreshTokenPeriodically,
+            55 * 60 * 1000
+          );
+        },
+        5 * 60 * 1000
+      );
 
-    return () => {
-      if (refreshInterval) {
-        clearInterval(refreshInterval);
-      }
-    };
+      return () => {
+        clearTimeout(initialDelay);
+        if (refreshInterval) {
+          clearInterval(refreshInterval);
+        }
+      };
+    }
   }, [authState.isAuthenticated, refreshTokenPeriodically]);
 
   return (
@@ -191,10 +183,13 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
         selectedModel,
         setSelectedModel,
         isAuthenticated: authState.isAuthenticated,
+        authState,
         login,
         logout,
         getClient,
-        refreshAuth,
+        client,
+        viewMode,
+        setViewMode,
       }}
     >
       {children}

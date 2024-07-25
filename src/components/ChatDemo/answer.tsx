@@ -1,4 +1,3 @@
-import { BookOpenText, BookText } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import { FC } from 'react';
 import Markdown from 'react-markdown';
@@ -9,6 +8,7 @@ import {
   PopoverTrigger,
 } from '@/components/ChatDemo/popover';
 import { Skeleton } from '@/components/ChatDemo/skeleton';
+import { Logo } from '@/components/shared/Logo';
 import {
   Accordion,
   AccordionContent,
@@ -102,27 +102,20 @@ export const Answer: FC<{
         <AccordionItem value="answer">
           <AccordionTrigger className="py-2 text-lg font-bold text-zinc-200 hover:no-underline">
             <div className="flex items-center justify-between w-full">
-              <div className="flex items-center">
-                {isOpen ? (
-                  <BookOpenText className="mr-2" />
-                ) : (
-                  <BookText className="mr-2" />
-                )}
-                Answer
-              </div>
+              <Logo width={25} disableLink={true} />
               <span className="text-sm font-normal">
-                {isSearching ? (
+                {isSearching && parsedSources.length === 0 ? (
                   <span className="searching-animation">
                     Searching over sources...
                   </span>
-                ) : parsedSources.length === 0 ? (
-                  <span className="searching-animation">
-                    Searching over sources...
-                  </span>
-                ) : isOpen ? (
-                  'Hide Sources'
+                ) : parsedSources.length > 0 ? (
+                  isOpen ? (
+                    'Hide Sources'
+                  ) : (
+                    `View ${parsedSources.length} Sources`
+                  )
                 ) : (
-                  `View ${parsedSources.length} Sources`
+                  'No sources found'
                 )}
               </span>
             </div>
