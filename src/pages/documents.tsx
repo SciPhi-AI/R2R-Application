@@ -1,16 +1,6 @@
-<<<<<<< HEAD:src/pages/pipeline/[pipelineId]/documents.tsx
-import {
-  DocumentMagnifyingGlassIcon,
-  FunnelIcon,
-} from '@heroicons/react/24/outline';
 import { format, parseISO } from 'date-fns'; // Import date-fns functions
-import { r2rClient } from 'r2r-js';
+import { ChevronUpSquare, ChevronDownSquare, FileSearch2 } from 'lucide-react';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-=======
-import { format, parseISO } from 'date-fns'; // Import date-fns functions
-import { FileSearch2 } from 'lucide-react';
-import React, { useState, useEffect, useCallback } from 'react';
->>>>>>> origin/main:src/pages/documents.tsx
 
 import { DeleteButton } from '@/components/ChatDemo/deleteButton';
 import UpdateButtonContainer from '@/components/ChatDemo/UpdateButtonContainer';
@@ -21,50 +11,17 @@ import Layout from '@/components/Layout';
 import Pagination from '@/components/ui/altPagination';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
-  Menubar,
-  MenubarContent,
-  MenubarItem,
-  MenubarMenu,
-  MenubarSeparator,
-  MenubarTrigger,
-  MenubarSub,
-  MenubarSubContent,
-  MenubarSubTrigger,
-} from '@/components/ui/MenuBar';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { useToast } from '@/components/ui/use-toast';
-<<<<<<< HEAD:src/pages/pipeline/[pipelineId]/documents.tsx
-import { usePipelineInfo } from '@/context/PipelineInfo';
-import { DocumentFilterCriteria, DocumentInfoType } from '@/types';
-=======
 import { useUserContext } from '@/context/UserContext';
-
-class DocumentInfoType {
-  document_id: string = '';
-  user_id: string = '';
-  title: string = '';
-  version: string = '';
-  updated_at: string = '';
-  size_in_bytes: number = 0;
-  metadata: any = null;
-}
->>>>>>> origin/main:src/pages/documents.tsx
+import { DocumentFilterCriteria, DocumentInfoType } from '@/types';
 
 const MAX_RETRIES = 3;
-const RETRY_DELAY = 2000; // 2 seconds
-const TRANSITION_DELAY = 500; // 0.5 seconds
+const RETRY_DELAY = 2000;
 
 const Index: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -78,7 +35,7 @@ const Index: React.FC = () => {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
-  const { getClient, pipeline } = useUserContext();
+  const { pipeline, getClient } = useUserContext();
 
   const documentsPerPage = 10;
 
@@ -94,17 +51,12 @@ const Index: React.FC = () => {
       try {
         const client = await getClient();
         if (!client) {
-          console.error('Failed to get authenticated client');
-          return;
+          throw new Error('Failed to get authenticated client');
         }
 
         const data = await client.documentsOverview([], []);
         setDocuments(data.results);
-        setIsTransitioning(true);
-        setTimeout(() => {
-          setIsLoading(false);
-          setIsTransitioning(false);
-        }, TRANSITION_DELAY);
+        setIsLoading(false);
         setError(null);
       } catch (error) {
         console.error('Error fetching documents:', error);
@@ -123,7 +75,6 @@ const Index: React.FC = () => {
     setCurrentPage(pageNumber);
   };
 
-<<<<<<< HEAD:src/pages/pipeline/[pipelineId]/documents.tsx
   const filteredAndSortedDocuments = useMemo(
     () => getFilteredAndSortedDocuments(documents, filterCriteria),
     [documents, filterCriteria]
@@ -133,19 +84,13 @@ const Index: React.FC = () => {
     (filteredAndSortedDocuments.length || 0) / documentsPerPage
   );
   const currentDocuments = filteredAndSortedDocuments.slice(
-=======
-  useEffect(() => {
-    if (pipeline?.deploymentUrl) {
-      fetchDocuments();
-    }
-  }, [pipeline?.deploymentUrl, fetchDocuments]);
-
-  const totalPages = Math.ceil((documents.length || 0) / documentsPerPage);
-  const currentDocuments = documents.slice(
->>>>>>> origin/main:src/pages/documents.tsx
     (currentPage - 1) * documentsPerPage,
     currentPage * documentsPerPage
   );
+
+  useEffect(() => {
+    fetchDocuments();
+  }, [fetchDocuments]);
 
   useEffect(() => {
     if (
@@ -400,60 +345,7 @@ const Index: React.FC = () => {
             <h3 className="text-2xl font-bold text-blue-500 pl-4 pt-8">
               Documents
             </h3>
-            <div className="flex items-center space-x-4">
-              <Menubar>
-                <MenubarMenu>
-                  <MenubarTrigger className="p-2">
-                    <FunnelIcon className="h-5 w-5" />
-                  </MenubarTrigger>
-                  <MenubarContent>
-                    <MenubarItem
-                      onClick={() =>
-                        setFilterCriteria((prev) => ({
-                          ...prev,
-                          sort: 'title',
-                        }))
-                      }
-                    >
-                      Sort by Title
-                    </MenubarItem>
-                    <MenubarItem
-                      onClick={() =>
-                        setFilterCriteria((prev) => ({ ...prev, sort: 'date' }))
-                      }
-                    >
-                      Sort by Date
-                    </MenubarItem>
-                    <MenubarSeparator />
-                    <MenubarSub>
-                      <MenubarSubTrigger>Order</MenubarSubTrigger>
-                      <MenubarSubContent>
-                        <MenubarItem
-                          onClick={() =>
-                            setFilterCriteria((prev) => ({
-                              ...prev,
-                              order: 'asc',
-                            }))
-                          }
-                        >
-                          Ascending
-                        </MenubarItem>
-                        <MenubarItem
-                          onClick={() =>
-                            setFilterCriteria((prev) => ({
-                              ...prev,
-                              order: 'desc',
-                            }))
-                          }
-                        >
-                          Descending
-                        </MenubarItem>
-                      </MenubarSubContent>
-                    </MenubarSub>
-                  </MenubarContent>
-                </MenubarMenu>
-              </Menubar>
-            </div>
+            <div className="flex items-center space-x-4"></div>
             <div className="flex justify-center mt-4">
               <div className="mt-6 pr-2">
                 <UploadButton
@@ -495,10 +387,82 @@ const Index: React.FC = () => {
                       </TooltipProvider>
                     </th>
                     <th className="px-4 py-2 text-left text-white">User ID</th>
-                    <th className="px-4 py-2 text-left text-white">Title</th>
+                    <th className="px-4 py-2 text-left text-white">
+                      <div className="flex items-center">
+                        <span className="mr-2">Title</span>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <button
+                                onClick={() =>
+                                  setFilterCriteria({
+                                    sort: 'title',
+                                    order:
+                                      filterCriteria.order === 'asc'
+                                        ? 'desc'
+                                        : 'asc',
+                                  })
+                                }
+                                className="p-1"
+                              >
+                                {filterCriteria.sort === 'title' &&
+                                filterCriteria.order === 'asc' ? (
+                                  <ChevronUpSquare className="h-4 w-4" />
+                                ) : (
+                                  <ChevronDownSquare className="h-4 w-4" />
+                                )}
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>
+                                Sort by Title{' '}
+                                {filterCriteria.order === 'asc'
+                                  ? 'Descending'
+                                  : 'Ascending'}
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                    </th>
                     <th className="px-4 py-2 text-left text-white">Version</th>
                     <th className="px-4 py-2 text-left text-white">
-                      Updated At
+                      <div className="flex items-center">
+                        <span className="mr-2">Updated At</span>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <button
+                                onClick={() =>
+                                  setFilterCriteria({
+                                    sort: 'date',
+                                    order:
+                                      filterCriteria.order === 'asc'
+                                        ? 'desc'
+                                        : 'asc',
+                                  })
+                                }
+                                className="p-1"
+                              >
+                                {filterCriteria.sort === 'date' &&
+                                filterCriteria.order === 'asc' ? (
+                                  <ChevronUpSquare className="h-4 w-4" />
+                                ) : (
+                                  <ChevronDownSquare className="h-4 w-4" />
+                                )}
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>
+                                Sort by Date{' '}
+                                {filterCriteria.order === 'asc'
+                                  ? 'Descending'
+                                  : 'Ascending'}
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
                     </th>
                     <th className="px-4 py-2 text-left text-white">
                       Size in MB
