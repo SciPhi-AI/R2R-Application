@@ -36,6 +36,7 @@ export const Result: FC<{
   setUploadedDocuments: any;
   hasAttemptedFetch: boolean;
   switches: any;
+  mode: 'rag' | 'rag_chat';
 }> = ({
   query,
   setQuery,
@@ -56,6 +57,7 @@ export const Result: FC<{
   setUploadedDocuments,
   hasAttemptedFetch,
   switches,
+  mode,
 }) => {
   const [sources, setSources] = useState<string | null>(null);
   const [markdown, setMarkdown] = useState<string>('');
@@ -66,16 +68,20 @@ export const Result: FC<{
   const { getClient } = useUserContext();
 
   const [messages, setMessages] = useState<Message[]>([]);
+  const [isProcessingQuery, setIsProcessingQuery] = useState(false);
+
   const [currentAssistantMessage, setCurrentAssistantMessage] =
     useState<string>('');
-  const [isProcessingQuery, setIsProcessingQuery] = useState(false);
+  const conversationHistoryRef = useRef<Message[]>([
+    { role: 'system', content: 'You are a helpful assistant.' },
+  ]);
 
   useEffect(() => {
     setMessages([]);
     return () => {
       setMessages([]);
     };
-  }, []);
+  }, [mode]);
 
   let timeout: NodeJS.Timeout;
 
@@ -93,16 +99,21 @@ export const Result: FC<{
     setError(null);
 
     const newUserMessage: Message = {
-      id: Date.now().toString(),
+      role: 'user',
       content: query,
-      sender: 'user',
+      id: Date.now().toString(),
       timestamp: Date.now(),
     };
 
+    conversationHistoryRef.current = [
+      ...conversationHistoryRef.current,
+      newUserMessage,
+    ];
+
     const newAssistantMessage: Message = {
-      id: (Date.now() + 1).toString(),
+      role: 'assistant',
       content: '',
-      sender: 'assistant',
+      id: (Date.now() + 1).toString(),
       timestamp: Date.now() + 1,
       isStreaming: true,
       sources: null,
@@ -116,6 +127,7 @@ export const Result: FC<{
 
     let buffer = '';
     let inLLMResponse = false;
+    let sourcesContent = '';
 
     try {
       const client = await getClient();
@@ -132,15 +144,29 @@ export const Result: FC<{
         model: model !== 'null' && model !== null ? model : undefined,
       };
 
-      const streamResponse = await client.rag({
-        query: query,
-        use_vector_search: switches.vector_search?.checked ?? true,
-        search_filters: search_filters,
-        search_limit: search_limit,
-        do_hybrid_search: switches.hybrid_search?.checked ?? false,
-        use_kg_search: switches.knowledge_graph_search?.checked ?? false,
-        rag_generation_config: ragGenerationConfig,
-      });
+      let streamResponse;
+
+      if (mode === 'rag_chat') {
+        streamResponse = await client.ragChat({
+          messages: conversationHistoryRef.current,
+          use_vector_search: switches.vector_search?.checked ?? true,
+          search_filters: search_filters,
+          search_limit: search_limit,
+          do_hybrid_search: switches.hybrid_search?.checked ?? false,
+          use_kg_search: switches.knowledge_graph_search?.checked ?? false,
+          rag_generation_config: ragGenerationConfig,
+        });
+      } else {
+        streamResponse = await client.rag({
+          query: query,
+          use_vector_search: switches.vector_search?.checked ?? true,
+          search_filters: search_filters,
+          search_limit: search_limit,
+          do_hybrid_search: switches.hybrid_search?.checked ?? false,
+          use_kg_search: switches.knowledge_graph_search?.checked ?? false,
+          rag_generation_config: ragGenerationConfig,
+        });
+      }
 
       const reader = streamResponse.getReader();
       const decoder = new TextDecoder();
@@ -155,18 +181,20 @@ export const Result: FC<{
 
         if (buffer.includes(SEARCH_END_TOKEN)) {
           const [results, rest] = buffer.split(SEARCH_END_TOKEN);
-          const cleanedResults = results.replace(SEARCH_START_TOKEN, '');
+          sourcesContent = results.replace(SEARCH_START_TOKEN, '');
+          setSources(sourcesContent);
 
           setMessages((prevMessages) => {
             const updatedMessages = [...prevMessages];
             const lastMessage = updatedMessages[updatedMessages.length - 1];
-            if (lastMessage.sender === 'assistant' && lastMessage.isStreaming) {
-              lastMessage.sources = cleanedResults;
+            if (lastMessage.role === 'assistant' && lastMessage.isStreaming) {
+              lastMessage.sources = sourcesContent;
             }
             return updatedMessages;
           });
 
           buffer = rest || '';
+          setIsSearching(false);
         }
 
         if (buffer.includes(LLM_START_TOKEN)) {
@@ -191,7 +219,7 @@ export const Result: FC<{
           setMessages((prevMessages) => {
             const updatedMessages = [...prevMessages];
             const lastMessage = updatedMessages[updatedMessages.length - 1];
-            if (lastMessage.sender === 'assistant' && lastMessage.isStreaming) {
+            if (lastMessage.role === 'assistant' && lastMessage.isStreaming) {
               lastMessage.content += chunk;
             }
             return updatedMessages;
@@ -209,7 +237,7 @@ export const Result: FC<{
       setMessages((prevMessages) => {
         const updatedMessages = [...prevMessages];
         const lastMessage = updatedMessages[updatedMessages.length - 1];
-        if (lastMessage.sender === 'assistant' && lastMessage.isStreaming) {
+        if (lastMessage.role === 'assistant' && lastMessage.isStreaming) {
           lastMessage.isStreaming = false;
         }
         return updatedMessages;
@@ -255,7 +283,7 @@ export const Result: FC<{
       <div className="flex flex-col space-y-8 mb-4">
         {messages.map((message, index) => (
           <React.Fragment key={message.id}>
-            {message.sender === 'user' ? (
+            {message.role === 'user' ? (
               <MessageBubble message={message} />
             ) : (
               <Answer

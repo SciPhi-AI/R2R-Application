@@ -123,10 +123,10 @@ export interface LogoProps {
 }
 
 export interface Message {
-  id: string;
+  role: 'system' | 'user' | 'assistant';
   content: string;
-  sender: 'user' | 'assistant';
-  timestamp: number;
+  id?: string;
+  timestamp?: number;
   isStreaming?: boolean;
   sources?: string | null;
 }
@@ -166,6 +166,7 @@ export interface RagGenerationConfig {
 export interface SearchProps {
   pipeline?: Pipeline;
   setQuery: (query: string) => void;
+  placeholder?: string;
 }
 
 export interface SidebarProps {

@@ -5,6 +5,7 @@
 @layer base {
   :root {
     --header-height: 4.5rem;
+    --sidebar-width: 20rem;
 
     --shiki-color-text: theme('colors.white');
     --shiki-token-constant: theme('colors.emerald.300');
@@ -169,4 +170,34 @@ a {
   animation: searchingAnimation 4s forwards;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+.main-content-wrapper {
+  position: fixed;
+  top: var(--header-height);
+  left: var(--sidebar-width);
+  right: 0;
+  bottom: 0;
+  transition: left 0.2s ease-in-out;
+  display: flex;
+  justify-content: center;
+  overflow-x: hidden;
+}
+
+.main-content-wrapper.sidebar-closed {
+  left: 0;
+}
+
+.main-content {
+  width: 100%;
+  max-width: 64rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.mode-selector {
+  position: sticky;
+  z-index: 10;
 }
