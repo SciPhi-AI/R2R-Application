@@ -1,3 +1,4 @@
+<<<<<<< HEAD:src/pages/pipeline/[pipelineId]/documents.tsx
 import {
   DocumentMagnifyingGlassIcon,
   FunnelIcon,
@@ -5,6 +6,11 @@ import {
 import { format, parseISO } from 'date-fns'; // Import date-fns functions
 import { r2rClient } from 'r2r-js';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+=======
+import { format, parseISO } from 'date-fns'; // Import date-fns functions
+import { FileSearch2 } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+>>>>>>> origin/main:src/pages/documents.tsx
 
 import { DeleteButton } from '@/components/ChatDemo/deleteButton';
 import UpdateButtonContainer from '@/components/ChatDemo/UpdateButtonContainer';
@@ -39,8 +45,22 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { useToast } from '@/components/ui/use-toast';
+<<<<<<< HEAD:src/pages/pipeline/[pipelineId]/documents.tsx
 import { usePipelineInfo } from '@/context/PipelineInfo';
 import { DocumentFilterCriteria, DocumentInfoType } from '@/types';
+=======
+import { useUserContext } from '@/context/UserContext';
+
+class DocumentInfoType {
+  document_id: string = '';
+  user_id: string = '';
+  title: string = '';
+  version: string = '';
+  updated_at: string = '';
+  size_in_bytes: number = 0;
+  metadata: any = null;
+}
+>>>>>>> origin/main:src/pages/documents.tsx
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 2000; // 2 seconds
@@ -58,15 +78,26 @@ const Index: React.FC = () => {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+  const { getClient, pipeline } = useUserContext();
 
   const documentsPerPage = 10;
 
-  const { pipeline, isLoading: isPipelineLoading } = usePipelineInfo();
   const userId = null;
 
   const fetchDocuments = useCallback(
-    async (client: r2rClient, retryCount = 0) => {
+    async (retryCount = 0) => {
+      if (!pipeline?.deploymentUrl) {
+        console.error('No pipeline deployment URL available');
+        return;
+      }
+
       try {
+        const client = await getClient();
+        if (!client) {
+          console.error('Failed to get authenticated client');
+          return;
+        }
+
         const data = await client.documentsOverview([], []);
         setDocuments(data.results);
         setIsTransitioning(true);
@@ -78,27 +109,21 @@ const Index: React.FC = () => {
       } catch (error) {
         console.error('Error fetching documents:', error);
         if (retryCount < MAX_RETRIES) {
-          setTimeout(() => fetchDocuments(client, retryCount + 1), RETRY_DELAY);
+          setTimeout(() => fetchDocuments(retryCount + 1), RETRY_DELAY);
         } else {
           setIsLoading(false);
           setError('Failed to fetch documents. Please try again later.');
         }
       }
     },
-    []
+    [pipeline?.deploymentUrl, getClient]
   );
-
-  useEffect(() => {
-    if (pipeline?.deploymentUrl) {
-      const client = new r2rClient(pipeline?.deploymentUrl);
-      fetchDocuments(client);
-    }
-  }, [pipeline?.deploymentUrl, isPipelineLoading, fetchDocuments]);
 
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
   };
 
+<<<<<<< HEAD:src/pages/pipeline/[pipelineId]/documents.tsx
   const filteredAndSortedDocuments = useMemo(
     () => getFilteredAndSortedDocuments(documents, filterCriteria),
     [documents, filterCriteria]
@@ -108,6 +133,16 @@ const Index: React.FC = () => {
     (filteredAndSortedDocuments.length || 0) / documentsPerPage
   );
   const currentDocuments = filteredAndSortedDocuments.slice(
+=======
+  useEffect(() => {
+    if (pipeline?.deploymentUrl) {
+      fetchDocuments();
+    }
+  }, [pipeline?.deploymentUrl, fetchDocuments]);
+
+  const totalPages = Math.ceil((documents.length || 0) / documentsPerPage);
+  const currentDocuments = documents.slice(
+>>>>>>> origin/main:src/pages/documents.tsx
     (currentPage - 1) * documentsPerPage,
     currentPage * documentsPerPage
   );
@@ -293,12 +328,8 @@ const Index: React.FC = () => {
                   <Tooltip>
                     <TooltipTrigger>
                       <UpdateButtonContainer
-                        apiUrl={pipeline?.deploymentUrl || ''}
                         documentId={doc.document_id}
-                        onUpdateSuccess={() =>
-                          pipeline?.deploymentUrl &&
-                          fetchDocuments(new r2rClient(pipeline?.deploymentUrl))
-                        }
+                        onUpdateSuccess={fetchDocuments}
                         showToast={toast}
                       />
                     </TooltipTrigger>
@@ -318,7 +349,7 @@ const Index: React.FC = () => {
                         }}
                         className="info-button hover:bg-blue-700 bg-blue-500 text-white font-bold rounded flex items-center justify-center"
                       >
-                        <DocumentMagnifyingGlassIcon className="h-8 w-8" />
+                        <FileSearch2 className="h-8 w-8" />
                       </button>
                     </TooltipTrigger>
                     <TooltipContent>
@@ -362,7 +393,7 @@ const Index: React.FC = () => {
   };
 
   return (
-    <Layout>
+    <Layout pageTitle="Documents">
       <main className="max-w-7xl flex flex-col min-h-screen container">
         <div className="mt-[5rem] sm:mt-[5rem]">
           <div className="flex justify-between items-center">
@@ -427,25 +458,17 @@ const Index: React.FC = () => {
               <div className="mt-6 pr-2">
                 <UploadButton
                   userId={userId}
-                  apiUrl={pipeline?.deploymentUrl || ''}
                   uploadedDocuments={documents}
                   setUploadedDocuments={setDocuments}
-                  onUploadSuccess={() =>
-                    pipeline?.deploymentUrl &&
-                    fetchDocuments(new r2rClient(pipeline?.deploymentUrl))
-                  }
+                  onUploadSuccess={fetchDocuments}
                   showToast={toast}
                 />
               </div>
               <div className="mt-6 pr-2">
                 <DeleteButton
                   selectedDocumentIds={selectedDocumentIds}
-                  apiUrl={pipeline?.deploymentUrl || ''}
                   onDelete={() => setSelectedDocumentIds([])}
-                  onSuccess={() =>
-                    pipeline?.deploymentUrl &&
-                    fetchDocuments(new r2rClient(pipeline?.deploymentUrl))
-                  }
+                  onSuccess={() => fetchDocuments()}
                   showToast={toast}
                 />
               </div>
@@ -506,7 +529,6 @@ const Index: React.FC = () => {
       </main>
       <DocumentInfoDialog
         documentId={selectedDocumentId}
-        apiUrl={pipeline?.deploymentUrl || ''}
         open={isDocumentInfoDialogOpen}
         onClose={() => setIsDocumentInfoDialogOpen(false)}
       />

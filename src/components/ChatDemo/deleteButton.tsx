@@ -1,4 +1,3 @@
-import { r2rClient } from 'r2r-js';
 import React from 'react';
 
 import {
@@ -12,63 +11,55 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-
-interface DeleteButtonProps {
-  selectedDocumentIds: string[];
-  apiUrl: string;
-  onDelete: () => void;
-  onSuccess: () => void;
-  showToast: (message: {
-    title: string;
-    description: string;
-    variant: 'default' | 'destructive' | 'success';
-  }) => void;
-}
+import { useUserContext } from '@/context/UserContext';
+import { DeleteButtonProps } from '@/types';
 
 export const DeleteButton: React.FC<DeleteButtonProps> = ({
   selectedDocumentIds,
-  apiUrl,
   onDelete,
   onSuccess,
   showToast,
 }) => {
+  const { getClient } = useUserContext();
+
   const handleBatchDelete = async () => {
     if (selectedDocumentIds.length === 0) {
       return;
     }
 
-    if (apiUrl) {
-      try {
-        const client = new r2rClient(apiUrl);
+    try {
+      const client = await getClient();
+      if (!client) {
+        throw new Error('Failed to get authenticated client');
+      }
 
-        for (let i = 0; i < selectedDocumentIds.length; i++) {
-          const key = 'document_id';
-          const value = selectedDocumentIds[i];
+      for (let i = 0; i < selectedDocumentIds.length; i++) {
+        const key = 'document_id';
+        const value = selectedDocumentIds[i];
 
-          await client.delete([key], [value]);
-        }
+        await client.delete([key], [value]);
+      }
+      showToast({
+        variant: 'success',
+        title: 'Documents deleted',
+        description: 'The selected documents have been successfully deleted',
+      });
+      onSuccess();
+      onDelete();
+    } catch (error: unknown) {
+      console.error('Error deleting documents:', error);
+      if (error instanceof Error) {
         showToast({
-          variant: 'success',
-          title: 'Documents deleted',
-          description: 'The selected documents have been successfully deleted',
+          variant: 'destructive',
+          title: 'Failed to delete documents',
+          description: error.message,
         });
-        onSuccess();
-        onDelete();
-      } catch (error: unknown) {
-        console.error('Error deleting documents:', error);
-        if (error instanceof Error) {
-          showToast({
-            variant: 'destructive',
-            title: 'Failed to delete documents',
-            description: error.message,
-          });
-        } else {
-          showToast({
-            variant: 'destructive',
-            title: 'Failed to delete documents',
-            description: 'An unknown error occurred',
-          });
-        }
+      } else {
+        showToast({
+          variant: 'destructive',
+          title: 'Failed to delete documents',
+          description: 'An unknown error occurred',
+        });
       }
     }
   };

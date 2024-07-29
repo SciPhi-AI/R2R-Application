@@ -1,4 +1,3 @@
-import { r2rClient } from 'r2r-js';
 import React, { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/Button';
@@ -10,26 +9,19 @@ import {
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
-
-interface EditPromptDialogProps {
-  open: boolean;
-  onClose: () => void;
-  promptName: string;
-  promptTemplate: string;
-  apiUrl: string;
-  onSaveSuccess: () => void;
-}
+import { useUserContext } from '@/context/UserContext';
+import { EditPromptDialogProps } from '@/types';
 
 const EditPromptDialog: React.FC<EditPromptDialogProps> = ({
   open,
   onClose,
   promptName,
   promptTemplate,
-  apiUrl,
   onSaveSuccess,
 }) => {
   const [editedTemplate, setEditedTemplate] = useState(promptTemplate);
   const { toast } = useToast();
+  const { getClient } = useUserContext();
 
   useEffect(() => {
     setEditedTemplate(promptTemplate);
@@ -37,7 +29,11 @@ const EditPromptDialog: React.FC<EditPromptDialogProps> = ({
 
   const handleSave = async () => {
     try {
-      const client = new r2rClient(apiUrl);
+      const client = await getClient();
+      if (!client) {
+        throw new Error('Failed to get authenticated client');
+      }
+
       await client.updatePrompt(promptName, editedTemplate);
       toast({
         title: 'Prompt updated',

@@ -1,31 +1,33 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { r2rClient } from 'r2r-js';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from 'react';
 
-// Define the initial context value and its types
-interface Pipeline {
-  pipelineName: string;
-  deploymentUrl: string;
-  pipelineId: string;
-}
-
-interface UserContextProps {
-  watchedPipelines: Record<string, Pipeline>;
-  addWatchedPipeline: (pipelineId: string, pipeline: Pipeline) => void;
-  removeWatchedPipeline: (pipelineId: string) => void;
-  isPipelineUnique: (
-    name: string,
-    url: string
-  ) => { nameUnique: boolean; urlUnique: boolean };
-  selectedModel: string;
-  setSelectedModel: (model: string) => void;
-}
+import { AuthenticationError } from '@/lib/CustomErrors';
+import { AuthState, Pipeline, UserContextProps } from '@/types';
 
 const UserContext = createContext<UserContextProps>({
-  watchedPipelines: {},
-  addWatchedPipeline: () => {},
-  removeWatchedPipeline: () => {},
-  isPipelineUnique: () => ({ nameUnique: true, urlUnique: true }),
+  pipeline: null,
+  setPipeline: () => {},
   selectedModel: 'null',
   setSelectedModel: () => {},
+  isAuthenticated: false,
+  login: async () => {},
+  logout: async () => {},
+  authState: {
+    isAuthenticated: false,
+    email: null,
+    password: null,
+    userRole: null,
+  },
+  getClient: () => null,
+  client: null,
+  viewMode: 'admin',
+  setViewMode: () => {},
 });
 
 export const useUserContext = () => useContext(UserContext);
@@ -33,90 +35,161 @@ export const useUserContext = () => useContext(UserContext);
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [watchedPipelines, setWatchedPipelines] = useState<
-    Record<string, Pipeline>
-  >({});
+  const [client, setClient] = useState<r2rClient | null>(null);
+  const [pipeline, setPipeline] = useState<Pipeline | null>(null);
+  const [viewMode, setViewMode] = useState<'admin' | 'user'>('admin');
 
   const [selectedModel, setSelectedModel] = useState(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('selectedModel') || 'null';
+      return localStorage.getItem('selectedModel') || 'gpt-4o';
     }
     return 'null';
   });
-
-  // Load data from local storage on initial render
-  useEffect(() => {
-    const storedPipelines = localStorage.getItem('watchedPipelines');
-    if (storedPipelines) {
-      setWatchedPipelines(JSON.parse(storedPipelines));
+  const [authState, setAuthState] = useState<AuthState>(() => {
+    if (typeof window !== 'undefined') {
+      const storedAuthState = localStorage.getItem('authState');
+      if (storedAuthState) {
+        return JSON.parse(storedAuthState);
+      }
     }
-  }, []);
-
-  useEffect(() => {
-    const preWatchedPipeline = {
-      pipelineName: 'Local Pipeline',
-      deploymentUrl: 'http://localhost:8000',
-      pipelineId: 'e67897b9-5f80-4f6a-8f2f-0c80ad106865',
+    return {
+      isAuthenticated: false,
+      email: null,
+      password: null,
+      userRole: null,
     };
+  });
 
-    if (
-      isPipelineUnique(
-        preWatchedPipeline.pipelineName,
-        preWatchedPipeline.deploymentUrl
-      ).nameUnique &&
-      isPipelineUnique(
-        preWatchedPipeline.pipelineName,
-        preWatchedPipeline.deploymentUrl
-      ).urlUnique
-    ) {
-      addWatchedPipeline(preWatchedPipeline.pipelineId, preWatchedPipeline);
+  const [lastLoginTime, setLastLoginTime] = useState<number | null>(null);
+
+  const login = async (
+    email: string,
+    password: string,
+    instanceUrl: string
+  ) => {
+    const newClient = new r2rClient(instanceUrl);
+    try {
+      await newClient.login(email, password);
+
+      let userRole: 'admin' | 'user' = 'user';
+      try {
+        await newClient.appSettings();
+        userRole = 'admin';
+      } catch (error) {
+        if (
+          !(error instanceof Error && 'status' in error && error.status === 403)
+        ) {
+          console.error('Unexpected error when checking user role:', error);
+        }
+      }
+
+      const newAuthState: AuthState = {
+        isAuthenticated: true,
+        email,
+        password,
+        userRole,
+      };
+      setAuthState(newAuthState);
+      setLastLoginTime(Date.now());
+      localStorage.setItem('authState', JSON.stringify(newAuthState));
+      setPipeline({ deploymentUrl: instanceUrl });
+      setClient(newClient);
+    } catch (error) {
+      console.error('Login failed:', error);
+      throw error;
     }
-  }, []);
-
-  // Save data to local storage whenever watchedPipelines changes
-  useEffect(() => {
-    localStorage.setItem('watchedPipelines', JSON.stringify(watchedPipelines));
-  }, [watchedPipelines]);
-
-  // Save selectedModel to local storage whenever it changes
-  useEffect(() => {
-    localStorage.setItem('selectedModel', selectedModel);
-  }, [selectedModel]);
-
-  const addWatchedPipeline = (pipelineId: string, pipeline: Pipeline) => {
-    setWatchedPipelines((prevPipelines) => ({
-      ...prevPipelines,
-      [pipelineId]: pipeline,
-    }));
   };
 
-  const removeWatchedPipeline = (pipelineId: string) => {
-    setWatchedPipelines((prevPipelines) => {
-      const newPipelines = { ...prevPipelines };
-      delete newPipelines[pipelineId];
-      return newPipelines;
+  const logout = useCallback(async () => {
+    if (client && authState.isAuthenticated) {
+      try {
+        await client.logout();
+      } catch (error) {
+        console.error(`Logout failed:`, error);
+      }
+    }
+    setAuthState({
+      isAuthenticated: false,
+      email: null,
+      password: null,
+      userRole: null,
     });
-  };
+    setPipeline(null);
+    setClient(null);
+    localStorage.removeItem('authState');
+  }, [client, authState]);
 
-  const isPipelineUnique = (name: string, url: string) => {
-    const nameUnique = !Object.values(watchedPipelines).some(
-      (p) => p.pipelineName === name
-    );
-    const urlUnique = !Object.values(watchedPipelines).some(
-      (p) => p.deploymentUrl === url
-    );
-    return { nameUnique, urlUnique };
-  };
+  const refreshTokenPeriodically = useCallback(async () => {
+    if (authState.isAuthenticated && client) {
+      if (lastLoginTime && Date.now() - lastLoginTime < 5 * 60 * 1000) {
+        return;
+      }
+      try {
+        await client.refreshAccessToken();
+        setLastLoginTime(Date.now());
+      } catch (error) {
+        console.error('Failed to refresh token:', error);
+        if (error instanceof AuthenticationError) {
+          try {
+            await login(
+              authState.email!,
+              authState.password!,
+              pipeline!.deploymentUrl
+            );
+          } catch (loginError) {
+            console.error('Failed to re-authenticate:', loginError);
+            await logout();
+          }
+        } else {
+          await logout();
+        }
+      }
+    }
+  }, [authState, client, login, logout, lastLoginTime, pipeline]);
+
+  const getClient = useCallback((): r2rClient | null => {
+    return client;
+  }, [client]);
+
+  useEffect(() => {
+    let refreshInterval: NodeJS.Timeout;
+
+    if (authState.isAuthenticated) {
+      const initialDelay = setTimeout(
+        () => {
+          refreshTokenPeriodically();
+          refreshInterval = setInterval(
+            refreshTokenPeriodically,
+            55 * 60 * 1000
+          );
+        },
+        5 * 60 * 1000
+      );
+
+      return () => {
+        clearTimeout(initialDelay);
+        if (refreshInterval) {
+          clearInterval(refreshInterval);
+        }
+      };
+    }
+  }, [authState.isAuthenticated, refreshTokenPeriodically]);
 
   return (
     <UserContext.Provider
       value={{
-        watchedPipelines,
-        addWatchedPipeline,
-        removeWatchedPipeline,
-        isPipelineUnique,
+        pipeline,
+        setPipeline,
         selectedModel,
         setSelectedModel,
+        isAuthenticated: authState.isAuthenticated,
+        authState,
+        login,
+        logout,
+        getClient,
+        client,
+        viewMode,
+        setViewMode,
       }}
     >
       {children}

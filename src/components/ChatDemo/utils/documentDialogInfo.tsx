@@ -1,4 +1,3 @@
-import { r2rClient } from 'r2r-js';
 import React, { useEffect, useState } from 'react';
 
 import {
@@ -7,31 +6,24 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-
-interface DocumentInfoDialogProps {
-  documentId: string;
-  apiUrl: string;
-  open: boolean;
-  onClose: () => void;
-}
-
-interface DocumentChunk {
-  chunk_order: number;
-  text: string;
-}
+import { useUserContext } from '@/context/UserContext';
+import { DocumentInfoDialogProps, DocumentChunk } from '@/types';
 
 const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
   documentId,
-  apiUrl,
   open,
   onClose,
 }) => {
   const [documentChunks, setDocumentChunks] = useState<DocumentChunk[]>([]);
+  const { getClient } = useUserContext();
 
   useEffect(() => {
     const fetchDocumentChunks = async () => {
       try {
-        const client = new r2rClient(apiUrl);
+        const client = await getClient();
+        if (!client) {
+          throw new Error('Failed to get authenticated client');
+        }
 
         const chunks = await client.documentChunks(documentId);
 
@@ -49,7 +41,7 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
     if (open && documentId) {
       fetchDocumentChunks();
     }
-  }, [open, documentId, apiUrl]);
+  }, [open, documentId, getClient]);
 
   return (
     <Dialog open={open} onOpenChange={onClose}>

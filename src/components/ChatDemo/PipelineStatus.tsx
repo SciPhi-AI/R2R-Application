@@ -1,64 +1,74 @@
 import { r2rClient } from 'r2r-js';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+
+import { useUserContext } from '@/context/UserContext';
+import { PipelineStatusProps } from '@/types';
+
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 2000;
 
 async function checkPipelineStatus(
-  deploymentUrl: string | undefined
+  deploymentUrl: string | undefined,
+  getClient: () => r2rClient | null
 ): Promise<'Connected' | 'No Connection'> {
   if (!deploymentUrl) {
     return 'No Connection';
   }
 
-  try {
-    const client = new r2rClient(deploymentUrl);
-    await client.healthCheck();
-    return 'Connected';
-  } catch (error) {
-    console.error('Health check failed:', error);
-    return 'No Connection';
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    try {
+      const client = getClient();
+      if (!client) {
+        return 'No Connection';
+      }
+      await client.health();
+      return 'Connected';
+    } catch (error) {
+      console.warn(`Health check attempt ${attempt + 1} failed:`, error);
+      if (attempt < MAX_RETRIES - 1) {
+        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
+      }
+    }
   }
+
+  console.error('Health check failed after multiple attempts');
+  return 'No Connection';
 }
 
 export function useConnectionStatus(
   deploymentUrl?: string,
   onStatusChange?: (isConnected: boolean) => void
 ) {
+  const { getClient } = useUserContext();
   const [isConnected, setIsConnected] = useState(false);
 
-  useEffect(() => {
-    const checkStatus = async () => {
-      if (deploymentUrl) {
-        const status = await checkPipelineStatus(deploymentUrl);
-        const newConnectionStatus = status === 'Connected';
-        setIsConnected(newConnectionStatus);
-        onStatusChange?.(newConnectionStatus);
-      } else {
-        setIsConnected(false);
-        onStatusChange?.(false);
-      }
-    };
+  const checkStatus = useCallback(async () => {
+    if (deploymentUrl) {
+      const status = await checkPipelineStatus(deploymentUrl, getClient);
+      const newConnectionStatus = status === 'Connected';
+      setIsConnected(newConnectionStatus);
+      onStatusChange?.(newConnectionStatus);
+    } else {
+      setIsConnected(false);
+      onStatusChange?.(false);
+    }
+  }, [deploymentUrl, getClient, onStatusChange]);
 
+  useEffect(() => {
     checkStatus();
     const interval = setInterval(checkStatus, 10000);
 
     return () => clearInterval(interval);
-  }, [deploymentUrl, onStatusChange]);
+  }, [checkStatus]);
 
   return isConnected;
 }
 
-interface PipelineStatusProps {
-  pipeline: {
-    deploymentUrl: string;
-  };
-  className?: string;
-  onStatusChange?: (isConnected: boolean) => void;
-}
-
 export function PipelineStatus({
-  pipeline,
   className = '',
   onStatusChange,
 }: PipelineStatusProps) {
+  const { pipeline } = useUserContext();
   const isConnected = useConnectionStatus(
     pipeline?.deploymentUrl,
     onStatusChange

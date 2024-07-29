@@ -1,29 +1,19 @@
 'use client';
-import { DocumentArrowUpIcon } from '@heroicons/react/24/outline';
-import { r2rClient } from 'r2r-js';
+import { FileUp } from 'lucide-react';
 import React, { useState, useRef } from 'react';
 
 import { Spinner } from '@/components/Spinner';
-
-interface UpdateButtonContainerProps {
-  apiUrl: string;
-  documentId: string;
-  onUpdateSuccess: () => void;
-  showToast: (message: {
-    title: string;
-    description: string;
-    variant: 'default' | 'destructive' | 'success';
-  }) => void;
-}
+import { useUserContext } from '@/context/UserContext';
+import { UpdateButtonContainerProps } from '@/types';
 
 const UpdateButtonContainer: React.FC<UpdateButtonContainerProps> = ({
-  apiUrl,
   documentId,
   onUpdateSuccess,
   showToast,
 }) => {
   const [isUpdating, setIsUpdating] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { getClient } = useUserContext();
 
   const handleDocumentUpdate = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -36,12 +26,13 @@ const UpdateButtonContainer: React.FC<UpdateButtonContainerProps> = ({
     ) {
       setIsUpdating(true);
       const file = fileInputRef.current.files[0];
-      const client = new r2rClient(apiUrl);
 
       try {
-        if (!apiUrl) {
-          throw new Error('API URL is not defined');
+        const client = await getClient();
+        if (!client) {
+          throw new Error('Failed to get authenticated client');
         }
+
         const metadata = { title: file.name };
 
         await client.updateFiles([file], {
@@ -92,7 +83,7 @@ const UpdateButtonContainer: React.FC<UpdateButtonContainerProps> = ({
         {isUpdating ? (
           <Spinner className="h-5 w-5 text-white" />
         ) : (
-          <DocumentArrowUpIcon className="h-8 w-8" />
+          <FileUp className="h-8 w-8" />
         )}
       </button>
       <input

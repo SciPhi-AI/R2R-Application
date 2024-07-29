@@ -1,4 +1,4 @@
-import { AdjustmentsHorizontalIcon } from '@heroicons/react/24/outline';
+import { SlidersHorizontal } from 'lucide-react';
 import React from 'react';
 
 import { Input } from '@/components/ui/input';
@@ -12,48 +12,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { Slider } from '@/components/ui/slider';
-
-interface GenerationConfig {
-  // RAG Configuration
-  temperature?: number;
-  setTemperature?: (value: number) => void;
-  top_p?: number;
-  setTopP?: (value: number) => void;
-  top_k?: number;
-  setTop_k?: (value: number) => void;
-  max_tokens_to_sample?: number;
-  setMax_tokens_to_sample?: (value: number) => void;
-  model?: string;
-  setModel?: (value: string) => void;
-  stream?: boolean;
-  setStream?: (value: boolean) => void;
-  functions?: Array<Record<string, any>> | null;
-  setFunctions?: (value: Array<Record<string, any>> | null) => void;
-  skip_special_tokens?: boolean;
-  setSkipSpecialTokens?: (value: boolean) => void;
-  stop_token?: string | null;
-  setStopToken?: (value: string | null) => void;
-  num_beams?: number;
-  setNumBeams?: (value: number) => void;
-  do_sample?: boolean;
-  setDoSample?: (value: boolean) => void;
-  generate_with_chat?: boolean;
-  setGenerateWithChat?: (value: boolean) => void;
-  add_generation_kwargs?: Record<string, any>;
-  setAddGenerationKwargs?: (value: Record<string, any>) => void;
-  api_base?: string | null;
-  setApiBase?: (value: string | null) => void;
-
-  // Knowledge Graph Configuration
-  kg_temperature?: number;
-  setKgTemperature?: (value: number) => void;
-  kg_top_p?: number;
-  setKgTopP?: (value: number) => void;
-  kg_top_k?: number;
-  setKgTop_k?: (value: number) => void;
-  kg_max_tokens_to_sample?: number;
-  setKgMax_tokens_to_sample?: (value: number) => void;
-}
+import { GenerationConfig } from '@/types';
 
 const ConfigurationSheet: React.FC<GenerationConfig> = ({
   temperature,
@@ -96,7 +55,7 @@ const ConfigurationSheet: React.FC<GenerationConfig> = ({
   return (
     <Sheet>
       <SheetTrigger>
-        <AdjustmentsHorizontalIcon className="h-8 w-8 mb-3" />
+        <SlidersHorizontal className="h-8 w-8 mb-3" />
       </SheetTrigger>
       <SheetContent side="left">
         <SheetHeader>

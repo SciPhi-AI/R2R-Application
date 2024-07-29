@@ -1,29 +1,27 @@
 'use client';
 import { Loader } from 'lucide-react';
-import { useRouter } from 'next/router';
-import { r2rClient } from 'r2r-js';
 import React, { useState, useEffect } from 'react';
 
 import LogTable from '@/components/ChatDemo/logtable';
 import Layout from '@/components/Layout';
-import { usePipelineInfo } from '@/context/PipelineInfo';
+import { useUserContext } from '@/context/UserContext';
 
 const Index: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
-
-  const router = useRouter();
-
-  const { pipeline, isLoading: isPipelineLoading } = usePipelineInfo();
-
-  const [selectedLogs, setSelectedLogs] = useState('ALL');
   const [logs, setLogs] = useState<any[]>([]);
+  const { getClient, pipeline } = useUserContext();
 
   function sleep(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
-  const fetchLogs = async (client: r2rClient) => {
+  const fetchLogs = async () => {
     try {
+      const client = await getClient();
+      if (!client) {
+        throw new Error('Failed to get authenticated client');
+      }
+
       const data = await client.logs();
       setLogs(data.results || []);
     } catch (error) {
@@ -33,15 +31,13 @@ const Index: React.FC = () => {
 
   useEffect(() => {
     if (pipeline?.deploymentUrl) {
-      const client = new r2rClient(pipeline?.deploymentUrl);
-      fetchLogs(client);
-      sleep(1000);
-      setIsLoading(false);
+      fetchLogs();
+      sleep(1000).then(() => setIsLoading(false));
     }
-  }, [pipeline?.deploymentUrl, selectedLogs]);
+  }, [pipeline?.deploymentUrl]);
 
   return (
-    <Layout includeFooter={false}>
+    <Layout pageTitle="Logs" includeFooter={false}>
       <main className="w-full flex flex-col min-h-screen container">
         <div className="absolute inset-0 bg-zinc-900 mt-[5rem] sm:mt-[5rem] ">
           <div className="mx-auto max-w-6xl mb-12 mt-4 absolute inset-4 md:inset-1">

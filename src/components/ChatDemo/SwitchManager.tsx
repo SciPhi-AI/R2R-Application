@@ -1,10 +1,6 @@
 import { useState, useCallback } from 'react';
 
-interface Switch {
-  checked: boolean;
-  label: string;
-  tooltipText: string;
-}
+import { Switch } from '@/types';
 
 const useSwitchManager = () => {
   const [switches, setSwitches] = useState<Record<string, Switch>>({});

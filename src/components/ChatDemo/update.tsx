@@ -1,28 +1,17 @@
 'use client';
-import { r2rClient } from 'r2r-js';
 import React, { useState, useRef, FormEvent, ChangeEvent } from 'react';
 
-interface UpdateButtonProps {
-  userId: string;
-  apiUrl: string;
-  documentId: string;
-  onUpdateSuccess: () => void;
-  showToast?: (message: {
-    title: string;
-    description: string;
-    variant: 'default' | 'destructive' | 'success';
-  }) => void;
-}
+import { useUserContext } from '@/context/UserContext';
+import { UpdateButtonProps } from '@/types';
 
 export const UpdateButton: React.FC<UpdateButtonProps> = ({
-  userId,
-  apiUrl,
   documentId,
   onUpdateSuccess,
   showToast = () => {},
 }) => {
   const [isUpdating, setIsUpdating] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { getClient } = useUserContext();
 
   const handleDocumentUpdate = async (
     event: FormEvent<HTMLFormElement> | ChangeEvent<HTMLInputElement>
@@ -35,12 +24,13 @@ export const UpdateButton: React.FC<UpdateButtonProps> = ({
     ) {
       setIsUpdating(true);
       const file = fileInputRef.current.files[0];
-      const client = new r2rClient(apiUrl);
 
       try {
-        if (!apiUrl) {
-          throw new Error('API URL is not defined');
+        const client = await getClient();
+        if (!client) {
+          throw new Error('Failed to get authenticated client');
         }
+
         const metadata = { title: file.name };
 
         await client.updateFiles([file], {
