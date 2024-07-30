@@ -6,6 +6,14 @@ export interface AdminBadgeProps {
   onToggle: () => void;
 }
 
+export interface AnalyticsData {
+  [key: string]: any;
+  percentiles?: Record<string, number | string>;
+  filtered_logs?: {
+    [key: string]: any[];
+  };
+}
+
 export interface AuthState {
   isAuthenticated: boolean;
   email: string | null;

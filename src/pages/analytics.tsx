@@ -1,11 +1,11 @@
 import { useRouter } from 'next/router';
+import { AnalysisTypes, FilterCriteria } from 'r2r-js';
 import React, { useState, useEffect } from 'react';
 
 import Layout from '@/components/Layout';
 import Pagination from '@/components/ui/altPagination';
 import BarChart from '@/components/ui/BarChart';
 import { InfoIcon } from '@/components/ui/InfoIcon';
-import { AnalysisTypes, FilterCriteria } from 'r2r-js';
 import {
   Select,
   SelectContent,
@@ -20,6 +20,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { useUserContext } from '@/context/UserContext';
+import { AnalyticsData } from '@/types';
 
 type FilterDisplayNameKeys =
   | 'search_latency'
@@ -248,7 +249,7 @@ const AnalysisResults: React.FC<{
 };
 
 const Analytics: React.FC = () => {
-  const [analyticsData, setAnalyticsData] = useState<any>({});
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData>({});
   const router = useRouter();
   const { getClient, pipeline } = useUserContext();
 
@@ -263,45 +264,63 @@ const Analytics: React.FC = () => {
         console.error('Failed to get authenticated client');
         return;
       }
-      const filters = { [filter]: filter };
-      const metricsAnalysisTypes = {
-        [filter]:
-          filter === 'error'
-            ? ['bar_chart', filter]
-            : ['basic_statistics', filter],
-      };
-      const percentiles = [10, 25, 50, 90];
 
-      const filter_criteria: FilterCriteria = { [filter]: filter };
-      const analysis_types: AnalysisTypes = {
-        [filter]:
-          filter === 'error'
-            ? ['bar_chart', filter]
-            : ['basic_statistics', filter],
+      const filterCriteria: FilterCriteria = {
+        filters: {
+          [filter]: filter,
+        },
       };
 
-      const [metricsData, ...percentilesData] = await Promise.all([
-        client.analytics(filter_criteria, analysis_types),
-        ...percentiles.map((percentile) => {
-          const percentileAnalysisTypes: AnalysisTypes = {
-            [filter]: ['percentile', filter, percentile.toString()],
-          };
-          return client.analytics(filter_criteria, percentileAnalysisTypes);
-        }),
-      ]);
+      const analysisTypes: AnalysisTypes = {
+        analysis_types: {
+          [filter]:
+            filter === 'error'
+              ? ['bar_chart', filter]
+              : ['basic_statistics', filter],
+        },
+      };
 
-      const percentileResults = percentilesData.reduce((acc, data, index) => {
-        acc[`p${percentiles[index]}`] = data.results[filter]?.value;
-        return acc;
-      }, {});
+      console.log('Sending request with:', { filterCriteria, analysisTypes });
 
+      const metricsData = await client.analytics(filterCriteria, analysisTypes);
+
+      console.log('Analytics data received:', metricsData);
+
+      // Process and set the analytics data
       setAnalyticsData({
         [filter]: metricsData.results[filter],
-        percentiles: percentileResults,
         filtered_logs: {
           [filter]: metricsData.results.filtered_logs?.[filter],
         },
       });
+
+      // Fetch percentiles data if needed
+      if (filter !== 'error') {
+        const percentiles = [10, 25, 50, 90];
+        const percentilesData = await Promise.all(
+          percentiles.map((percentile) => {
+            const percentileAnalysisTypes: AnalysisTypes = {
+              analysis_types: {
+                [filter]: ['percentile', filter, percentile.toString()],
+              },
+            };
+            return client.analytics(filterCriteria, percentileAnalysisTypes);
+          })
+        );
+
+        const percentileResults = percentilesData.reduce(
+          (acc, data, index) => {
+            acc[`p${percentiles[index]}`] = data.results[filter]?.value;
+            return acc;
+          },
+          {} as Record<string, number | string>
+        );
+
+        setAnalyticsData((prevData: AnalyticsData) => ({
+          ...prevData,
+          percentiles: percentileResults,
+        }));
+      }
     } catch (error) {
       console.error('Error fetching analytics data:', error);
     }
@@ -309,6 +328,7 @@ const Analytics: React.FC = () => {
 
   useEffect(() => {
     if (pipeline?.deploymentUrl) {
+      console.log('Fetching analytics for:', selectedFilter);
       fetchAnalytics(selectedFilter);
     }
   }, [pipeline?.deploymentUrl, selectedFilter]);
@@ -321,10 +341,11 @@ const Analytics: React.FC = () => {
     (analyticsData.filtered_logs?.[selectedFilter]?.length || 0) / logsPerPage
   );
 
-  const currentLogs = analyticsData.filtered_logs?.[selectedFilter]?.slice(
-    (currentPage - 1) * logsPerPage,
-    currentPage * logsPerPage
-  );
+  const currentLogs =
+    analyticsData.filtered_logs?.[selectedFilter]?.slice(
+      (currentPage - 1) * logsPerPage,
+      currentPage * logsPerPage
+    ) || [];
 
   return (
     <Layout pageTitle="Analytics">
@@ -339,10 +360,10 @@ const Analytics: React.FC = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="search_latency">Search Latency</SelectItem>
-                  <SelectItem value="search_metrics">Search Metrics</SelectItem>
+                  {/* <SelectItem value="search_metrics">Search Metrics</SelectItem>
                   <SelectItem value="rag_generation_latency">
                     RAG Latency
-                  </SelectItem>
+                  </SelectItem> */}
                   {/* <SelectItem value="error">Errors</SelectItem> */}
                 </SelectContent>
               </Select>
