@@ -24,9 +24,10 @@ function MyAppContent({ Component, pageProps }: AppProps) {
       '/playground',
       '/users',
       '/logs',
+      '/analytics',
       '/settings',
     ];
-    const adminRoutes = ['/users', '/logs', '/settings'];
+    const adminRoutes = ['/users', '/logs', '/analytics', '/settings'];
 
     if (!isAuthenticated && protectedRoutes.includes(router.pathname)) {
       router.replace('/login');
