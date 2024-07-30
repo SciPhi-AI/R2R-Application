@@ -2,8 +2,8 @@
 import { Loader } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 
-import LogTable from '@/components/ChatDemo/logtable';
 import Layout from '@/components/Layout';
+import LogTable from '@/components/ui/logtable';
 import { useUserContext } from '@/context/UserContext';
 
 const Index: React.FC = () => {
