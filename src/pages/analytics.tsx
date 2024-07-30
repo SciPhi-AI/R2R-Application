@@ -1,11 +1,11 @@
 import { useRouter } from 'next/router';
-import { r2rClient, FilterCriteria, AnalysisTypes } from 'r2r-js';
 import React, { useState, useEffect } from 'react';
 
 import Layout from '@/components/Layout';
 import Pagination from '@/components/ui/altPagination';
 import BarChart from '@/components/ui/BarChart';
 import { InfoIcon } from '@/components/ui/InfoIcon';
+import { AnalysisTypes, FilterCriteria } from 'r2r-js';
 import {
   Select,
   SelectContent,
@@ -128,7 +128,7 @@ const AnalyticsTable: React.FC<{ data: any[]; filterKey: string }> = ({
   data,
   filterKey,
 }) => {
-  const maxLogs = 5; // Set the maximum number of logs to display
+  const maxLogs = 5;
 
   const renderLogRows = () => {
     const rows = [];
@@ -250,62 +250,66 @@ const AnalysisResults: React.FC<{
 const Analytics: React.FC = () => {
   const [analyticsData, setAnalyticsData] = useState<any>({});
   const router = useRouter();
-  const { pipeline } = useUserContext();
+  const { getClient, pipeline } = useUserContext();
 
   const [selectedFilter, setSelectedFilter] = useState('search_latency');
   const [currentPage, setCurrentPage] = useState(1);
   const logsPerPage = 5;
 
-  const fetchAnalytics = (client: r2rClient, filter: string) => {
-    const filters = { [filter]: filter };
-    const metricsAnalysisTypes = {
-      [filter]:
-        filter === 'error'
-          ? ['bar_chart', filter]
-          : ['basic_statistics', filter],
-    };
-    const percentiles = [10, 25, 50, 90];
+  const fetchAnalytics = async (filter: string) => {
+    try {
+      const client = await getClient();
+      if (!client) {
+        console.error('Failed to get authenticated client');
+        return;
+      }
+      const filters = { [filter]: filter };
+      const metricsAnalysisTypes = {
+        [filter]:
+          filter === 'error'
+            ? ['bar_chart', filter]
+            : ['basic_statistics', filter],
+      };
+      const percentiles = [10, 25, 50, 90];
 
-    const filter_criteria: FilterCriteria = { [filter]: filter };
-    const analysis_types: AnalysisTypes = {
-      [filter]:
-        filter === 'error'
-          ? ['bar_chart', filter]
-          : ['basic_statistics', filter],
-    };
+      const filter_criteria: FilterCriteria = { [filter]: filter };
+      const analysis_types: AnalysisTypes = {
+        [filter]:
+          filter === 'error'
+            ? ['bar_chart', filter]
+            : ['basic_statistics', filter],
+      };
 
-    Promise.all([
-      client.analytics(filter_criteria, analysis_types),
-      ...percentiles.map((percentile) => {
-        const percentileAnalysisTypes: AnalysisTypes = {
-          [filter]: ['percentile', filter, percentile.toString()],
-        };
-        return client.analytics(filter_criteria, percentileAnalysisTypes);
-      }),
-    ])
-      .then(([metricsData, ...percentilesData]) => {
-        const percentileResults = percentilesData.reduce((acc, data, index) => {
-          acc[`p${percentiles[index]}`] = data.results[filter]?.value;
-          return acc;
-        }, {});
+      const [metricsData, ...percentilesData] = await Promise.all([
+        client.analytics(filter_criteria, analysis_types),
+        ...percentiles.map((percentile) => {
+          const percentileAnalysisTypes: AnalysisTypes = {
+            [filter]: ['percentile', filter, percentile.toString()],
+          };
+          return client.analytics(filter_criteria, percentileAnalysisTypes);
+        }),
+      ]);
 
-        setAnalyticsData({
-          [filter]: metricsData.results[filter],
-          percentiles: percentileResults,
-          filtered_logs: {
-            [filter]: metricsData.results.filtered_logs?.[filter],
-          },
-        });
-      })
-      .catch((error) => {
-        console.error('Error fetching analytics data:', error);
+      const percentileResults = percentilesData.reduce((acc, data, index) => {
+        acc[`p${percentiles[index]}`] = data.results[filter]?.value;
+        return acc;
+      }, {});
+
+      setAnalyticsData({
+        [filter]: metricsData.results[filter],
+        percentiles: percentileResults,
+        filtered_logs: {
+          [filter]: metricsData.results.filtered_logs?.[filter],
+        },
       });
+    } catch (error) {
+      console.error('Error fetching analytics data:', error);
+    }
   };
 
   useEffect(() => {
     if (pipeline?.deploymentUrl) {
-      const client = new r2rClient(pipeline?.deploymentUrl);
-      fetchAnalytics(client, selectedFilter);
+      fetchAnalytics(selectedFilter);
     }
   }, [pipeline?.deploymentUrl, selectedFilter]);
 
