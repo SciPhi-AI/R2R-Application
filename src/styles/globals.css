@@ -201,3 +201,41 @@ a {
   position: sticky;
   z-index: 10;
 }
+
+.prose {
+  color: #d4d4d8;
+}
+
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
+  color: white;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+}
+
+.prose p {
+  margin-bottom: 1em;
+}
+
+.prose ul,
+.prose ol {
+  padding-left: 1.5em;
+  margin-bottom: 1em;
+}
+
+.prose code {
+  background-color: #3f3f46;
+  padding: 0.2em 0.4em;
+  border-radius: 0.25em;
+}
+
+.prose pre {
+  background-color: #27272a;
+  padding: 1em;
+  border-radius: 0.5em;
+  overflow-x: auto;
+}

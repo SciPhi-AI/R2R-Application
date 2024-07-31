@@ -185,8 +185,8 @@ const Index: React.FC = () => {
                   <SelectValue placeholder="Select Mode" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="rag">Question and Answer</SelectItem>
                   <SelectItem value="rag_agent">RAG Agent</SelectItem>
+                  <SelectItem value="rag">Question and Answer</SelectItem>
                 </SelectContent>
               </Select>
             </div>

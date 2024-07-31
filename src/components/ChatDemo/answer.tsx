@@ -33,8 +33,6 @@ const SourceItem: FC<{ source: Source }> = ({ source }) => {
 
 function formatMarkdownNewLines(markdown: string) {
   return markdown
-    .split('\\n')
-    .join('  \n')
     .replace(/\[(\d+)]/g, '[$1]($1)')
     .split(`"queries":`)[0]
     .replace(/\\u[\dA-F]{4}/gi, (match: string) => {
@@ -92,10 +90,16 @@ export const Answer: FC<{
     }
   }, [message.sources]);
 
+  const showSourcesAccordion =
+    mode === 'rag' || (mode === 'rag_agent' && parsedSources.length > 0);
+  const showNoSourcesFound =
+    mode === 'rag_agent' &&
+    message.searchPerformed &&
+    parsedSources.length === 0;
+
   return (
     <div className="mt-4">
-      {(mode === 'rag' ||
-        (mode === 'rag_agent' && parsedSources.length > 0)) && (
+      {showSourcesAccordion && (
         <Accordion
           type="single"
           collapsible
@@ -107,18 +111,12 @@ export const Answer: FC<{
               <div className="flex items-center justify-between w-full">
                 <Logo width={25} disableLink={true} />
                 <span className="text-sm font-normal">
-                  {isSearching && parsedSources.length === 0 ? (
+                  {isSearching ? (
                     <span className="searching-animation">
                       Searching over sources...
                     </span>
-                  ) : parsedSources.length > 0 ? (
-                    isOpen ? (
-                      'Hide Sources'
-                    ) : (
-                      `View ${parsedSources.length} Sources`
-                    )
                   ) : (
-                    'No sources found'
+                    `View ${parsedSources.length} Sources`
                   )}
                 </span>
               </div>
@@ -136,7 +134,14 @@ export const Answer: FC<{
         </Accordion>
       )}
 
-      {mode === 'rag_agent' && parsedSources.length === 0 && (
+      {showNoSourcesFound && (
+        <div className="flex items-center justify-between py-2 text-sm text-zinc-400">
+          <Logo width={25} disableLink={true} />
+          <span>No sources found</span>
+        </div>
+      )}
+
+      {mode === 'rag_agent' && !showSourcesAccordion && !showNoSourcesFound && (
         <div className="flex items-center py-2">
           <Logo width={25} disableLink={true} />
         </div>
@@ -144,11 +149,11 @@ export const Answer: FC<{
 
       <div className="space-y-4 mt-4">
         {message.content ? (
-          <div className="prose prose-sm max-w-full text-zinc-300 overflow-y-auto max-h-[700px]">
+          <div className="prose prose-sm max-w-full text-zinc-300 overflow-y-auto max-h-[700px] prose-headings:text-white prose-p:text-white prose-strong:text-white prose-code:text-white">
             <Markdown
               components={{
-                h1: (props) => <h1 style={{ color: 'white' }} {...props} />,
-                h2: (props) => <h2 style={{ color: 'white' }} {...props} />,
+                h1: (props) => <h1 className="prose-heading" {...props} />,
+                h2: (props) => <h2 className="prose-heading" {...props} />,
                 h3: (props) => <h3 style={{ color: 'white' }} {...props} />,
                 h4: (props) => <h4 style={{ color: 'white' }} {...props} />,
                 h5: (props) => <h5 style={{ color: 'white' }} {...props} />,
