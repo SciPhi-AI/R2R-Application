@@ -56,8 +56,8 @@ After installing PNPM, you may need to add it to your system's PATH. Follow the 
 1. **Clone the project repository and navigate to the project directory:**
 
    ```bash
-   git clone git@github.com:SciPhi-AI/R2R-Dashboard.git
-   cd R2R-Dashboard
+   git clone git@github.com:SciPhi-AI/R2R-Application.git
+   cd R2R-Application
    ```
 
 2. **Install the project dependencies using PNPM:**

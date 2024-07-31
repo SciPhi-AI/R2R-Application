@@ -1,11 +1,12 @@
 import { format, parseISO } from 'date-fns'; // Import date-fns functions
-import { FileSearch2 } from 'lucide-react';
-import React, { useState, useEffect, useCallback } from 'react';
+import { ChevronUpSquare, ChevronDownSquare, FileSearch2 } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 
 import { DeleteButton } from '@/components/ChatDemo/deleteButton';
 import UpdateButtonContainer from '@/components/ChatDemo/UpdateButtonContainer';
 import { UploadButton } from '@/components/ChatDemo/upload';
 import DocumentInfoDialog from '@/components/ChatDemo/utils/documentDialogInfo';
+import { getFilteredAndSortedDocuments } from '@/components/ChatDemo/utils/documentSorter';
 import Layout from '@/components/Layout';
 import Pagination from '@/components/ui/altPagination';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -17,6 +18,7 @@ import {
 } from '@/components/ui/tooltip';
 import { useToast } from '@/components/ui/use-toast';
 import { useUserContext } from '@/context/UserContext';
+
 import { formatFileSize } from '@/lib/utils';
 
 class DocumentInfoType {
@@ -28,20 +30,24 @@ class DocumentInfoType {
   size_in_bytes: number = 0;
   metadata: any = null;
 }
+import { DocumentFilterCriteria, DocumentInfoType } from '@/types';
 
 const MAX_RETRIES = 3;
-const RETRY_DELAY = 2000; // 2 seconds
-const TRANSITION_DELAY = 500; // 0.5 seconds
+const RETRY_DELAY = 2000;
 
 const Index: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [documents, setDocuments] = useState<DocumentInfoType[]>([]);
+  const [filterCriteria, setFilterCriteria] = useState<DocumentFilterCriteria>({
+    sort: 'title',
+    order: 'asc',
+  });
   const [selectedDocumentIds, setSelectedDocumentIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
-  const { getClient, pipeline } = useUserContext();
+  const { pipeline, getClient } = useUserContext();
 
   const documentsPerPage = 10;
 
@@ -57,17 +63,12 @@ const Index: React.FC = () => {
       try {
         const client = await getClient();
         if (!client) {
-          console.error('Failed to get authenticated client');
-          return;
+          throw new Error('Failed to get authenticated client');
         }
 
         const data = await client.documentsOverview([], []);
         setDocuments(data.results);
-        setIsTransitioning(true);
-        setTimeout(() => {
-          setIsLoading(false);
-          setIsTransitioning(false);
-        }, TRANSITION_DELAY);
+        setIsLoading(false);
         setError(null);
       } catch (error) {
         console.error('Error fetching documents:', error);
@@ -86,23 +87,36 @@ const Index: React.FC = () => {
     setCurrentPage(pageNumber);
   };
 
-  useEffect(() => {
-    if (pipeline?.deploymentUrl) {
-      fetchDocuments();
-    }
-  }, [pipeline?.deploymentUrl, fetchDocuments]);
+  const filteredAndSortedDocuments = useMemo(
+    () => getFilteredAndSortedDocuments(documents, filterCriteria),
+    [documents, filterCriteria]
+  );
 
-  const totalPages = Math.ceil((documents.length || 0) / documentsPerPage);
-  const currentDocuments = documents.slice(
+  const totalPages = Math.ceil(
+    (filteredAndSortedDocuments.length || 0) / documentsPerPage
+  );
+  const currentDocuments = filteredAndSortedDocuments.slice(
     (currentPage - 1) * documentsPerPage,
     currentPage * documentsPerPage
   );
 
   useEffect(() => {
-    if (currentPage > totalPages) {
-      setCurrentPage(Math.max(1, totalPages));
+    fetchDocuments();
+  }, [fetchDocuments]);
+
+  useEffect(() => {
+    if (
+      currentPage >
+      Math.ceil(filteredAndSortedDocuments.length / documentsPerPage)
+    ) {
+      setCurrentPage(
+        Math.max(
+          1,
+          Math.ceil(filteredAndSortedDocuments.length / documentsPerPage)
+        )
+      );
     }
-  }, [totalPages, currentPage]);
+  }, [filteredAndSortedDocuments.length, currentPage, documentsPerPage]);
 
   const [selectedDocumentId, setSelectedDocumentId] = useState('');
   const [isDocumentInfoDialogOpen, setIsDocumentInfoDialogOpen] =
@@ -343,6 +357,7 @@ const Index: React.FC = () => {
             <h3 className="text-2xl font-bold text-blue-500 pl-4 pt-8">
               Documents
             </h3>
+            <div className="flex items-center space-x-4"></div>
             <div className="flex justify-center mt-4">
               <div className="mt-6 pr-2">
                 <UploadButton
@@ -384,10 +399,82 @@ const Index: React.FC = () => {
                       </TooltipProvider>
                     </th>
                     <th className="px-4 py-2 text-left text-white">User ID</th>
-                    <th className="px-4 py-2 text-left text-white">Title</th>
+                    <th className="px-4 py-2 text-left text-white">
+                      <div className="flex items-center">
+                        <span className="mr-2">Title</span>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <button
+                                onClick={() =>
+                                  setFilterCriteria({
+                                    sort: 'title',
+                                    order:
+                                      filterCriteria.order === 'asc'
+                                        ? 'desc'
+                                        : 'asc',
+                                  })
+                                }
+                                className="p-1"
+                              >
+                                {filterCriteria.sort === 'title' &&
+                                filterCriteria.order === 'asc' ? (
+                                  <ChevronUpSquare className="h-4 w-4" />
+                                ) : (
+                                  <ChevronDownSquare className="h-4 w-4" />
+                                )}
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>
+                                Sort by Title{' '}
+                                {filterCriteria.order === 'asc'
+                                  ? 'Descending'
+                                  : 'Ascending'}
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                    </th>
                     <th className="px-4 py-2 text-left text-white">Version</th>
                     <th className="px-4 py-2 text-left text-white">
-                      Updated At
+                      <div className="flex items-center">
+                        <span className="mr-2">Updated At</span>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <button
+                                onClick={() =>
+                                  setFilterCriteria({
+                                    sort: 'date',
+                                    order:
+                                      filterCriteria.order === 'asc'
+                                        ? 'desc'
+                                        : 'asc',
+                                  })
+                                }
+                                className="p-1"
+                              >
+                                {filterCriteria.sort === 'date' &&
+                                filterCriteria.order === 'asc' ? (
+                                  <ChevronUpSquare className="h-4 w-4" />
+                                ) : (
+                                  <ChevronDownSquare className="h-4 w-4" />
+                                )}
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>
+                                Sort by Date{' '}
+                                {filterCriteria.order === 'asc'
+                                  ? 'Descending'
+                                  : 'Ascending'}
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
                     </th>
                     <th className="px-4 py-2 text-left text-white">
                       File Size
@@ -405,7 +492,7 @@ const Index: React.FC = () => {
             </div>
           </div>
 
-          {!isLoading && !error && documents.length > 0 && (
+          {!isLoading && !error && filteredAndSortedDocuments.length > 0 && (
             <div className="flex justify-center mt-4">
               <Pagination
                 currentPage={currentPage}

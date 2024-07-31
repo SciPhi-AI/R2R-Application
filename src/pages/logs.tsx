@@ -2,11 +2,11 @@
 import { Loader } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 
-import LogTable from '@/components/ChatDemo/logtable';
 import Layout from '@/components/Layout';
+import LogTable from '@/components/ui/logtable';
 import { useUserContext } from '@/context/UserContext';
 
-const Index: React.FC = () => {
+const Logs: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [logs, setLogs] = useState<any[]>([]);
   const { getClient, pipeline } = useUserContext();
@@ -55,4 +55,4 @@ const Index: React.FC = () => {
   );
 };
 
-export default Index;
+export default Logs;

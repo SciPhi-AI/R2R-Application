@@ -6,6 +6,14 @@ export interface AdminBadgeProps {
   onToggle: () => void;
 }
 
+export interface AnalyticsData {
+  [key: string]: any;
+  percentiles?: Record<string, number | string>;
+  filtered_logs?: {
+    [key: string]: any[];
+  };
+}
+
 export interface AuthState {
   isAuthenticated: boolean;
   email: string | null;
@@ -41,6 +49,21 @@ export interface DeleteButtonProps {
 export interface Document {
   id: string;
   text: string;
+  metadata: any;
+}
+
+export interface DocumentFilterCriteria {
+  sort: 'title' | 'date';
+  order: 'asc' | 'desc';
+}
+
+export interface DocumentInfoType {
+  document_id: string;
+  user_id: string;
+  title: string;
+  version: string;
+  updated_at: string;
+  size_in_bytes: number;
   metadata: any;
 }
 
