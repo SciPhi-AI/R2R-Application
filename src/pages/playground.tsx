@@ -24,7 +24,7 @@ const Index: React.FC = () => {
   const [hasAttemptedFetch, setHasAttemptedFetch] = useState(false);
   const [searchLimit, setSearchLimit] = useState(10);
   const [searchFilters, setSearchFilters] = useState('{}');
-  const [mode, setMode] = useState<'rag' | 'rag_chat'>('rag');
+  const [mode, setMode] = useState<'rag' | 'rag_agent'>('rag_agent');
 
   useEffect(() => {
     if (searchParams) {
@@ -34,7 +34,7 @@ const Index: React.FC = () => {
 
   const { pipeline, getClient, selectedModel } = useUserContext();
 
-  const [sidebarIsOpen, setSidebarIsOpen] = useState(true);
+  const [sidebarIsOpen, setSidebarIsOpen] = useState(false);
 
   const toggleSidebar = () => {
     setSidebarIsOpen(!sidebarIsOpen);
@@ -59,7 +59,7 @@ const Index: React.FC = () => {
     height: 0,
   });
   const contentAreaRef = useRef<HTMLDivElement>(null);
-  const [uploadedDocuments, setUploadedDocuments] = useState([]);
+  const [uploadedDocuments, setUploadedDocuments] = useState<string[]>([]);
 
   const [userId, setUserId] = useState(null);
 
@@ -179,14 +179,14 @@ const Index: React.FC = () => {
             <div className="mode-selector h-0">
               <Select
                 value={mode}
-                onValueChange={(value) => setMode(value as 'rag' | 'rag_chat')}
+                onValueChange={(value) => setMode(value as 'rag' | 'rag_agent')}
               >
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Select Mode" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="rag">Question and Answer</SelectItem>
-                  <SelectItem value="rag_chat">RAG Chat</SelectItem>
+                  <SelectItem value="rag_agent">RAG Agent</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -223,6 +223,7 @@ const Index: React.FC = () => {
                       ? 'Ask a question...'
                       : 'Start a conversation...'
                   }
+                  disabled={uploadedDocuments?.length === 0 && mode === 'rag'}
                 />
               </div>
             </div>

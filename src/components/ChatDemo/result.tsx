@@ -1,24 +1,17 @@
-import React, { FC, useEffect, useState, useMemo, useRef } from 'react';
+import React, { FC, useEffect, useState, useRef } from 'react';
 
 import { useUserContext } from '@/context/UserContext';
-import { Message } from '@/types';
-import { RagGenerationConfig } from '@/types';
+import { Message, RagGenerationConfig } from '@/types';
 
 import { Answer } from './answer';
 import { DefaultQueries } from './DefaultQueries';
 import MessageBubble from './MessageBubble';
 import { UploadButton } from './upload';
-import { parseMarkdown } from './utils/parseMarkdown';
 
 const FUNCTION_START_TOKEN = '<function_call>';
 const FUNCTION_END_TOKEN = '</function_call>';
-
-const FUNCTION_NAME_TOKEN = '<name>';
-const FUNCTION_NAME_END_TOKEN = '</name>';
-
 const SEARCH_START_TOKEN = '<search>';
 const SEARCH_END_TOKEN = '</search>';
-
 const LLM_START_TOKEN = '<completion>';
 const LLM_END_TOKEN = '</completion>';
 
@@ -33,16 +26,12 @@ export const Result: FC<{
   rag_topP: number | null;
   rag_topK: number | null;
   rag_maxTokensToSample: number | null;
-  // kg_temperature: number | null;
-  // kg_topP: number | null;
-  // kg_topK: number | null;
-  // kg_maxTokensToSample: number | null;
   model: string | null;
   uploadedDocuments: string[];
-  setUploadedDocuments: any;
+  setUploadedDocuments: React.Dispatch<React.SetStateAction<string[]>>;
   hasAttemptedFetch: boolean;
   switches: any;
-  mode: 'rag' | 'rag_chat';
+  mode: 'rag' | 'rag_agent';
 }> = ({
   query,
   setQuery,
@@ -54,10 +43,6 @@ export const Result: FC<{
   rag_topP,
   rag_topK,
   rag_maxTokensToSample,
-  // kg_temperature,
-  // kg_topP,
-  // kg_topK,
-  // kg_maxTokensToSample,
   model,
   uploadedDocuments,
   setUploadedDocuments,
@@ -65,43 +50,30 @@ export const Result: FC<{
   switches,
   mode,
 }) => {
-  const [sources, setSources] = useState<string | null>(null);
-  const [markdown, setMarkdown] = useState<string>('');
-  const [error, setError] = useState<string | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [isStreaming, setIsStreaming] = useState<boolean>(false);
   const [isSearching, setIsSearching] = useState<boolean>(false);
-  const [sourceCount, setSourceCount] = useState<number>(0);
-  const { getClient } = useUserContext();
-
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const [isProcessingQuery, setIsProcessingQuery] = useState(false);
-
-  const [currentAssistantMessage, setCurrentAssistantMessage] =
-    useState<string>('');
-  const conversationHistoryRef = useRef<Message[]>([
-    { role: 'system', content: 'You are a helpful assistant.' },
-  ]);
+  const { getClient } = useUserContext();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMessages([]);
-    return () => {
-      setMessages([]);
-    };
   }, [mode]);
 
-  let timeout: NodeJS.Timeout;
+  useEffect(() => {
+    localStorage.setItem('chatMessages', JSON.stringify(messages));
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
-  const parseStreaming = async (query: string, userId: string | null) => {
+  const parseStreaming = async (query: string): Promise<void> => {
     if (isProcessingQuery) {
       return;
     }
     setIsProcessingQuery(true);
-
-    setSources(null);
-    setMarkdown('');
     setIsStreaming(true);
     setIsSearching(true);
-    setSourceCount(0);
     setError(null);
 
     const newUserMessage: Message = {
@@ -110,11 +82,6 @@ export const Result: FC<{
       id: Date.now().toString(),
       timestamp: Date.now(),
     };
-
-    conversationHistoryRef.current = [
-      ...conversationHistoryRef.current,
-      newUserMessage,
-    ];
 
     const newAssistantMessage: Message = {
       role: 'assistant',
@@ -134,8 +101,6 @@ export const Result: FC<{
     let buffer = '';
     let inLLMResponse = false;
     let sourcesContent = '';
-    const inFunctionCall = false;
-    const currentFunctionCall = '';
 
     try {
       const client = await getClient();
@@ -152,29 +117,26 @@ export const Result: FC<{
         model: model !== 'null' && model !== null ? model : undefined,
       };
 
-      let streamResponse;
-
-      if (mode === 'rag_chat') {
-        streamResponse = await client.ragChat({
-          messages: conversationHistoryRef.current,
-          use_vector_search: switches.vector_search?.checked ?? true,
-          search_filters: search_filters,
-          search_limit: search_limit,
-          do_hybrid_search: switches.hybrid_search?.checked ?? false,
-          use_kg_search: switches.knowledge_graph_search?.checked ?? false,
-          rag_generation_config: ragGenerationConfig,
-        });
-      } else {
-        streamResponse = await client.rag({
-          query: query,
-          use_vector_search: switches.vector_search?.checked ?? true,
-          search_filters: search_filters,
-          search_limit: search_limit,
-          do_hybrid_search: switches.hybrid_search?.checked ?? false,
-          use_kg_search: switches.knowledge_graph_search?.checked ?? false,
-          rag_generation_config: ragGenerationConfig,
-        });
-      }
+      const streamResponse =
+        mode === 'rag_agent'
+          ? await client.ragAgent({
+              messages: [...messages, newUserMessage],
+              use_vector_search: switches.vector_search?.checked ?? true,
+              search_filters,
+              search_limit,
+              do_hybrid_search: switches.hybrid_search?.checked ?? false,
+              use_kg_search: switches.knowledge_graph_search?.checked ?? false,
+              rag_generation_config: ragGenerationConfig,
+            })
+          : await client.rag({
+              query,
+              use_vector_search: switches.vector_search?.checked ?? true,
+              search_filters,
+              search_limit,
+              do_hybrid_search: switches.hybrid_search?.checked ?? false,
+              use_kg_search: switches.knowledge_graph_search?.checked ?? false,
+              rag_generation_config: ragGenerationConfig,
+            });
 
       const reader = streamResponse.getReader();
       const decoder = new TextDecoder();
@@ -187,15 +149,10 @@ export const Result: FC<{
 
         buffer += decoder.decode(value, { stream: true });
 
-        console.log('Buffer:', buffer);
-
         if (mode === 'rag') {
-          // Handle RAG mode (Q&A)
           if (buffer.includes(SEARCH_END_TOKEN)) {
             const [results, rest] = buffer.split(SEARCH_END_TOKEN);
             sourcesContent = results.replace(SEARCH_START_TOKEN, '');
-            setSources(sourcesContent);
-
             updateLastMessage(undefined, sourcesContent);
             buffer = rest || '';
             setIsSearching(false);
@@ -222,25 +179,19 @@ export const Result: FC<{
             updateLastMessage(chunk);
           }
         } else {
-          // Handle RAG Agent mode
           if (buffer.includes(FUNCTION_END_TOKEN)) {
             const [results, rest] = buffer.split(FUNCTION_END_TOKEN);
             sourcesContent = results
               .replace(FUNCTION_START_TOKEN, '')
               .replace(/^[\s\S]*?<results>([\s\S]*)<\/results>[\s\S]*$/, '$1');
-            console.log('At function:', sourcesContent);
-            setSources(sourcesContent);
             updateLastMessage(undefined, sourcesContent);
             buffer = rest || '';
             setIsSearching(false);
           }
 
-          console.log('gets here');
-
           if (buffer.includes(LLM_START_TOKEN)) {
             inLLMResponse = true;
             buffer = buffer.split(LLM_START_TOKEN)[1] || '';
-            console.log('At LLM:', buffer);
           }
 
           if (inLLMResponse) {
@@ -259,8 +210,6 @@ export const Result: FC<{
             updateLastMessage(chunk);
           }
         }
-
-        setMarkdown((prev) => prev + buffer);
       }
     } catch (err: unknown) {
       console.error('Error in streaming:', err);
@@ -301,33 +250,12 @@ export const Result: FC<{
       return;
     }
 
-    const debouncedParseStreaming = () => {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => {
-        parseStreaming(query, userId);
-      }, 500);
-    };
+    const debouncedParseStreaming = setTimeout(() => {
+      parseStreaming(query);
+    }, 500);
 
-    debouncedParseStreaming();
-
-    return () => {
-      clearTimeout(timeout);
-    };
+    return () => clearTimeout(debouncedParseStreaming);
   }, [query, userId, pipelineUrl]);
-
-  useEffect(() => {
-    localStorage.setItem('chatMessages', JSON.stringify(messages));
-  }, [messages]);
-
-  const parsedMarkdown = useMemo(() => parseMarkdown(markdown), [markdown]);
-
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  useEffect(scrollToBottom, [messages]);
 
   return (
     <div className="flex flex-col gap-8">
@@ -343,6 +271,7 @@ export const Result: FC<{
                 isSearching={
                   index === messages.length - 1 ? isSearching : false
                 }
+                mode={mode}
               />
             )}
           </React.Fragment>
@@ -350,19 +279,22 @@ export const Result: FC<{
         <div ref={messagesEndRef} />
       </div>
       {error && <div className="text-red-500">Error: {error}</div>}
-      {!query && <DefaultQueries setQuery={setQuery} />}
-      {hasAttemptedFetch && uploadedDocuments?.length === 0 && pipelineUrl && (
-        <div className="absolute inset-4 flex items-center justify-center bg-white/40 backdrop-blur-sm">
-          <div className="flex items-center p-4 bg-white shadow-2xl rounded text-blue-500 font-medium gap-4">
-            Please upload at least one document to submit queries.{' '}
-            <UploadButton
-              userId={userId}
-              uploadedDocuments={uploadedDocuments}
-              setUploadedDocuments={setUploadedDocuments}
-            />
+      {!query && <DefaultQueries setQuery={setQuery} mode={mode} />}
+      {hasAttemptedFetch &&
+        uploadedDocuments?.length === 0 &&
+        pipelineUrl &&
+        mode === 'rag' && (
+          <div className="absolute inset-4 flex items-center justify-center backdrop-blur-sm">
+            <div className="flex items-center p-4 bg-white shadow-2xl rounded text-blue-500 font-medium gap-4">
+              Please upload at least one document to submit queries.{' '}
+              <UploadButton
+                userId={userId}
+                uploadedDocuments={uploadedDocuments}
+                setUploadedDocuments={setUploadedDocuments}
+              />
+            </div>
           </div>
-        </div>
-      )}
+        )}
     </div>
   );
 };

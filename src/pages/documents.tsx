@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/tooltip';
 import { useToast } from '@/components/ui/use-toast';
 import { useUserContext } from '@/context/UserContext';
+import { formatFileSize } from '@/lib/utils';
 
 class DocumentInfoType {
   document_id: string = '';
@@ -261,7 +262,7 @@ const Index: React.FC = () => {
                 className="overflow-x-auto whitespace-nowrap"
                 style={{ width: '75px' }}
               >
-                {(doc.size_in_bytes / 1e6).toFixed(2)}
+                {formatFileSize(doc.size_in_bytes)}
               </div>
             </td>
             <td className="px-4 py-2 text-white">
@@ -389,7 +390,7 @@ const Index: React.FC = () => {
                       Updated At
                     </th>
                     <th className="px-4 py-2 text-left text-white">
-                      Size in MB
+                      File Size
                     </th>
                     <th className="px-4 py-2 text-left text-white">Actions</th>
                     <th className="px-4 py-2 text-left text-white">Metadata</th>

@@ -24,6 +24,7 @@ export interface BarChartProps {
 
 export interface DefaultQueriesProps {
   setQuery: (query: string) => void;
+  mode: 'rag' | 'rag_agent';
 }
 
 export interface DeleteButtonProps {
@@ -167,6 +168,7 @@ export interface SearchProps {
   pipeline?: Pipeline;
   setQuery: (query: string) => void;
   placeholder?: string;
+  disabled?: boolean;
 }
 
 export interface SidebarProps {

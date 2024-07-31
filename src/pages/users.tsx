@@ -13,21 +13,9 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useUserContext } from '@/context/UserContext';
+import { formatFileSize } from '@/lib/utils';
 
 const USERS_PER_PAGE = 10;
-
-const formatFileSize = (bytes: number) => {
-  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-  let size = bytes;
-  let unitIndex = 0;
-
-  while (size >= 1024 && unitIndex < units.length - 1) {
-    size /= 1024;
-    unitIndex++;
-  }
-
-  return `${size.toFixed(2)} ${units[unitIndex]}`;
-};
 
 const UserTable = ({ users }: { users: any[] }) => {
   const [currentPage, setCurrentPage] = useState(1);
