@@ -163,7 +163,7 @@ export const Navbar = forwardRef<React.ElementRef<'div'>, NavbarProps>(
                       : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white'
                   )}
                 >
-                  R2R Dashboard
+                  Home
                 </span>
               </Code>
             </Link>

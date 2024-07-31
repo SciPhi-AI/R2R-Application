@@ -1,4 +1,5 @@
-import { Check, ClipboardCheck, Link } from 'lucide-react';
+import { Check, ClipboardCheck, Link, BookOpenText } from 'lucide-react';
+import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
 
@@ -57,7 +58,7 @@ const PipelinePage = () => {
   return (
     <Layout isConnected={isConnected}>
       <main className="w-full flex flex-col min-h-screen mt-[4rem] sm:mt-[6rem] container mb-[4rem] sm:mb-[6rem]">
-        <h1 className="text-white text-2xl mb-4">R2R Dashboard</h1>
+        <h1 className="text-white text-2xl mb-4">R2R</h1>
         <Separator />
         <Alert variant="default" className="mt-3">
           <AlertTitle className="text-lg ">
@@ -186,6 +187,113 @@ const PipelinePage = () => {
                         }}
                       />
                     )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+          <div className="w-full px-2 mt-6">
+            <h2 className="text-xl mb-4">SDKs</h2>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Card className="w-full sm:w-1/4 flex flex-col">
+                <CardHeader className="flex flex-row items-center space-x-2">
+                  <Image
+                    src="/images/python-logo.svg"
+                    alt="Python Logo"
+                    width={30}
+                    height={30}
+                  />
+                  <CardTitle>Python SDK</CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-col justify-end flex-grow">
+                  <div className="flex flex-row space-x-2">
+                    <Button
+                      className="rounded-md py-1 px-3"
+                      variant="filled"
+                      onClick={() =>
+                        window.open(
+                          'https://r2r-docs.sciphi.ai/walkthrough',
+                          '_blank'
+                        )
+                      }
+                    >
+                      <div className="flex items-center">
+                        <BookOpenText size={20} className="mr-2" />
+                        <span>Docs</span>
+                      </div>
+                    </Button>
+                    <Button
+                      className="rounded-md py-1 px-3"
+                      variant="filled"
+                      onClick={() =>
+                        window.open(
+                          'https://github.com/SciPhi-AI/R2R',
+                          '_blank'
+                        )
+                      }
+                    >
+                      <div className="flex items-center">
+                        <Image
+                          src="/images/github-mark.svg"
+                          alt="GitHub Logo"
+                          width={20}
+                          height={20}
+                          className="mr-2"
+                        />
+                        <span>View on GitHub</span>
+                      </div>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="w-full sm:w-1/4 flex flex-col">
+                <CardHeader className="flex flex-row items-center space-x-2">
+                  <Image
+                    src="/images/javascript-logo.svg"
+                    alt="JavaScript Logo"
+                    width={30}
+                    height={30}
+                  />
+                  <CardTitle>JavaScript SDK</CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-col justify-end flex-grow">
+                  <div className="flex flex-row space-x-2">
+                    <Button
+                      className="rounded-md py-1 px-3"
+                      variant="filled"
+                      onClick={() =>
+                        window.open(
+                          'https://github.com/SciPhi-AI/r2r-js',
+                          '_blank'
+                        )
+                      }
+                    >
+                      <div className="flex items-center">
+                        <BookOpenText size={20} className="mr-2" />
+                        <span>Docs</span>
+                      </div>
+                    </Button>
+                    <Button
+                      className="rounded-md py-1 px-3"
+                      variant="filled"
+                      onClick={() =>
+                        window.open(
+                          'https://github.com/SciPhi-AI/r2r-js',
+                          '_blank'
+                        )
+                      }
+                    >
+                      <div className="flex items-center">
+                        <Image
+                          src="/images/github-mark.svg"
+                          alt="GitHub Logo"
+                          width={20}
+                          height={20}
+                          className="mr-2"
+                        />
+                        <span>View on GitHub</span>
+                      </div>
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
