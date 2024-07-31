@@ -1,3 +1,4 @@
+import { useRouter } from 'next/router';
 import { r2rClient } from 'r2r-js';
 import React, {
   createContext,
@@ -35,9 +36,18 @@ export const useUserContext = () => useContext(UserContext);
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  const router = useRouter();
+  const [isReady, setIsReady] = useState(false);
   const [client, setClient] = useState<r2rClient | null>(null);
-  const [pipeline, setPipeline] = useState<Pipeline | null>(null);
   const [viewMode, setViewMode] = useState<'admin' | 'user'>('admin');
+
+  const [pipeline, setPipeline] = useState<Pipeline | null>(() => {
+    if (typeof window !== 'undefined') {
+      const storedPipeline = localStorage.getItem('pipeline');
+      return storedPipeline ? JSON.parse(storedPipeline) : null;
+    }
+    return null;
+  });
 
   const [selectedModel, setSelectedModel] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -45,6 +55,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
     }
     return 'null';
   });
+
   const [authState, setAuthState] = useState<AuthState>(() => {
     if (typeof window !== 'undefined') {
       const storedAuthState = localStorage.getItem('authState');
@@ -92,7 +103,11 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
       setAuthState(newAuthState);
       setLastLoginTime(Date.now());
       localStorage.setItem('authState', JSON.stringify(newAuthState));
-      setPipeline({ deploymentUrl: instanceUrl });
+
+      const newPipeline = { deploymentUrl: instanceUrl };
+      setPipeline(newPipeline);
+      localStorage.setItem('pipeline', JSON.stringify(newPipeline));
+
       setClient(newClient);
     } catch (error) {
       console.error('Login failed:', error);
@@ -114,6 +129,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
       password: null,
       userRole: null,
     });
+    localStorage.removeItem('pipeline');
     setPipeline(null);
     setClient(null);
     localStorage.removeItem('authState');
@@ -152,6 +168,30 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [client]);
 
   useEffect(() => {
+    if (authState.isAuthenticated && pipeline && !client) {
+      const newClient = new r2rClient(pipeline.deploymentUrl);
+      setClient(newClient);
+    }
+  }, [authState.isAuthenticated, pipeline, client]);
+
+  useEffect(() => {
+    const handleRouteChange = () => {
+      if (authState.isAuthenticated && !client && pipeline) {
+        const newClient = new r2rClient(pipeline.deploymentUrl);
+        setClient(newClient);
+      }
+    };
+
+    router.events.on('routeChangeComplete', handleRouteChange);
+
+    setIsReady(true);
+
+    return () => {
+      router.events.off('routeChangeComplete', handleRouteChange);
+    };
+  }, [router, authState.isAuthenticated, client, pipeline]);
+
+  useEffect(() => {
     let refreshInterval: NodeJS.Timeout;
 
     if (authState.isAuthenticated) {
@@ -174,6 +214,16 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
       };
     }
   }, [authState.isAuthenticated, refreshTokenPeriodically]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('selectedModel', selectedModel);
+    }
+  }, [selectedModel]);
+
+  if (!isReady) {
+    return null; // or a loading spinner
+  }
 
   return (
     <UserContext.Provider
