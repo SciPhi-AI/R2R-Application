@@ -10,6 +10,12 @@ import MessageBubble from './MessageBubble';
 import { UploadButton } from './upload';
 import { parseMarkdown } from './utils/parseMarkdown';
 
+const FUNCTION_START_TOKEN = '<function_call>';
+const FUNCTION_END_TOKEN = '</function_call>';
+
+const FUNCTION_NAME_TOKEN = '<name>';
+const FUNCTION_NAME_END_TOKEN = '</name>';
+
 const SEARCH_START_TOKEN = '<search>';
 const SEARCH_END_TOKEN = '</search>';
 
@@ -128,6 +134,8 @@ export const Result: FC<{
     let buffer = '';
     let inLLMResponse = false;
     let sourcesContent = '';
+    const inFunctionCall = false;
+    const currentFunctionCall = '';
 
     try {
       const client = await getClient();
@@ -179,52 +187,80 @@ export const Result: FC<{
 
         buffer += decoder.decode(value, { stream: true });
 
-        if (buffer.includes(SEARCH_END_TOKEN)) {
-          const [results, rest] = buffer.split(SEARCH_END_TOKEN);
-          sourcesContent = results.replace(SEARCH_START_TOKEN, '');
-          setSources(sourcesContent);
+        console.log('Buffer:', buffer);
 
-          setMessages((prevMessages) => {
-            const updatedMessages = [...prevMessages];
-            const lastMessage = updatedMessages[updatedMessages.length - 1];
-            if (lastMessage.role === 'assistant' && lastMessage.isStreaming) {
-              lastMessage.sources = sourcesContent;
-            }
-            return updatedMessages;
-          });
+        if (mode === 'rag') {
+          // Handle RAG mode (Q&A)
+          if (buffer.includes(SEARCH_END_TOKEN)) {
+            const [results, rest] = buffer.split(SEARCH_END_TOKEN);
+            sourcesContent = results.replace(SEARCH_START_TOKEN, '');
+            setSources(sourcesContent);
 
-          buffer = rest || '';
-          setIsSearching(false);
-        }
-
-        if (buffer.includes(LLM_START_TOKEN)) {
-          inLLMResponse = true;
-          buffer = buffer.split(LLM_START_TOKEN)[1] || '';
-        }
-
-        if (inLLMResponse) {
-          const endTokenIndex = buffer.indexOf(LLM_END_TOKEN);
-          let chunk = '';
-
-          if (endTokenIndex !== -1) {
-            chunk = buffer.slice(0, endTokenIndex);
-            buffer = buffer.slice(endTokenIndex + LLM_END_TOKEN.length);
-            inLLMResponse = false;
-          } else {
-            chunk = buffer;
-            buffer = '';
+            updateLastMessage(undefined, sourcesContent);
+            buffer = rest || '';
+            setIsSearching(false);
           }
 
-          setMarkdown((prev) => prev + chunk);
-          setMessages((prevMessages) => {
-            const updatedMessages = [...prevMessages];
-            const lastMessage = updatedMessages[updatedMessages.length - 1];
-            if (lastMessage.role === 'assistant' && lastMessage.isStreaming) {
-              lastMessage.content += chunk;
+          if (buffer.includes(LLM_START_TOKEN)) {
+            inLLMResponse = true;
+            buffer = buffer.split(LLM_START_TOKEN)[1] || '';
+          }
+
+          if (inLLMResponse) {
+            const endTokenIndex = buffer.indexOf(LLM_END_TOKEN);
+            let chunk = '';
+
+            if (endTokenIndex !== -1) {
+              chunk = buffer.slice(0, endTokenIndex);
+              buffer = buffer.slice(endTokenIndex + LLM_END_TOKEN.length);
+              inLLMResponse = false;
+            } else {
+              chunk = buffer;
+              buffer = '';
             }
-            return updatedMessages;
-          });
+
+            updateLastMessage(chunk);
+          }
+        } else {
+          // Handle RAG Agent mode
+          if (buffer.includes(FUNCTION_END_TOKEN)) {
+            const [results, rest] = buffer.split(FUNCTION_END_TOKEN);
+            sourcesContent = results
+              .replace(FUNCTION_START_TOKEN, '')
+              .replace(/^[\s\S]*?<results>([\s\S]*)<\/results>[\s\S]*$/, '$1');
+            console.log('At function:', sourcesContent);
+            setSources(sourcesContent);
+            updateLastMessage(undefined, sourcesContent);
+            buffer = rest || '';
+            setIsSearching(false);
+          }
+
+          console.log('gets here');
+
+          if (buffer.includes(LLM_START_TOKEN)) {
+            inLLMResponse = true;
+            buffer = buffer.split(LLM_START_TOKEN)[1] || '';
+            console.log('At LLM:', buffer);
+          }
+
+          if (inLLMResponse) {
+            const endTokenIndex = buffer.indexOf(LLM_END_TOKEN);
+            let chunk = '';
+
+            if (endTokenIndex !== -1) {
+              chunk = buffer.slice(0, endTokenIndex);
+              buffer = buffer.slice(endTokenIndex + LLM_END_TOKEN.length);
+              inLLMResponse = false;
+            } else {
+              chunk = buffer;
+              buffer = '';
+            }
+
+            updateLastMessage(chunk);
+          }
         }
+
+        setMarkdown((prev) => prev + buffer);
       }
     } catch (err: unknown) {
       console.error('Error in streaming:', err);
@@ -233,16 +269,31 @@ export const Result: FC<{
       setIsStreaming(false);
       setIsSearching(false);
       setIsProcessingQuery(false);
-
-      setMessages((prevMessages) => {
-        const updatedMessages = [...prevMessages];
-        const lastMessage = updatedMessages[updatedMessages.length - 1];
-        if (lastMessage.role === 'assistant' && lastMessage.isStreaming) {
-          lastMessage.isStreaming = false;
-        }
-        return updatedMessages;
-      });
+      updateLastMessage(undefined, undefined, false);
     }
+  };
+
+  const updateLastMessage = (
+    content?: string,
+    sources?: string,
+    isStreaming?: boolean
+  ) => {
+    setMessages((prevMessages) => {
+      const updatedMessages = [...prevMessages];
+      const lastMessage = updatedMessages[updatedMessages.length - 1];
+      if (lastMessage.role === 'assistant') {
+        if (content !== undefined) {
+          lastMessage.content += content;
+        }
+        if (sources !== undefined) {
+          lastMessage.sources = sources;
+        }
+        if (isStreaming !== undefined) {
+          lastMessage.isStreaming = isStreaming;
+        }
+      }
+      return updatedMessages;
+    });
   };
 
   useEffect(() => {
