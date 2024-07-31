@@ -18,18 +18,7 @@ import {
 } from '@/components/ui/tooltip';
 import { useToast } from '@/components/ui/use-toast';
 import { useUserContext } from '@/context/UserContext';
-
 import { formatFileSize } from '@/lib/utils';
-
-class DocumentInfoType {
-  document_id: string = '';
-  user_id: string = '';
-  title: string = '';
-  version: string = '';
-  updated_at: string = '';
-  size_in_bytes: number = 0;
-  metadata: any = null;
-}
 import { DocumentFilterCriteria, DocumentInfoType } from '@/types';
 
 const MAX_RETRIES = 3;
