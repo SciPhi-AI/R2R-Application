@@ -90,6 +90,7 @@ export const Result: FC<{
       timestamp: Date.now() + 1,
       isStreaming: true,
       sources: null,
+      searchPerformed: false,
     };
 
     setMessages((prevMessages) => [
@@ -184,7 +185,7 @@ export const Result: FC<{
             sourcesContent = results
               .replace(FUNCTION_START_TOKEN, '')
               .replace(/^[\s\S]*?<results>([\s\S]*)<\/results>[\s\S]*$/, '$1');
-            updateLastMessage(undefined, sourcesContent);
+            updateLastMessage(undefined, sourcesContent, undefined, true);
             buffer = rest || '';
             setIsSearching(false);
           }
@@ -225,7 +226,8 @@ export const Result: FC<{
   const updateLastMessage = (
     content?: string,
     sources?: string,
-    isStreaming?: boolean
+    isStreaming?: boolean,
+    searchPerformed?: boolean
   ) => {
     setMessages((prevMessages) => {
       const updatedMessages = [...prevMessages];
@@ -239,6 +241,9 @@ export const Result: FC<{
         }
         if (isStreaming !== undefined) {
           lastMessage.isStreaming = isStreaming;
+        }
+        if (searchPerformed !== undefined) {
+          lastMessage.searchPerformed = searchPerformed;
         }
       }
       return updatedMessages;

@@ -153,6 +153,7 @@ export interface Message {
   timestamp?: number;
   isStreaming?: boolean;
   sources?: string | null;
+  searchPerformed?: boolean;
 }
 
 export interface ModelSelectorProps {

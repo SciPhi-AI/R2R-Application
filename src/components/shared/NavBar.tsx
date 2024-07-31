@@ -22,6 +22,17 @@ const NavItems: React.FC<NavItemsProps> = ({
   effectiveRole,
   pathname,
 }) => {
+  const router = useRouter();
+
+  const handleNavigation = (path: string) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (pathname === path) {
+      window.location.href = path;
+    } else {
+      router.push(path);
+    }
+  };
+
   const commonItems = [
     { path: '/documents', label: 'Documents' },
     { path: '/playground', label: 'Playground' },
@@ -48,6 +59,7 @@ const NavItems: React.FC<NavItemsProps> = ({
           <li key={item.path}>
             <Link
               href={item.path}
+              onClick={handleNavigation(item.path)}
               className={clsx(
                 'text-sm leading-5 transition',
                 pathname === item.path
