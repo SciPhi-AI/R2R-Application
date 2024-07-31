@@ -280,11 +280,7 @@ const Analytics: React.FC = () => {
         },
       };
 
-      console.log('Sending request with:', { filterCriteria, analysisTypes });
-
       const metricsData = await client.analytics(filterCriteria, analysisTypes);
-
-      console.log('Analytics data received:', metricsData);
 
       // Process and set the analytics data
       setAnalyticsData({
@@ -328,7 +324,6 @@ const Analytics: React.FC = () => {
 
   useEffect(() => {
     if (pipeline?.deploymentUrl) {
-      console.log('Fetching analytics for:', selectedFilter);
       fetchAnalytics(selectedFilter);
     }
   }, [pipeline?.deploymentUrl, selectedFilter]);
