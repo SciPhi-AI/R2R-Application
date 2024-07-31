@@ -73,7 +73,8 @@ export const Answer: FC<{
   message: Message;
   isStreaming: boolean;
   isSearching: boolean;
-}> = ({ message, isStreaming, isSearching }) => {
+  mode: 'rag' | 'rag_agent';
+}> = ({ message, isStreaming, isSearching, mode }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [parsedSources, setParsedSources] = useState<Source[]>([]);
 
@@ -93,44 +94,53 @@ export const Answer: FC<{
 
   return (
     <div className="mt-4">
-      <Accordion
-        type="single"
-        collapsible
-        className="w-full"
-        onValueChange={(value) => setIsOpen(value === 'answer')}
-      >
-        <AccordionItem value="answer">
-          <AccordionTrigger className="py-2 text-lg font-bold text-zinc-200 hover:no-underline">
-            <div className="flex items-center justify-between w-full">
-              <Logo width={25} disableLink={true} />
-              <span className="text-sm font-normal">
-                {isSearching && parsedSources.length === 0 ? (
-                  <span className="searching-animation">
-                    Searching over sources...
-                  </span>
-                ) : parsedSources.length > 0 ? (
-                  isOpen ? (
-                    'Hide Sources'
+      {(mode === 'rag' ||
+        (mode === 'rag_agent' && parsedSources.length > 0)) && (
+        <Accordion
+          type="single"
+          collapsible
+          className="w-full"
+          onValueChange={(value) => setIsOpen(value === 'answer')}
+        >
+          <AccordionItem value="answer">
+            <AccordionTrigger className="py-2 text-lg font-bold text-zinc-200 hover:no-underline">
+              <div className="flex items-center justify-between w-full">
+                <Logo width={25} disableLink={true} />
+                <span className="text-sm font-normal">
+                  {isSearching && parsedSources.length === 0 ? (
+                    <span className="searching-animation">
+                      Searching over sources...
+                    </span>
+                  ) : parsedSources.length > 0 ? (
+                    isOpen ? (
+                      'Hide Sources'
+                    ) : (
+                      `View ${parsedSources.length} Sources`
+                    )
                   ) : (
-                    `View ${parsedSources.length} Sources`
-                  )
-                ) : (
-                  'No sources found'
-                )}
-              </span>
-            </div>
-          </AccordionTrigger>
-          <AccordionContent>
-            <div className="space-y-2 pt-2">
-              <div className="space-y-2 max-h-60 overflow-y-auto">
-                {parsedSources.map((item: Source) => (
-                  <SourceItem key={item.id} source={item} />
-                ))}
+                    'No sources found'
+                  )}
+                </span>
               </div>
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="space-y-2 pt-2">
+                <div className="space-y-2 max-h-60 overflow-y-auto">
+                  {parsedSources.map((item: Source) => (
+                    <SourceItem key={item.id} source={item} />
+                  ))}
+                </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      )}
+
+      {mode === 'rag_agent' && parsedSources.length === 0 && (
+        <div className="flex items-center py-2">
+          <Logo width={25} disableLink={true} />
+        </div>
+      )}
 
       <div className="space-y-4 mt-4">
         {message.content ? (

@@ -32,6 +32,7 @@ export interface BarChartProps {
 
 export interface DefaultQueriesProps {
   setQuery: (query: string) => void;
+  mode: 'rag' | 'rag_agent';
 }
 
 export interface DeleteButtonProps {
@@ -146,10 +147,10 @@ export interface LogoProps {
 }
 
 export interface Message {
-  id: string;
+  role: 'system' | 'user' | 'assistant';
   content: string;
-  sender: 'user' | 'assistant';
-  timestamp: number;
+  id?: string;
+  timestamp?: number;
   isStreaming?: boolean;
   sources?: string | null;
 }
@@ -189,6 +190,8 @@ export interface RagGenerationConfig {
 export interface SearchProps {
   pipeline?: Pipeline;
   setQuery: (query: string) => void;
+  placeholder?: string;
+  disabled?: boolean;
 }
 
 export interface SidebarProps {

@@ -17,9 +17,18 @@ function debounce<T extends (...args: any[]) => void>(
   };
 }
 
-export const Search: FC<SearchProps> = ({ pipeline, setQuery }) => {
+export const Search: FC<SearchProps> = ({
+  pipeline,
+  setQuery,
+  placeholder,
+  disabled = false,
+}) => {
   const [value, setValue] = useState('');
   const router = useRouter();
+
+  if (!placeholder) {
+    placeholder = 'Search over your documents…';
+  }
 
   const navigateToSearch = useCallback(
     debounce((searchValue: string) => {
@@ -49,12 +58,14 @@ export const Search: FC<SearchProps> = ({ pipeline, setQuery }) => {
             setValue(e.target.value)
           }
           autoFocus
-          placeholder="Search over your documents..."
+          placeholder={placeholder}
           className="w-full px-4 py-2 h-10 bg-zinc-700 text-zinc-200 rounded-l-full focus:outline-none"
+          disabled={disabled}
         />
         <button
           type="submit"
           className="px-4 py-2 h-10 bg-blue-500 text-white rounded-r-full hover:bg-blue-600 focus:outline-none transition-colors duration-200"
+          disabled={disabled}
         >
           <ArrowRight size={20} />
         </button>

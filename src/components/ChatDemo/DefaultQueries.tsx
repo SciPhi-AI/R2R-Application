@@ -5,8 +5,8 @@ import { Logo } from '@/components/shared/Logo';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { DefaultQueriesProps } from '@/types';
 
-export const DefaultQueries: FC<DefaultQueriesProps> = ({ setQuery }) => {
-  const defaultQueries = [
+export const DefaultQueries: FC<DefaultQueriesProps> = ({ setQuery, mode }) => {
+  const defaultRagQueries = [
     {
       query: 'What is the main topic of the uploaded documents?',
       icon: <Lightbulb className="h-6 w-6 text-yellow-400" />,
@@ -24,6 +24,37 @@ export const DefaultQueries: FC<DefaultQueriesProps> = ({ setQuery }) => {
       icon: <Earth className="h-6 w-6 text-green-400" />,
     },
   ];
+
+  const defaultRagAgentQueries = [
+    {
+      query: 'Hey! How are you today?',
+      icon: <Lightbulb className="h-6 w-6 text-yellow-400" />,
+    },
+    {
+      query: 'Can you help me understand my documents better?',
+      icon: <FlaskConical className="h-6 w-6 text-purple-400" />,
+    },
+    {
+      query: 'How might agentic RAG help me in the long run?',
+      icon: <Flame className="h-6 w-6 text-red-400" />,
+    },
+    {
+      query: 'What is the coolest thing you can do?',
+      icon: <Earth className="h-6 w-6 text-green-400" />,
+    },
+  ];
+
+  const getQueriesBasedOnMode = (mode: 'rag' | 'rag_agent') => {
+    if (mode === 'rag') {
+      return defaultRagQueries;
+    } else if (mode === 'rag_agent') {
+      return defaultRagAgentQueries;
+    } else {
+      throw new Error('Invalid mode');
+    }
+  };
+
+  const defaultQueries = getQueriesBasedOnMode(mode);
 
   return (
     <div className="flex flex-col items-center justify-center h-full space-y-8">

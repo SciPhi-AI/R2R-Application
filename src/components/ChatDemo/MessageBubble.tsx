@@ -6,7 +6,7 @@ const MessageBubble: React.FC<{ message: Message; isStreaming?: boolean }> = ({
   message,
   isStreaming,
 }) => {
-  if (message.sender === 'user') {
+  if (message.role === 'user') {
     return (
       <div className="flex justify-end mb-4">
         <div className="bg-zinc-800 text-white rounded-lg p-3 max-w-xs lg:max-w-md">
@@ -14,7 +14,7 @@ const MessageBubble: React.FC<{ message: Message; isStreaming?: boolean }> = ({
         </div>
       </div>
     );
-  } else if (message.sender === 'assistant') {
+  } else if (message.role === 'assistant') {
     return (
       <div className="flex justify-start mb-4">
         <div

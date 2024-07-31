@@ -7,6 +7,13 @@ import { Search } from '@/components/ChatDemo/search';
 import useSwitchManager from '@/components/ChatDemo/SwitchManager';
 import Layout from '@/components/Layout';
 import Sidebar from '@/components/Sidebar';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
 import { useUserContext } from '@/context/UserContext';
 
@@ -17,6 +24,7 @@ const Index: React.FC = () => {
   const [hasAttemptedFetch, setHasAttemptedFetch] = useState(false);
   const [searchLimit, setSearchLimit] = useState(10);
   const [searchFilters, setSearchFilters] = useState('{}');
+  const [mode, setMode] = useState<'rag' | 'rag_agent'>('rag_agent');
 
   useEffect(() => {
     if (searchParams) {
@@ -26,7 +34,7 @@ const Index: React.FC = () => {
 
   const { pipeline, getClient, selectedModel } = useUserContext();
 
-  const [sidebarIsOpen, setSidebarIsOpen] = useState(true);
+  const [sidebarIsOpen, setSidebarIsOpen] = useState(false);
 
   const toggleSidebar = () => {
     setSidebarIsOpen(!sidebarIsOpen);
@@ -51,9 +59,13 @@ const Index: React.FC = () => {
     height: 0,
   });
   const contentAreaRef = useRef<HTMLDivElement>(null);
-  const [uploadedDocuments, setUploadedDocuments] = useState([]);
+  const [uploadedDocuments, setUploadedDocuments] = useState<string[]>([]);
 
   const [userId, setUserId] = useState(null);
+
+  useEffect(() => {
+    setQuery('');
+  }, [mode]);
 
   useEffect(() => {
     initializeSwitch(
@@ -157,38 +169,63 @@ const Index: React.FC = () => {
 
         {/* Main Content */}
         <div
-          className={`flex-1 flex flex-col items-center overflow-hidden transition-all duration-300 ease-in-out ${
-            sidebarIsOpen ? 'ml-80' : 'ml-0'
-          }`}
-          style={{
-            width: sidebarIsOpen ? 'calc(100% - 20rem)' : '100%',
-          }}
+          className={`main-content-wrapper ${sidebarIsOpen ? '' : 'sidebar-closed'}`}
         >
-          <div className="w-full max-w-4xl flex flex-col flex-grow overflow-hidden">
-            {/* Chat Interface */}
-            <div className="flex-1 overflow-auto p-4 mt-5">
-              <Result
-                query={query}
-                setQuery={setQuery}
-                model={selectedModel}
-                userId={userId}
-                pipelineUrl={pipeline?.deploymentUrl || ''}
-                search_limit={searchLimit}
-                search_filters={safeJsonParse(searchFilters)}
-                rag_temperature={temperature}
-                rag_topP={topP}
-                rag_topK={top_k}
-                rag_maxTokensToSample={max_tokens_to_sample}
-                uploadedDocuments={uploadedDocuments}
-                setUploadedDocuments={setUploadedDocuments}
-                switches={switches}
-                hasAttemptedFetch={hasAttemptedFetch}
-              />
+          <div
+            className={`main-content ${sidebarIsOpen ? '' : 'sidebar-closed'}`}
+            ref={contentAreaRef}
+          >
+            {/* Mode Selector */}
+            <div className="mode-selector h-0">
+              <Select
+                value={mode}
+                onValueChange={(value) => setMode(value as 'rag' | 'rag_agent')}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Select Mode" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="rag">Question and Answer</SelectItem>
+                  <SelectItem value="rag_agent">RAG Agent</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
+            <div className="w-full max-w-4xl flex flex-col flex-grow overflow-hidden">
+              {/* Chat Interface */}
+              <div className="flex-1 overflow-auto p-4 mt-16">
+                <Result
+                  query={query}
+                  setQuery={setQuery}
+                  model={selectedModel}
+                  userId={userId}
+                  pipelineUrl={pipeline?.deploymentUrl || ''}
+                  search_limit={searchLimit}
+                  search_filters={safeJsonParse(searchFilters)}
+                  rag_temperature={temperature}
+                  rag_topP={topP}
+                  rag_topK={top_k}
+                  rag_maxTokensToSample={max_tokens_to_sample}
+                  uploadedDocuments={uploadedDocuments}
+                  setUploadedDocuments={setUploadedDocuments}
+                  switches={switches}
+                  hasAttemptedFetch={hasAttemptedFetch}
+                  mode={mode}
+                />
+              </div>
 
-            {/* Search Bar */}
-            <div className="p-4 w-full">
-              <Search pipeline={pipeline || undefined} setQuery={setQuery} />
+              {/* Search Bar */}
+              <div className="p-4 w-full">
+                <Search
+                  pipeline={pipeline || undefined}
+                  setQuery={setQuery}
+                  placeholder={
+                    mode === 'rag'
+                      ? 'Ask a question...'
+                      : 'Start a conversation...'
+                  }
+                  disabled={uploadedDocuments?.length === 0 && mode === 'rag'}
+                />
+              </div>
             </div>
           </div>
         </div>

@@ -86,3 +86,20 @@ export function generateIdFromLabel(label: string): string {
   const NAMESPACE_DNS = '6ba7b810-9dad-11d1-80b4-00c04fd430c8'; // UUID for DNS namespace
   return uuidv5(label, NAMESPACE_DNS);
 }
+
+export function formatFileSize(bytes: number | undefined): string {
+  if (bytes === undefined || isNaN(bytes)) {
+    return 'N/A';
+  }
+
+  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+  let size = bytes;
+  let unitIndex = 0;
+
+  while (size >= 1024 && unitIndex < units.length - 1) {
+    size /= 1024;
+    unitIndex++;
+  }
+
+  return `${size.toFixed(2)} ${units[unitIndex]}`;
+}
