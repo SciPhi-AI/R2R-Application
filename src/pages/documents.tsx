@@ -343,9 +343,6 @@ const Index: React.FC = () => {
       <main className="max-w-7xl flex flex-col min-h-screen container">
         <div className="mt-[5rem] sm:mt-[5rem]">
           <div className="flex justify-between items-center">
-            <h3 className="text-2xl font-bold text-blue-500 pl-4 pt-8">
-              Documents
-            </h3>
             <div className="flex items-center space-x-4"></div>
             <div className="flex justify-center mt-4">
               <div className="mt-6 pr-2">

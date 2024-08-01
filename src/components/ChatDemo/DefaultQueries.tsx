@@ -58,7 +58,7 @@ export const DefaultQueries: FC<DefaultQueriesProps> = ({ setQuery, mode }) => {
 
   return (
     <div className="flex flex-col items-center justify-center h-full space-y-8">
-      <Logo width={150} height={150} disableLink={true} />
+      <Logo width={200} height={200} disableLink={true} />
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full max-w-4xl px-4">
         {defaultQueries.map(({ query, icon }, index) => (
           <Alert

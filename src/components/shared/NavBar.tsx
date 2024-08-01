@@ -9,13 +9,14 @@ import { Logo } from '@/components/shared/Logo';
 import { Button } from '@/components/ui/Button';
 import { Code } from '@/components/ui/Code';
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useUserContext } from '@/context/UserContext';
-import { AdminBadgeProps, NavbarProps, NavItemsProps } from '@/types';
+import { NavbarProps, NavItemsProps } from '@/types';
 
 const NavItems: React.FC<NavItemsProps> = ({
   isAuthenticated,
@@ -35,7 +36,7 @@ const NavItems: React.FC<NavItemsProps> = ({
 
   const commonItems = [
     { path: '/documents', label: 'Documents' },
-    { path: '/playground', label: 'Playground' },
+    { path: '/chat', label: 'Chat' },
   ];
 
   const adminItems = [
@@ -76,39 +77,6 @@ const NavItems: React.FC<NavItemsProps> = ({
   );
 };
 
-const AdminBadge: React.FC<AdminBadgeProps> = ({
-  isAdmin,
-  viewMode,
-  onToggle,
-}) => {
-  if (!isAdmin) {
-    return null;
-  }
-
-  return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger>
-          <Button
-            className="rounded-md py-1 px-3 w-30"
-            variant="filled"
-            onClick={onToggle}
-          >
-            {viewMode === 'admin' ? 'Admin View' : 'User View'}
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>
-            {viewMode === 'admin'
-              ? "You're interacting as an administrator."
-              : "You're viewing as a regular user."}
-          </p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  );
-};
-
 export const Navbar = forwardRef<React.ElementRef<'div'>, NavbarProps>(
   function Header({ className }, ref) {
     const pathname = usePathname();
@@ -121,8 +89,8 @@ export const Navbar = forwardRef<React.ElementRef<'div'>, NavbarProps>(
     const effectiveRole =
       viewMode === 'user' ? 'user' : authState.userRole || 'user';
 
-    const toggleViewMode = () => {
-      setViewMode(viewMode === 'admin' ? 'user' : 'admin');
+    const toggleViewMode = (value: 'admin' | 'user') => {
+      setViewMode(value);
     };
 
     const handleLogout = async () => {
@@ -152,7 +120,7 @@ export const Navbar = forwardRef<React.ElementRef<'div'>, NavbarProps>(
       >
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center space-x-4">
-            <Logo width={25} height={25} onClick={handleHomeClick} />
+            <Logo width={40} height={40} onClick={handleHomeClick} />
             <Link href="/" onClick={handleHomeClick}>
               <Code>
                 <span
@@ -163,7 +131,7 @@ export const Navbar = forwardRef<React.ElementRef<'div'>, NavbarProps>(
                       : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white'
                   )}
                 >
-                  R2R Dashboard
+                  Home
                 </span>
               </Code>
             </Link>
@@ -174,11 +142,21 @@ export const Navbar = forwardRef<React.ElementRef<'div'>, NavbarProps>(
             />
           </div>
           <div className="flex items-center space-x-4">
-            <AdminBadge
-              isAdmin={isAdmin}
-              viewMode={viewMode}
-              onToggle={toggleViewMode}
-            />
+            {isAuthenticated && isAdmin && (
+              <Select onValueChange={toggleViewMode}>
+                <SelectTrigger className="w-30 rounded-md py-1 px-3">
+                  <SelectValue
+                    placeholder={
+                      viewMode === 'admin' ? 'Admin View' : 'User View'
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="admin">Admin View</SelectItem>
+                  <SelectItem value="user">User View</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
             <Button
               className="rounded-md py-1 px-3 w-30"
               variant="filled"

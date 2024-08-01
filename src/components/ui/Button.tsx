@@ -17,6 +17,7 @@ const variantStyles = {
     'bg-amber-500 text-white hover:bg-amber-600 dark:bg-amber-500 dark:text-white dark:hover:bg-amber-600',
   text: 'text-blue-600 hover:text-blue-600 dark:text-blue-600 dark:hover:text-blue-600',
   disabled: 'bg-zinc-600 text-white cursor-not-allowed hover:bg-zinc-500',
+  light: 'bg-zinc-700 text-white hover:bg-zinc-600',
 };
 
 type ButtonProps = {

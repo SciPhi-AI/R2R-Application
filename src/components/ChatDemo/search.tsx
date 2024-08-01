@@ -33,7 +33,7 @@ export const Search: FC<SearchProps> = ({
   const navigateToSearch = useCallback(
     debounce((searchValue: string) => {
       if (pipeline) {
-        router.push(`/playground/?q=${encodeURIComponent(searchValue)}`);
+        router.push(`/chat/?q=${encodeURIComponent(searchValue)}`);
       }
     }, 50),
     [router, pipeline]

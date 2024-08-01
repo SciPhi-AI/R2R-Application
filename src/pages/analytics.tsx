@@ -347,8 +347,7 @@ const Analytics: React.FC = () => {
       <main className="w-full flex flex-col min-h-screen container">
         <div className="mt-[5rem] sm:mt-[5rem]">
           <div className="flex justify-between items-center">
-            <h3 className="text-2xl font-bold text-blue-500 pl-4">Analytics</h3>
-            <div className="pr-4">
+            <div className="pr-4 ml-auto">
               <Select onValueChange={(value) => setSelectedFilter(value)}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder={selectedFilter} />
