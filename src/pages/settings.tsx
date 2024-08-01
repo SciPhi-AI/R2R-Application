@@ -16,40 +16,52 @@ interface AppData {
   prompts: Record<string, Prompt>;
 }
 
-const renderNestedConfig = (config: Record<string, any>, depth = 0) => {
-  return Object.entries(config).map(([key, value]) => {
-    if (typeof value === 'object' && value !== null) {
-      return (
-        <React.Fragment key={key}>
-          <tr className="border-t border-gray-600">
-            <td
-              className={`px-4 py-2 text-white ${depth === 0 ? 'font-bold' : ''}`}
-              style={{ paddingLeft: `${(depth + 1) * 20}px` }}
-            >
-              {key}
-            </td>
-          </tr>
-          {renderNestedConfig(value, depth + 1)}
-        </React.Fragment>
-      );
-    } else {
-      return (
-        <tr key={key} className="border-t border-gray-600">
+const renderNestedConfig = (
+  config: Record<string, any>,
+  depth = 0
+): JSX.Element => {
+  if (typeof config !== 'object' || config === null) {
+    return (
+      <span className="whitespace-pre-wrap">
+        {JSON.stringify(config, null, 2)}
+      </span>
+    );
+  }
+
+  const isBottomLevel = Object.values(config).every(
+    (value) => typeof value !== 'object' || value === null
+  );
+
+  return (
+    <>
+      {Object.entries(config).map(([key, value], index) => (
+        <tr
+          key={key}
+          className={
+            (depth <= 1 || isBottomLevel) && index !== 0
+              ? 'border-t border-gray-600'
+              : ''
+          }
+        >
           <td
-            className={`px-4 py-2 text-white ${depth === 0 ? 'font-bold' : ''}`}
-            style={{ paddingLeft: `${(depth + 1) * 20}px` }}
+            className={`w-1/3 px-4 py-2 text-white text-center ${depth === 0 ? 'font-bold' : ''}`}
+            style={{ paddingLeft: `${depth * 20}px` }}
           >
             {key}
           </td>
-          <td className="px-4 py-2 text-white">
-            <pre className="whitespace-pre-wrap">
-              {JSON.stringify(value, null, 2)}
-            </pre>
+          <td className="w-2/3 px-4 py-2 text-white text-left">
+            {typeof value === 'object' && value !== null ? (
+              renderNestedConfig(value, depth + 1)
+            ) : (
+              <span className="whitespace-pre-wrap">
+                {JSON.stringify(value, null, 2)}
+              </span>
+            )}
           </td>
         </tr>
-      );
-    }
-  });
+      ))}
+    </>
+  );
 };
 
 const Index: React.FC = () => {
@@ -106,15 +118,12 @@ const Index: React.FC = () => {
   return (
     <Layout pageTitle="Settings">
       <main className="w-full flex flex-col min-h-screen container bg-zinc-900 text-white p-4 mt-4">
-        <div className="mx-auto max-w-6xl mb-12 mt-4">
+        <div className="mx-auto w-full max-w-5xl mb-12 mt-4">
           <div className="mt-8">
-            <div className="flex justify-between items-center">
-              <h3 className="text-2xl font-bold text-blue-500 pl-4">
-                App Data
-              </h3>
-              <div className="flex justify-center mt-4">
+            <div className="flex justify-between items-center mb-4">
+              <div className="flex justify-center ml-auto">
                 <button
-                  className={`px-4 py-2 mx-2 rounded ${
+                  className={`px-4 py-2 rounded mr-2 ${
                     activeTab === 'config'
                       ? 'bg-blue-500 text-white'
                       : 'bg-zinc-800 text-zinc-400'
@@ -124,7 +133,7 @@ const Index: React.FC = () => {
                   Config
                 </button>
                 <button
-                  className={`px-4 py-2 mx-2 rounded ${
+                  className={`px-4 py-2 rounded ${
                     activeTab === 'prompts'
                       ? 'bg-blue-500 text-white'
                       : 'bg-zinc-800 text-zinc-400'
@@ -135,81 +144,91 @@ const Index: React.FC = () => {
                 </button>
               </div>
             </div>
-            <div className="flex flex-col space-y-4 p-4">
+            <div className="bg-zinc-800 p-4 rounded">
               {activeTab === 'config' && (
-                <div className="bg-zinc-800 p-4 rounded ">
+                <>
                   <h4 className="text-xl font-bold text-white pb-2">Config</h4>
-                  <table className="w-full bg-zinc-800 border border-gray-600">
-                    <thead>
-                      <tr className="border-b border-gray-600">
-                        <th className="w-1/3 px-4 py-2 text-left text-white">
-                          Key
-                        </th>
-                        <th className="w-2/3 px-4 py-2 text-left text-white">
-                          Value
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {config && Object.keys(config).length > 0 ? (
-                        renderNestedConfig(config)
-                      ) : (
-                        <tr>
-                          <td
-                            colSpan={2}
-                            className="px-4 py-2 text-white text-center"
-                            style={{ width: '750px' }}
-                          >
-                            No valid configuration data available
-                          </td>
+                  <div className="overflow-x-auto">
+                    <table className="w-full bg-zinc-800 border border-gray-600">
+                      <thead>
+                        <tr className="border-b border-gray-600">
+                          <th className="w-1/3 px-4 py-2 text-left text-white">
+                            Key
+                          </th>
+                          <th className="w-2/3 px-4 py-2 text-left text-white">
+                            Value
+                          </th>
                         </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-              {activeTab === 'prompts' && (
-                <div className="bg-zinc-800 p-4 rounded">
-                  <h4 className="text-xl font-bold text-white pb-2">Prompts</h4>
-                  <table className="w-full bg-zinc-800 border border-gray-600">
-                    <thead>
-                      <tr className="border-b border-gray-600">
-                        <th className="px-4 py-2 text-left text-white">Name</th>
-                        <th className="px-4 py-2 text-left text-white">
-                          Template
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {Object.entries(prompts).length > 0 ? (
-                        Object.entries(prompts).map(([name, prompt]) => (
-                          <tr key={name} className="border-t border-gray-600">
-                            <td className="px-4 py-2 text-white">{name}</td>
-                            <td className="px-4 py-2 text-white relative">
-                              <div className="whitespace-pre-wrap font-sans pr-8">
-                                {prompt.template}
-                              </div>
-                              <button
-                                onClick={() =>
-                                  handleEditPrompt(name, prompt.template)
-                                }
-                                className="absolute bottom-2 right-2 text-gray-400 cursor-pointer hover:text-blue-500"
-                              >
-                                <SquarePen className="h-5 w-5" />
-                              </button>
+                      </thead>
+                      <tbody>
+                        {config && Object.keys(config).length > 0 ? (
+                          renderNestedConfig(config)
+                        ) : (
+                          <tr>
+                            <td
+                              colSpan={2}
+                              className="px-4 py-2 text-white text-center"
+                            >
+                              No valid configuration data available
                             </td>
                           </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan={3} className="px-4 py-2 text-white">
-                            No prompts available
-                          </td>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              )}
+              {activeTab === 'prompts' && (
+                <>
+                  <h4 className="text-xl font-bold text-white pb-2">Prompts</h4>
+                  <div className="overflow-x-auto">
+                    <table className="w-full bg-zinc-800 border border-gray-600">
+                      <thead>
+                        <tr className="border-b border-gray-600">
+                          <th className="w-1/3 px-4 py-2 text-left text-white">
+                            Name
+                          </th>
+                          <th className="w-2/3 px-4 py-2 text-left text-white">
+                            Template
+                          </th>
                         </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody>
+                        {Object.entries(prompts).length > 0 ? (
+                          Object.entries(prompts).map(([name, prompt]) => (
+                            <tr key={name} className="border-t border-gray-600">
+                              <td className="w-1/3 px-4 py-2 text-white">
+                                {name}
+                              </td>
+                              <td className="w-2/3 px-4 py-2 text-white relative">
+                                <div className="whitespace-pre-wrap font-sans pr-8 max-h-32 overflow-y-auto">
+                                  {prompt.template}
+                                </div>
+                                <button
+                                  onClick={() =>
+                                    handleEditPrompt(name, prompt.template)
+                                  }
+                                  className="absolute top-2 right-2 text-gray-400 cursor-pointer hover:text-blue-500"
+                                >
+                                  <SquarePen className="h-5 w-5" />
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td
+                              colSpan={2}
+                              className="px-4 py-2 text-white text-center"
+                            >
+                              No prompts available
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
               )}
             </div>
           </div>

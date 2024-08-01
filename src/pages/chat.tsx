@@ -145,7 +145,7 @@ const Index: React.FC = () => {
   };
 
   return (
-    <Layout pageTitle="Playground" includeFooter={false}>
+    <Layout pageTitle="Chat" includeFooter={false}>
       <div className="flex h-[calc(100vh)] pt-16">
         <Sidebar
           isOpen={sidebarIsOpen}

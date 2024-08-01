@@ -21,7 +21,7 @@ function MyAppContent({ Component, pageProps }: AppProps) {
   useEffect(() => {
     const protectedRoutes = [
       '/documents',
-      '/playground',
+      '/chat',
       '/users',
       '/logs',
       '/analytics',

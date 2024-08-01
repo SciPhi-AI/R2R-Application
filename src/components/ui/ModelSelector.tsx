@@ -18,11 +18,9 @@ import { useUserContext } from '@/context/UserContext';
 import { ModelSelectorProps } from '@/types';
 
 const predefinedModels = [
-  { value: 'gpt-4o-mini', label: 'GPT-4o-mini' },
-  { value: 'gpt-4o', label: 'GPT-4o' },
-  { value: 'gpt-4-turbo', label: 'GPT-4 Turbo' },
-  { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo' },
-  { value: 'ollama/llama3', label: 'Llama 3' },
+  { value: 'gpt-4o-mini', label: 'gpt-4o-mini' },
+  { value: 'gpt-4o', label: 'gpt-4o' },
+  { value: 'ollama/llama3.1', label: 'ollama/llama3.1' },
 ];
 
 const ModelSelector: React.FC<ModelSelectorProps> = ({ id }) => {

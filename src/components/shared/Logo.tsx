@@ -5,8 +5,8 @@ import React from 'react';
 import { LogoProps } from '@/types';
 
 export function Logo({
-  width = 25,
-  height = 25,
+  width = 50,
+  height = 50,
   className = '',
   onClick,
   disableLink = false,
@@ -22,11 +22,10 @@ export function Logo({
 
   const imageElement = (
     <Image
-      alt="sciphi.png"
-      src="/images/sciphi.png"
+      alt="SciPhi Logo"
+      src="/images/sciphi.svg"
       width={width}
       height={height}
-      className="w-full h-full"
       priority={priority}
       {...rest}
     />
