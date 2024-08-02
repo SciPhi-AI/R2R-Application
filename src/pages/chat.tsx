@@ -25,6 +25,7 @@ const Index: React.FC = () => {
   const [searchLimit, setSearchLimit] = useState(10);
   const [searchFilters, setSearchFilters] = useState('{}');
   const [mode, setMode] = useState<'rag' | 'rag_agent'>('rag_agent');
+  const [sidebarIsOpen, setSidebarIsOpen] = useState(false);
 
   useEffect(() => {
     if (searchParams) {
@@ -33,8 +34,6 @@ const Index: React.FC = () => {
   }, [searchParams]);
 
   const { pipeline, getClient, selectedModel } = useUserContext();
-
-  const [sidebarIsOpen, setSidebarIsOpen] = useState(false);
 
   const toggleSidebar = () => {
     setSidebarIsOpen(!sidebarIsOpen);
