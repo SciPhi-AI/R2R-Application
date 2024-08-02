@@ -179,6 +179,11 @@ export interface PipelineStatusProps {
   onStatusChange?: (isConnected: boolean) => void;
 }
 
+export interface R2RServerCardProps {
+  pipeline: Pipeline | null;
+  onStatusChange: (status: boolean) => void;
+}
+
 export interface RagGenerationConfig {
   temperature?: number;
   top_p?: number;
@@ -193,6 +198,13 @@ export interface SearchProps {
   setQuery: (query: string) => void;
   placeholder?: string;
   disabled?: boolean;
+}
+
+export interface ServerStats {
+  start_time: string;
+  uptime_seconds: number;
+  cpu_usage: number;
+  memory_usage: number;
 }
 
 export interface SidebarProps {
