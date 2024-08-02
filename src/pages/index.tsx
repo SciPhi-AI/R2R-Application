@@ -25,6 +25,7 @@ import { useState, useEffect } from 'react';
 import { Line } from 'react-chartjs-2';
 
 import { PipelineStatus } from '@/components/ChatDemo/PipelineStatus';
+import R2RServerCard from '@/components/ChatDemo/ServerCard';
 import Layout from '@/components/Layout';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/Button';
@@ -344,61 +345,12 @@ const HomePage = () => {
           <div className="w-full lg:w-1/3 flex flex-col gap-4">
             {/* R2R Server Cards */}
             <div className="flex flex-col gap-4">
-              <Card className="h-full flex flex-col">
-                <CardHeader className="pb-0">
-                  <CardTitle className="text-xl">R2R Server</CardTitle>
-                  <PipelineStatus onStatusChange={setIsConnected} />
-                  <CardDescription>
-                    Your deployment of an R2R server.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  {/* <div className="grid gap-4">
-                    <div className="mt-4">
-                      <h3 className="text-lg font-semibold">
-                        Deployment Metrics
-                      </h3>
-                      <div className="grid grid-cols-2 gap-2 text-sm">
-                        <div>
-                          <p className="font-medium">Uptime:</p>
-                          <p>24 hours</p>
-                        </div>
-                        <div>
-                          <p className="font-medium">CPU Usage:</p>
-                          <p>45%</p>
-                        </div>
-                        <div>
-                          <p className="font-medium">Error Count:</p>
-                          <p>5</p>
-                        </div>
-                        <div>
-                          <p className="font-medium">Memory Usage:</p>
-                          <p>60%</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div> */}
-                  <div className="flex items-center gap-2 pt-4">
-                    <Link width="20" height="20" />
-                    <span className="text-sm text-gray-500 dark:text-gray-400">
-                      {pipeline?.deploymentUrl}
-                    </span>
-
-                    {copied ? (
-                      <Check className="w-4 h-4" />
-                    ) : (
-                      <ClipboardCheck
-                        className="w-4 h-4 cursor-pointer"
-                        onClick={() => {
-                          handleCopy(pipeline!.deploymentUrl);
-                          setCopied(true);
-                          setTimeout(() => setCopied(false), 2000);
-                        }}
-                      />
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+              {pipeline && (
+                <R2RServerCard
+                  pipeline={pipeline}
+                  onStatusChange={setIsConnected}
+                />
+              )}
 
               {/* <Card className="h-full flex flex-col">
                 <CardHeader className="pb-0">
