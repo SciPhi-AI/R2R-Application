@@ -120,7 +120,7 @@ export const Result: FC<{
 
       const streamResponse =
         mode === 'rag_agent'
-          ? await client.ragAgent({
+          ? await client.agent({
               messages: [...messages, newUserMessage],
               use_vector_search: switches.vector_search?.checked ?? true,
               search_filters,

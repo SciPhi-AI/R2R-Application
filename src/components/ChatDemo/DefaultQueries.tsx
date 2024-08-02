@@ -25,7 +25,7 @@ export const DefaultQueries: FC<DefaultQueriesProps> = ({ setQuery, mode }) => {
     },
   ];
 
-  const defaultRagAgentQueries = [
+  const defaultAgentQueries = [
     {
       query: 'Hey! How are you today?',
       icon: <Lightbulb className="h-6 w-6 text-yellow-400" />,
@@ -48,7 +48,7 @@ export const DefaultQueries: FC<DefaultQueriesProps> = ({ setQuery, mode }) => {
     if (mode === 'rag') {
       return defaultRagQueries;
     } else if (mode === 'rag_agent') {
-      return defaultRagAgentQueries;
+      return defaultAgentQueries;
     } else {
       throw new Error('Invalid mode');
     }
