@@ -252,7 +252,7 @@ const HomePage = () => {
                         variant="light"
                         onClick={() =>
                           window.open(
-                            'https://r2r-docs.sciphi.ai/walkthrough',
+                            'https://r2r-docs.sciphi.ai/python-sdk',
                             '_blank'
                           )
                         }
@@ -303,7 +303,7 @@ const HomePage = () => {
                         variant="light"
                         onClick={() =>
                           window.open(
-                            'https://r2r-docs.sciphi.ai/cookbooks/web-dev',
+                            'https://r2r-docs.sciphi.ai/js-sdk',
                             '_blank'
                           )
                         }
