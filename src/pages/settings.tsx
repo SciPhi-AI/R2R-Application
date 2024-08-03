@@ -1,5 +1,6 @@
 import { SquarePen } from 'lucide-react';
 import React, { useState, useEffect, useCallback } from 'react';
+import toml from 'toml';
 
 import EditPromptDialog from '@/components/ChatDemo/utils/editPromptDialog';
 import Layout from '@/components/Layout';
@@ -23,42 +24,47 @@ const renderNestedConfig = (
   if (typeof config !== 'object' || config === null) {
     return (
       <span className="whitespace-pre-wrap">
-        {JSON.stringify(config, null, 2)}
+        {typeof config === 'string' ? `"${config}"` : String(config)}
       </span>
     );
   }
 
-  const isBottomLevel = Object.values(config).every(
-    (value) => typeof value !== 'object' || value === null
-  );
-
   return (
     <>
       {Object.entries(config).map(([key, value], index) => (
-        <tr
-          key={key}
-          className={
-            (depth <= 1 || isBottomLevel) && index !== 0
-              ? 'border-t border-gray-600'
-              : ''
-          }
-        >
-          <td
-            className={`w-1/3 px-4 py-2 text-white text-center ${depth === 0 ? 'font-bold' : ''}`}
-            style={{ paddingLeft: `${depth * 20}px` }}
-          >
-            {key}
-          </td>
-          <td className="w-2/3 px-4 py-2 text-white text-left">
-            {typeof value === 'object' && value !== null ? (
-              renderNestedConfig(value, depth + 1)
-            ) : (
-              <span className="whitespace-pre-wrap">
-                {JSON.stringify(value, null, 2)}
-              </span>
-            )}
-          </td>
-        </tr>
+        <React.Fragment key={key}>
+          <tr className={index !== 0 ? 'border-t border-gray-600' : ''}>
+            <td
+              className={`w-1/3 px-6 py-2 text-white ${depth === 0 ? 'font-bold' : ''}`}
+              style={{ paddingLeft: `${depth * 20 + 24}px` }}
+            >
+              {key}
+            </td>
+            <td className="w-2/3 px-4 py-2 text-white">
+              {typeof value === 'object' && value !== null ? (
+                Array.isArray(value) ? (
+                  <span className="whitespace-pre-wrap">
+                    {`[${value
+                      .map((item) =>
+                        typeof item === 'string'
+                          ? `"${item}"`
+                          : JSON.stringify(item)
+                      )
+                      .join(', ')}]`}
+                  </span>
+                ) : (
+                  ''
+                )
+              ) : (
+                renderNestedConfig(value)
+              )}
+            </td>
+          </tr>
+          {typeof value === 'object' &&
+            value !== null &&
+            !Array.isArray(value) &&
+            renderNestedConfig(value, depth + 1)}
+        </React.Fragment>
       ))}
     </>
   );
@@ -81,10 +87,11 @@ const Index: React.FC = () => {
       }
 
       const response = await client.appSettings();
+      console.log(response);
       if (response && response.results) {
         const { config, prompts } = response.results;
         setAppData({
-          config: typeof config === 'string' ? JSON.parse(config) : config,
+          config: typeof config === 'string' ? toml.parse(config) : config,
           prompts: prompts || {},
         });
       } else {
@@ -161,7 +168,7 @@ const Index: React.FC = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {config && Object.keys(config).length > 0 ? (
+                        {Object.keys(config).length > 0 ? (
                           renderNestedConfig(config)
                         ) : (
                           <tr>
