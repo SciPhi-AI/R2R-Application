@@ -26,7 +26,11 @@ import {
 const COLLAPSIBLE_THRESHOLD = 100;
 const LOGS_PER_PAGE = 5;
 
-const LogTable = ({ logs }: { logs: LogType[] }) => {
+const LogTable = ({
+  logs,
+}: {
+  logs: Array<{ run_id: string; run_type: string; entries: any[] }>;
+}) => {
   const [expandedCells, setExpandedCells] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const [paginatedLogs, setPaginatedLogs] = useState([]);
@@ -35,15 +39,13 @@ const LogTable = ({ logs }: { logs: LogType[] }) => {
     setExpandedCells((prev) => ({ ...prev, [rowId]: !prev[rowId] }));
   };
 
-  const flattenedLogs = logs.flatMap((log) =>
-    log.entries.map((entry, index) => ({
-      id: `${log.run_id}-${index}`,
-      run_id: log.run_id,
-      run_type: log.run_type,
-      key: entry.key,
-      value: entry.value,
-    }))
-  );
+  const flattenedLogs = logs.map((log) => ({
+    id: log.run_id,
+    run_id: log.run_id,
+    run_type: log.run_type,
+    key: 'Run Type',
+    value: log.run_type,
+  }));
 
   const groupedLogs = flattenedLogs.reduce((acc, log) => {
     if (!acc[log.run_id]) {

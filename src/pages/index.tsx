@@ -9,9 +9,6 @@ import {
   Legend,
 } from 'chart.js';
 import {
-  Check,
-  ClipboardCheck,
-  Link,
   BookOpenText,
   FileText,
   MessageCircle,
@@ -22,11 +19,11 @@ import {
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
-import { Line } from 'react-chartjs-2';
 
 import { PipelineStatus } from '@/components/ChatDemo/PipelineStatus';
 import R2RServerCard from '@/components/ChatDemo/ServerCard';
 import Layout from '@/components/Layout';
+import RequestsCard from '@/components/RequestsCard';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/Button';
 import {
@@ -53,48 +50,6 @@ const HomePage = () => {
   const { isAuthenticated, pipeline } = useUserContext();
   const [copied, setCopied] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
-
-  // const chartData = {
-  //   labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'],
-  //   datasets: [
-  //     {
-  //       label: 'Requests per Day',
-  //       data: [120, 190, 300, 500, 800, 1200, 2000],
-  //       fill: false,
-  //       borderColor: 'rgb(59, 130, 246)',
-  //       backgroundColor: 'rgb(59, 130, 246)',
-  //       tension: 0.1,
-  //     },
-  //   ],
-  // };
-
-  // const chartOptions = {
-  //   responsive: true,
-  //   plugins: {
-  //     legend: {
-  //       position: 'top',
-  //     },
-  //     title: {
-  //       display: true,
-  //       text: 'Requests Growth',
-  //     },
-  //   },
-  //   scales: {
-  //     y: {
-  //       beginAtZero: true,
-  //       title: {
-  //         display: true,
-  //         text: 'Number of Requests',
-  //       },
-  //     },
-  //     x: {
-  //       title: {
-  //         display: true,
-  //         text: 'Day',
-  //       },
-  //     },
-  //   },
-  // };
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -134,7 +89,7 @@ const HomePage = () => {
         <div className="flex flex-col lg:flex-row gap-4">
           {/* Left column - Alert */}
           <div className="w-full lg:w-2/3 flex flex-col gap-4">
-            <Alert variant="default" className="h-full flex flex-col">
+            <Alert variant="default" className="flex flex-col">
               <AlertTitle className="text-lg ">
                 <div className="flex gap-2 text-xl">
                   <span className="text-gray-500 dark:text-gray-200 font-semibold">
@@ -352,21 +307,7 @@ const HomePage = () => {
                 />
               )}
 
-              {/* <Card className="h-full flex flex-col">
-                <CardHeader className="pb-0">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-xl">Requests</CardTitle>
-                  </div>
-                  <CardDescription>
-                    Requests to your R2R server over the past week.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="mt-4 h-64">
-                    <Line data={chartData} options={chartOptions} />
-                  </div>
-                </CardContent>
-              </Card> */}
+              <RequestsCard />
             </div>
           </div>
         </div>

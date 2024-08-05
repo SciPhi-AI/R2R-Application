@@ -8,7 +8,7 @@ import { useUserContext } from '@/context/UserContext';
 
 const Logs: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const [logs, setLogs] = useState<any[]>([]);
+  const [logs, setLogs] = useState<{ results: any[] } | null>(null);
   const { getClient, pipeline } = useUserContext();
 
   function sleep(ms: number) {
@@ -23,6 +23,7 @@ const Logs: React.FC = () => {
       }
 
       const data = await client.logs();
+      console.log('logs:', data);
       setLogs(data.results || []);
     } catch (error) {
       console.error('Error fetching logs:', error);
@@ -45,8 +46,10 @@ const Logs: React.FC = () => {
               <Loader className="mx-auto mt-20 animate-spin" size={64} />
             )}
 
-            {!isLoading && logs != null && (
-              <LogTable logs={Array.isArray(logs) ? logs : []} />
+            {!isLoading && logs && logs.results && logs.results.length > 0 ? (
+              <LogTable logs={logs.results} />
+            ) : (
+              <p>No logs available.</p>
             )}
           </div>
         </div>
