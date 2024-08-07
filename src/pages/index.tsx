@@ -279,7 +279,7 @@ const HomePage = () => {
           {/* Right column - Cards */}
           <div className="w-full lg:w-1/3 flex flex-col gap-4">
             {/* R2R Server Cards */}
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4 flex-grow">
               {pipeline && (
                 <R2RServerCard
                   pipeline={pipeline}
@@ -287,7 +287,7 @@ const HomePage = () => {
                 />
               )}
 
-              <div className="w-full h-[400px]">
+              <div className="flex-grow">
                 <RequestsCard />
               </div>
             </div>

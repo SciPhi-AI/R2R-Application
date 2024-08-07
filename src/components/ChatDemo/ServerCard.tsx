@@ -36,49 +36,46 @@ const R2RServerCard: React.FC<R2RServerCardProps> = ({
   };
 
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader className="pb-0">
-        <CardTitle className="text-xl">R2R Server</CardTitle>
-        <PipelineStatus onStatusChange={onStatusChange} />
-        <CardDescription>Your deployment of an R2R server.</CardDescription>
+    <Card className="flex flex-col">
+      <CardHeader className="pb-2">
+        <div className="flex justify-between items-center">
+          <CardTitle className="text-lg">R2R Server</CardTitle>
+          <PipelineStatus onStatusChange={onStatusChange} />
+        </div>
+        <CardDescription className="text-sm">
+          Your deployment of an R2R server.
+        </CardDescription>
       </CardHeader>
       <CardContent className="pt-0">
-        <div className="grid gap-4">
-          <div className="mt-4">
-            <h3 className="text-lg font-semibold">Deployment Status</h3>
-            <div className="grid grid-cols-2 gap-2 text-sm">
-              <div>
-                <p className="font-medium">Uptime:</p>
-                <p>{isConnected ? formatUptime(localUptime) : 'N/A'}</p>
-              </div>
-              <div>
-                <p className="font-medium">CPU Usage:</p>
-                <p>
-                  {serverStats ? `${serverStats.cpu_usage.toFixed(1)}%` : 'N/A'}
-                </p>
-              </div>
-              <div>
-                <p className="font-medium">Start Time:</p>
-                <p>
-                  {serverStats
-                    ? new Date(serverStats.start_time).toLocaleString()
-                    : 'N/A'}
-                </p>
-              </div>
-              <div>
-                <p className="font-medium">Memory Usage:</p>
-                <p>
-                  {serverStats
-                    ? `${serverStats.memory_usage.toFixed(1)}%`
-                    : 'N/A'}
-                </p>
-              </div>
-            </div>
+        <div className="grid grid-cols-2 gap-2 text-sm">
+          <div>
+            <p className="font-medium">Uptime:</p>
+            <p>{isConnected ? formatUptime(localUptime) : 'N/A'}</p>
+          </div>
+          <div>
+            <p className="font-medium">CPU Usage:</p>
+            <p>
+              {serverStats ? `${serverStats.cpu_usage.toFixed(1)}%` : 'N/A'}
+            </p>
+          </div>
+          <div>
+            <p className="font-medium">Start Time:</p>
+            <p>
+              {serverStats
+                ? new Date(serverStats.start_time).toLocaleString()
+                : 'N/A'}
+            </p>
+          </div>
+          <div>
+            <p className="font-medium">Memory Usage:</p>
+            <p>
+              {serverStats ? `${serverStats.memory_usage.toFixed(1)}%` : 'N/A'}
+            </p>
           </div>
         </div>
-        <div className="flex items-center gap-2 pt-4">
-          <Link width="20" height="20" />
-          <span className="text-sm text-gray-500 dark:text-gray-400">
+        <div className="flex items-center gap-2 pt-2 text-sm">
+          <Link width="16" height="16" />
+          <span className="text-gray-500 dark:text-gray-400 truncate">
             {pipeline?.deploymentUrl}
           </span>
           {copied ? (

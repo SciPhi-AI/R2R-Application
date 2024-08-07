@@ -109,14 +109,6 @@ export default function WorldMapCard() {
         >
           {width > 0 && height > 0 && (
             <svg width={width} height={height}>
-              <rect
-                x={0}
-                y={0}
-                width={width}
-                height={height}
-                fill={background}
-                rx={14}
-              />
               <Mercator<FeatureShape>
                 data={world.features}
                 scale={scale}

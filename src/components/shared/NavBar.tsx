@@ -68,7 +68,7 @@ const NavItems: React.FC<NavItemsProps> = ({
                   : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white'
               )}
             >
-              <Code>{item.label}</Code>
+              {item.label}
             </Link>
           </li>
         ))}
@@ -122,18 +122,16 @@ export const Navbar = forwardRef<React.ElementRef<'div'>, NavbarProps>(
           <div className="flex items-center space-x-4">
             <Logo width={40} height={40} onClick={handleHomeClick} />
             <Link href="/" onClick={handleHomeClick}>
-              <Code>
-                <span
-                  className={clsx(
-                    'text-sm leading-5 transition',
-                    isHomePage
-                      ? 'text-link'
-                      : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white'
-                  )}
-                >
-                  Home
-                </span>
-              </Code>
+              <span
+                className={clsx(
+                  'text-sm leading-5 transition',
+                  isHomePage
+                    ? 'text-link'
+                    : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white'
+                )}
+              >
+                Home
+              </span>
             </Link>
             <NavItems
               isAuthenticated={isAuthenticated}
