@@ -1,6 +1,6 @@
 'use client';
 
-import { GradientTealBlue } from '@visx/gradient';
+import { GradientPinkRed } from '@visx/gradient';
 import { Group } from '@visx/group';
 import { scaleBand, scaleLinear } from '@visx/scale';
 import { Bar } from '@visx/shape';
@@ -41,7 +41,7 @@ interface TooltipData {
 // Temporary example data for a 24-hour period
 const exampleData = Array.from({ length: 24 }, (_, i) => ({
   hour: i,
-  count: Math.floor(Math.random() * 50),
+  count: Math.floor(Math.random() * 5),
 }));
 
 const generateYAxisTicks = (maxValue: number): number[] => {
@@ -90,7 +90,7 @@ const processLogData = (logs: LogData) => {
   }));
 };
 
-const RequestsBarChart = withTooltip<
+const ErrorsBarChart = withTooltip<
   {
     data: { hour: number; count: number; date: Date }[];
     width: number;
@@ -144,7 +144,7 @@ const RequestsBarChart = withTooltip<
           viewBox={`0 0 ${width} ${height}`}
           preserveAspectRatio="xMidYMid meet"
         >
-          <GradientTealBlue id="bar-gradient" />
+          <GradientPinkRed id="error-bar-gradient" />
           <Group left={margin.left} top={margin.top}>
             {data.map((d) => {
               const barHeight =
@@ -162,7 +162,7 @@ const RequestsBarChart = withTooltip<
                   y={innerHeight - barHeight}
                   height={barHeight}
                   width={xScale.bandwidth()}
-                  fill="url(#bar-gradient)"
+                  fill="url(#error-bar-gradient)"
                   onMouseEnter={() => {
                     const top = yScale(d.count);
                     const left = (barX ?? 0) + xScale.bandwidth() / 2;
@@ -222,7 +222,7 @@ const RequestsBarChart = withTooltip<
             <div>
               <strong>{`${tooltipData.hour}:00`}</strong>
             </div>
-            <div>{`Requests: ${tooltipData.count}`}</div>
+            <div>{`Errors: ${tooltipData.count}`}</div>
             <div>{`${tooltipData.date.toLocaleString()}`}</div>
           </Tooltip>
         )}
@@ -231,7 +231,7 @@ const RequestsBarChart = withTooltip<
   }
 );
 
-const RequestsCard: React.FC = () => {
+const ErrorsCard: React.FC = () => {
   const [logData, setLogData] = useState<Array<{
     hour: number;
     count: number;
@@ -295,17 +295,28 @@ const RequestsCard: React.FC = () => {
   }, []);
 
   return (
-    <Card className="h-full request-card">
+    <Card className="h-full flex flex-col">
       <CardHeader className="pb-0">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-xl">Requests</CardTitle>
+          <CardTitle className="text-xl">Errors</CardTitle>
         </div>
         <CardDescription>
-          Requests to your R2R server over the past 24 hours.
+          Errors that your R2R server has seen over the past 24 hours.
         </CardDescription>
       </CardHeader>
-      <CardContent className="pt-0 request-card-content">
-        <div ref={chartRef} className="chart-wrapper">
+      <CardContent
+        className="pt-0 flex-grow flex flex-col"
+        style={{ minHeight: '300px', maxHeight: '400px' }}
+      >
+        <div
+          ref={chartRef}
+          className="mt-4 flex-grow"
+          style={{
+            minHeight: '250px',
+            maxHeight: '350px',
+            aspectRatio: '16 / 9',
+          }}
+        >
           {isLoading && <p>Loading...</p>}
           {error && <p className="text-red-500">{error}</p>}
           {logData &&
@@ -313,12 +324,10 @@ const RequestsCard: React.FC = () => {
             dimensions.height > 0 &&
             (logData.every((d) => d.count === 0) ? (
               <div className="flex items-center justify-center h-full">
-                <p className="text-gray-500">
-                  No requests in the last 24 hours
-                </p>
+                <p className="text-gray-500">No errors in the last 24 hours</p>
               </div>
             ) : (
-              <RequestsBarChart
+              <ErrorsBarChart
                 data={logData}
                 width={dimensions.width}
                 height={dimensions.height}
@@ -330,4 +339,4 @@ const RequestsCard: React.FC = () => {
   );
 };
 
-export default RequestsCard;
+export default ErrorsCard;

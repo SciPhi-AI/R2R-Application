@@ -1,14 +1,4 @@
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js';
-import {
   BookOpenText,
   FileText,
   MessageCircle,
@@ -34,16 +24,6 @@ import {
   Card,
 } from '@/components/ui/card';
 import { useUserContext } from '@/context/UserContext';
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-);
 
 const HomePage = () => {
   const router = useRouter();
@@ -307,7 +287,9 @@ const HomePage = () => {
                 />
               )}
 
-              <RequestsCard />
+              <div className="w-full h-[400px]">
+                <RequestsCard />
+              </div>
             </div>
           </div>
         </div>
