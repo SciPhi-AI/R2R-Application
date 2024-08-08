@@ -26,45 +26,21 @@ import {
 const COLLAPSIBLE_THRESHOLD = 100;
 const LOGS_PER_PAGE = 5;
 
-const LogTable = ({ logs }: { logs: LogType[] }) => {
+const LogTable = ({ logs }) => {
   const [expandedCells, setExpandedCells] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const [paginatedLogs, setPaginatedLogs] = useState([]);
 
-  const toggleCell = (rowId: str) => {
+  const toggleCell = (rowId) => {
     setExpandedCells((prev) => ({ ...prev, [rowId]: !prev[rowId] }));
   };
 
-  const flattenedLogs = logs.flatMap((log) =>
-    log.entries.map((entry, index) => ({
-      id: `${log.run_id}-${index}`,
-      run_id: log.run_id,
-      run_type: log.run_type,
-      key: entry.key,
-      value: entry.value,
-    }))
-  );
-
-  const groupedLogs = flattenedLogs.reduce((acc, log) => {
-    if (!acc[log.run_id]) {
-      acc[log.run_id] = [];
-    }
-    acc[log.run_id].push(log);
-    return acc;
-  }, {});
-
-  const totalPages = Math.ceil(Object.keys(groupedLogs).length / LOGS_PER_PAGE);
+  const totalPages = Math.ceil(logs.length / LOGS_PER_PAGE);
 
   useEffect(() => {
     const startIndex = (currentPage - 1) * LOGS_PER_PAGE;
     const endIndex = startIndex + LOGS_PER_PAGE;
-    const paginatedEntries = Object.entries(groupedLogs).slice(
-      startIndex,
-      endIndex
-    );
-    setPaginatedLogs(
-      paginatedEntries.map(([runId, logs]) => ({ runId, logs }))
-    );
+    setPaginatedLogs(logs.slice(startIndex, endIndex));
   }, [currentPage, logs]);
 
   const truncateValue = (value, maxLength = 50) => {
@@ -74,65 +50,27 @@ const LogTable = ({ logs }: { logs: LogType[] }) => {
     return value;
   };
 
-  const prettifyJSON = (value, indent = 0) => {
-    if (typeof value !== 'string') {
-      return value;
-    }
-
+  const prettifyJSON = (value) => {
     try {
-      const outerArray = JSON.parse(value);
-      const parsedArray = outerArray.map((item) => {
-        if (typeof item === 'string') {
-          try {
-            return JSON.parse(item);
-          } catch (e) {
-            return item;
-          }
-        }
-        return item;
-      });
-
-      return formatObject(parsedArray, indent);
+      return JSON.stringify(JSON.parse(value), null, 2);
     } catch (e) {
       return value;
     }
   };
 
-  const formatObject = (obj, indent = 0) => {
-    if (typeof obj !== 'object' || obj === null) {
-      return JSON.stringify(obj);
-    }
-
-    const isArray = Array.isArray(obj);
-    const brackets = isArray ? ['[', ']'] : ['{', '}'];
-    const indentStr = '  '.repeat(indent);
-    const nextIndentStr = '  '.repeat(indent + 1);
-
-    const formatted = Object.entries(obj)
-      .map(([key, value]) => {
-        const formattedValue = formatObject(value, indent + 1);
-        return isArray
-          ? `${nextIndentStr}${formattedValue}`
-          : `${nextIndentStr}"${key}": ${formattedValue}`;
-      })
-      .join(',\n');
-
-    return `${brackets[0]}\n${formatted}\n${indentStr}${brackets[1]}`;
-  };
-
-  const renderValue = (log) => {
+  const renderValue = (value, id) => {
     const isCollapsible =
-      typeof log.value === 'string' && log.value.length > COLLAPSIBLE_THRESHOLD;
-    const prettyValue = prettifyJSON(log.value);
+      typeof value === 'string' && value.length > COLLAPSIBLE_THRESHOLD;
+    const prettyValue = prettifyJSON(value);
 
     if (isCollapsible) {
       return (
-        <Collapsible open={expandedCells[log.id]}>
+        <Collapsible open={expandedCells[id]}>
           <CollapsibleTrigger
-            onClick={() => toggleCell(log.id)}
+            onClick={() => toggleCell(id)}
             className="flex items-center w-full text-left"
           >
-            {expandedCells[log.id] ? (
+            {expandedCells[id] ? (
               <ChevronDown className="mr-2 flex-shrink-0" />
             ) : (
               <ChevronRight className="mr-2 flex-shrink-0" />
@@ -155,6 +93,34 @@ const LogTable = ({ logs }: { logs: LogType[] }) => {
     }
   };
 
+  const renderLogEntries = (log) => {
+    if (
+      !log.entries ||
+      !Array.isArray(log.entries) ||
+      log.entries.length === 0
+    ) {
+      return (
+        <TableRow key={`${log.run_id}-no-entries`} className="align-top">
+          <TableCell className="w-1/6"></TableCell>
+          <TableCell className="w-1/6"></TableCell>
+          <TableCell className="w-1/6 pt-3">No entries</TableCell>
+          <TableCell className="w-1/2">-</TableCell>
+        </TableRow>
+      );
+    }
+
+    return log.entries.map((entry, index) => (
+      <TableRow key={`${log.run_id}-${index}`} className="align-top">
+        <TableCell className="w-1/6"></TableCell>
+        <TableCell className="w-1/6"></TableCell>
+        <TableCell className="w-1/6 pt-3">{entry.key}</TableCell>
+        <TableCell className="w-1/2">
+          {renderValue(entry.value, `${log.run_id}-${index}`)}
+        </TableCell>
+      </TableRow>
+    ));
+  };
+
   return (
     <div className="overflow-x-auto">
       <Table>
@@ -167,21 +133,14 @@ const LogTable = ({ logs }: { logs: LogType[] }) => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {paginatedLogs.map(({ runId, logs }) => (
-            <React.Fragment key={runId}>
+          {paginatedLogs.map((log) => (
+            <React.Fragment key={log.run_id}>
               <TableRow className="bg-muted/50">
                 <TableCell colSpan={4} className="font-semibold">
-                  Run ID: {runId} ({logs[0].run_type})
+                  Run ID: {log.run_id} ({log.run_type || 'N/A'})
                 </TableCell>
               </TableRow>
-              {logs.map((log) => (
-                <TableRow key={log.id} className="align-top">
-                  <TableCell className="w-1/6"></TableCell>
-                  <TableCell className="w-1/6"></TableCell>
-                  <TableCell className="w-1/6 pt-3">{log.key}</TableCell>
-                  <TableCell className="w-1/2">{renderValue(log)}</TableCell>
-                </TableRow>
-              ))}
+              {renderLogEntries(log)}
             </React.Fragment>
           ))}
         </TableBody>
