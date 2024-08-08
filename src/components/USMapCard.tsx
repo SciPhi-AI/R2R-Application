@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as topojson from 'topojson-client';
 import { Topology, GeometryObject } from 'topojson-specification';
 
+import OverlayWrapper from '@/components/OverlayWrapper';
 import {
   Card,
   CardHeader,
@@ -139,60 +140,62 @@ export default function USMapCard() {
           style={{ aspectRatio: '16 / 9' }}
         >
           {width > 0 && height > 0 && (
-            <svg width={width} height={height}>
-              <AlbersUsa<FeatureShape>
-                data={features as FeatureShape[]}
-                scale={scale}
-                translate={[centerX, centerY - 25]}
-              >
-                {({ features }) =>
-                  features.map(({ feature, path, projection }, i) => {
-                    const coords: [number, number] | null = projection(
-                      geoCentroid(feature)
-                    );
-                    const abbr: string =
-                      (feature.id as StateId) in stateAbbrs
-                        ? stateAbbrs[feature.id as StateId]
-                        : '';
-
-                    if (coordOffsets[abbr] && coords) {
-                      coords[0] += coordOffsets[abbr][0];
-                      coords[1] += coordOffsets[abbr][1];
-                    }
-
-                    const stylesObj = {
-                      fill: '#FFF',
-                      fontFamily: 'sans-serif',
-                      cursor: 'default',
-                    };
-
-                    if (ignoredStates.includes(abbr)) {
-                      return (
-                        <path
-                          key={`map-feature-${i}`}
-                          d={path || ''}
-                          fill={getColor(abbr)}
-                          stroke={background}
-                          strokeWidth={0.5}
-                        />
+            <OverlayWrapper>
+              <svg width={width} height={height}>
+                <AlbersUsa<FeatureShape>
+                  data={features as FeatureShape[]}
+                  scale={scale}
+                  translate={[centerX, centerY - 25]}
+                >
+                  {({ features }) =>
+                    features.map(({ feature, path, projection }, i) => {
+                      const coords: [number, number] | null = projection(
+                        geoCentroid(feature)
                       );
-                    }
+                      const abbr: string =
+                        (feature.id as StateId) in stateAbbrs
+                          ? stateAbbrs[feature.id as StateId]
+                          : '';
 
-                    return (
-                      <React.Fragment key={`map-feature-${i}`}>
-                        <path
-                          key={`map-feature-${i}`}
-                          d={path || ''}
-                          fill={getColor(abbr)}
-                          stroke={background}
-                          strokeWidth={0.5}
-                        />
-                      </React.Fragment>
-                    );
-                  })
-                }
-              </AlbersUsa>
-            </svg>
+                      if (coordOffsets[abbr] && coords) {
+                        coords[0] += coordOffsets[abbr][0];
+                        coords[1] += coordOffsets[abbr][1];
+                      }
+
+                      const stylesObj = {
+                        fill: '#FFF',
+                        fontFamily: 'sans-serif',
+                        cursor: 'default',
+                      };
+
+                      if (ignoredStates.includes(abbr)) {
+                        return (
+                          <path
+                            key={`map-feature-${i}`}
+                            d={path || ''}
+                            fill={getColor(abbr)}
+                            stroke={background}
+                            strokeWidth={0.5}
+                          />
+                        );
+                      }
+
+                      return (
+                        <React.Fragment key={`map-feature-${i}`}>
+                          <path
+                            key={`map-feature-${i}`}
+                            d={path || ''}
+                            fill={getColor(abbr)}
+                            stroke={background}
+                            strokeWidth={0.5}
+                          />
+                        </React.Fragment>
+                      );
+                    })
+                  }
+                </AlbersUsa>
+              </svg>
+            </OverlayWrapper>
           )}
         </div>
       </CardContent>

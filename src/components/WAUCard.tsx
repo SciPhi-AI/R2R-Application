@@ -15,6 +15,7 @@ import { WithTooltipProvidedProps } from '@visx/tooltip/lib/enhancers/withToolti
 import { bisector } from 'd3-array';
 import React, { useState, useEffect, useRef } from 'react';
 
+import OverlayWrapper from '@/components/OverlayWrapper';
 import {
   Card,
   CardHeader,
@@ -263,7 +264,9 @@ const WAUCard: React.FC = () => {
             !error &&
             dimensions.width > 0 &&
             dimensions.height > 0 && (
-              <WAUChart width={dimensions.width} height={dimensions.height} />
+              <OverlayWrapper>
+                <WAUChart width={dimensions.width} height={dimensions.height} />
+              </OverlayWrapper>
             )}
         </div>
       </CardContent>

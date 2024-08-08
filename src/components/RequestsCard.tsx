@@ -71,165 +71,169 @@ const processLogData = (logs: LogData) => {
   const now = new Date();
   const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
-  const hourlyData = Array(24).fill(0);
+  const validLogs = logs.results.filter(
+    (log) => new Date(log.timestamp) >= twentyFourHoursAgo
+  );
 
-  logs.results.forEach((log) => {
+  if (validLogs.length === 0) {
+    return Array(24)
+      .fill(0)
+      .map((_, index) => ({
+        hour: index,
+        count: 0,
+        date: new Date(now.getTime() - (23 - index) * 60 * 60 * 1000),
+      }));
+  }
+
+  const earliestLog = new Date(
+    Math.min(...validLogs.map((log) => new Date(log.timestamp).getTime()))
+  );
+  const latestLog = new Date(
+    Math.max(...validLogs.map((log) => new Date(log.timestamp).getTime()))
+  );
+
+  const timeRange = latestLog.getTime() - earliestLog.getTime();
+
+  let bucketSize: number;
+  let bucketCount: number;
+
+  if (timeRange <= 2 * 60 * 60 * 1000) {
+    // 2 hours or less
+    bucketSize = 5 * 60 * 1000; // 5 minutes
+    bucketCount = Math.ceil(timeRange / bucketSize);
+  } else if (timeRange <= 6 * 60 * 60 * 1000) {
+    // 6 hours or less
+    bucketSize = 15 * 60 * 1000; // 15 minutes
+    bucketCount = Math.ceil(timeRange / bucketSize);
+  } else if (timeRange <= 12 * 60 * 60 * 1000) {
+    // 12 hours or less
+    bucketSize = 30 * 60 * 1000; // 30 minutes
+    bucketCount = Math.ceil(timeRange / bucketSize);
+  } else {
+    bucketSize = 60 * 60 * 1000; // 1 hour
+    bucketCount = 24;
+  }
+
+  const buckets: { [key: number]: number } = {};
+
+  for (let i = 0; i < bucketCount; i++) {
+    buckets[i] = 0;
+  }
+
+  validLogs.forEach((log) => {
     const logTime = new Date(log.timestamp);
-    if (logTime >= twentyFourHoursAgo) {
-      let hourIndex =
-        23 - Math.floor((now.getTime() - logTime.getTime()) / (60 * 60 * 1000));
-      hourIndex = Math.max(0, Math.min(23, hourIndex));
-      hourlyData[hourIndex]++;
+    const bucketIndex = Math.floor(
+      (logTime.getTime() - earliestLog.getTime()) / bucketSize
+    );
+    if (buckets.hasOwnProperty(bucketIndex)) {
+      buckets[bucketIndex]++;
     }
   });
 
-  return hourlyData.map((count, index) => ({
-    hour: index,
-    count: count,
-    date: new Date(now.getTime() - (23 - index) * 60 * 60 * 1000),
-  }));
+  return Object.entries(buckets).map(([index, count]) => {
+    const bucketStart = new Date(
+      earliestLog.getTime() + parseInt(index) * bucketSize
+    );
+    return {
+      hour: bucketStart.getHours() + bucketStart.getMinutes() / 60,
+      count,
+      date: bucketStart,
+    };
+  });
 };
 
-const RequestsBarChart = withTooltip<
-  {
-    data: { hour: number; count: number; date: Date }[];
-    width: number;
-    height: number;
-  },
-  TooltipData
->(
-  ({
-    data,
-    width,
-    height,
-    tooltipOpen,
-    tooltipLeft,
-    tooltipTop,
-    tooltipData,
-    showTooltip,
-    hideTooltip,
-  }: {
-    data: { hour: number; count: number; date: Date }[];
-    width: number;
-    height: number;
-  } & WithTooltipProvidedProps<TooltipData>) => {
-    const margin = { top: 20, right: 20, bottom: 40, left: 40 };
-    const innerWidth = width - margin.left - margin.right;
-    const innerHeight = height - margin.top - margin.bottom;
+const RequestsBarChart = ({
+  data,
+  width,
+  height,
+}: {
+  data: { hour: number; count: number; date: Date }[];
+  width: number;
+  height: number;
+}) => {
+  const margin = { top: 20, right: 20, bottom: 40, left: 40 };
+  const innerWidth = width - margin.left - margin.right;
+  const innerHeight = height - margin.top - margin.bottom;
 
-    const xScale = scaleBand({
-      range: [0, innerWidth],
-      domain: data.map((d) => d.hour),
-      padding: 0.2,
-    });
+  const xScale = scaleBand({
+    range: [0, innerWidth],
+    domain: data.map((d) => d.hour.toString()),
+    padding: 0.2,
+  });
 
-    const maxCount = Math.max(...data.map((d) => d.count), 1);
-    if (isNaN(maxCount)) {
-      console.error('Invalid maxCount value:', maxCount);
-    }
-    const yScale = scaleLinear({
-      range: [innerHeight, 0],
-      domain: [0, isNaN(maxCount) ? 1 : maxCount],
-      nice: true,
-    });
-    const yTicks = generateYAxisTicks(isNaN(maxCount) ? 1 : maxCount);
+  const maxCount = Math.max(...data.map((d) => d.count), 1);
+  const yScale = scaleLinear({
+    range: [innerHeight, 0],
+    domain: [0, maxCount],
+    nice: true,
+  });
+  const yTicks = generateYAxisTicks(maxCount);
 
-    const minBarHeight = 2;
+  const minBarHeight = 2;
 
-    return (
-      <div style={{ position: 'relative' }}>
-        <svg
-          width="100%"
-          height="100%"
-          viewBox={`0 0 ${width} ${height}`}
-          preserveAspectRatio="xMidYMid meet"
-        >
-          <GradientTealBlue id="bar-gradient" />
-          <Group left={margin.left} top={margin.top}>
-            {data.map((d) => {
-              const barHeight =
-                d.count === 0
-                  ? 0
-                  : Math.max(
-                      innerHeight - (yScale(d.count) ?? 0),
-                      minBarHeight
-                    );
-              const barX = xScale(d.hour);
-              return (
-                <Bar
-                  key={`bar-${d.hour}`}
-                  x={barX ?? 0}
-                  y={innerHeight - barHeight}
-                  height={barHeight}
-                  width={xScale.bandwidth()}
-                  fill="url(#bar-gradient)"
-                  onMouseEnter={() => {
-                    const top = yScale(d.count);
-                    const left = (barX ?? 0) + xScale.bandwidth() / 2;
-                    showTooltip({
-                      tooltipData: d,
-                      tooltipTop: top,
-                      tooltipLeft: left,
-                    });
-                  }}
-                  onMouseLeave={() => hideTooltip()}
-                />
-              );
-            })}
-            {xScale
-              .domain()
-              .filter((_, i) => i % 3 === 0)
-              .map((tick) => {
-                const tickX = xScale(tick);
-                return (
-                  <text
-                    key={`x-axis-${tick}`}
-                    x={(tickX ?? 0) + xScale.bandwidth() / 2}
-                    y={innerHeight + 20}
-                    textAnchor="middle"
-                    fill="white"
-                    fontSize={10}
-                  >
-                    {tick}h
-                  </text>
-                );
-              })}
-            {yTicks.map((tick) => (
+  return (
+    <svg
+      width="100%"
+      height="100%"
+      viewBox={`0 0 ${width} ${height}`}
+      preserveAspectRatio="xMidYMid meet"
+    >
+      <GradientTealBlue id="bar-gradient" />
+      <Group left={margin.left} top={margin.top}>
+        {data.map((d) => {
+          const barHeight = Math.max(
+            innerHeight - (yScale(d.count) ?? 0),
+            minBarHeight
+          );
+          const barX = xScale(d.hour.toString());
+          return (
+            <Bar
+              key={`bar-${d.hour}`}
+              x={barX ?? 0}
+              y={innerHeight - barHeight}
+              height={barHeight}
+              width={xScale.bandwidth()}
+              fill="url(#bar-gradient)"
+            />
+          );
+        })}
+        {xScale
+          .domain()
+          .filter((_, i) => i % Math.max(1, Math.floor(data.length / 6)) === 0)
+          .map((tick) => {
+            const tickX = xScale(tick);
+            const hour = parseFloat(tick);
+            const formattedTime = `${Math.floor(hour)}:${((hour % 1) * 60).toFixed(0).padStart(2, '0')}`;
+            return (
               <text
-                key={`y-axis-${tick}`}
-                x={-10}
-                y={yScale(tick) ?? 0}
-                textAnchor="end"
-                alignmentBaseline="middle"
+                key={`x-axis-${tick}`}
+                x={(tickX ?? 0) + xScale.bandwidth() / 2}
+                y={innerHeight + 20}
+                textAnchor="middle"
                 fill="white"
                 fontSize={10}
               >
-                {formatTickLabel(tick)}
+                {formattedTime}
               </text>
-            ))}
-          </Group>
-        </svg>
-        {tooltipOpen && tooltipData && (
-          <Tooltip
-            top={tooltipTop}
-            left={tooltipLeft}
-            style={{
-              ...defaultTooltipStyles,
-              backgroundColor: '#283238',
-              color: 'white',
-            }}
+            );
+          })}
+        {yTicks.map((tick) => (
+          <text
+            key={`y-axis-${tick}`}
+            x={-10}
+            y={yScale(tick) ?? 0}
+            textAnchor="end"
+            alignmentBaseline="middle"
+            fill="white"
+            fontSize={10}
           >
-            <div>
-              <strong>{`${tooltipData.hour}:00`}</strong>
-            </div>
-            <div>{`Requests: ${tooltipData.count}`}</div>
-            <div>{`${tooltipData.date.toLocaleString()}`}</div>
-          </Tooltip>
-        )}
-      </div>
-    );
-  }
-);
+            {formatTickLabel(tick)}
+          </text>
+        ))}
+      </Group>
+    </svg>
+  );
+};
 
 const RequestsCard: React.FC = () => {
   const [logData, setLogData] = useState<Array<{
@@ -243,7 +247,7 @@ const RequestsCard: React.FC = () => {
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const chartRef = useRef<HTMLDivElement>(null);
 
-  const useRealData = false;
+  const useRealData = true;
 
   useEffect(() => {
     const fetchLogData = async () => {
@@ -295,7 +299,7 @@ const RequestsCard: React.FC = () => {
   }, []);
 
   return (
-    <Card className="h-full request-card">
+    <Card className="h-full flex flex-col">
       <CardHeader className="pb-0">
         <div className="flex items-center justify-between">
           <CardTitle className="text-xl">Requests</CardTitle>
@@ -304,8 +308,19 @@ const RequestsCard: React.FC = () => {
           Requests to your R2R server over the past 24 hours.
         </CardDescription>
       </CardHeader>
-      <CardContent className="pt-0 request-card-content">
-        <div ref={chartRef} className="chart-wrapper">
+      <CardContent
+        className="pt-0 flex-grow flex flex-col"
+        style={{ minHeight: '300px', maxHeight: '400px' }}
+      >
+        <div
+          ref={chartRef}
+          className="mt-4 flex-grow"
+          style={{
+            minHeight: '250px',
+            maxHeight: '350px',
+            aspectRatio: '16 / 9',
+          }}
+        >
           {isLoading && <p>Loading...</p>}
           {error && <p className="text-red-500">{error}</p>}
           {logData &&

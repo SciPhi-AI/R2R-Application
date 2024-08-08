@@ -12,6 +12,7 @@ import {
 import { WithTooltipProvidedProps } from '@visx/tooltip/lib/enhancers/withTooltip';
 import React, { useState, useEffect, useRef } from 'react';
 
+import OverlayWrapper from '@/components/OverlayWrapper';
 import {
   Card,
   CardHeader,
@@ -404,11 +405,13 @@ const LLMCompletionCard: React.FC = () => {
             completionData.length > 0 &&
             dimensions.width > 0 &&
             dimensions.height > 0 && (
-              <LLMCompletionPlot
-                width={dimensions.width}
-                height={dimensions.height}
-                data={completionData}
-              />
+              <OverlayWrapper>
+                <LLMCompletionPlot
+                  width={dimensions.width}
+                  height={dimensions.height}
+                  data={completionData}
+                />
+              </OverlayWrapper>
             )}
         </div>
       </CardContent>

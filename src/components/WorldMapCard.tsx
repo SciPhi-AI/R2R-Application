@@ -1,8 +1,8 @@
 import { Mercator, Graticule } from '@visx/geo';
-import { scaleQuantize } from '@visx/scale';
 import React, { useEffect, useRef, useState } from 'react';
 import * as topojson from 'topojson-client';
 
+import OverlayWrapper from '@/components/OverlayWrapper';
 import {
   Card,
   CardHeader,
@@ -108,31 +108,33 @@ export default function WorldMapCard() {
           style={{ aspectRatio: '16 / 9' }}
         >
           {width > 0 && height > 0 && (
-            <svg width={width} height={height}>
-              <Mercator<FeatureShape>
-                data={world.features}
-                scale={scale}
-                translate={[centerX, centerY + 50]}
-              >
-                {(mercator) => (
-                  <g>
-                    <Graticule
-                      graticule={(g) => mercator.path(g) || ''}
-                      stroke="rgba(255,255,255, 0)"
-                    />
-                    {mercator.features.map(({ feature, path }, i) => (
-                      <path
-                        key={`map-feature-${i}`}
-                        d={path || ''}
-                        fill={getColor(feature.id)}
-                        stroke={background}
-                        strokeWidth={0.5}
+            <OverlayWrapper>
+              <svg width={width} height={height}>
+                <Mercator<FeatureShape>
+                  data={world.features}
+                  scale={scale}
+                  translate={[centerX, centerY + 50]}
+                >
+                  {(mercator) => (
+                    <g>
+                      <Graticule
+                        graticule={(g) => mercator.path(g) || ''}
+                        stroke="rgba(255,255,255, 0)"
                       />
-                    ))}
-                  </g>
-                )}
-              </Mercator>
-            </svg>
+                      {mercator.features.map(({ feature, path }, i) => (
+                        <path
+                          key={`map-feature-${i}`}
+                          d={path || ''}
+                          fill={getColor(feature.id)}
+                          stroke={background}
+                          strokeWidth={0.5}
+                        />
+                      ))}
+                    </g>
+                  )}
+                </Mercator>
+              </svg>
+            </OverlayWrapper>
           )}
         </div>
       </CardContent>

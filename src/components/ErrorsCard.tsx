@@ -12,6 +12,7 @@ import {
 import { WithTooltipProvidedProps } from '@visx/tooltip/lib/enhancers/withTooltip';
 import React, { useState, useEffect, useRef } from 'react';
 
+import OverlayWrapper from '@/components/OverlayWrapper';
 import {
   Card,
   CardHeader,
@@ -310,7 +311,7 @@ const ErrorsCard: React.FC = () => {
       >
         <div
           ref={chartRef}
-          className="mt-4 flex-grow"
+          className="mt-4 flex-grow relative"
           style={{
             minHeight: '250px',
             maxHeight: '350px',
@@ -319,20 +320,15 @@ const ErrorsCard: React.FC = () => {
         >
           {isLoading && <p>Loading...</p>}
           {error && <p className="text-red-500">{error}</p>}
-          {logData &&
-            dimensions.width > 0 &&
-            dimensions.height > 0 &&
-            (logData.every((d) => d.count === 0) ? (
-              <div className="flex items-center justify-center h-full">
-                <p className="text-gray-500">No errors in the last 24 hours</p>
-              </div>
-            ) : (
+          {logData && dimensions.width > 0 && dimensions.height > 0 && (
+            <OverlayWrapper>
               <ErrorsBarChart
                 data={logData}
                 width={dimensions.width}
                 height={dimensions.height}
               />
-            ))}
+            </OverlayWrapper>
+          )}
         </div>
       </CardContent>
     </Card>

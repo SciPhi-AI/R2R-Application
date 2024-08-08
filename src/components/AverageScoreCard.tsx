@@ -15,6 +15,7 @@ import { WithTooltipProvidedProps } from '@visx/tooltip/lib/enhancers/withToolti
 import { bisector } from 'd3-array';
 import React, { useState, useEffect, useRef } from 'react';
 
+import OverlayWrapper from '@/components/OverlayWrapper';
 import {
   Card,
   CardHeader,
@@ -278,11 +279,13 @@ const AverageScoreCard: React.FC<AverageScoreCardProps> = ({
             scoreData.length > 0 &&
             dimensions.width > 0 &&
             dimensions.height > 0 && (
-              <AverageScoreChart
-                width={dimensions.width}
-                height={dimensions.height}
-                scoreData={scoreData}
-              />
+              <OverlayWrapper>
+                <AverageScoreChart
+                  width={dimensions.width}
+                  height={dimensions.height}
+                  scoreData={scoreData}
+                />
+              </OverlayWrapper>
             )}
         </div>
       </CardContent>
