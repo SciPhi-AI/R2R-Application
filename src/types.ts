@@ -191,6 +191,10 @@ export interface RagGenerationConfig {
   max_tokens_to_sample?: number;
   model?: string;
   stream: boolean;
+  kg_temperature?: number;
+  kg_top_p?: number;
+  kg_top_k?: number;
+  kg_max_tokens_to_sample?: number;
 }
 
 export interface SearchProps {
@@ -225,6 +229,14 @@ export interface SidebarProps {
   setTemperature: (value: number) => void;
   topP: number;
   setTopP: (value: number) => void;
+  kg_temperature: number;
+  setKgTemperature: (value: number) => void;
+  kg_top_p: number;
+  setKgTopP: (value: number) => void;
+  kg_top_k: number;
+  setKgTop_k: (value: number) => void;
+  kg_max_tokens_to_sample: number;
+  setKgMax_tokens_to_sample: (value: number) => void;
 }
 
 export interface SingleSwitchProps {
