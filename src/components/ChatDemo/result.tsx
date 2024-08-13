@@ -26,6 +26,10 @@ export const Result: FC<{
   rag_topP: number | null;
   rag_topK: number | null;
   rag_maxTokensToSample: number | null;
+  kg_temperature: number | null;
+  kg_topP: number | null;
+  kg_topK: number | null;
+  kg_maxTokensToSample: number | null;
   model: string | null;
   uploadedDocuments: string[];
   setUploadedDocuments: React.Dispatch<React.SetStateAction<string[]>>;
@@ -43,6 +47,10 @@ export const Result: FC<{
   rag_topP,
   rag_topK,
   rag_maxTokensToSample,
+  kg_temperature,
+  kg_top_p,
+  kg_top_k,
+  kg_max_tokens_to_sample,
   model,
   uploadedDocuments,
   setUploadedDocuments,
@@ -116,26 +124,38 @@ export const Result: FC<{
         top_k: rag_topK ?? undefined,
         max_tokens_to_sample: rag_maxTokensToSample ?? undefined,
         model: model !== 'null' && model !== null ? model : undefined,
+        kg_temperature: kg_temperature ?? undefined,
+        kg_top_p: kg_top_p ?? undefined,
+        kg_top_k: kg_top_k ?? undefined,
+        kg_max_tokens_to_sample: kg_max_tokens_to_sample ?? undefined,
       };
 
       const streamResponse =
         mode === 'rag_agent'
           ? await client.agent({
               messages: [...messages, newUserMessage],
-              use_vector_search: switches.vector_search?.checked ?? true,
+              vector_search_settings: {
+                use_vector_search: switches.vector_search?.checked ?? true,
+              },
+              kg_search_settings: {
+                use_kg_search: switches.kg_search?.checked ?? false,
+              },
               search_filters,
               search_limit,
               do_hybrid_search: switches.hybrid_search?.checked ?? false,
-              use_kg_search: switches.knowledge_graph_search?.checked ?? false,
               rag_generation_config: ragGenerationConfig,
             })
           : await client.rag({
               query,
-              use_vector_search: switches.vector_search?.checked ?? true,
+              vector_search_settings: {
+                use_vector_search: switches.vector_search?.checked ?? true,
+              },
+              kg_search_settings: {
+                use_kg_search: switches.kg_search?.checked ?? false,
+              },
               search_filters,
               search_limit,
               do_hybrid_search: switches.hybrid_search?.checked ?? false,
-              use_kg_search: switches.knowledge_graph_search?.checked ?? false,
               rag_generation_config: ragGenerationConfig,
             });
 
