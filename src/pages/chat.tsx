@@ -79,6 +79,12 @@ const Index: React.FC = () => {
       'Hybrid Search',
       'Hybrid search is a search method that combines multiple search methods to provide more accurate and relevant search results.'
     );
+    initializeSwitch(
+      'kg_search',
+      false,
+      'KG Search',
+      'KG search is a search method that uses knowledge graphs to find relevant information.'
+    );
   }, [initializeSwitch]);
 
   const handleSwitchChange = (id: string, checked: boolean) => {
@@ -164,6 +170,14 @@ const Index: React.FC = () => {
           setTemperature={setTemperature}
           topP={topP}
           setTopP={setTopP}
+          kg_temperature={kg_temperature}
+          setKgTemperature={setKgTemperature}
+          kg_top_p={kg_top_p}
+          setKgTopP={setKgTopP}
+          kg_top_k={kg_top_k}
+          setKgTop_k={setKgTop_k}
+          kg_max_tokens_to_sample={kg_max_tokens_to_sample}
+          setKgMax_tokens_to_sample={setKgMax_tokens_to_sample}
         />
 
         {/* Main Content */}
@@ -204,6 +218,10 @@ const Index: React.FC = () => {
                   rag_topP={topP}
                   rag_topK={top_k}
                   rag_maxTokensToSample={max_tokens_to_sample}
+                  kg_temperature={kg_temperature}
+                  kg_topP={kg_top_p}
+                  kg_topK={kg_top_k}
+                  kg_maxTokensToSample={kg_max_tokens_to_sample}
                   uploadedDocuments={uploadedDocuments}
                   setUploadedDocuments={setUploadedDocuments}
                   switches={switches}
