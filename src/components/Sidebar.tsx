@@ -26,6 +26,14 @@ const Sidebar: React.FC<SidebarProps> = ({
   setTemperature,
   topP,
   setTopP,
+  kg_temperature,
+  setKgTemperature,
+  kg_top_p,
+  setKgTopP,
+  kg_top_k,
+  setKgTop_k,
+  kg_max_tokens_to_sample,
+  setKgMax_tokens_to_sample,
 }) => {
   return (
     <>
@@ -135,6 +143,62 @@ const Sidebar: React.FC<SidebarProps> = ({
                   onValueChange={(value) => setTopP(value[0])}
                 />
                 <span className="text-sm">{topP.toFixed(2)}</span>
+              </div>
+            </div>
+
+            {/* KG Search Configuration */}
+            <h3 className="text-lg font-semibold text-blue-400 pt-4">
+              KG Search Config
+            </h3>
+            <div className="space-y-2">
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="kg_top_k">KG Top K</Label>
+                <Input
+                  id="kg_top_k"
+                  type="number"
+                  value={kg_top_k}
+                  onChange={(e) => setKgTop_k(Number(e.target.value))}
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="kg_max_tokens_to_sample">
+                  KG Max Tokens to Sample
+                </Label>
+                <Input
+                  id="kg_max_tokens_to_sample"
+                  type="number"
+                  value={kg_max_tokens_to_sample}
+                  onChange={(e) =>
+                    setKgMax_tokens_to_sample(Number(e.target.value))
+                  }
+                />
+              </div>
+
+              <Label htmlFor="kg_temperature">KG Temperature</Label>
+              <div className="flex items-center gap-2">
+                <Slider
+                  id="kg_temperature"
+                  value={[kg_temperature]}
+                  max={2}
+                  step={0.01}
+                  className="w-60"
+                  onValueChange={(value) => setKgTemperature(value[0])}
+                />
+                <span className="text-sm">{kg_temperature.toFixed(2)}</span>
+              </div>
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="kg_top_p">KG Top P</Label>
+              <div className="flex items-center gap-2">
+                <Slider
+                  id="kg_top_p"
+                  value={[kg_top_p]}
+                  max={1}
+                  step={0.01}
+                  className="w-60"
+                  onValueChange={(value) => setKgTopP(value[0])}
+                />
+                <span className="text-sm">{kg_top_p.toFixed(2)}</span>
               </div>
             </div>
           </div>
