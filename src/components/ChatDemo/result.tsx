@@ -27,9 +27,9 @@ export const Result: FC<{
   rag_topK: number | null;
   rag_maxTokensToSample: number | null;
   kg_temperature: number | null;
-  kg_topP: number | null;
-  kg_topK: number | null;
-  kg_maxTokensToSample: number | null;
+  kg_top_p: number | null;
+  kg_top_k: number | null;
+  kg_max_tokens_to_sample: number | null;
   model: string | null;
   uploadedDocuments: string[];
   setUploadedDocuments: React.Dispatch<React.SetStateAction<string[]>>;
@@ -134,12 +134,8 @@ export const Result: FC<{
         mode === 'rag_agent'
           ? await client.agent({
               messages: [...messages, newUserMessage],
-              vector_search_settings: {
-                use_vector_search: switches.vector_search?.checked ?? true,
-              },
-              kg_search_settings: {
-                use_kg_search: switches.kg_search?.checked ?? false,
-              },
+              use_vector_search: switches.vector_search?.checked ?? true,
+              use_kg_search: switches.knowledge_graph_search?.checked ?? false,
               search_filters,
               search_limit,
               do_hybrid_search: switches.hybrid_search?.checked ?? false,
@@ -147,12 +143,8 @@ export const Result: FC<{
             })
           : await client.rag({
               query,
-              vector_search_settings: {
-                use_vector_search: switches.vector_search?.checked ?? true,
-              },
-              kg_search_settings: {
-                use_kg_search: switches.kg_search?.checked ?? false,
-              },
+              use_vector_search: switches.vector_search?.checked ?? true,
+              use_kg_search: switches.knowledge_graph_search?.checked ?? false,
               search_filters,
               search_limit,
               do_hybrid_search: switches.hybrid_search?.checked ?? false,
