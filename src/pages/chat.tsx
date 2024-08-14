@@ -219,9 +219,9 @@ const Index: React.FC = () => {
                   rag_topK={top_k}
                   rag_maxTokensToSample={max_tokens_to_sample}
                   kg_temperature={kg_temperature}
-                  kg_topP={kg_top_p}
-                  kg_topK={kg_top_k}
-                  kg_maxTokensToSample={kg_max_tokens_to_sample}
+                  kg_top_p={kg_top_p}
+                  kg_top_k={kg_top_k}
+                  kg_max_tokens_to_sample={kg_max_tokens_to_sample}
                   uploadedDocuments={uploadedDocuments}
                   setUploadedDocuments={setUploadedDocuments}
                   switches={switches}
