@@ -135,7 +135,7 @@ export const Result: FC<{
           ? await client.agent({
               messages: [...messages, newUserMessage],
               use_vector_search: switches.vector_search?.checked ?? true,
-              use_kg_search: switches.knowledge_graph_search?.checked ?? false,
+              use_kg_search: switches.kg_search?.checked ?? false,
               search_filters,
               search_limit,
               do_hybrid_search: switches.hybrid_search?.checked ?? false,
@@ -144,7 +144,7 @@ export const Result: FC<{
           : await client.rag({
               query,
               use_vector_search: switches.vector_search?.checked ?? true,
-              use_kg_search: switches.knowledge_graph_search?.checked ?? false,
+              use_kg_search: switches.kg_search?.checked ?? false,
               search_filters,
               search_limit,
               do_hybrid_search: switches.hybrid_search?.checked ?? false,
