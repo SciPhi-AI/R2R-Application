@@ -80,10 +80,10 @@ const Index: React.FC = () => {
       'Hybrid search is a search method that combines multiple search methods to provide more accurate and relevant search results.'
     );
     initializeSwitch(
-      'kg_search',
+      'knowledge_graph_search',
       false,
-      'KG Search',
-      'KG search is a search method that uses knowledge graphs to find relevant information.'
+      'Knowledge Graph Search',
+      'KG search is a search method that uses a knowledge graph to find relevant information.'
     );
   }, [initializeSwitch]);
 
