@@ -65,7 +65,7 @@ const UserTable = ({ users }: { users: any[] }) => {
       </Table>
       <div className="flex items-center justify-end space-x-2 py-4">
         <Button
-          variant="outline"
+          shape="outline"
           onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
           disabled={currentPage === 1}
         >
@@ -76,7 +76,7 @@ const UserTable = ({ users }: { users: any[] }) => {
           Page {currentPage} of {totalPages}
         </div>
         <Button
-          variant="outline"
+          shape="outline"
           onClick={() =>
             setCurrentPage((page) => Math.min(totalPages, page + 1))
           }
