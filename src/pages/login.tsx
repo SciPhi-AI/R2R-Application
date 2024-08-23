@@ -102,11 +102,7 @@ const LoginPage: React.FC = () => {
             </div>
           </div>
           <div className="flex items-center justify-between">
-            <Button
-              type="submit"
-              variant="filled"
-              className="rounded-md py-1 px-3 w-full"
-            >
+            <Button color="filled" className="rounded-md py-1 px-3 w-full">
               Sign In
             </Button>
           </div>

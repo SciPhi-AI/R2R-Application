@@ -2,6 +2,7 @@ import { Upload, X } from 'lucide-react';
 import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 
+import { Button } from '@/components/ui/Button';
 import {
   Dialog,
   DialogContent,
@@ -55,7 +56,7 @@ export const UploadDialog: React.FC<UploadDialogProps> = ({
         <div
           {...getRootProps()}
           className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer ${
-            isDragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
+            isDragActive ? 'border-indigo-500 bg-indigo-50' : 'border-gray-300'
           }`}
         >
           <input {...getInputProps()} />
@@ -82,7 +83,7 @@ export const UploadDialog: React.FC<UploadDialogProps> = ({
                   </span>
                   <button
                     onClick={() => removeFile(index)}
-                    className="ml-2 text-red-500 hover:text-red-700"
+                    className="mr-4 text-red-500 hover:text-red-700"
                   >
                     <X size={16} />
                   </button>
@@ -91,17 +92,14 @@ export const UploadDialog: React.FC<UploadDialogProps> = ({
             </ul>
           </div>
         )}
-        <button
+        <Button
           onClick={handleUpload}
           disabled={files.length === 0}
-          className={`mt-4 py-2 px-4 rounded-full transition-colors ${
-            files.length === 0
-              ? 'bg-gray-500 text-white cursor-not-allowed'
-              : 'bg-blue-500 text-white hover:bg-blue-600'
-          }`}
+          className={`mt-4 py-2 px-4 rounded-full transition-colors`}
+          color={files.length === 0 ? 'disabled' : 'filled'}
         >
           Upload
-        </button>
+        </Button>
       </DialogContent>
     </Dialog>
   );

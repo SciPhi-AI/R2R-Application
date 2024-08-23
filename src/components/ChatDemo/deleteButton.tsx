@@ -11,6 +11,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/Button';
 import { useUserContext } from '@/context/UserContext';
 import { DeleteButtonProps } from '@/types';
 
@@ -37,7 +38,7 @@ export const DeleteButton: React.FC<DeleteButtonProps> = ({
         const key = 'document_id';
         const value = selectedDocumentIds[i];
 
-        await client.delete([key], [value]);
+        await client.delete({ [key]: value });
       }
       showToast({
         variant: 'success',
@@ -67,16 +68,14 @@ export const DeleteButton: React.FC<DeleteButtonProps> = ({
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <button
-          className={`pl-2 pr-2 text-white py-2 px-4 rounded-full ${
-            selectedDocumentIds.length === 0
-              ? 'bg-red-400 cursor-not-allowed'
-              : 'bg-red-500 hover:bg-red-600'
-          }`}
+        <Button
+          className={`pl-2 pr-2 py-2 px-4 ${selectedDocumentIds.length === 0 ? 'cursor-not-allowed' : ''}`}
+          color="danger"
+          shape="rounded"
           disabled={selectedDocumentIds.length === 0}
         >
           Delete File(s)
-        </button>
+        </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>

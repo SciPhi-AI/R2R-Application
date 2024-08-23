@@ -4,6 +4,7 @@ import toml from 'toml';
 
 import EditPromptDialog from '@/components/ChatDemo/utils/editPromptDialog';
 import Layout from '@/components/Layout';
+import { Button } from '@/components/ui/Button';
 import { useUserContext } from '@/context/UserContext';
 
 type Prompt = {
@@ -129,26 +130,22 @@ const Index: React.FC = () => {
           <div className="mt-8">
             <div className="flex justify-between items-center mb-4">
               <div className="flex justify-center ml-auto">
-                <button
-                  className={`px-4 py-2 rounded mr-2 ${
-                    activeTab === 'config'
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-zinc-800 text-zinc-400'
-                  }`}
+                <Button
+                  className={`px-4 py-2 rounded mr-2`}
+                  color={activeTab === 'config' ? 'filled' : 'secondary'}
+                  shape={activeTab === 'config' ? 'default' : 'outline'}
                   onClick={() => setActiveTab('config')}
                 >
                   Config
-                </button>
-                <button
-                  className={`px-4 py-2 rounded ${
-                    activeTab === 'prompts'
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-zinc-800 text-zinc-400'
-                  }`}
+                </Button>
+                <Button
+                  className={`px-4 py-2 rounded`}
+                  color={activeTab === 'prompts' ? 'filled' : 'secondary'}
+                  shape={activeTab === 'prompts' ? 'default' : 'outline'}
                   onClick={() => setActiveTab('prompts')}
                 >
                   Prompts
-                </button>
+                </Button>
               </div>
             </div>
             <div className="bg-zinc-800 p-4 rounded">
@@ -215,7 +212,7 @@ const Index: React.FC = () => {
                                   onClick={() =>
                                     handleEditPrompt(name, prompt.template)
                                   }
-                                  className="absolute top-2 right-2 text-gray-400 cursor-pointer hover:text-blue-500"
+                                  className="absolute top-2 right-2 text-gray-400 cursor-pointer hover:text-indigo-500"
                                 >
                                   <SquarePen className="h-5 w-5" />
                                 </button>

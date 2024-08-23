@@ -19,7 +19,7 @@ function WatchButton({
     <Button
       onClick={onClick}
       className={`w-1/3 h-8 py-1 ${isDisabled ? 'cursor-not-allowed' : ''}`}
-      variant="primary"
+      color="primary"
       disabled={isDisabled}
     >
       {isLoading ? 'Watching...' : 'Watch'}

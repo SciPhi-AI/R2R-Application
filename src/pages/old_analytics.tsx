@@ -52,7 +52,7 @@ const MetricCard: React.FC<{
   return (
     <div className="bg-zinc-800 rounded-lg shadow-lg p-6 m-4">
       <div className="flex justify-center items-center mb-4">
-        <h6 className="text-lg font-bold text-blue-500">
+        <h6 className="text-lg font-bold text-indigo-500">
           {filterDisplayNames[title] || title} Metrics
         </h6>
         <TooltipProvider>
@@ -68,7 +68,7 @@ const MetricCard: React.FC<{
       </div>
       {Object.entries(displayMetrics).map(([metric, value]) => (
         <div key={metric} className="flex justify-between">
-          <span className="font-bold text-blue-500">{metric}:</span>
+          <span className="font-bold text-indigo-500">{metric}:</span>
           <span className="text-white pr-2">
             {value !== null && value !== undefined ? value : 'N/A'}
           </span>
@@ -94,7 +94,7 @@ const PercentileCard: React.FC<{
   return (
     <div className="bg-zinc-800 rounded-lg shadow-lg p-6 m-4">
       <div className="flex justify-center items-center mb-4">
-        <h6 className="text-lg font-bold text-blue-500">
+        <h6 className="text-lg font-bold text-indigo-500">
           {filterDisplayNames[title] || title} Percentiles
         </h6>
         <TooltipProvider>
@@ -113,7 +113,7 @@ const PercentileCard: React.FC<{
       </div>
       {Object.entries(displayPercentiles).map(([percentile, value]) => (
         <div key={percentile} className="flex justify-between">
-          <span className="font-bold text-blue-500">
+          <span className="font-bold text-indigo-500">
             {percentile}th Percentile:
           </span>
           <span className="text-white pr-2">

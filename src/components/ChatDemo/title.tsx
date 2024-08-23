@@ -37,7 +37,7 @@ export const Title = ({
             router.push(getSearchUrl(encodeURIComponent(query)));
           }}
           type="button"
-          className="rounded flex gap-2 items-center bg-transparent px-2 py-1 text-md font-semibold text-blue-500 hover:bg-zinc-900"
+          className="rounded flex gap-2 items-center bg-transparent px-2 py-1 text-md font-semibold text-indigo-500 hover:bg-zinc-900"
         >
           {model}
         </button> */}
@@ -46,7 +46,7 @@ export const Title = ({
             router.push(getSearchUrl(encodeURIComponent(query)));
           }}
           type="button"
-          className="rounded flex gap-2 items-center bg-transparent px-2 py-1 text-md font-semibold text-blue-500 hover:bg-zinc-900"
+          className="rounded flex gap-2 items-center bg-transparent px-2 py-1 text-md font-semibold text-indigo-500 hover:bg-zinc-900"
         >
           {/* <RefreshCcw size={12}></RefreshCcw>Rewrite */}
         </button>

@@ -85,7 +85,7 @@ export const UpdateButton: React.FC<UpdateButtonProps> = ({
           className={`${
             isUpdating
               ? 'bg-gray-400 cursor-not-allowed'
-              : 'hover:bg-blue-700 bg-blue-500'
+              : 'hover:bg-indigo-700 bg-indigo-500'
           } text-white font-bold py-1 px-2 rounded`}
         >
           {isUpdating ? <span className="animate-spin">↻</span> : '↺'}

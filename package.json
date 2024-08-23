@@ -4,7 +4,7 @@
   "private": true,
   "proxy": "http://localhost:8000",
   "scripts": {
-    "dev": "NEXT_PUBLIC_CLOUD_MODE=false next dev",
+    "dev": "NEXT_PUBLIC_CLOUD_MODE=false next dev -p 3005",
     "dev:cloud": "NEXT_PUBLIC_CLOUD_MODE=true next dev",
     "build": "next build",
     "start": "next start",
@@ -86,7 +86,6 @@
     "pnpm": "^9.5.0",
     "postcss": "^8.4.39",
     "posthog-js": "^1.148.0",
-    "r2r-js": "^1.2.15",
     "radix-ui": "^1.0.1",
     "react": "18.3.1",
     "react-chartjs-2": "^5.2.0",
