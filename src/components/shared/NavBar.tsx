@@ -7,7 +7,6 @@ import { forwardRef } from 'react';
 
 import { Logo } from '@/components/shared/Logo';
 import { Button } from '@/components/ui/Button';
-import { Code } from '@/components/ui/Code';
 import {
   Select,
   SelectContent,
@@ -64,7 +63,7 @@ const NavItems: React.FC<NavItemsProps> = ({
               className={clsx(
                 'text-sm leading-5 transition',
                 pathname === item.path
-                  ? 'text-link'
+                  ? 'text-indigo-400'
                   : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white'
               )}
             >
@@ -157,7 +156,7 @@ export const Navbar = forwardRef<React.ElementRef<'div'>, NavbarProps>(
             )}
             <Button
               className="rounded-md py-1 px-3 w-30"
-              variant="filled"
+              color="filled"
               onClick={() =>
                 window.open('https://r2r-docs.sciphi.ai', '_blank')
               }
@@ -167,7 +166,7 @@ export const Navbar = forwardRef<React.ElementRef<'div'>, NavbarProps>(
             {isAuthenticated && (
               <Button
                 onClick={handleLogout}
-                variant="danger"
+                color="danger"
                 className="rounded-md py-1 px-3 w-30"
               >
                 Logout

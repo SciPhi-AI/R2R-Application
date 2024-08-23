@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 
+import { Button } from '@/components/ui/Button';
 import { useUserContext } from '@/context/UserContext';
 import { generateIdFromLabel } from '@/lib/utils';
 import { UploadButtonProps } from '@/types';
@@ -64,18 +65,16 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
 
   return (
     <>
-      <button
+      <Button
         type="button"
+        color="filled"
+        shape="rounded"
         onClick={() => setIsDialogOpen(true)}
         disabled={isUploading}
-        className={`pl-2 pr-2 text-white py-2 px-4 rounded-full ${
-          isUploading
-            ? 'bg-blue-400 cursor-not-allowed'
-            : 'bg-blue-500 hover:bg-blue-600'
-        }`}
+        className={`pl-2 pr-2 text-white py-2 px-4`}
       >
         {isUploading ? 'Uploading...' : 'Upload File(s)'}
-      </button>
+      </Button>
       <UploadDialog
         isOpen={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}

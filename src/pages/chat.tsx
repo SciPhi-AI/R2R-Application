@@ -40,7 +40,6 @@ const Index: React.FC = () => {
   };
 
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('query');
 
   const { switches, initializeSwitch, updateSwitch } = useSwitchManager();
 
@@ -118,23 +117,11 @@ const Index: React.FC = () => {
     fetchDocuments();
   }, [pipeline, getClient]);
 
-  useEffect(() => {
-    const updateDimensions = () => {
-      if (contentAreaRef.current) {
-        setGraphDimensions({
-          width: contentAreaRef.current.offsetWidth,
-          height: contentAreaRef.current.offsetHeight,
-        });
-      }
-    };
-
-    updateDimensions();
-    window.addEventListener('resize', updateDimensions);
-
-    return () => window.removeEventListener('resize', updateDimensions);
-  }, []);
-
   const safeJsonParse = (jsonString: string) => {
+    if (typeof jsonString !== 'string') {
+      console.warn('Input is not a string:', jsonString);
+      return {};
+    }
     try {
       return JSON.parse(jsonString);
     } catch (error) {

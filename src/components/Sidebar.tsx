@@ -36,13 +36,13 @@ const Sidebar: React.FC<SidebarProps> = ({
         }}
       >
         <div className="p-4 overflow-y-auto h-[calc(100%-var(--header-height))]">
-          <h2 className="text-xl font-bold text-blue-500 mb-4">
+          <h2 className="text-xl font-bold text-indigo-500 mb-4">
             Control Panel
           </h2>
 
           {/* Configuration Fields */}
           <div className="space-y-4 mb-4">
-            <h3 className="text-lg font-semibold text-blue-400 mt-2">
+            <h3 className="text-lg font-semibold text-indigo-400 mt-2">
               Search Settings
             </h3>
 
@@ -79,7 +79,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               />
             </div>
 
-            <h3 className="text-lg font-semibold text-blue-400 pt-4">
+            <h3 className="text-lg font-semibold text-indigo-400 pt-4">
               RAG Generation Config
             </h3>
             <div className="space-y-2">

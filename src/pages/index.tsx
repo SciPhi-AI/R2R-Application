@@ -140,7 +140,7 @@ const HomePage = () => {
                   <div className="flex space-x-4">
                     <Button
                       className="flex items-center justify-center px-4 py-2 text-sm"
-                      variant="light"
+                      color="light"
                       onClick={() =>
                         window.open(
                           'https://github.com/SciPhi-AI/R2R-Dashboard/issues/new?assignees=&labels=&projects=&template=feature_request.md&title=',
@@ -152,7 +152,7 @@ const HomePage = () => {
                     </Button>
                     <Button
                       className="flex items-center justify-center px-4 py-2 text-sm"
-                      variant="light"
+                      color="light"
                       onClick={() =>
                         window.open(
                           'https://github.com/SciPhi-AI/R2R-Dashboard/issues/new?assignees=&labels=&projects=&template=bug_report.md&title=',
@@ -168,7 +168,6 @@ const HomePage = () => {
             </Alert>
             {/* SDK Cards */}
             <div className="flex flex-col gap-4">
-              <h2 className="text-xl font-semibold mb-2">SDKs</h2>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Card className="w-full sm:w-1/2 flex flex-col">
                   <CardHeader className="flex flex-row items-center space-x-2">
@@ -184,7 +183,7 @@ const HomePage = () => {
                     <div className="flex flex-row space-x-2">
                       <Button
                         className="rounded-md py-1 px-3"
-                        variant="light"
+                        color="light"
                         onClick={() =>
                           window.open(
                             'https://r2r-docs.sciphi.ai/python-sdk',
@@ -199,10 +198,10 @@ const HomePage = () => {
                       </Button>
                       <Button
                         className="rounded-md py-1 px-3"
-                        variant="light"
+                        color="light"
                         onClick={() =>
                           window.open(
-                            'https://github.com/SciPhi-AI/R2R',
+                            'https://github.com/SciPhi-AI/R2R/tree/main/py',
                             '_blank'
                           )
                         }
@@ -235,7 +234,7 @@ const HomePage = () => {
                     <div className="flex flex-row space-x-2">
                       <Button
                         className="rounded-md py-1 px-3"
-                        variant="light"
+                        color="light"
                         onClick={() =>
                           window.open(
                             'https://r2r-docs.sciphi.ai/js-sdk',
@@ -250,10 +249,10 @@ const HomePage = () => {
                       </Button>
                       <Button
                         className="rounded-md py-1 px-3"
-                        variant="light"
+                        color="light"
                         onClick={() =>
                           window.open(
-                            'https://github.com/SciPhi-AI/r2r-js',
+                            'https://github.com/SciPhi-AI/R2R/tree/dev/js',
                             '_blank'
                           )
                         }

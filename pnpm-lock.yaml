@@ -180,8 +180,8 @@ importers:
         specifier: ^1.148.0
         version: 1.148.0
       r2r-js:
-        specifier: ^1.2.15
-        version: 1.2.15
+        specifier: ^0.3.0
+        version: 0.3.0
       radix-ui:
         specifier: ^1.0.1
         version: 1.0.1(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -2706,6 +2706,9 @@ packages:
   axios@1.7.2:
     resolution: {integrity: sha512-2A8QhOMrbomlDuiLeK9XibIBzuHeRcqqNOHp0Cyp5EoJ1IFDh+XZH3A6BkXtv0K4gFGCI0Y4BM7B1wOEi0Rmgw==}
 
+  axios@1.7.5:
+    resolution: {integrity: sha512-fZu86yCo+svH3uqJ/yTdQ0QHpQu5oL+/QE+QPSv6BZSkDAoky9vytxp7u5qk83OJFS3kEBcesWni9WTZAv3tSw==}
+
   axobject-query@3.1.1:
     resolution: {integrity: sha512-goKlv8DZrK9hUh975fnHzhNIO4jUnFCfv/dszV5VwUGDFjI6vQ2VwoyjYjYNEbBE8AH87TduWP5uyDR1D+Iteg==}
 
@@ -4770,8 +4773,11 @@ packages:
   posthog-js@1.148.0:
     resolution: {integrity: sha512-nydf+aret26YViDBwH7DdN/c8dmCzQGNQ1yredeE47UlbpJ3J/iTgskNdmGJIofFcdSagcwAE/FF7s++YfTtvg==}
 
-  posthog-node@4.0.1:
-    resolution: {integrity: sha512-rtqm2h22QxLGBrW2bLYzbRhliIrqgZ0k+gF0LkQ1SNdeD06YE5eilV0MxZppFSxC8TfH0+B0cWCuebEnreIDgQ==}
+  posthog-js@1.157.2:
+    resolution: {integrity: sha512-ATYKGs+Q51u26nHHhrhWNh1whqFm7j/rwQQYw+y6/YzNmRlo+YsqrGZji9nqXb9/4fo0ModDr+ZmuOI3hKkUXA==}
+
+  posthog-node@4.1.1:
+    resolution: {integrity: sha512-hva26cNSz62H76blhWUF8mZmE3Q81KTrkkpHEZlD00qDov/phLQCrKQnxwjiAN3yI9pv/0/uwte6Gluy1xBmUA==}
     engines: {node: '>=15.0.0'}
 
   preact@10.22.1:
@@ -4812,8 +4818,8 @@ packages:
   queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
 
-  r2r-js@1.2.15:
-    resolution: {integrity: sha512-NL+N4+B8e1VHVE9hCYoPzSWNKYWQWvdlyOOoVMaIYu4NNzWtelYhpATFwdHfSl4eR5woZrx1J2X12zfHQAiblQ==}
+  r2r-js@0.3.0:
+    resolution: {integrity: sha512-BfgFwEmh0fzQ8/3WjfEWy8Pt1F/CTKYKEk+YXPzD91j3xcmrzOzAOFk6okV6e0dStfCj6PalPtFFxMGX1skRog==}
 
   radix-ui@1.0.1:
     resolution: {integrity: sha512-qfGibbqtbOlxP3b+1JjbLUc8Q7+e9DL8gFycLtkBkoAQyUkKuHAEBfFUcyG5MaQHjqRuML+YLtt/R1/dUYQafQ==}
@@ -8986,6 +8992,14 @@ snapshots:
     transitivePeerDependencies:
       - debug
 
+  axios@1.7.5:
+    dependencies:
+      follow-redirects: 1.15.6
+      form-data: 4.0.0
+      proxy-from-env: 1.1.0
+    transitivePeerDependencies:
+      - debug
+
   axobject-query@3.1.1:
     dependencies:
       deep-equal: 2.2.3
@@ -11771,9 +11785,15 @@ snapshots:
       preact: 10.22.1
       web-vitals: 4.2.2
 
-  posthog-node@4.0.1:
+  posthog-js@1.157.2:
     dependencies:
-      axios: 1.7.2
+      fflate: 0.4.8
+      preact: 10.22.1
+      web-vitals: 4.2.2
+
+  posthog-node@4.1.1:
+    dependencies:
+      axios: 1.7.5
       rusha: 0.8.14
     transitivePeerDependencies:
       - debug
@@ -11806,12 +11826,12 @@ snapshots:
 
   queue-microtask@1.2.3: {}
 
-  r2r-js@1.2.15:
+  r2r-js@0.3.0:
     dependencies:
-      axios: 1.7.2
+      axios: 1.7.5
       form-data: 4.0.0
-      posthog-js: 1.148.0
-      posthog-node: 4.0.1
+      posthog-js: 1.157.2
+      posthog-node: 4.1.1
       uuid: 10.0.0
     transitivePeerDependencies:
       - debug

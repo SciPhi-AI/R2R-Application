@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
-import { formatUptime } from '@/components/ChatDemo/utils/formatUptime';
 import { useUserContext } from '@/context/UserContext';
 import { PipelineStatusProps, ServerStats } from '@/types';
 
