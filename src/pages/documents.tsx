@@ -84,10 +84,12 @@ const Index: React.FC = () => {
   const totalPages = Math.ceil(
     (filteredAndSortedDocuments.length || 0) / documentsPerPage
   );
-  const currentDocuments = filteredAndSortedDocuments.slice(
-    (currentPage - 1) * documentsPerPage,
-    currentPage * documentsPerPage
-  );
+  const currentDocuments = filteredAndSortedDocuments
+    .filter((doc) => doc.ingestion_status === 'success')
+    .slice(
+      (currentPage - 1) * documentsPerPage,
+      currentPage * documentsPerPage
+    );
 
   useEffect(() => {
     fetchDocuments();
@@ -175,24 +177,43 @@ const Index: React.FC = () => {
           </td>
         </tr>
       );
-    }
-
-    return currentDocuments
-      .filter((doc) => doc.ingestion_status === 'success')
-      .map((doc) => (
-        <tr key={doc.id}>
-          <td className="px-4 py-2 text-white">
-            <div className="flex items-center">
-              <Checkbox
-                checked={selectedDocumentIds.includes(doc.id)}
-                onCheckedChange={(checked) => {
-                  setSelectedDocumentIds((prevSelected) =>
-                    checked
-                      ? [...prevSelected, doc.id]
-                      : prevSelected.filter((id) => id !== doc.id)
-                  );
-                }}
-              />
+    } else {
+      currentDocuments.forEach((doc) => {
+        rows.push(
+          <tr key={doc.id}>
+            <td className="px-4 py-2 text-white">
+              <div className="flex items-center">
+                <Checkbox
+                  checked={selectedDocumentIds.includes(doc.id)}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      setSelectedDocumentIds([...selectedDocumentIds, doc.id]);
+                    } else {
+                      setSelectedDocumentIds(
+                        selectedDocumentIds.filter((id) => id !== doc.id)
+                      );
+                    }
+                  }}
+                />
+                <div
+                  className="overflow-x-auto whitespace-nowrap ml-4"
+                  style={{ width: '125px' }}
+                >
+                  {/* {doc.document_id} */}
+                  <div
+                    className="overflow-x-auto whitespace-nowrap cursor-pointer"
+                    onClick={() =>
+                      copyToClipboard(doc.id, 'Document ID copied to clipboard')
+                    }
+                  >
+                    {doc.id
+                      ? `${doc.id.substring(0, 8)}...${doc.id.slice(-4)}`
+                      : 'N/A'}
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td className="px-4 py-2 text-white">
               <div
                 className="overflow-x-auto whitespace-nowrap cursor-pointer"
                 style={{ width: '100px' }}
