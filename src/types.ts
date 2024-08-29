@@ -66,7 +66,8 @@ export interface DocumentInfoType {
   title: string;
   version: string;
   size_in_bytes: number;
-  status: string;
+  ingestion_status: string;
+  restructuring_status: string;
   created_at: string;
   updated_at: string;
 }
