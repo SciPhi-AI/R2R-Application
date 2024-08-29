@@ -40,23 +40,6 @@ const LoginPage: React.FC = () => {
           <div className="mb-4">
             <label
               className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2"
-              htmlFor="instanceUrl"
-            >
-              Instance URL
-            </label>
-            <Input
-              id="instanceUrl"
-              name="instanceUrl"
-              type="text"
-              placeholder="Instance URL"
-              value={instanceUrl}
-              onChange={(e) => setInstanceUrl(e.target.value)}
-              autoComplete="url"
-            />
-          </div>
-          <div className="mb-4">
-            <label
-              className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2"
               htmlFor="email"
             >
               Email

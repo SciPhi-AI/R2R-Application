@@ -19,7 +19,9 @@ const Layout: React.FC<Props> = ({
 }) => {
   return (
     <div className="w-full min-h-screen flex flex-col">
-      <Head>{pageTitle && <title>{pageTitle} | R2R</title>}</Head>
+      <Head>
+        <title>{pageTitle ? `${pageTitle} | R2R` : 'R2R'}</title>
+      </Head>
       <Navbar />
       <main className="flex-grow">{children}</main>
       <Toaster />

@@ -40,6 +40,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isReady, setIsReady] = useState(false);
   const [client, setClient] = useState<r2rClient | null>(null);
   const [viewMode, setViewMode] = useState<'admin' | 'user'>('admin');
+  const [agentUrl] = useState(process.env.NEXT_PUBLIC_DEFAULT_AGENT_URL || '');
 
   const [pipeline, setPipeline] = useState<Pipeline | null>(() => {
     if (typeof window !== 'undefined') {
@@ -73,12 +74,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const [lastLoginTime, setLastLoginTime] = useState<number | null>(null);
 
-  const login = async (
-    email: string,
-    password: string,
-    instanceUrl: string
-  ) => {
-    const newClient = new r2rClient(instanceUrl);
+  const login = async (email: string, password: string) => {
+    const newClient = new r2rClient(agentUrl);
     try {
       await newClient.login(email, password);
 
@@ -104,7 +101,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
       setLastLoginTime(Date.now());
       localStorage.setItem('authState', JSON.stringify(newAuthState));
 
-      const newPipeline = { deploymentUrl: instanceUrl };
+      const newPipeline = { deploymentUrl: agentUrl };
       setPipeline(newPipeline);
       localStorage.setItem('pipeline', JSON.stringify(newPipeline));
 
@@ -147,11 +144,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
         console.error('Failed to refresh token:', error);
         if (error instanceof AuthenticationError) {
           try {
-            await login(
-              authState.email!,
-              authState.password!,
-              pipeline!.deploymentUrl
-            );
+            await login(authState.email!, authState.password!);
           } catch (loginError) {
             console.error('Failed to re-authenticate:', loginError);
             await logout();

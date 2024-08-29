@@ -73,20 +73,6 @@ const R2RServerCard: React.FC<R2RServerCardProps> = ({
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2 pt-2 text-sm">
-          <Link width="16" height="16" />
-          <span className="text-gray-500 dark:text-gray-400 truncate">
-            {pipeline?.deploymentUrl}
-          </span>
-          {copied ? (
-            <Check className="w-4 h-4" />
-          ) : (
-            <ClipboardCheck
-              className="w-4 h-4 cursor-pointer"
-              onClick={() => handleCopy(pipeline?.deploymentUrl || '')}
-            />
-          )}
-        </div>
       </CardContent>
     </Card>
   );
