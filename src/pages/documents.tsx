@@ -173,24 +173,122 @@ const Index: React.FC = () => {
           </td>
         </tr>
       );
-    }
+    } else {
+      currentDocuments.forEach((doc) => {
+        rows.push(
+          <tr key={doc.id}>
+            <td className="px-4 py-2 text-white">
+              <div className="flex items-center">
+                <Checkbox
+                  checked={selectedDocumentIds.includes(doc.id)}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      setSelectedDocumentIds([...selectedDocumentIds, doc.id]);
+                    } else {
+                      setSelectedDocumentIds(
+                        selectedDocumentIds.filter((id) => id !== doc.id)
+                      );
+                    }
+                  }}
+                />
+                <div
+                  className="overflow-x-auto whitespace-nowrap ml-4"
+                  style={{ width: '125px' }}
+                >
+                  {/* {doc.document_id} */}
+                  <div
+                    className="overflow-x-auto whitespace-nowrap ml-4 cursor-pointer flex items-center"
+                    style={{ width: '125px' }}
+                    onClick={() => copyToClipboard(doc.id)}
+                  >
+                    {doc.id.substring(0, 4)}...
+                    {doc.id.substring(doc.id.length - 4, doc.id.length)}
+                    {/* <ClipboardCopyIcon className="h-4 w-4 ml-2" /> */}
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td className="px-4 py-2 text-white">
+              <div
+                className="overflow-x-auto whitespace-nowrap cursor-pointer"
+                style={{ width: '100px' }}
+                onClick={() => copyUserToClipboard(doc.user_id)}
+              >
+                {doc.user_id
+                  ? `${doc.user_id.substring(0, 4)}...${doc.user_id.substring(doc.user_id.length - 4, doc.user_id.length)}`
+                  : 'N/A'}
+              </div>
+            </td>
+            <td className="px-4 py-2 text-white">
+              <div
+                className="overflow-x-auto whitespace-nowrap"
+                style={{ width: '175px' }}
+              >
+                {doc.title || 'N/A'}
+              </div>
+            </td>
+            <td className="px-4 py-2 text-white">
+              <div
+                className="overflow-x-auto whitespace-nowrap"
+                style={{ width: '75px' }}
+              >
+                {doc.version}
+              </div>
+            </td>
+            <td className="px-4 py-2 text-white">
+              <div
+                className="overflow-x-auto whitespace-nowrap"
+                style={{ width: '175px' }}
+              >
+                {formatDate(doc.updated_at)}
+              </div>
+            </td>
+            <td className="px-4 py-2 text-white">
+              <div
+                className="overflow-x-auto whitespace-nowrap"
+                style={{ width: '75px' }}
+              >
+                {formatFileSize(doc.size_in_bytes)}
+              </div>
+            </td>
+            <td className="px-4 py-2 text-white">
+              <div className="flex justify-center items-center space-x-2">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <UpdateButtonContainer
+                        documentId={doc.id}
+                        onUpdateSuccess={fetchDocuments}
+                        showToast={toast}
+                      />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Update Document</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
 
-    return currentDocuments
-      .filter((doc) => doc.status === 'success')
-      .map((doc) => (
-        <tr key={doc.id}>
-          <td className="px-4 py-2 text-white">
-            <div className="flex items-center">
-              <Checkbox
-                checked={selectedDocumentIds.includes(doc.id)}
-                onCheckedChange={(checked) => {
-                  setSelectedDocumentIds((prevSelected) =>
-                    checked
-                      ? [...prevSelected, doc.id]
-                      : prevSelected.filter((id) => id !== doc.id)
-                  );
-                }}
-              />
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <button
+                        onClick={() => {
+                          setSelectedDocumentId(doc.id);
+                          setIsDocumentInfoDialogOpen(true);
+                        }}
+                        className="info-button hover:bg-blue-700 bg-blue-500 text-white font-bold rounded flex items-center justify-center"
+                      >
+                        <FileSearch2 className="h-8 w-8" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>View Document Chunks</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+            </td>
+            <td className="px-4 py-2 text-white">
               <div
                 className="overflow-x-auto whitespace-nowrap ml-4 cursor-pointer flex items-center"
                 style={{ width: '125px' }}
