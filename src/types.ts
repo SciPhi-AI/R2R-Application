@@ -58,7 +58,7 @@ export interface DocumentFilterCriteria {
 }
 
 export interface DocumentInfoType {
-  document_id: string;
+  id: string;
   user_id: string;
   title: string;
   version: string;

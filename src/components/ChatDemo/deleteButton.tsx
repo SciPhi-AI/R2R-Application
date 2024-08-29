@@ -37,7 +37,7 @@ export const DeleteButton: React.FC<DeleteButtonProps> = ({
         const key = 'document_id';
         const value = selectedDocumentIds[i];
 
-        await client.delete([key], [value]);
+        await client.delete({ [key]: value });
       }
       showToast({
         variant: 'success',

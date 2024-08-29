@@ -1,3 +1,9 @@
+import {
+  GenerationConfig,
+  IndexMeasure,
+  KGSearchSettings,
+  VectorSearchSettings,
+} from 'r2r-js';
 import React, { FC, useEffect, useState, useRef } from 'react';
 
 import { useUserContext } from '@/context/UserContext';
@@ -109,35 +115,40 @@ export const Result: FC<{
         throw new Error('Failed to get authenticated client');
       }
 
-      const ragGenerationConfig: RagGenerationConfig = {
+      const ragGenerationConfig: GenerationConfig = {
         stream: true,
         temperature: rag_temperature ?? undefined,
         top_p: rag_topP ?? undefined,
-        top_k: rag_topK ?? undefined,
         max_tokens_to_sample: rag_maxTokensToSample ?? undefined,
         model: model !== 'null' && model !== null ? model : undefined,
       };
 
+      const vectorSearchSettings: VectorSearchSettings = {
+        use_vector_search: switches.vector_search?.checked ?? true,
+        use_hybrid_search: switches.hybrid_search?.checked ?? false,
+        filters: search_filters,
+        search_limit: search_limit,
+        index_measure: IndexMeasure.COSINE_DISTANCE, // You might want to make this configurable
+      };
+
+      const kgSearchSettings: KGSearchSettings = {
+        use_kg_search: switches.knowledge_graph_search?.checked ?? false,
+      };
+
       const streamResponse =
         mode === 'rag_agent'
-          ? await client.agent({
-              messages: [...messages, newUserMessage],
-              use_vector_search: switches.vector_search?.checked ?? true,
-              search_filters,
-              search_limit,
-              do_hybrid_search: switches.hybrid_search?.checked ?? false,
-              use_kg_search: switches.knowledge_graph_search?.checked ?? false,
-              rag_generation_config: ragGenerationConfig,
-            })
-          : await client.rag({
+          ? await client.agent(
+              [...messages, newUserMessage],
+              vectorSearchSettings,
+              kgSearchSettings,
+              ragGenerationConfig
+            )
+          : await client.rag(
               query,
-              use_vector_search: switches.vector_search?.checked ?? true,
-              search_filters,
-              search_limit,
-              do_hybrid_search: switches.hybrid_search?.checked ?? false,
-              use_kg_search: switches.knowledge_graph_search?.checked ?? false,
-              rag_generation_config: ragGenerationConfig,
-            });
+              vectorSearchSettings,
+              kgSearchSettings,
+              ragGenerationConfig
+            );
 
       const reader = streamResponse.getReader();
       const decoder = new TextDecoder();

@@ -55,7 +55,7 @@ const Index: React.FC = () => {
           throw new Error('Failed to get authenticated client');
         }
 
-        const data = await client.documentsOverview([], []);
+        const data = await client.documentsOverview();
         setDocuments(data.results);
         setIsLoading(false);
         setError(null);
@@ -185,22 +185,17 @@ const Index: React.FC = () => {
     } else {
       currentDocuments.forEach((doc) => {
         rows.push(
-          <tr key={doc.document_id}>
+          <tr key={doc.id}>
             <td className="px-4 py-2 text-white">
               <div className="flex items-center">
                 <Checkbox
-                  checked={selectedDocumentIds.includes(doc.document_id)}
+                  checked={selectedDocumentIds.includes(doc.id)}
                   onCheckedChange={(checked) => {
                     if (checked) {
-                      setSelectedDocumentIds([
-                        ...selectedDocumentIds,
-                        doc.document_id,
-                      ]);
+                      setSelectedDocumentIds([...selectedDocumentIds, doc.id]);
                     } else {
                       setSelectedDocumentIds(
-                        selectedDocumentIds.filter(
-                          (id) => id !== doc.document_id
-                        )
+                        selectedDocumentIds.filter((id) => id !== doc.id)
                       );
                     }
                   }}
@@ -213,13 +208,10 @@ const Index: React.FC = () => {
                   <div
                     className="overflow-x-auto whitespace-nowrap ml-4 cursor-pointer flex items-center"
                     style={{ width: '125px' }}
-                    onClick={() => copyToClipboard(doc.document_id)}
+                    onClick={() => copyToClipboard(doc.id)}
                   >
-                    {doc.document_id.substring(0, 4)}...
-                    {doc.document_id.substring(
-                      doc.document_id.length - 4,
-                      doc.document_id.length
-                    )}
+                    {doc.id.substring(0, 4)}...
+                    {doc.id.substring(doc.id.length - 4, doc.id.length)}
                     {/* <ClipboardCopyIcon className="h-4 w-4 ml-2" /> */}
                   </div>
                 </div>
@@ -274,7 +266,7 @@ const Index: React.FC = () => {
                   <Tooltip>
                     <TooltipTrigger>
                       <UpdateButtonContainer
-                        documentId={doc.document_id}
+                        documentId={doc.id}
                         onUpdateSuccess={fetchDocuments}
                         showToast={toast}
                       />
@@ -290,7 +282,7 @@ const Index: React.FC = () => {
                     <TooltipTrigger>
                       <button
                         onClick={() => {
-                          setSelectedDocumentId(doc.document_id);
+                          setSelectedDocumentId(doc.id);
                           setIsDocumentInfoDialogOpen(true);
                         }}
                         className="info-button hover:bg-blue-700 bg-blue-500 text-white font-bold rounded flex items-center justify-center"
