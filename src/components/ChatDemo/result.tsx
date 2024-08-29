@@ -73,6 +73,33 @@ export const Result: FC<{
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  const updateLastMessage = (
+    content?: string,
+    sources?: string,
+    isStreaming?: boolean,
+    searchPerformed?: boolean
+  ) => {
+    setMessages((prevMessages) => {
+      const updatedMessages = [...prevMessages];
+      const lastMessage = updatedMessages[updatedMessages.length - 1];
+      if (lastMessage.role === 'assistant') {
+        if (content !== undefined) {
+          lastMessage.content += content;
+        }
+        if (sources !== undefined) {
+          lastMessage.sources = sources;
+        }
+        if (isStreaming !== undefined) {
+          lastMessage.isStreaming = isStreaming;
+        }
+        if (searchPerformed !== undefined) {
+          lastMessage.searchPerformed = searchPerformed;
+        }
+      }
+      return updatedMessages;
+    });
+  };
+
   const parseStreaming = async (query: string): Promise<void> => {
     if (isProcessingQuery) {
       return;
@@ -104,10 +131,6 @@ export const Result: FC<{
       newUserMessage,
       newAssistantMessage,
     ]);
-
-    let buffer = '';
-    let inLLMResponse = false;
-    let sourcesContent = '';
 
     try {
       const client = await getClient();
@@ -152,6 +175,10 @@ export const Result: FC<{
 
       const reader = streamResponse.getReader();
       const decoder = new TextDecoder();
+
+      let buffer = '';
+      let inLLMResponse = false;
+      let sourcesContent = '';
 
       while (true) {
         const { done, value } = await reader.read();
@@ -234,33 +261,6 @@ export const Result: FC<{
     }
   };
 
-  const updateLastMessage = (
-    content?: string,
-    sources?: string,
-    isStreaming?: boolean,
-    searchPerformed?: boolean
-  ) => {
-    setMessages((prevMessages) => {
-      const updatedMessages = [...prevMessages];
-      const lastMessage = updatedMessages[updatedMessages.length - 1];
-      if (lastMessage.role === 'assistant') {
-        if (content !== undefined) {
-          lastMessage.content += content;
-        }
-        if (sources !== undefined) {
-          lastMessage.sources = sources;
-        }
-        if (isStreaming !== undefined) {
-          lastMessage.isStreaming = isStreaming;
-        }
-        if (searchPerformed !== undefined) {
-          lastMessage.searchPerformed = searchPerformed;
-        }
-      }
-      return updatedMessages;
-    });
-  };
-
   useEffect(() => {
     if (query === '' || !pipelineUrl) {
       return;
@@ -301,7 +301,7 @@ export const Result: FC<{
         pipelineUrl &&
         mode === 'rag' && (
           <div className="absolute inset-4 flex items-center justify-center backdrop-blur-sm">
-            <div className="flex items-center p-4 bg-white shadow-2xl rounded text-blue-500 font-medium gap-4">
+            <div className="flex items-center p-4 bg-white shadow-2xl rounded text-indigo-500 font-medium gap-4">
               Please upload at least one document to submit queries.{' '}
               <UploadButton
                 userId={userId}

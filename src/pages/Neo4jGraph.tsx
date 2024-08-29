@@ -150,22 +150,22 @@ const Neo4jGraph: React.FC<Neo4jGraphProps> = ({ width, height }) => {
           />
           <div className="absolute top-4 right-4 flex flex-col space-y-2">
             <button
-              className="bg-white rounded-full p-2 hover:bg-blue-100 focus:outline-none"
+              className="bg-white rounded-full p-2 hover:bg-indigo-100 focus:outline-none"
               onClick={handleHome}
             >
-              <Locate className="h-6 w-6 text-blue-500" />
+              <Locate className="h-6 w-6 text-indigo-500" />
             </button>
             <button
-              className="bg-white rounded-full p-2 hover:bg-blue-100 focus:outline-none"
+              className="bg-white rounded-full p-2 hover:bg-indigo-100 focus:outline-none"
               onClick={handleZoomIn}
             >
-              <ZoomIn className="h-6 w-6 text-blue-500" />
+              <ZoomIn className="h-6 w-6 text-indigo-500" />
             </button>
             <button
-              className="bg-white rounded-full p-2 hover:bg-blue-100 focus:outline-none"
+              className="bg-white rounded-full p-2 hover:bg-indigo-100 focus:outline-none"
               onClick={handleZoomOut}
             >
-              <ZoomOut className="h-6 w-6 text-blue-500" />
+              <ZoomOut className="h-6 w-6 text-indigo-500" />
             </button>
           </div>
         </div>

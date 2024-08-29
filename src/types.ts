@@ -60,11 +60,15 @@ export interface DocumentFilterCriteria {
 export interface DocumentInfoType {
   id: string;
   user_id: string;
+  group_ids: string[];
+  type: string;
+  metadata: Record<string, any>;
   title: string;
   version: string;
-  updated_at: string;
   size_in_bytes: number;
-  metadata: any;
+  status: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface DocumentInfoDialogProps {

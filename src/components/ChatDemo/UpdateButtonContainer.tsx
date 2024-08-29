@@ -77,7 +77,7 @@ const UpdateButtonContainer: React.FC<UpdateButtonContainerProps> = ({
         className={`update-button text-white font-bold rounded flex items-center justify-center ${
           isUpdating
             ? 'bg-gray-400 cursor-not-allowed'
-            : 'hover:bg-blue-700 bg-blue-500'
+            : 'hover:bg-indigo-700 bg-indigo-500'
         }`}
       >
         {isUpdating ? (
