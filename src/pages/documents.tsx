@@ -1,4 +1,4 @@
-import { format, parseISO } from 'date-fns';
+import { format, parseISO } from 'date-fns'; // Import date-fns functions
 import { ChevronUpSquare, ChevronDownSquare, FileSearch2 } from 'lucide-react';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 
@@ -18,11 +18,11 @@ import {
 } from '@/components/ui/tooltip';
 import { useToast } from '@/components/ui/use-toast';
 import { useUserContext } from '@/context/UserContext';
+import { formatFileSize } from '@/lib/utils';
 import { DocumentFilterCriteria, DocumentInfoType } from '@/types';
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 2000;
-const DOCUMENTS_PER_PAGE = 10;
 
 const Index: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -33,14 +33,14 @@ const Index: React.FC = () => {
   });
   const [selectedDocumentIds, setSelectedDocumentIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedDocumentId, setSelectedDocumentId] = useState('');
-  const [isAllSelected, setIsAllSelected] = useState(false);
-  const [isDocumentInfoDialogOpen, setIsDocumentInfoDialogOpen] =
-    useState(false);
-
   const { toast } = useToast();
   const { pipeline, getClient } = useUserContext();
+
+  const documentsPerPage = 10;
+
+  const userId = null;
 
   const fetchDocuments = useCallback(
     async (retryCount = 0) => {
@@ -57,7 +57,6 @@ const Index: React.FC = () => {
 
         const data = await client.documentsOverview();
         setDocuments(data.results);
-        console.log(data.results);
         setIsLoading(false);
         setError(null);
       } catch (error) {
@@ -73,9 +72,9 @@ const Index: React.FC = () => {
     [pipeline?.deploymentUrl, getClient]
   );
 
-  useEffect(() => {
-    fetchDocuments();
-  }, [fetchDocuments]);
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
 
   const filteredAndSortedDocuments = useMemo(
     () => getFilteredAndSortedDocuments(documents, filterCriteria),
@@ -83,48 +82,34 @@ const Index: React.FC = () => {
   );
 
   const totalPages = Math.ceil(
-    filteredAndSortedDocuments.length / DOCUMENTS_PER_PAGE
+    (filteredAndSortedDocuments.length || 0) / documentsPerPage
   );
   const currentDocuments = filteredAndSortedDocuments.slice(
-    (currentPage - 1) * DOCUMENTS_PER_PAGE,
-    currentPage * DOCUMENTS_PER_PAGE
+    (currentPage - 1) * documentsPerPage,
+    currentPage * documentsPerPage
   );
 
-  const handleSelectAll = (checked: boolean) => {
-    setIsAllSelected(checked);
-    if (checked) {
-      const currentPageDocumentIds = currentDocuments.map((doc) => doc.id);
-      setSelectedDocumentIds((prevSelected) => [
-        ...new Set([...prevSelected, ...currentPageDocumentIds]),
-      ]);
-    } else {
-      const currentPageDocumentIds = currentDocuments.map((doc) => doc.id);
-      setSelectedDocumentIds((prevSelected) =>
-        prevSelected.filter((id) => !currentPageDocumentIds.includes(id))
+  useEffect(() => {
+    fetchDocuments();
+  }, [fetchDocuments]);
+
+  useEffect(() => {
+    if (
+      currentPage >
+      Math.ceil(filteredAndSortedDocuments.length / documentsPerPage)
+    ) {
+      setCurrentPage(
+        Math.max(
+          1,
+          Math.ceil(filteredAndSortedDocuments.length / documentsPerPage)
+        )
       );
     }
-  };
+  }, [filteredAndSortedDocuments.length, currentPage, documentsPerPage]);
 
-  useEffect(() => {
-    const maxPage = Math.max(
-      1,
-      Math.ceil(filteredAndSortedDocuments.length / DOCUMENTS_PER_PAGE)
-    );
-    if (currentPage > maxPage) {
-      setCurrentPage(maxPage);
-    }
-    setIsAllSelected(false);
-  }, [filteredAndSortedDocuments.length, currentPage]);
-
-  useEffect(() => {
-    const currentPageDocumentIds = currentDocuments.map((doc) => doc.id);
-    const allCurrentSelected = currentPageDocumentIds.every((id) =>
-      selectedDocumentIds.includes(id)
-    );
-    setIsAllSelected(allCurrentSelected);
-  }, [selectedDocumentIds, currentDocuments]);
-
-  const handlePageChange = (pageNumber: number) => setCurrentPage(pageNumber);
+  const [selectedDocumentId, setSelectedDocumentId] = useState('');
+  const [isDocumentInfoDialogOpen, setIsDocumentInfoDialogOpen] =
+    useState(false);
 
   const copyToClipboard = (text: string, description: string) => {
     navigator.clipboard
@@ -133,18 +118,39 @@ const Index: React.FC = () => {
       .catch((err) => console.error('Could not copy text: ', err));
   };
 
+  const copyUserToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text).then(
+      () => {
+        toast({
+          title: 'Copied!',
+          description: 'User ID copied to clipboard',
+        });
+      },
+      (err) => {
+        console.error('Could not copy text: ', err);
+      }
+    );
+  };
+
   const formatDate = (dateString: string) => {
-    if (dateString && dateString.length > 0) {
+    if (
+      dateString !== null &&
+      dateString !== undefined &&
+      dateString.length > 0
+    ) {
       const date = parseISO(dateString);
-      return format(date, 'MMM d, yyyy HH:mm');
+      return format(date, 'MMM d, yyyy HH:mm'); // Format: "Jun 5, 2024 16:26"
+    } else {
+      return 'N/A';
     }
-    return 'N/A';
   };
 
   const renderTableRows = () => {
+    const rows = [];
+
     if (isLoading) {
-      return (
-        <tr>
+      rows.push(
+        <tr key="loading">
           <td colSpan={8} className="px-4 py-2 text-center text-white">
             <div className="flex justify-center items-center space-x-2">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
@@ -153,21 +159,17 @@ const Index: React.FC = () => {
           </td>
         </tr>
       );
-    }
-
-    if (error) {
-      return (
-        <tr>
+    } else if (error) {
+      rows.push(
+        <tr key="error">
           <td colSpan={8} className="px-4 py-2 text-center text-white">
             {error}
           </td>
         </tr>
       );
-    }
-
-    if (documents.length === 0) {
-      return (
-        <tr>
+    } else if (documents.length === 0) {
+      rows.push(
+        <tr key="no-docs">
           <td colSpan={8} className="px-4 py-2 text-center text-white">
             No documents available. Upload a document to get started.
           </td>
@@ -192,137 +194,116 @@ const Index: React.FC = () => {
                 }}
               />
               <div
-                className="overflow-x-auto whitespace-nowrap ml-4 cursor-pointer flex items-center"
-                style={{ width: '125px' }}
-                onClick={() =>
-                  copyToClipboard(doc.id, 'Document ID copied to clipboard')
-                }
+                className="overflow-x-auto whitespace-nowrap cursor-pointer"
+                style={{ width: '100px' }}
+                onClick={() => copyUserToClipboard(doc.user_id)}
               >
-                {doc.id
-                  ? `${doc.id.substring(0, 4)}...${doc.id.slice(-4)}`
+                {doc.user_id
+                  ? `${doc.user_id.substring(0, 4)}...${doc.user_id.substring(doc.user_id.length - 4, doc.user_id.length)}`
                   : 'N/A'}
               </div>
-            </div>
-          </td>
-          <td className="px-4 py-2 text-white">
-            <div
-              className="overflow-x-auto whitespace-nowrap cursor-pointer"
-              style={{ width: '100px' }}
-              onClick={() =>
-                copyToClipboard(doc.user_id, 'User ID copied to clipboard')
-              }
-            >
-              {doc.user_id
-                ? `${doc.user_id.substring(0, 4)}...${doc.user_id.slice(-4)}`
-                : 'N/A'}
-            </div>
-          </td>
-          <td className="px-4 py-2 text-white">
-            <div
-              className="overflow-x-auto whitespace-nowrap"
-              style={{ width: '175px' }}
-            >
-              {doc.title || 'N/A'}
-            </div>
-          </td>
-          <td className="px-4 py-2 text-white">
-            <div
-              className="overflow-x-auto whitespace-nowrap"
-              style={{ width: '75px' }}
-            >
-              {doc.version}
-            </div>
-          </td>
-          <td className="px-4 py-2 text-white">
-            <div
-              className="overflow-x-auto whitespace-nowrap"
-              style={{ width: '175px' }}
-            >
-              {formatDate(doc.updated_at)}
-            </div>
-          </td>
-          <td className="px-4 py-2 text-white">
-            <div className="flex justify-center items-center space-x-2">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <UpdateButtonContainer
-                      documentId={doc.id}
-                      onUpdateSuccess={fetchDocuments}
-                      showToast={toast}
-                    />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Update Document</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+            </td>
+            <td className="px-4 py-2 text-white">
+              <div
+                className="overflow-x-auto whitespace-nowrap"
+                style={{ width: '175px' }}
+              >
+                {doc.title || 'N/A'}
+              </div>
+            </td>
+            <td className="px-4 py-2 text-white">
+              <div
+                className="overflow-x-auto whitespace-nowrap"
+                style={{ width: '75px' }}
+              >
+                {doc.version}
+              </div>
+            </td>
+            <td className="px-4 py-2 text-white">
+              <div
+                className="overflow-x-auto whitespace-nowrap"
+                style={{ width: '175px' }}
+              >
+                {formatDate(doc.updated_at)}
+              </div>
+            </td>
+            <td className="px-4 py-2 text-white">
+              <div
+                className="overflow-x-auto whitespace-nowrap"
+                style={{ width: '75px' }}
+              >
+                {formatFileSize(doc.size_in_bytes)}
+              </div>
+            </td>
+            <td className="px-4 py-2 text-white">
+              <div className="flex justify-center items-center space-x-2">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <UpdateButtonContainer
+                        documentId={doc.id}
+                        onUpdateSuccess={fetchDocuments}
+                        showToast={toast}
+                      />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Update Document</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
 
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <button
-                      onClick={() => {
-                        setSelectedDocumentId(doc.id);
-                        setIsDocumentInfoDialogOpen(true);
-                      }}
-                      className="info-button hover:bg-indigo-700 bg-indigo-500 text-white font-bold rounded flex items-center justify-center"
-                    >
-                      <FileSearch2 className="h-8 w-8" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>View Document Chunks</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-          </td>
-          <td className="px-4 py-2 text-white">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <button
+                        onClick={() => {
+                          setSelectedDocumentId(doc.id);
+                          setIsDocumentInfoDialogOpen(true);
+                        }}
+                        className="info-button hover:bg-indigo-700 bg-indigo-500 text-white font-bold rounded flex items-center justify-center"
+                      >
+                        <FileSearch2 className="h-8 w-8" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>View Document Chunks</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+            </td>
+            <td className="px-4 py-2 text-white">
+              <div
+                className="overflow-x-auto whitespace-nowrap"
+                style={{ width: '100px' }}
+              >
+                {doc.updated_at}
+              </div>
+            </td>
+          </tr>
+        );
+      });
+    }
+
+    // Add empty rows to maintain table height
+    const emptyRowsCount = documentsPerPage - rows.length;
+    for (let i = 0; i < emptyRowsCount; i++) {
+      rows.push(
+        <tr key={`empty-${i}`} style={{ height: '50px' }}>
+          <td colSpan={8} className="px-4 py-2 text-center text-white">
             <div
-              className="overflow-x-auto whitespace-nowrap"
-              style={{ width: '100px' }}
+              className="flex justify-center items-center space-x-2"
+              style={{ width: '1160px' }}
             >
-              {doc.updated_at}
+              &nbsp;
             </div>
           </td>
         </tr>
-      ));
-  };
+      );
+    }
 
-  const renderSortButton = (label: string, sortKey: 'title' | 'date') => (
-    <div className="flex items-center">
-      <span className="mr-2">{label}</span>
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger>
-            <button
-              onClick={() =>
-                setFilterCriteria({
-                  sort: sortKey,
-                  order: filterCriteria.order === 'asc' ? 'desc' : 'asc',
-                })
-              }
-              className="p-1"
-            >
-              {filterCriteria.sort === sortKey &&
-              filterCriteria.order === 'asc' ? (
-                <ChevronUpSquare className="h-4 w-4" />
-              ) : (
-                <ChevronDownSquare className="h-4 w-4" />
-              )}
-            </button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>
-              Sort by {label}{' '}
-              {filterCriteria.order === 'asc' ? 'Descending' : 'Ascending'}
-            </p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    </div>
-  );
+    return rows;
+  };
 
   return (
     <Layout pageTitle="Documents">
@@ -333,7 +314,7 @@ const Index: React.FC = () => {
             <div className="flex justify-center mt-4">
               <div className="mt-6 pr-2">
                 <UploadButton
-                  userId={null}
+                  userId={userId}
                   uploadedDocuments={documents}
                   setUploadedDocuments={setDocuments}
                   onUploadSuccess={fetchDocuments}
@@ -357,38 +338,109 @@ const Index: React.FC = () => {
                 <thead>
                   <tr className="border-b border-gray-600">
                     <th className="px-4 py-2 text-left text-white">
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="pl-11">Document ID </div>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>
+                              Click on a Document ID to copy it to clipboard
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </th>
+                    <th className="px-4 py-2 text-left text-white">User ID</th>
+                    <th className="px-4 py-2 text-left text-white">
                       <div className="flex items-center">
-                        <Checkbox
-                          checked={isAllSelected}
-                          onCheckedChange={handleSelectAll}
-                        />
+                        <span className="mr-2">Title</span>
                         <TooltipProvider>
                           <Tooltip>
-                            <TooltipTrigger asChild>
-                              <div className="pl-4">Document ID</div>
+                            <TooltipTrigger>
+                              <button
+                                onClick={() =>
+                                  setFilterCriteria({
+                                    sort: 'title',
+                                    order:
+                                      filterCriteria.order === 'asc'
+                                        ? 'desc'
+                                        : 'asc',
+                                  })
+                                }
+                                className="p-1"
+                              >
+                                {filterCriteria.sort === 'title' &&
+                                filterCriteria.order === 'asc' ? (
+                                  <ChevronUpSquare className="h-4 w-4" />
+                                ) : (
+                                  <ChevronDownSquare className="h-4 w-4" />
+                                )}
+                              </button>
                             </TooltipTrigger>
                             <TooltipContent>
                               <p>
-                                Click on a Document ID to copy it to clipboard
+                                Sort by Title{' '}
+                                {filterCriteria.order === 'asc'
+                                  ? 'Descending'
+                                  : 'Ascending'}
                               </p>
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
                       </div>
                     </th>
-                    <th className="px-4 py-2 text-left text-white">User ID</th>
-                    <th className="px-4 py-2 text-left text-white">
-                      {renderSortButton('Title', 'title')}
-                    </th>
                     <th className="px-4 py-2 text-left text-white">Version</th>
                     <th className="px-4 py-2 text-left text-white">
-                      {renderSortButton('Updated At', 'date')}
+                      <div className="flex items-center">
+                        <span className="mr-2">Updated At</span>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <button
+                                onClick={() =>
+                                  setFilterCriteria({
+                                    sort: 'date',
+                                    order:
+                                      filterCriteria.order === 'asc'
+                                        ? 'desc'
+                                        : 'asc',
+                                  })
+                                }
+                                className="p-1"
+                              >
+                                {filterCriteria.sort === 'date' &&
+                                filterCriteria.order === 'asc' ? (
+                                  <ChevronUpSquare className="h-4 w-4" />
+                                ) : (
+                                  <ChevronDownSquare className="h-4 w-4" />
+                                )}
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>
+                                Sort by Date{' '}
+                                {filterCriteria.order === 'asc'
+                                  ? 'Descending'
+                                  : 'Ascending'}
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                    </th>
+                    <th className="px-4 py-2 text-left text-white">
+                      File Size
                     </th>
                     <th className="px-4 py-2 text-left text-white">Actions</th>
                     <th className="px-4 py-2 text-left text-white">Metadata</th>
                   </tr>
                 </thead>
-                <tbody>{renderTableRows()}</tbody>
+                <tbody
+                  className={`transition-opacity duration-500 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}
+                >
+                  {renderTableRows()}
+                </tbody>
               </table>
             </div>
           </div>
