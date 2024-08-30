@@ -10,7 +10,7 @@ import { useUserContext } from '@/context/UserContext';
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('admin@example.com');
   const [password, setPassword] = useState('change_me_immediately');
-  const [instanceUrl, setInstanceUrl] = useState('http://localhost:8000');
+  const [deploymentUrl, setDeploymentUrl] = useState('http://localhost:8000');
   const [showPassword, setShowPassword] = useState(false);
   const { login } = useUserContext();
   const router = useRouter();
@@ -18,11 +18,13 @@ const LoginPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await login(email, password, instanceUrl);
+      await login(email, password, deploymentUrl);
       router.push('/');
     } catch (error) {
       console.error('Login failed:', error);
-      alert('Login failed. Please check your credentials and try again.');
+      alert(
+        'Login failed. Ensure that your R2R server is running at the specified URL or check your credentials and try again.'
+      );
     }
   };
 
@@ -40,17 +42,17 @@ const LoginPage: React.FC = () => {
           <div className="mb-4">
             <label
               className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2"
-              htmlFor="instanceUrl"
+              htmlFor="deploymentUrl"
             >
-              Instance URL
+              R2R Deployment URL
             </label>
             <Input
-              id="instanceUrl"
-              name="instanceUrl"
+              id="deploymentUrl"
+              name="deploymentUrl"
               type="text"
-              placeholder="Instance URL"
-              value={instanceUrl}
-              onChange={(e) => setInstanceUrl(e.target.value)}
+              placeholder="R2R Deployment URL"
+              value={deploymentUrl}
+              onChange={(e) => setDeploymentUrl(e.target.value)}
               autoComplete="url"
             />
           </div>
