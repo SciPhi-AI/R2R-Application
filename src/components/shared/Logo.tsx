@@ -27,8 +27,8 @@ export function Logo({
 
   const imageElement = (
     <Image
-      alt="sciphi.png"
-      src="/images/sciphi.png"
+      alt="sciphi.svg"
+      src="/images/sciphi.svg"
       width={width}
       height={height}
       className="w-full h-full"
