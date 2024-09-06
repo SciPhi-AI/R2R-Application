@@ -8,7 +8,6 @@ import { Toaster } from '@/components/ui/toaster';
 type Props = {
   children: ReactNode;
   pageTitle?: string;
-  isConnected?: boolean;
   includeFooter?: boolean;
 };
 
@@ -18,7 +17,7 @@ const Layout: React.FC<Props> = ({
   includeFooter = true,
 }) => {
   return (
-    <div className="w-full min-h-screen flex flex-col">
+    <div className="flex flex-col min-h-screen bg-zinc-900">
       <Head>
         <title>{pageTitle ? `${pageTitle} | R2R` : 'R2R'}</title>
       </Head>

@@ -1,11 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, Dispatch, SetStateAction } from 'react';
 
 import { Button } from '@/components/ui/Button';
 import { useUserContext } from '@/context/UserContext';
 import { generateIdFromLabel } from '@/lib/utils';
-import { UploadButtonProps } from '@/types';
 
 import { UploadDialog } from './UploadDialog';
+
+export interface UploadButtonProps {
+  userId: string | null;
+  uploadedDocuments: any[];
+  setUploadedDocuments: Dispatch<SetStateAction<any[]>>;
+  onUploadSuccess?: () => Promise<any[]>;
+  showToast?: (message: {
+    title: string;
+    description: string;
+    variant: 'default' | 'destructive' | 'success';
+  }) => void;
+  setPendingDocuments?: Dispatch<SetStateAction<string[]>>;
+  setCurrentPage?: React.Dispatch<React.SetStateAction<number>>;
+  documentsPerPage?: number;
+}
 
 export const UploadButton: React.FC<UploadButtonProps> = ({
   userId,
@@ -13,6 +27,9 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
   setUploadedDocuments,
   onUploadSuccess,
   showToast = () => {},
+  setPendingDocuments,
+  setCurrentPage,
+  documentsPerPage,
 }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -42,14 +59,32 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
         user_ids: userIds,
       });
 
-      setUploadedDocuments([...uploadedDocuments, ...uploadedFiles]);
+      setUploadedDocuments((prevDocuments) => [
+        ...prevDocuments,
+        ...uploadedFiles,
+      ]);
+
+      if (setPendingDocuments) {
+        const newUploadedFiles = uploadedFiles.map((file) => file.document_id);
+        setPendingDocuments((prev) => [...prev, ...newUploadedFiles]);
+      }
+
       showToast({
         variant: 'success',
         title: 'Upload Successful',
-        description: 'The documents have been uploaded',
+        description: 'All files have been uploaded successfully.',
       });
+
       if (onUploadSuccess) {
-        onUploadSuccess();
+        const updatedDocuments = await onUploadSuccess();
+        if (updatedDocuments.length > 0 && setCurrentPage && documentsPerPage) {
+          const totalPages = Math.ceil(
+            updatedDocuments.length / documentsPerPage
+          );
+          setCurrentPage(1);
+        } else if (setCurrentPage) {
+          setCurrentPage(1);
+        }
       }
     } catch (error: any) {
       console.error('Error uploading files:', error);

@@ -1,19 +1,12 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
-import {
-  ChevronDown,
-  ChevronRight,
-  ChevronLeft,
-  ChevronRight as ChevronRightIcon,
-} from 'lucide-react';
-import React, { useState, useEffect } from 'react';
+import { ChevronDown, ChevronRight } from 'lucide-react';
+import React, { useState } from 'react';
 
-import { Button } from '@/components/ui/Button';
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
+import Pagination from '@/components/ui/pagination';
 import {
   Table,
   TableBody,
@@ -23,59 +16,76 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
+const LOGS_PER_PAGE = 10;
 const COLLAPSIBLE_THRESHOLD = 100;
-const LOGS_PER_PAGE = 5;
 
-const LogTable = ({ logs }) => {
-  const [expandedCells, setExpandedCells] = useState({});
+interface Log {
+  id: string;
+  run_id: string;
+  run_type: string;
+  timestamp: string;
+  user_id: string;
+  entries: any[];
+  value?: any;
+}
+
+interface LogTableProps {
+  logs: Log[];
+}
+
+const LogTable: React.FC<LogTableProps> = ({ logs }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [paginatedLogs, setPaginatedLogs] = useState([]);
-
-  const toggleCell = (rowId) => {
-    setExpandedCells((prev) => ({ ...prev, [rowId]: !prev[rowId] }));
-  };
+  const [expandedCells, setExpandedCells] = useState<Record<string, boolean>>(
+    {}
+  );
 
   const totalPages = Math.ceil(logs.length / LOGS_PER_PAGE);
 
-  useEffect(() => {
-    const startIndex = (currentPage - 1) * LOGS_PER_PAGE;
-    const endIndex = startIndex + LOGS_PER_PAGE;
-    setPaginatedLogs(logs.slice(startIndex, endIndex));
-  }, [currentPage, logs]);
+  const paginatedLogs = logs.slice(
+    (currentPage - 1) * LOGS_PER_PAGE,
+    currentPage * LOGS_PER_PAGE
+  );
 
-  const truncateValue = (value, maxLength = 50) => {
-    if (typeof value === 'string' && value.length > maxLength) {
-      return value.substring(0, maxLength) + '...';
-    }
-    return value;
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
   };
 
-  const prettifyJSON = (value) => {
-    try {
-      return JSON.stringify(JSON.parse(value), null, 2);
-    } catch (e) {
-      return value;
-    }
+  const toggleCell = (logId: string) => {
+    setExpandedCells((prev) => ({ ...prev, [logId]: !prev[logId] }));
   };
 
-  const renderValue = (value, id) => {
+  const prettifyJSON = (value: any): string => {
+    if (typeof value !== 'object') {
+      return String(value);
+    }
+    return JSON.stringify(value, null, 2);
+  };
+
+  const renderValue = (log: Log) => {
+    const isEmptyArray = Array.isArray(log.value) && log.value.length === 0;
     const isCollapsible =
-      typeof value === 'string' && value.length > COLLAPSIBLE_THRESHOLD;
-    const prettyValue = prettifyJSON(value);
+      !isEmptyArray &&
+      ((typeof log.value === 'string' &&
+        log.value.length > COLLAPSIBLE_THRESHOLD) ||
+        (typeof log.value === 'object' && log.value !== null));
+    const prettyValue = prettifyJSON(log.value);
+
+    if (isEmptyArray) {
+      return null;
+    }
 
     if (isCollapsible) {
       return (
-        <Collapsible open={expandedCells[id]}>
+        <Collapsible open={expandedCells[log.id]}>
           <CollapsibleTrigger
-            onClick={() => toggleCell(id)}
+            onClick={() => toggleCell(log.id)}
             className="flex items-center w-full text-left"
           >
-            {expandedCells[id] ? (
-              <ChevronDown className="mr-2 flex-shrink-0" />
+            {expandedCells[log.id] ? (
+              <ChevronDown className="flex-shrink-0 h-5 w-5" />
             ) : (
-              <ChevronRight className="mr-2 flex-shrink-0" />
+              <ChevronRight className="flex-shrink-0 h-5 w-5" />
             )}
-            <span className="truncate">{truncateValue(prettyValue)}</span>
           </CollapsibleTrigger>
           <CollapsibleContent>
             <pre className="mt-2 whitespace-pre-wrap overflow-x-auto text-xs">
@@ -93,81 +103,47 @@ const LogTable = ({ logs }) => {
     }
   };
 
-  const renderLogEntries = (log) => {
-    if (
-      !log.entries ||
-      !Array.isArray(log.entries) ||
-      log.entries.length === 0
-    ) {
-      return (
-        <TableRow key={`${log.run_id}-no-entries`} className="align-top">
-          <TableCell className="w-1/6"></TableCell>
-          <TableCell className="w-1/6"></TableCell>
-          <TableCell className="w-1/6 pt-3">No entries</TableCell>
-          <TableCell className="w-1/2">-</TableCell>
-        </TableRow>
-      );
-    }
-
-    return log.entries.map((entry, index) => (
-      <TableRow key={`${log.run_id}-${index}`} className="align-top">
-        <TableCell className="w-1/6"></TableCell>
-        <TableCell className="w-1/6"></TableCell>
-        <TableCell className="w-1/6 pt-3">{entry.key}</TableCell>
-        <TableCell className="w-1/2">
-          {renderValue(entry.value, `${log.run_id}-${index}`)}
-        </TableCell>
-      </TableRow>
-    ));
-  };
-
   return (
     <div className="overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-1/6">Run ID</TableHead>
-            <TableHead className="w-1/6">Run Type</TableHead>
-            <TableHead className="w-1/6">Key</TableHead>
-            <TableHead className="w-1/2">Value</TableHead>
+            <TableHead className="w-1/5 text-white">Run ID</TableHead>
+            <TableHead className="w-1/5 text-white">Run Type</TableHead>
+            <TableHead className="w-1/5 text-white">Timestamp</TableHead>
+            <TableHead className="w-1/5 text-white">User ID</TableHead>
+            <TableHead className="w-1/5 text-white">Entries</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {paginatedLogs.map((log) => (
-            <React.Fragment key={log.run_id}>
-              <TableRow className="bg-muted/50">
-                <TableCell colSpan={4} className="font-semibold">
-                  Run ID: {log.run_id} ({log.run_type || 'N/A'})
+            <TableRow key={log.run_id}>
+              <TableCell>
+                {log.run_id
+                  ? `${log.run_id.substring(0, 8)}...${log.run_id.slice(-8)}`
+                  : 'N/A'}
+              </TableCell>
+              <TableCell>{log.run_type}</TableCell>
+              <TableCell>{log.timestamp}</TableCell>
+              <TableCell>
+                {log.user_id
+                  ? `${log.user_id.substring(0, 8)}...${log.user_id.slice(-8)}`
+                  : 'N/A'}
+              </TableCell>
+              {log.entries && log.entries.length > 0 && (
+                <TableCell>
+                  {renderValue({ ...log, id: log.run_id, value: log.entries })}
                 </TableCell>
-              </TableRow>
-              {renderLogEntries(log)}
-            </React.Fragment>
+              )}
+            </TableRow>
           ))}
         </TableBody>
       </Table>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <Button
-          variant="outline"
-          onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
-          disabled={currentPage === 1}
-        >
-          <ChevronLeft className="h-4 w-4" />
-          Previous
-        </Button>
-        <div className="text-sm font-medium">
-          Page {currentPage} of {totalPages}
-        </div>
-        <Button
-          variant="outline"
-          onClick={() =>
-            setCurrentPage((page) => Math.min(totalPages, page + 1))
-          }
-          disabled={currentPage === totalPages}
-        >
-          Next
-          <ChevronRightIcon className="h-4 w-4" />
-        </Button>
-      </div>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+      />
     </div>
   );
 };

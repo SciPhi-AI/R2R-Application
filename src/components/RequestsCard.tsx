@@ -1,5 +1,5 @@
 'use client';
-
+import { localPoint } from '@visx/event';
 import { GradientTealBlue } from '@visx/gradient';
 import { Group } from '@visx/group';
 import { scaleBand, scaleLinear } from '@visx/scale';
@@ -10,7 +10,9 @@ import {
   defaultStyles as defaultTooltipStyles,
 } from '@visx/tooltip';
 import { WithTooltipProvidedProps } from '@visx/tooltip/lib/enhancers/withTooltip';
-import React, { useState, useEffect, useRef } from 'react';
+import { Loader } from 'lucide-react';
+import { useRouter } from 'next/router';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 
 import {
   Card,
@@ -32,17 +34,20 @@ interface LogData {
   results: LogEntry[];
 }
 
-interface TooltipData {
-  hour: number;
+interface BucketData {
+  timestamp: Date;
   count: number;
-  date: Date;
 }
 
-// Temporary example data for a 24-hour period
-const exampleData = Array.from({ length: 24 }, (_, i) => ({
-  hour: i,
-  count: Math.floor(Math.random() * 50),
-}));
+interface BarChartProps {
+  data: BucketData[];
+  width: number;
+  height: number;
+}
+
+const BUCKET_SIZE_MINUTES = 60;
+const HOURS_TO_SHOW = 24;
+const BUCKETS_COUNT = (HOURS_TO_SHOW * 60) / BUCKET_SIZE_MINUTES;
 
 const generateYAxisTicks = (maxValue: number): number[] => {
   if (isNaN(maxValue) || maxValue === 0) {
@@ -67,216 +72,214 @@ const formatTickLabel = (value: number): string => {
   return value.toString();
 };
 
-const processLogData = (logs: LogData) => {
-  const now = new Date();
-  const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-
-  const validLogs = logs.results.filter(
-    (log) => new Date(log.timestamp) >= twentyFourHoursAgo
+const processLogData = (logs: LogData): BucketData[] => {
+  const utcNow = new Date();
+  const twentyFourHoursAgo = new Date(
+    utcNow.getTime() - HOURS_TO_SHOW * 60 * 60 * 1000
   );
 
-  if (validLogs.length === 0) {
-    return Array(24)
-      .fill(0)
-      .map((_, index) => ({
-        hour: index,
-        count: 0,
-        date: new Date(now.getTime() - (23 - index) * 60 * 60 * 1000),
-      }));
-  }
-
-  const earliestLog = new Date(
-    Math.min(...validLogs.map((log) => new Date(log.timestamp).getTime()))
-  );
-  const latestLog = new Date(
-    Math.max(...validLogs.map((log) => new Date(log.timestamp).getTime()))
+  const buckets: BucketData[] = Array.from(
+    { length: BUCKETS_COUNT },
+    (_, i) => ({
+      timestamp: new Date(
+        twentyFourHoursAgo.getTime() + i * BUCKET_SIZE_MINUTES * 60 * 1000
+      ),
+      count: 0,
+    })
   );
 
-  const timeRange = latestLog.getTime() - earliestLog.getTime();
-
-  let bucketSize: number;
-  let bucketCount: number;
-
-  if (timeRange <= 2 * 60 * 60 * 1000) {
-    // 2 hours or less
-    bucketSize = 5 * 60 * 1000; // 5 minutes
-    bucketCount = Math.ceil(timeRange / bucketSize);
-  } else if (timeRange <= 6 * 60 * 60 * 1000) {
-    // 6 hours or less
-    bucketSize = 15 * 60 * 1000; // 15 minutes
-    bucketCount = Math.ceil(timeRange / bucketSize);
-  } else if (timeRange <= 12 * 60 * 60 * 1000) {
-    // 12 hours or less
-    bucketSize = 30 * 60 * 1000; // 30 minutes
-    bucketCount = Math.ceil(timeRange / bucketSize);
-  } else {
-    bucketSize = 60 * 60 * 1000; // 1 hour
-    bucketCount = 24;
-  }
-
-  const buckets: { [key: number]: number } = {};
-
-  for (let i = 0; i < bucketCount; i++) {
-    buckets[i] = 0;
-  }
-
-  validLogs.forEach((log) => {
-    const logTime = new Date(log.timestamp);
-    const bucketIndex = Math.floor(
-      (logTime.getTime() - earliestLog.getTime()) / bucketSize
-    );
-    if (buckets.hasOwnProperty(bucketIndex)) {
-      buckets[bucketIndex]++;
+  logs.results.forEach((log) => {
+    const logTime = new Date(log.timestamp + 'Z');
+    if (logTime >= twentyFourHoursAgo && logTime <= utcNow) {
+      const bucketIndex = Math.floor(
+        (logTime.getTime() - twentyFourHoursAgo.getTime()) /
+          (BUCKET_SIZE_MINUTES * 60 * 1000)
+      );
+      if (bucketIndex >= 0 && bucketIndex < buckets.length) {
+        buckets[bucketIndex].count++;
+      }
     }
   });
 
-  return Object.entries(buckets).map(([index, count]) => {
-    const bucketStart = new Date(
-      earliestLog.getTime() + parseInt(index) * bucketSize
-    );
-    return {
-      hour: bucketStart.getHours() + bucketStart.getMinutes() / 60,
-      count,
-      date: bucketStart,
-    };
-  });
+  return buckets;
 };
 
-const RequestsBarChart = ({
-  data,
-  width,
-  height,
-}: {
-  data: { hour: number; count: number; date: Date }[];
-  width: number;
-  height: number;
-}) => {
-  const margin = { top: 20, right: 20, bottom: 40, left: 40 };
-  const innerWidth = width - margin.left - margin.right;
-  const innerHeight = height - margin.top - margin.bottom;
+const RequestsBarChart = withTooltip<BarChartProps, BucketData>(
+  ({
+    data,
+    width,
+    height,
+    showTooltip,
+    hideTooltip,
+    tooltipData,
+    tooltipTop = 0,
+    tooltipLeft = 0,
+  }: BarChartProps & WithTooltipProvidedProps<BucketData>) => {
+    const margin = { top: 20, right: 20, bottom: 40, left: 40 };
+    const innerWidth = width - margin.left - margin.right;
+    const innerHeight = height - margin.top - margin.bottom;
 
-  const xScale = scaleBand({
-    range: [0, innerWidth],
-    domain: data.map((d) => d.hour.toString()),
-    padding: 0.2,
-  });
+    const xScale = useMemo(
+      () =>
+        scaleBand({
+          range: [0, innerWidth],
+          domain: data.map((_, i) => i.toString()),
+          padding: 0.2,
+        }),
+      [data, innerWidth]
+    );
 
-  const maxCount = Math.max(...data.map((d) => d.count), 1);
-  const yScale = scaleLinear({
-    range: [innerHeight, 0],
-    domain: [0, maxCount],
-    nice: true,
-  });
-  const yTicks = generateYAxisTicks(maxCount);
+    const maxCount = Math.max(...data.map((d) => d.count), 1);
+    const yScale = useMemo(
+      () =>
+        scaleLinear({
+          range: [innerHeight, 0],
+          domain: [0, maxCount],
+          nice: true,
+        }),
+      [innerHeight, maxCount]
+    );
 
-  const minBarHeight = 2;
+    const yTicks = generateYAxisTicks(maxCount);
 
-  return (
-    <svg
-      width="100%"
-      height="100%"
-      viewBox={`0 0 ${width} ${height}`}
-      preserveAspectRatio="xMidYMid meet"
-    >
-      <GradientTealBlue id="bar-gradient" />
-      <Group left={margin.left} top={margin.top}>
-        {data.map((d) => {
-          const barHeight = Math.max(
-            innerHeight - (yScale(d.count) ?? 0),
-            minBarHeight
-          );
-          const barX = xScale(d.hour.toString());
-          return (
-            <Bar
-              key={`bar-${d.hour}`}
-              x={barX ?? 0}
-              y={innerHeight - barHeight}
-              height={barHeight}
-              width={xScale.bandwidth()}
-              fill="url(#bar-gradient)"
-            />
-          );
-        })}
-        {xScale
-          .domain()
-          .filter((_, i) => i % Math.max(1, Math.floor(data.length / 6)) === 0)
-          .map((tick) => {
-            const tickX = xScale(tick);
-            const hour = parseFloat(tick);
-            const formattedTime = `${Math.floor(hour)}:${((hour % 1) * 60).toFixed(0).padStart(2, '0')}`;
-            return (
+    const minBarHeight = 2;
+
+    return (
+      <div>
+        <svg
+          width="100%"
+          height="100%"
+          viewBox={`0 0 ${width} ${height}`}
+          preserveAspectRatio="xMidYMid meet"
+        >
+          <GradientTealBlue id="bar-gradient" />
+          <Group left={margin.left} top={margin.top}>
+            {data.map((d, i) => {
+              const barHeight = Math.max(
+                innerHeight - (yScale(d.count) ?? 0),
+                minBarHeight
+              );
+              const barX = xScale(i.toString());
+              return (
+                <Bar
+                  key={`bar-${i}`}
+                  x={barX ?? 0}
+                  y={innerHeight - barHeight}
+                  height={barHeight}
+                  width={xScale.bandwidth()}
+                  fill="url(#bar-gradient)"
+                  onMouseLeave={() => hideTooltip()}
+                  onMouseMove={(event) => {
+                    const eventSvg = localPoint(event);
+                    showTooltip({
+                      tooltipData: d,
+                      tooltipTop: eventSvg?.y ?? 0,
+                      tooltipLeft: eventSvg?.x ?? 0,
+                    });
+                  }}
+                />
+              );
+            })}
+            {data
+              .filter(
+                (_, i) =>
+                  i % ((HOURS_TO_SHOW * 60) / BUCKET_SIZE_MINUTES / 4) === 0
+              )
+              .map((d, i) => {
+                const tickX = xScale(
+                  (
+                    (i * HOURS_TO_SHOW * 60) /
+                    BUCKET_SIZE_MINUTES /
+                    4
+                  ).toString()
+                );
+                const hoursAgo = HOURS_TO_SHOW - i * 6;
+                return (
+                  <text
+                    key={`x-axis-${i}`}
+                    x={(tickX ?? 0) + xScale.bandwidth() / 2}
+                    y={innerHeight + 20}
+                    textAnchor="middle"
+                    fill="white"
+                    fontSize={10}
+                  >
+                    {hoursAgo === 0 ? 'Now' : `${hoursAgo}h ago`}
+                  </text>
+                );
+              })}
+            {yTicks.map((tick) => (
               <text
-                key={`x-axis-${tick}`}
-                x={(tickX ?? 0) + xScale.bandwidth() / 2}
-                y={innerHeight + 20}
-                textAnchor="middle"
+                key={`y-axis-${tick}`}
+                x={-10}
+                y={yScale(tick) ?? 0}
+                textAnchor="end"
+                alignmentBaseline="middle"
                 fill="white"
                 fontSize={10}
               >
-                {formattedTime}
+                {formatTickLabel(tick)}
               </text>
-            );
-          })}
-        {yTicks.map((tick) => (
-          <text
-            key={`y-axis-${tick}`}
-            x={-10}
-            y={yScale(tick) ?? 0}
-            textAnchor="end"
-            alignmentBaseline="middle"
-            fill="white"
-            fontSize={10}
+            ))}
+          </Group>
+        </svg>
+        {tooltipData && (
+          <Tooltip
+            top={tooltipTop}
+            left={tooltipLeft}
+            style={{
+              ...defaultTooltipStyles,
+              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+              color: 'white',
+            }}
           >
-            {formatTickLabel(tick)}
-          </text>
-        ))}
-      </Group>
-    </svg>
-  );
-};
+            <div>
+              <strong>Time (UTC):</strong> {tooltipData.timestamp.toUTCString()}
+            </div>
+            <div>
+              <strong>Requests:</strong> {tooltipData.count}
+            </div>
+          </Tooltip>
+        )}
+      </div>
+    );
+  }
+);
 
 const RequestsCard: React.FC = () => {
-  const [logData, setLogData] = useState<Array<{
-    hour: number;
-    count: number;
-    date: Date;
-  }> | null>(null);
+  const { pipeline, getClient } = useUserContext();
+  const [logData, setLogData] = useState<BucketData[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { getClient } = useUserContext();
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const chartRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+  const { projectId } = router.query;
 
-  const useRealData = true;
+  const fetchLogData = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const client = await getClient();
+      if (!client) {
+        throw new Error('Failed to get authenticated client');
+      }
+
+      const logs = await client.logs('', 1000);
+      const processedData = processLogData(logs);
+      setLogData(processedData);
+    } catch (error) {
+      console.error('Error fetching log data:', error);
+      setError('Failed to fetch log data. Please try again later.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchLogData = async () => {
-      if (!useRealData) {
-        setLogData(exampleData.map((d) => ({ ...d, date: new Date() })));
-        setIsLoading(false);
-        return;
-      }
-
-      setIsLoading(true);
-      setError(null);
-      try {
-        const client = await getClient();
-        if (!client) {
-          throw new Error('Failed to get authenticated client');
-        }
-        const logs = await client.logs();
-        const processedData = processLogData(logs);
-        setLogData(processedData);
-      } catch (error) {
-        console.error('Error fetching log data:', error);
-        setError('Failed to fetch log data. Please try again later.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchLogData();
-  }, [getClient, useRealData]);
+    if (pipeline?.deploymentUrl) {
+      fetchLogData();
+    }
+  }, [pipeline?.deploymentUrl]);
 
   useEffect(() => {
     const observeTarget = chartRef.current;
@@ -299,17 +302,17 @@ const RequestsCard: React.FC = () => {
   }, []);
 
   return (
-    <Card className="h-full flex flex-col">
+    <Card className="max-height-64 flex flex-col">
       <CardHeader className="pb-0">
         <div className="flex items-center justify-between">
           <CardTitle className="text-xl">Requests</CardTitle>
         </div>
         <CardDescription>
-          Requests to your R2R server over the past 24 hours.
+          Requests seen in the last 24 hours (UTC time).
         </CardDescription>
       </CardHeader>
       <CardContent
-        className="pt-0 flex-grow flex flex-col"
+        className="flex-grow flex flex-col"
         style={{ minHeight: '300px', maxHeight: '400px' }}
       >
         <div
@@ -321,9 +324,14 @@ const RequestsCard: React.FC = () => {
             aspectRatio: '16 / 9',
           }}
         >
-          {isLoading && <p>Loading...</p>}
-          {error && <p className="text-red-500">{error}</p>}
-          {logData &&
+          {isLoading ? (
+            <div className="flex justify-center items-center h-full">
+              <Loader className="animate-spin" size={32} />
+            </div>
+          ) : error ? (
+            <p className="text-red-500">{error}</p>
+          ) : (
+            logData &&
             dimensions.width > 0 &&
             dimensions.height > 0 &&
             (logData.every((d) => d.count === 0) ? (
@@ -338,7 +346,8 @@ const RequestsCard: React.FC = () => {
                 width={dimensions.width}
                 height={dimensions.height}
               />
-            ))}
+            ))
+          )}
         </div>
       </CardContent>
     </Card>

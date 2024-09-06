@@ -10,19 +10,12 @@ import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
 
-import { PipelineStatus } from '@/components/ChatDemo/PipelineStatus';
 import R2RServerCard from '@/components/ChatDemo/ServerCard';
 import Layout from '@/components/Layout';
 import RequestsCard from '@/components/RequestsCard';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/Button';
-import {
-  CardTitle,
-  CardDescription,
-  CardHeader,
-  CardContent,
-  Card,
-} from '@/components/ui/card';
+import { CardTitle, CardHeader, CardContent, Card } from '@/components/ui/card';
 import { useUserContext } from '@/context/UserContext';
 
 const HomePage = () => {
@@ -41,253 +34,238 @@ const HomePage = () => {
     return null;
   }
 
-  const handleCopy = (text: string) => {
-    if (!navigator.clipboard) {
-      const textarea = document.createElement('textarea');
-      textarea.value = text;
-      document.body.appendChild(textarea);
-      textarea.select();
-      try {
-        document.execCommand('copy');
-      } catch (err) {
-        console.error('Failed to copy text: ', err);
-      }
-      document.body.removeChild(textarea);
-    } else {
-      navigator.clipboard.writeText(text).then(
-        () => {},
-        (err) => {
-          console.error('Failed to copy text: ', err);
-        }
-      );
-    }
-  };
-
   return (
-    <Layout isConnected={isConnected}>
-      <main className="w-full flex flex-col min-h-screen mt-[4rem] sm:mt-[6rem] container mb-[4rem] sm:mb-[6rem]">
-        <div className="flex flex-col lg:flex-row gap-4">
-          {/* Left column - Alert */}
-          <div className="w-full lg:w-2/3 flex flex-col gap-4">
-            <Alert variant="default" className="flex flex-col">
-              <AlertTitle className="text-lg ">
-                <div className="flex gap-2 text-xl">
-                  <span className="text-gray-500 dark:text-gray-200 font-semibold">
-                    You're connected to your R2R deployment!
-                  </span>
-                </div>
-              </AlertTitle>
-              <AlertDescription>
-                <p className="mb-4 text-sm text-gray-600 dark:text-gray-300">
-                  Here, you'll find a number of tools to help you manage your
-                  pipelines and deploy user-facing applications directly to
-                  users.
-                </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                  <div className="flex items-start space-x-3">
-                    <FileText className="w-5 h-5 text-primary" />
-                    <div>
-                      <h3 className="text-sm font-semibold mb-1">Documents</h3>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        Upload, update, and delete documents and their metadata.
-                      </p>
-                    </div>
+    <Layout>
+      <main className="w-full flex flex-col container h-screen-[calc(100%-4rem)]">
+        <div className="absolute inset-0 bg-zinc-900 mt-[5rem] sm:mt-[5rem] mr-[5rem] ml-[5rem]">
+          <div className="flex flex-col lg:flex-row gap-4">
+            {/* Left column - Alert */}
+            <div className="w-full lg:w-2/3 flex flex-col gap-4">
+              <Alert variant="default" className="flex flex-col">
+                <AlertTitle className="text-lg ">
+                  <div className="flex gap-2 text-xl">
+                    <span className="text-gray-500 dark:text-gray-200 font-semibold">
+                      You're connected to your R2R deployment!
+                    </span>
                   </div>
-                  <div className="flex items-start space-x-3">
-                    <MessageCircle className="w-5 h-5 text-primary" />
-                    <div>
-                      <h3 className="text-sm font-semibold mb-1">Chat</h3>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        Stream RAG and knowledge graph responses with different
-                        models and configurable settings.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <Users className="w-5 h-5 text-primary" />
-                    <div>
-                      <h3 className="text-sm font-semibold mb-1">Users</h3>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        Track user queries, search results, and LLM responses.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <FileSearch className="w-5 h-5 text-primary" />
-                    <div>
-                      <h3 className="text-sm font-semibold mb-1">Logs</h3>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        Track user queries, search results, and LLM responses.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <BarChart2 className="w-5 h-5 text-primary" />
-                    <div>
-                      <h3 className="text-sm font-semibold mb-1">Analytics</h3>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        View aggregate statistics around latencies and metrics
-                        with detailed histograms.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                    Have a feature request or found a bug? Create a Github issue
-                    and help us improve the R2R dashboard!
+                </AlertTitle>
+                <AlertDescription>
+                  <p className="mb-4 text-sm text-gray-600 dark:text-gray-300">
+                    Here, you'll find a number of tools to help you manage your
+                    pipelines and deploy user-facing applications directly to
+                    users.
                   </p>
-                  <div className="flex space-x-4">
-                    <Button
-                      className="flex items-center justify-center px-4 py-2 text-sm"
-                      color="light"
-                      onClick={() =>
-                        window.open(
-                          'https://github.com/SciPhi-AI/R2R-Dashboard/issues/new?assignees=&labels=&projects=&template=feature_request.md&title=',
-                          '_blank'
-                        )
-                      }
-                    >
-                      Feature Request
-                    </Button>
-                    <Button
-                      className="flex items-center justify-center px-4 py-2 text-sm"
-                      color="light"
-                      onClick={() =>
-                        window.open(
-                          'https://github.com/SciPhi-AI/R2R-Dashboard/issues/new?assignees=&labels=&projects=&template=bug_report.md&title=',
-                          '_blank'
-                        )
-                      }
-                    >
-                      Report a Bug
-                    </Button>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div className="flex items-start space-x-3">
+                      <FileText className="w-5 h-5 text-primary" />
+                      <div>
+                        <h3 className="text-sm font-semibold mb-1">
+                          Documents
+                        </h3>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          Upload, update, and delete documents and their
+                          metadata.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start space-x-3">
+                      <MessageCircle className="w-5 h-5 text-primary" />
+                      <div>
+                        <h3 className="text-sm font-semibold mb-1">Chat</h3>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          Stream RAG and knowledge graph responses with
+                          different models and configurable settings.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start space-x-3">
+                      <Users className="w-5 h-5 text-primary" />
+                      <div>
+                        <h3 className="text-sm font-semibold mb-1">Users</h3>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          Track user queries, search results, and LLM responses.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start space-x-3">
+                      <FileSearch className="w-5 h-5 text-primary" />
+                      <div>
+                        <h3 className="text-sm font-semibold mb-1">Logs</h3>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          Track user queries, search results, and LLM responses.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start space-x-3">
+                      <BarChart2 className="w-5 h-5 text-primary" />
+                      <div>
+                        <h3 className="text-sm font-semibold mb-1">
+                          Analytics
+                        </h3>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          View aggregate statistics around latencies and metrics
+                          with detailed histograms.
+                        </p>
+                      </div>
+                    </div>
                   </div>
+                  <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                      Have a feature request or found a bug? Create a Github
+                      issue and help us improve the R2R dashboard!
+                    </p>
+                    <div className="flex space-x-4">
+                      <Button
+                        className="flex items-center justify-center px-4 py-2 text-sm"
+                        color="light"
+                        onClick={() =>
+                          window.open(
+                            'https://github.com/SciPhi-AI/R2R/issues/new?assignees=&labels=&projects=&template=feature_request.md&title=',
+                            '_blank'
+                          )
+                        }
+                      >
+                        Feature Request
+                      </Button>
+                      <Button
+                        className="flex items-center justify-center px-4 py-2 text-sm"
+                        color="light"
+                        onClick={() =>
+                          window.open(
+                            'https://github.com/SciPhi-AI/R2R/issues/new?assignees=&labels=&projects=&template=bug_report.md&title=',
+                            '_blank'
+                          )
+                        }
+                      >
+                        Report a Bug
+                      </Button>
+                    </div>
+                  </div>
+                </AlertDescription>
+              </Alert>
+              {/* SDK Cards */}
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Card className="w-full sm:w-1/2 flex flex-col">
+                    <CardHeader className="flex flex-row items-center space-x-2">
+                      <Image
+                        src="/images/python-logo.svg"
+                        alt="Python Logo"
+                        width={30}
+                        height={30}
+                      />
+                      <CardTitle>Python SDK</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex flex-col justify-end flex-grow">
+                      <div className="flex flex-row space-x-2">
+                        <Button
+                          className="rounded-md py-1 px-3"
+                          color="light"
+                          onClick={() =>
+                            window.open(
+                              'https://r2r-docs.sciphi.ai/python-sdk',
+                              '_blank'
+                            )
+                          }
+                        >
+                          <div className="flex items-center">
+                            <BookOpenText size={20} className="mr-2" />
+                            <span>Docs</span>
+                          </div>
+                        </Button>
+                        <Button
+                          className="rounded-md py-1 px-3"
+                          color="light"
+                          onClick={() =>
+                            window.open(
+                              'https://github.com/SciPhi-AI/R2R/tree/main/py',
+                              '_blank'
+                            )
+                          }
+                        >
+                          <div className="flex items-center">
+                            <Image
+                              src="/images/github-mark.svg"
+                              alt="GitHub Logo"
+                              width={20}
+                              height={20}
+                              className="mr-2"
+                            />
+                            <span>View on GitHub</span>
+                          </div>
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card className="w-full sm:w-1/2 flex flex-col">
+                    <CardHeader className="flex flex-row items-center space-x-2">
+                      <Image
+                        src="/images/javascript-logo.svg"
+                        alt="JavaScript Logo"
+                        width={30}
+                        height={30}
+                      />
+                      <CardTitle>JavaScript SDK</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex flex-col justify-end flex-grow">
+                      <div className="flex flex-row space-x-2">
+                        <Button
+                          className="rounded-md py-1 px-3"
+                          color="light"
+                          onClick={() =>
+                            window.open(
+                              'https://r2r-docs.sciphi.ai/js-sdk',
+                              '_blank'
+                            )
+                          }
+                        >
+                          <div className="flex items-center">
+                            <BookOpenText size={20} className="mr-2" />
+                            <span>Docs</span>
+                          </div>
+                        </Button>
+                        <Button
+                          className="rounded-md py-1 px-3"
+                          color="light"
+                          onClick={() =>
+                            window.open(
+                              'https://github.com/SciPhi-AI/R2R/tree/dev/js',
+                              '_blank'
+                            )
+                          }
+                        >
+                          <div className="flex items-center">
+                            <Image
+                              src="/images/github-mark.svg"
+                              alt="GitHub Logo"
+                              width={20}
+                              height={20}
+                              className="mr-2"
+                            />
+                            <span>View on GitHub</span>
+                          </div>
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
-              </AlertDescription>
-            </Alert>
-            {/* SDK Cards */}
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Card className="w-full sm:w-1/2 flex flex-col">
-                  <CardHeader className="flex flex-row items-center space-x-2">
-                    <Image
-                      src="/images/python-logo.svg"
-                      alt="Python Logo"
-                      width={30}
-                      height={30}
-                    />
-                    <CardTitle>Python SDK</CardTitle>
-                  </CardHeader>
-                  <CardContent className="flex flex-col justify-end flex-grow">
-                    <div className="flex flex-row space-x-2">
-                      <Button
-                        className="rounded-md py-1 px-3"
-                        color="light"
-                        onClick={() =>
-                          window.open(
-                            'https://r2r-docs.sciphi.ai/python-sdk',
-                            '_blank'
-                          )
-                        }
-                      >
-                        <div className="flex items-center">
-                          <BookOpenText size={20} className="mr-2" />
-                          <span>Docs</span>
-                        </div>
-                      </Button>
-                      <Button
-                        className="rounded-md py-1 px-3"
-                        color="light"
-                        onClick={() =>
-                          window.open(
-                            'https://github.com/SciPhi-AI/R2R/tree/main/py',
-                            '_blank'
-                          )
-                        }
-                      >
-                        <div className="flex items-center">
-                          <Image
-                            src="/images/github-mark.svg"
-                            alt="GitHub Logo"
-                            width={20}
-                            height={20}
-                            className="mr-2"
-                          />
-                          <span>View on GitHub</span>
-                        </div>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card className="w-full sm:w-1/2 flex flex-col">
-                  <CardHeader className="flex flex-row items-center space-x-2">
-                    <Image
-                      src="/images/javascript-logo.svg"
-                      alt="JavaScript Logo"
-                      width={30}
-                      height={30}
-                    />
-                    <CardTitle>JavaScript SDK</CardTitle>
-                  </CardHeader>
-                  <CardContent className="flex flex-col justify-end flex-grow">
-                    <div className="flex flex-row space-x-2">
-                      <Button
-                        className="rounded-md py-1 px-3"
-                        color="light"
-                        onClick={() =>
-                          window.open(
-                            'https://r2r-docs.sciphi.ai/js-sdk',
-                            '_blank'
-                          )
-                        }
-                      >
-                        <div className="flex items-center">
-                          <BookOpenText size={20} className="mr-2" />
-                          <span>Docs</span>
-                        </div>
-                      </Button>
-                      <Button
-                        className="rounded-md py-1 px-3"
-                        color="light"
-                        onClick={() =>
-                          window.open(
-                            'https://github.com/SciPhi-AI/R2R/tree/dev/js',
-                            '_blank'
-                          )
-                        }
-                      >
-                        <div className="flex items-center">
-                          <Image
-                            src="/images/github-mark.svg"
-                            alt="GitHub Logo"
-                            width={20}
-                            height={20}
-                            className="mr-2"
-                          />
-                          <span>View on GitHub</span>
-                        </div>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
               </div>
             </div>
-          </div>
 
-          {/* Right column - Cards */}
-          <div className="w-full lg:w-1/3 flex flex-col gap-4">
-            {/* R2R Server Cards */}
-            <div className="flex flex-col gap-4 flex-grow">
-              {pipeline && (
-                <R2RServerCard
-                  pipeline={pipeline}
-                  onStatusChange={setIsConnected}
-                />
-              )}
+            {/* Right column - Cards */}
+            <div className="w-full lg:w-1/3 flex flex-col gap-4">
+              {/* R2R Server Cards */}
+              <div className="flex flex-col gap-4 flex-grow">
+                {pipeline && (
+                  <R2RServerCard
+                    pipeline={pipeline}
+                    onStatusChange={setIsConnected}
+                  />
+                )}
 
-              <div className="flex-grow">
-                <RequestsCard />
+                <div className="flex-grow">
+                  <RequestsCard />
+                </div>
               </div>
             </div>
           </div>

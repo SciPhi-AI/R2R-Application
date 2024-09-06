@@ -2,15 +2,20 @@ import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
 
-import { LogoProps } from '@/types';
+interface LogoProps {
+  width?: number;
+  height?: number;
+  className?: string;
+  onClick?: () => void;
+  disableLink?: boolean;
+}
 
 export function Logo({
-  width = 50,
-  height = 50,
+  width = 25,
+  height = 25,
   className = '',
   onClick,
   disableLink = false,
-  priority = true,
   ...rest
 }: LogoProps) {
   const handleClick = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
@@ -22,11 +27,12 @@ export function Logo({
 
   const imageElement = (
     <Image
-      alt="SciPhi Logo"
-      src="/images/sciphi.svg"
+      alt="sciphi.png"
+      src="/images/sciphi.png"
       width={width}
       height={height}
-      priority={priority}
+      className="w-full h-full"
+      priority={true}
       {...rest}
     />
   );
@@ -43,8 +49,8 @@ export function Logo({
   }
 
   return (
-    <Link href="/" passHref onClick={handleClick} className={combinedClassName}>
-      {imageElement}
+    <Link href="/" className={combinedClassName}>
+      <span onClick={handleClick}>{imageElement}</span>
     </Link>
   );
 }

@@ -39,8 +39,8 @@ export const UpdateButton: React.FC<UpdateButtonProps> = ({
         });
         showToast({
           variant: 'success',
-          title: 'Update Successful',
-          description: 'The document has been updated',
+          title: 'Upload Successful',
+          description: 'All files have been uploaded successfully.',
         });
         onUpdateSuccess();
       } catch (error: unknown) {
@@ -51,7 +51,7 @@ export const UpdateButton: React.FC<UpdateButtonProps> = ({
         }
         showToast({
           variant: 'destructive',
-          title: 'Update Failed',
+          title: 'Upload Failed',
           description: errorMessage,
         });
       } finally {
