@@ -1,9 +1,8 @@
 import clsx from 'clsx';
-import { motion, useScroll, useTransform } from 'framer-motion';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useRouter } from 'next/router';
-import { forwardRef } from 'react';
+import { forwardRef, useEffect, useState, ReactNode } from 'react';
 
 import { Logo } from '@/components/shared/Logo';
 import { Button } from '@/components/ui/Button';
@@ -17,22 +16,27 @@ import {
 import { useUserContext } from '@/context/UserContext';
 import { NavbarProps, NavItemsProps } from '@/types';
 
+interface NavItemProps {
+  href: string;
+  children: ReactNode;
+  isActive: boolean;
+}
+
+const NavItem: React.FC<NavItemProps> = ({ href, children, isActive }) => (
+  <Link
+    href={href}
+    className={`px-2 py-1 text-sm font-medium ${
+      isActive ? 'text-indigo-400' : 'text-zinc-400 hover:text-white'
+    }`}
+  >
+    {children}
+  </Link>
+);
 const NavItems: React.FC<NavItemsProps> = ({
   isAuthenticated,
   effectiveRole,
   pathname,
 }) => {
-  const router = useRouter();
-
-  const handleNavigation = (path: string) => (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (pathname === path) {
-      window.location.href = path;
-    } else {
-      router.push(path);
-    }
-  };
-
   const commonItems = [
     { path: '/documents', label: 'Documents' },
     { path: '/chat', label: 'Chat' },
@@ -54,35 +58,32 @@ const NavItems: React.FC<NavItemsProps> = ({
 
   return (
     <nav>
-      <ul role="list" className="flex items-center gap-6">
+      <div className="flex items-center space-x-2">
         {items.map((item) => (
-          <li key={item.path}>
-            <Link
-              href={item.path}
-              onClick={handleNavigation(item.path)}
-              className={clsx(
-                'text-sm leading-5 transition',
-                pathname === item.path
-                  ? 'text-indigo-400'
-                  : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white'
-              )}
-            >
-              {item.label}
-            </Link>
-          </li>
+          <NavItem
+            key={item.path}
+            href={item.path}
+            isActive={pathname === item.path}
+          >
+            {item.label}
+          </NavItem>
         ))}
-      </ul>
+      </div>
     </nav>
   );
 };
 
-export const Navbar = forwardRef<React.ElementRef<'div'>, NavbarProps>(
+export const Navbar = forwardRef<React.ElementRef<'nav'>, NavbarProps>(
   function Header({ className }, ref) {
     const pathname = usePathname();
-    const isHomePage = pathname === '/';
     const { logout, isAuthenticated, authState, viewMode, setViewMode } =
       useUserContext();
     const router = useRouter();
+    const [isSignedIn, setIsSignedIn] = useState(false);
+
+    useEffect(() => {
+      setIsSignedIn(isAuthenticated);
+    }, [isAuthenticated]);
 
     const isAdmin = isAuthenticated && authState.userRole === 'admin';
     const effectiveRole =
@@ -97,84 +98,72 @@ export const Navbar = forwardRef<React.ElementRef<'div'>, NavbarProps>(
       router.push('/login');
     };
 
-    const { scrollY } = useScroll();
-    const bgOpacityLight = useTransform(scrollY, [0, 72], [0.5, 0.9]);
-    const bgOpacityDark = useTransform(scrollY, [0, 72], [0.2, 0.8]);
-    const handleHomeClick = () => router.push('/');
-
     return (
-      <motion.div
+      <nav
         ref={ref}
-        className={clsx(
-          className,
-          'fixed inset-x-0 top-0 z-50 flex h-16 items-center justify-between gap-12 px-6 transition lg:z-30 lg:px-8 backdrop-blur-sm dark:backdrop-blur',
-          'bg-zinc-100 dark:bg-zinc-800'
-        )}
-        style={
-          {
-            '--bg-opacity-light': bgOpacityLight,
-            '--bg-opacity-dark': bgOpacityDark,
-          } as React.CSSProperties
-        }
+        className={clsx(className, 'bg-zinc-900 shadow sticky top-0 z-50')}
       >
-        <div className="flex items-center justify-between w-full">
-          <div className="flex items-center space-x-4">
-            <Logo width={40} height={40} onClick={handleHomeClick} />
-            <Link href="/" onClick={handleHomeClick}>
-              <span
-                className={clsx(
-                  'text-sm leading-5 transition',
-                  isHomePage
-                    ? 'text-link'
-                    : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white'
-                )}
-              >
-                Home
-              </span>
-            </Link>
-            <NavItems
-              isAuthenticated={isAuthenticated}
-              effectiveRole={effectiveRole}
-              pathname={pathname}
-            />
-          </div>
-          <div className="flex items-center space-x-4">
-            {isAuthenticated && isAdmin && (
-              <Select onValueChange={toggleViewMode}>
-                <SelectTrigger className="w-30 rounded-md py-1 px-3">
-                  <SelectValue
-                    placeholder={
-                      viewMode === 'admin' ? 'Admin View' : 'User View'
-                    }
+        <div className="w-full px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-14 items-center">
+            <div className="flex items-center space-x-4">
+              <Link href="/" className="flex-shrink-0 flex items-center">
+                <Logo className="h-12 w-auto" />
+                <span className="ml-2 text-xl font-bold text-white">
+                  SciPhi
+                </span>
+              </Link>
+              {isSignedIn && (
+                <>
+                  <span className="text-zinc-400">|</span>
+                  <NavItem href="/" isActive={pathname === '/'}>
+                    Home
+                  </NavItem>
+                  <NavItems
+                    isAuthenticated={isAuthenticated}
+                    effectiveRole={effectiveRole}
+                    pathname={pathname}
                   />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="admin">Admin View</SelectItem>
-                  <SelectItem value="user">User View</SelectItem>
-                </SelectContent>
-              </Select>
-            )}
-            <Button
-              className="rounded-md py-1 px-3 w-30"
-              color="filled"
-              onClick={() =>
-                window.open('https://r2r-docs.sciphi.ai', '_blank')
-              }
-            >
-              Docs
-            </Button>
-            {isAuthenticated && (
+                </>
+              )}
+            </div>
+            <div className="flex items-center space-x-4">
+              {isSignedIn && isAdmin && (
+                <Select onValueChange={toggleViewMode}>
+                  <SelectTrigger className="w-30 rounded-md py-1 px-3">
+                    <SelectValue
+                      placeholder={
+                        viewMode === 'admin' ? 'Admin View' : 'User View'
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="admin">Admin View</SelectItem>
+                    <SelectItem value="user">User View</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
               <Button
-                onClick={handleLogout}
-                color="danger"
-                className="rounded-md py-1 px-3 w-30"
+                color="primary"
+                shape="outline_wide"
+                onClick={() =>
+                  window.open('https://r2r-docs.sciphi.ai', '_blank')
+                }
               >
-                Logout
+                Docs
               </Button>
-            )}
+              {isSignedIn && (
+                <Button
+                  onClick={handleLogout}
+                  color="danger"
+                  className="rounded-md py-1 px-3 w-30"
+                >
+                  Logout
+                </Button>
+              )}
+            </div>
           </div>
         </div>
-      </motion.div>
+      </nav>
     );
   }
 );

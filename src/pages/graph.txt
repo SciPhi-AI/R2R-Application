@@ -1,0 +1,81 @@
+'use client';
+import dynamic from 'next/dynamic';
+import React, { Suspense, useCallback } from 'react';
+
+import DocumentsTable from '@/components/DocumentsTable';
+import Layout from '@/components/Layout';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/Button';
+import { useUserContext } from '@/context/UserContext';
+
+const DynamicGraph = dynamic(() => import('@/components/Graph'), {
+  ssr: false,
+  loading: () => <p>Loading Graph...</p>,
+});
+
+const Index: React.FC = () => {
+  const { pipeline, getClient } = useUserContext();
+
+  const enrichGraph = useCallback(async () => {
+    if (!pipeline?.deploymentUrl) {
+      console.error('No pipeline deployment URL available');
+      return;
+    }
+
+    try {
+      const client = await getClient();
+      if (!client) {
+        throw new Error('Failed to get authenticated client');
+      }
+
+      const data = await client.enrichGraph();
+    } catch (error) {
+      console.error('Error enriching graph:', error);
+    }
+  }, [pipeline?.deploymentUrl, getClient]);
+
+  return (
+    <Layout pageTitle="Documents">
+      <main className="max-w-7xl flex flex-col min-h-screen container">
+        <div className="flex flex-col lg:flex-row gap-4 mt-[5rem] sm:mt-[5rem]">
+          {/* Left column - Documents */}
+          <div className="w-full lg:w-1/2 flex flex-col gap-4">
+            <div className="flex-grow overflow-y-auto">
+              <DocumentsTable />
+            </div>
+            <Alert variant="default" className="flex flex-col">
+              <AlertTitle className="text-lg ">
+                <div className="flex gap-2 text-xl">
+                  <span className="text-gray-500 dark:text-gray-200 font-semibold">
+                    Building your Knowledge Graph
+                  </span>
+                </div>
+              </AlertTitle>
+              <AlertDescription>
+                You must run the enrich graph pipeline to populate your
+                knowledge graph. This pipeline will extract entities from your
+                documents and create relationships between them.
+              </AlertDescription>
+            </Alert>
+            <Button onClick={enrichGraph} className="w-full" color="filled">
+              Create Graph
+            </Button>
+            <Button onClick={enrichGraph} className="w-full" color="filled">
+              Enrich Graph
+            </Button>
+          </div>
+          {/* Right column - Graph */}
+          <div className="w-full lg:w-1/2 flex flex-col">
+            <div className="flex-grow overflow-y-auto">
+              <Suspense fallback={<div>Loading Graph...</div>}>
+                <DynamicGraph />
+              </Suspense>
+            </div>
+          </div>
+        </div>
+      </main>
+    </Layout>
+  );
+};
+
+export default Index;

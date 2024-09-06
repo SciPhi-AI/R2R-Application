@@ -7,9 +7,11 @@ import LogTable from '@/components/ui/logtable';
 import { useUserContext } from '@/context/UserContext';
 
 const Logs: React.FC = () => {
+  const { getClient, pipeline } = useUserContext();
+
   const [isLoading, setIsLoading] = useState(true);
   const [logs, setLogs] = useState<any[] | null>(null);
-  const { getClient, pipeline } = useUserContext();
+  const [selectedLogs, setSelectedLogs] = useState('ALL');
 
   const fetchLogs = async () => {
     try {
@@ -19,7 +21,6 @@ const Logs: React.FC = () => {
       }
 
       const data = await client.logs();
-      console.log('logs:', data);
       setLogs(Array.isArray(data.results) ? data.results : []);
     } catch (error) {
       console.error('Error fetching logs:', error);
@@ -36,18 +37,16 @@ const Logs: React.FC = () => {
   }, [pipeline?.deploymentUrl]);
 
   return (
-    <Layout pageTitle="Logs" includeFooter={false}>
-      <main className="w-full flex flex-col min-h-screen container">
-        <div className="absolute inset-0 bg-zinc-900 mt-[5rem] sm:mt-[5rem] ">
+    <Layout includeFooter={false}>
+      <main className="w-full flex flex-col container h-screen-[calc(100%-4rem)]">
+        <div className="absolute inset-0 bg-zinc-900 mt-[6rem]">
           <div className="mx-auto max-w-6xl mb-12 mt-4 absolute inset-4 md:inset-1">
             {isLoading ? (
               <Loader className="mx-auto mt-20 animate-spin" size={64} />
-            ) : logs === null ? (
-              <p>Error loading logs.</p>
-            ) : logs.length === 0 ? (
-              <p>No logs available.</p>
-            ) : (
+            ) : logs && logs.length > 0 ? (
               <LogTable logs={logs} />
+            ) : (
+              <p className="text-center mt-20 text-white">No logs available.</p>
             )}
           </div>
         </div>

@@ -3,6 +3,7 @@ import { FileUp } from 'lucide-react';
 import React, { useState, useRef } from 'react';
 
 import { Spinner } from '@/components/Spinner';
+import { Button } from '@/components/ui/Button';
 import { useUserContext } from '@/context/UserContext';
 import { UpdateButtonContainerProps } from '@/types';
 
@@ -42,8 +43,8 @@ const UpdateButtonContainer: React.FC<UpdateButtonContainerProps> = ({
 
         showToast({
           variant: 'success',
-          title: 'Update Successful',
-          description: 'The document has been updated',
+          title: 'Upload Successful',
+          description: 'All files have been uploaded successfully.',
         });
         onUpdateSuccess();
       } catch (error: any) {
@@ -51,7 +52,7 @@ const UpdateButtonContainer: React.FC<UpdateButtonContainerProps> = ({
         console.error('Error details:', error.response?.data);
         showToast({
           variant: 'destructive',
-          title: 'Update Failed',
+          title: 'Upload Failed',
           description: error.message || 'An unknown error occurred',
         });
       } finally {
@@ -71,21 +72,18 @@ const UpdateButtonContainer: React.FC<UpdateButtonContainerProps> = ({
 
   return (
     <div>
-      <button
+      <Button
         onClick={handleUpdateButtonClick}
         disabled={isUpdating}
-        className={`update-button text-white font-bold rounded flex items-center justify-center ${
-          isUpdating
-            ? 'bg-gray-400 cursor-not-allowed'
-            : 'hover:bg-indigo-700 bg-indigo-500'
-        }`}
+        color={isUpdating ? 'disabled' : 'filled'}
+        shape="slim"
       >
         {isUpdating ? (
           <Spinner className="h-5 w-5 text-white" />
         ) : (
           <FileUp className="h-8 w-8" />
         )}
-      </button>
+      </Button>
       <input
         type="file"
         ref={fileInputRef}

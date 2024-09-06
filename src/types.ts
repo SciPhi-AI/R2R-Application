@@ -57,6 +57,16 @@ export interface DocumentFilterCriteria {
   order: 'asc' | 'desc';
 }
 
+export enum IngestionStatus {
+  PENDING = 'pending',
+  PARSING = 'parsing',
+  CHUNKING = 'chunking',
+  EMBEDDING = 'embedding',
+  STORING = 'storing',
+  FAILURE = 'failure',
+  SUCCESS = 'success',
+}
+
 export interface DocumentInfoType {
   id: string;
   user_id: string;
@@ -74,6 +84,7 @@ export interface DocumentInfoType {
 
 export interface DocumentInfoDialogProps {
   documentId: string;
+  apiUrl?: string;
   open: boolean;
   onClose: () => void;
 }
@@ -275,6 +286,7 @@ export interface SpinnerProps {
 export type TagColor = 'rose' | 'amber' | 'emerald' | 'zinc' | 'indigo' | 'sky';
 
 export interface UpdateButtonContainerProps {
+  apiUrl?: string;
   documentId: string;
   onUpdateSuccess: () => void;
   showToast: (message: {
@@ -288,18 +300,6 @@ export interface UpdateButtonProps {
   userId: string;
   documentId: string;
   onUpdateSuccess: () => void;
-  showToast?: (message: {
-    title: string;
-    description: string;
-    variant: 'default' | 'destructive' | 'success';
-  }) => void;
-}
-
-export interface UploadButtonProps {
-  userId: string | null;
-  uploadedDocuments: any[];
-  onUploadSuccess?: () => void;
-  setUploadedDocuments: (docs: any[]) => void;
   showToast?: (message: {
     title: string;
     description: string;

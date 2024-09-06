@@ -1,3 +1,4 @@
+import { Loader } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
 import {
@@ -14,17 +15,20 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
   open,
   onClose,
 }) => {
+  const [loading, setLoading] = useState(true);
   const [documentChunks, setDocumentChunks] = useState<DocumentChunk[]>([]);
   const { getClient } = useUserContext();
 
   useEffect(() => {
     const fetchDocumentChunks = async () => {
+      setLoading(true);
       try {
         const client = await getClient();
         if (!client) {
           throw new Error('Failed to get authenticated client');
         }
 
+        const overview = await client.documentsOverview([documentId]);
         const chunks = await client.documentChunks(documentId);
 
         setDocumentChunks(
@@ -35,6 +39,8 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
       } catch (error) {
         console.error('Error fetching document chunks:', error);
         setDocumentChunks([]);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -45,19 +51,27 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl">
+      <DialogContent className="text-white max-w-4xl">
         <DialogHeader>
-          <DialogTitle>Document Chunks</DialogTitle>
+          <DialogTitle className="text-2xl font-bold">
+            Document Chunks
+          </DialogTitle>
         </DialogHeader>
-        <div className="mt-4 space-y-4 max-h-96 overflow-y-auto">
-          {documentChunks.map((chunk, index) => (
-            <div key={index} className="bg-zinc-800 p-4 rounded-lg">
-              <p className="text-sm text-zinc-400 mb-2">
-                Chunk: {chunk.chunk_order}
-              </p>
-              <p className="text-white">{chunk.text}</p>
+        <div className="mt-4 space-y-2 h-96 overflow-y-auto">
+          {loading ? (
+            <Loader className="mx-auto mt-20 animate-spin" size={64} />
+          ) : (
+            <div className="grid grid-cols-1 gap-2">
+              {documentChunks.map((chunk, index) => (
+                <div key={index} className="py-2 border-b border-gray-700">
+                  <p className="text-sm text-gray-400 mb-2">
+                    Chunk: {chunk.chunk_order}
+                  </p>
+                  <p className="text-white">{chunk.text}</p>
+                </div>
+              ))}
             </div>
-          ))}
+          )}
         </div>
       </DialogContent>
     </Dialog>

@@ -2,7 +2,7 @@
   "name": "r2r-dashboard",
   "version": "1.0.0",
   "private": true,
-  "proxy": "http://localhost:8000",
+  "proxy": "http://localhost:7272",
   "scripts": {
     "dev": "NEXT_PUBLIC_CLOUD_MODE=false next dev -p 3005",
     "dev:cloud": "NEXT_PUBLIC_CLOUD_MODE=true next dev",
@@ -72,9 +72,12 @@
     "chart.js": "^4.4.3",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "d3": "^7.9.0",
     "d3-array": "^3.2.4",
+    "d3-force": "^3.0.0",
     "d3-geo": "^3.1.1",
     "date-fns": "^3.6.0",
+    "force-graph": "^1.43.5",
     "framer-motion": "^11.3.8",
     "fs": "0.0.1-security",
     "lucide-react": "^0.395.0",
@@ -107,7 +110,9 @@
     "zustand": "^4.5.4"
   },
   "devDependencies": {
+    "@types/d3": "^7.4.3",
     "@types/d3-array": "^3.2.1",
+    "@types/d3-force": "^3.0.10",
     "@types/node": "20.14.6",
     "@types/react": "18.3.3",
     "@types/topojson-client": "^3.1.4",

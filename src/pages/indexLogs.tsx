@@ -30,8 +30,6 @@ const LogTable = ({ logs, loading }: { logs: Log[]; loading: boolean }) => {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = (logs || []).slice(indexOfFirstItem, indexOfLastItem);
 
-  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
-
   const sortedLogs = useMemo(() => {
     return [...currentItems].sort((a, b) => {
       if (a[sortField as keyof Log] < b[sortField as keyof Log]) {
@@ -43,6 +41,12 @@ const LogTable = ({ logs, loading }: { logs: Log[]; loading: boolean }) => {
       return 0;
     });
   }, [currentItems, sortField, sortDirection]);
+
+  const totalPages = Math.ceil(sortedLogs.length / itemsPerPage);
+
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
 
   return (
     <div className="min-h-screen w-full">
@@ -140,11 +144,9 @@ const LogTable = ({ logs, loading }: { logs: Log[]; loading: boolean }) => {
           </div>
         </main>
         <Pagination
-          totalItems={logs?.length}
-          itemsPerPage={itemsPerPage}
           currentPage={currentPage}
-          onPageChange={paginate}
-          className="mb-4"
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
         />
       </div>
     </div>
