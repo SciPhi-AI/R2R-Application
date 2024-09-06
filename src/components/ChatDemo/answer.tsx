@@ -141,12 +141,6 @@ export const Answer: FC<{
         </div>
       )}
 
-      {mode === 'rag_agent' && !showSourcesAccordion && !showNoSourcesFound && (
-        <div className="flex items-center py-2">
-          <Logo width={25} disableLink={true} />
-        </div>
-      )}
-
       <div className="space-y-4 mt-4">
         {message.content ? (
           <div className="prose prose-sm max-w-full text-zinc-300 overflow-y-auto max-h-[700px] prose-headings:text-white prose-p:text-white prose-strong:text-white prose-code:text-white">
