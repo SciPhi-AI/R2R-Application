@@ -233,6 +233,10 @@ export interface SidebarProps {
   searchFilters: string;
   setSearchFilters: (filters: string) => void;
   selectedModel: string;
+  kgSearchType: 'local' | 'global';
+  setKgSearchType: (type: 'local' | 'global') => void;
+  max_llm_queries_for_global_search: number;
+  setMax_llm_queries_for_global_search: (value: number) => void;
   top_k: number;
   setTop_k: (value: number) => void;
   max_tokens_to_sample: number;

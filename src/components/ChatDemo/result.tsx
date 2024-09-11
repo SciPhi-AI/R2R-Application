@@ -28,6 +28,8 @@ export const Result: FC<{
   pipelineUrl: string | null;
   search_limit: number;
   search_filters: Record<string, unknown>;
+  kg_search_type: 'local' | 'global';
+  max_llm_queries_for_global_search: number;
   rag_temperature: number | null;
   rag_topP: number | null;
   rag_topK: number | null;
@@ -45,6 +47,8 @@ export const Result: FC<{
   pipelineUrl,
   search_limit,
   search_filters,
+  kg_search_type,
+  max_llm_queries_for_global_search,
   rag_temperature,
   rag_topP,
   rag_topK,
@@ -156,6 +160,8 @@ export const Result: FC<{
 
       const kgSearchSettings: KGSearchSettings = {
         use_kg_search: switches.knowledge_graph_search?.checked ?? false,
+        kg_search_type: kg_search_type,
+        max_llm_queries_for_global_search: max_llm_queries_for_global_search,
       };
 
       const streamResponse =

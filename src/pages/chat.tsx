@@ -24,6 +24,8 @@ const Index: React.FC = () => {
   const [hasAttemptedFetch, setHasAttemptedFetch] = useState(false);
   const [searchLimit, setSearchLimit] = useState(10);
   const [searchFilters, setSearchFilters] = useState('{}');
+  const [kgSearchType, setKgSearchType] = useState<'local' | 'global'>('local');
+  const [max_llm_queries_for_global_search, setMax_llm_queries_for_global_search] = useState(100);
   const [mode, setMode] = useState<'rag' | 'rag_agent'>('rag_agent');
   const [sidebarIsOpen, setSidebarIsOpen] = useState(false);
 
@@ -77,6 +79,12 @@ const Index: React.FC = () => {
       false,
       'Hybrid Search',
       'Hybrid search is a search method that combines multiple search methods to provide more accurate and relevant search results.'
+    );
+    initializeSwitch(
+      'knowledge_graph_search',
+      false,
+      'Knowledge Graph Search',
+      'Knowledge graph search is a search method that uses a knowledge graph to represent documents and queries. It is used to find similar documents to a given query.'
     );
   }, [initializeSwitch]);
 
@@ -142,7 +150,11 @@ const Index: React.FC = () => {
           setSearchLimit={setSearchLimit}
           searchFilters={searchFilters}
           setSearchFilters={setSearchFilters}
+          kgSearchType={kgSearchType}
+          setKgSearchType={setKgSearchType}
           selectedModel={selectedModel}
+          max_llm_queries_for_global_search={max_llm_queries_for_global_search}
+          setMax_llm_queries_for_global_search={setMax_llm_queries_for_global_search}
           top_k={top_k}
           setTop_k={setTop_k}
           max_tokens_to_sample={max_tokens_to_sample}
@@ -187,8 +199,12 @@ const Index: React.FC = () => {
                   pipelineUrl={pipeline?.deploymentUrl || ''}
                   search_limit={searchLimit}
                   search_filters={safeJsonParse(searchFilters)}
+                  kg_search_type={kgSearchType}
+                  setKgSearchType={setKgSearchType}
+                  max_llm_queries_for_global_search={max_llm_queries_for_global_search}
+                  setMax_llm_queries_for_global_search={setMax_llm_queries_for_global_search}
                   rag_temperature={temperature}
-                  rag_topP={topP}
+                  rag_topP={topP
                   rag_topK={top_k}
                   rag_maxTokensToSample={max_tokens_to_sample}
                   uploadedDocuments={uploadedDocuments}

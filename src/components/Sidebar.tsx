@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import ModelSelector from '@/components/ui/ModelSelector';
 import { Slider } from '@/components/ui/slider';
 import { SidebarProps } from '@/types';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const Sidebar: React.FC<SidebarProps> = ({
   isOpen,
@@ -17,6 +18,10 @@ const Sidebar: React.FC<SidebarProps> = ({
   setSearchLimit,
   searchFilters,
   setSearchFilters,
+  kgSearchType,
+  setKgSearchType,
+  max_llm_queries_for_global_search,
+  setMax_llm_queries_for_global_search,
   selectedModel,
   top_k,
   setTop_k,
@@ -76,6 +81,38 @@ const Sidebar: React.FC<SidebarProps> = ({
                 type="text"
                 value={searchFilters}
                 onChange={(e) => setSearchFilters(e.target.value)}
+              />
+            </div>
+
+            {/* KG search settings */}
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="kg_search_type">KG Search Type</Label>
+              <Select
+                id="kg_search_type"
+                value={kgSearchType}
+                onValueChange={setKgSearchType}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select KG search type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="local">Local</SelectItem>
+                  <SelectItem value="global">Global</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="max_llm_queries_for_global_search">
+                Max LLM Queries for Global Search
+              </Label>
+              <Input
+                id="max_llm_queries_for_global_search"
+                type="number"
+                value={max_llm_queries_for_global_search}
+                onChange={(e) =>
+                  setMax_llm_queries_for_global_search(Number(e.target.value))
+                }
               />
             </div>
 
