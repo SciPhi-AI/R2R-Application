@@ -281,6 +281,7 @@ export interface Source {
   };
   isNavigational: boolean;
   metadata: any;
+  text: string;
 }
 
 export interface SpinnerProps {

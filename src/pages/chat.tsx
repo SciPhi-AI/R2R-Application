@@ -143,7 +143,7 @@ const Index: React.FC = () => {
 
   return (
     <Layout pageTitle="Chat" includeFooter={false}>
-      <div className="flex h-[calc(100vh)] pt-16">
+      <div className="flex flex-col h-screen-[calc(100%-4rem)] overflow-hidden">
         <Sidebar
           isOpen={sidebarIsOpen}
           onToggle={toggleSidebar}
