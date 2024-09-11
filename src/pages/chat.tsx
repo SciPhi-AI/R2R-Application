@@ -204,7 +204,7 @@ const Index: React.FC = () => {
                   max_llm_queries_for_global_search={max_llm_queries_for_global_search}
                   setMax_llm_queries_for_global_search={setMax_llm_queries_for_global_search}
                   rag_temperature={temperature}
-                  rag_topP={topP
+                  rag_topP={topP}
                   rag_topK={top_k}
                   rag_maxTokensToSample={max_tokens_to_sample}
                   uploadedDocuments={uploadedDocuments}
