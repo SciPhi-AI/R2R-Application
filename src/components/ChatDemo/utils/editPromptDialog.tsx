@@ -66,9 +66,7 @@ const EditPromptDialog: React.FC<EditPromptDialogProps> = ({
               placeholder="Enter prompt template"
               rows={10}
             />
-            <Button onClick={handleSave} color="light">
-              Save
-            </Button>
+            <Button onClick={handleSave}>Save</Button>
           </div>
         </div>
       </DialogContent>

@@ -89,7 +89,7 @@
     "pnpm": "^9.5.0",
     "postcss": "^8.4.39",
     "posthog-js": "^1.148.0",
-    "r2r-js": "^0.3.0",
+    "r2r-js": "file:/Users/nolantremelling/R2R/js/sdk/r2r-js-0.3.1.tgz",
     "radix-ui": "^1.0.1",
     "react": "18.3.1",
     "react-chartjs-2": "^5.2.0",

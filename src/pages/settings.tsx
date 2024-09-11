@@ -1,4 +1,4 @@
-import { SquarePen } from 'lucide-react';
+import { SquarePen, ChevronDown, ChevronUp } from 'lucide-react';
 import React, { useState, useEffect, useCallback } from 'react';
 import toml from 'toml';
 
@@ -68,6 +68,43 @@ const renderNestedConfig = (
         </React.Fragment>
       ))}
     </>
+  );
+};
+
+interface PromptRowProps {
+  name: string;
+  prompt: Prompt;
+  onEdit: (name: string, template: string) => void;
+}
+
+const PromptRow: React.FC<PromptRowProps> = ({ name, prompt, onEdit }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  return (
+    <div className="flex flex-col border-t border-gray-600">
+      <div className="flex items-center">
+        <div className="w-1/4 px-4 py-2 text-white truncate">{name}</div>
+        <div className="w-3/4 px-4 py-2 text-white relative flex items-center">
+          <div className="flex-grow mr-16 overflow-hidden">
+            <div className={`${isExpanded ? '' : 'truncate'}`}>
+              {prompt.template}
+            </div>
+          </div>
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="absolute right-12 text-gray-400 hover:text-indigo-500"
+          >
+            {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+          </button>
+          <button
+            onClick={() => onEdit(name, prompt.template)}
+            className="absolute right-2 text-gray-400 hover:text-indigo-500"
+          >
+            <SquarePen size={20} />
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
 
@@ -152,7 +189,7 @@ const Index: React.FC = () => {
               {activeTab === 'config' && (
                 <>
                   <h4 className="text-xl font-bold text-white pb-2">Config</h4>
-                  <div className="overflow-x-auto">
+                  <div className="overflow-x-auto max-w-full">
                     <table className="w-full bg-zinc-800 border border-gray-600">
                       <thead>
                         <tr className="border-b border-gray-600">
@@ -185,52 +222,29 @@ const Index: React.FC = () => {
               {activeTab === 'prompts' && (
                 <>
                   <h4 className="text-xl font-bold text-white pb-2">Prompts</h4>
-                  <div className="overflow-x-auto">
-                    <table className="w-full bg-zinc-800 border border-gray-600">
-                      <thead>
-                        <tr className="border-b border-gray-600">
-                          <th className="w-1/3 px-4 py-2 text-left text-white">
-                            Name
-                          </th>
-                          <th className="w-2/3 px-4 py-2 text-left text-white">
-                            Template
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {Object.entries(prompts).length > 0 ? (
-                          Object.entries(prompts).map(([name, prompt]) => (
-                            <tr key={name} className="border-t border-gray-600">
-                              <td className="w-1/3 px-4 py-2 text-white">
-                                {name}
-                              </td>
-                              <td className="w-2/3 px-4 py-2 text-white relative">
-                                <div className="whitespace-pre-wrap font-sans pr-8 max-h-32 overflow-y-auto">
-                                  {prompt.template}
-                                </div>
-                                <button
-                                  onClick={() =>
-                                    handleEditPrompt(name, prompt.template)
-                                  }
-                                  className="absolute top-2 right-2 text-gray-400 cursor-pointer hover:text-indigo-500"
-                                >
-                                  <SquarePen className="h-5 w-5" />
-                                </button>
-                              </td>
-                            </tr>
-                          ))
-                        ) : (
-                          <tr>
-                            <td
-                              colSpan={2}
-                              className="px-4 py-2 text-white text-center"
-                            >
-                              No prompts available
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
+                  <div className="overflow-x-auto max-w-full">
+                    <div className="w-full bg-zinc-800 border border-gray-600">
+                      <div className="flex border-b border-gray-600 font-bold">
+                        <div className="w-1/4 px-4 py-2 text-white">Name</div>
+                        <div className="w-3/4 px-4 py-2 text-white">
+                          Template
+                        </div>
+                      </div>
+                      {Object.entries(prompts).length > 0 ? (
+                        Object.entries(prompts).map(([name, prompt]) => (
+                          <PromptRow
+                            key={name}
+                            name={name}
+                            prompt={prompt}
+                            onEdit={handleEditPrompt}
+                          />
+                        ))
+                      ) : (
+                        <div className="px-4 py-2 text-white text-center">
+                          No prompts available
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </>
               )}

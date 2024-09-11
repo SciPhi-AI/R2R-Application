@@ -51,7 +51,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const [selectedModel, setSelectedModel] = useState(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('selectedModel') || 'gpt-4o';
+      return localStorage.getItem('selectedModel') || '';
     }
     return 'null';
   });
