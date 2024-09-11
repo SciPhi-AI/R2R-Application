@@ -5,9 +5,15 @@ import SingleSwitch from '@/components/ChatDemo/SingleSwitch';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import ModelSelector from '@/components/ui/ModelSelector';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { SidebarProps } from '@/types';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const Sidebar: React.FC<SidebarProps> = ({
   isOpen,
@@ -83,7 +89,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 onChange={(e) => setSearchFilters(e.target.value)}
               />
             </div>
-          
+
             <h3 className="text-lg font-semibold text-indigo-400 pt-4">
               RAG Generation Config
             </h3>
@@ -146,19 +152,15 @@ const Sidebar: React.FC<SidebarProps> = ({
             <br />
 
             <div className="space-y-4 mb-4">
-            <h3 className="text-lg font-semibold text-indigo-400 mt-2">
-              KG Search Settings 
-            </h3>
-                  Enabled only if your knowledge graph is constructed.
+              <h3 className="text-lg font-semibold text-indigo-400 mt-2">
+                KG Search Settings
+              </h3>
+              Enabled only if your knowledge graph is constructed.
             </div>
-            
+
             <div className="flex flex-col gap-2">
               <Label htmlFor="kg_search_type">KG Search Type</Label>
-              <Select
-                id="kg_search_type"
-                value={kgSearchType}
-                onValueChange={setKgSearchType}
-              >
+              <Select value={kgSearchType} onValueChange={setKgSearchType}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select KG search type" />
                 </SelectTrigger>
