@@ -83,39 +83,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 onChange={(e) => setSearchFilters(e.target.value)}
               />
             </div>
-
-            {/* KG search settings */}
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="kg_search_type">KG Search Type</Label>
-              <Select
-                id="kg_search_type"
-                value={kgSearchType}
-                onValueChange={setKgSearchType}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select KG search type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="local">Local</SelectItem>
-                  <SelectItem value="global">Global</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="max_llm_queries_for_global_search">
-                Max LLM Queries for Global Search
-              </Label>
-              <Input
-                id="max_llm_queries_for_global_search"
-                type="number"
-                value={max_llm_queries_for_global_search}
-                onChange={(e) =>
-                  setMax_llm_queries_for_global_search(Number(e.target.value))
-                }
-              />
-            </div>
-
+          
             <h3 className="text-lg font-semibold text-indigo-400 pt-4">
               RAG Generation Config
             </h3>
@@ -173,6 +141,46 @@ const Sidebar: React.FC<SidebarProps> = ({
                 />
                 <span className="text-sm">{topP.toFixed(2)}</span>
               </div>
+            </div>
+
+            <br />
+
+            <div className="space-y-4 mb-4">
+            <h3 className="text-lg font-semibold text-indigo-400 mt-2">
+              KG Search Settings 
+            </h3>
+                  Enabled only if your knowledge graph is constructed.
+            </div>
+            
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="kg_search_type">KG Search Type</Label>
+              <Select
+                id="kg_search_type"
+                value={kgSearchType}
+                onValueChange={setKgSearchType}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select KG search type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="local">Local</SelectItem>
+                  <SelectItem value="global">Global</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="max_llm_queries_for_global_search">
+                Max LLM Queries for Global Search
+              </Label>
+              <Input
+                id="max_llm_queries_for_global_search"
+                type="number"
+                value={max_llm_queries_for_global_search}
+                onChange={(e) =>
+                  setMax_llm_queries_for_global_search(Number(e.target.value))
+                }
+              />
             </div>
           </div>
         </div>

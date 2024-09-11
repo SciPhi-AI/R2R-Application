@@ -84,7 +84,7 @@ const Index: React.FC = () => {
       'knowledge_graph_search',
       false,
       'Knowledge Graph Search',
-      'Knowledge graph search is a search method that uses a knowledge graph to represent documents and queries. It is used to find similar documents to a given query.'
+      'Please construct a Knowledge Graph to use this feature.'
     );
   }, [initializeSwitch]);
 
