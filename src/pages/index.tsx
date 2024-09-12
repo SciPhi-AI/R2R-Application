@@ -5,6 +5,7 @@ import {
   BarChart2,
   FileSearch,
   Users,
+  Settings,
 } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
@@ -103,8 +104,18 @@ const HomePage = () => {
                           Analytics
                         </h3>
                         <p className="text-xs text-gray-500 dark:text-gray-400">
-                          View aggregate statistics around latencies and metrics
-                          with detailed histograms.
+                          Rich analytics and insights on your users' queries and
+                          interactions.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start space-x-3">
+                      <Settings className="w-5 h-5 text-primary" />
+                      <div>
+                        <h3 className="text-sm font-semibold mb-1">Settings</h3>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          Manage your R2R deployment settings and
+                          configurations.
                         </p>
                       </div>
                     </div>

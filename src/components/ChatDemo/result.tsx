@@ -198,7 +198,25 @@ export const Result: FC<{
           if (buffer.includes(SEARCH_END_TOKEN)) {
             const [results, rest] = buffer.split(SEARCH_END_TOKEN);
             sourcesContent = results.replace(SEARCH_START_TOKEN, '');
-            updateLastMessage(undefined, sourcesContent);
+            const formattedSources = sourcesContent
+              .split('\n')
+              .filter((line) => line.trim() !== '')
+              .map((line) => {
+                try {
+                  return JSON.stringify(JSON.parse(line));
+                } catch (error) {
+                  console.error('Error parsing source line:', error);
+                  return null;
+                }
+              })
+              .filter(Boolean)
+              .join(',');
+            updateLastMessage(
+              undefined,
+              `[${formattedSources}]`,
+              undefined,
+              true
+            );
             buffer = rest || '';
             setIsSearching(false);
           }

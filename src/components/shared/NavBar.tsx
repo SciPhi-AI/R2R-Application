@@ -1,4 +1,3 @@
-import clsx from 'clsx';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useRouter } from 'next/router';
@@ -98,10 +97,12 @@ export const Navbar = forwardRef<React.ElementRef<'nav'>, NavbarProps>(
       router.push('/login');
     };
 
+    const isChatPage = router.pathname.includes('/chat');
+
     return (
       <nav
         ref={ref}
-        className={clsx(className, 'bg-zinc-900 shadow sticky top-0 z-50')}
+        className={`bg-zinc-900 shadow ${isChatPage ? '' : 'sticky'} z-50`}
       >
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-14 items-center">

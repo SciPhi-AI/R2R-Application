@@ -19,14 +19,14 @@ import { Message } from '@/types';
 import { Source } from '@/types';
 
 const SourceItem: FC<{ source: Source }> = ({ source }) => {
-  const { id, score, metadata } = source;
+  const { id, score, metadata, text } = source;
 
   return (
     <div className="bg-zinc-700 p-3 rounded-lg mb-2" style={{ width: '100%' }}>
       <h3 className="text-xs font-medium text-zinc-200 mb-1">
         {metadata.title} (Similarity: {score.toFixed(3)})
       </h3>
-      <p className="text-xs text-zinc-400">{metadata.text}</p>
+      <p className="text-xs text-zinc-400">{text}</p>
     </div>
   );
 };
@@ -56,7 +56,11 @@ const parseSources = (sources: string | object): Source[] => {
     try {
       const partialParsedSources = JSON.parse(jsonArrayString);
       return partialParsedSources.map((source: any) => {
-        return JSON.parse(source);
+        const parsedSource = JSON.parse(source);
+        return {
+          ...parsedSource,
+          text: parsedSource.text || '',
+        };
       });
     } catch (error) {
       console.error('Failed to parse sources:', error);
@@ -109,7 +113,12 @@ export const Answer: FC<{
           <AccordionItem value="answer">
             <AccordionTrigger className="py-2 text-lg font-bold text-zinc-200 hover:no-underline">
               <div className="flex items-center justify-between w-full">
-                <Logo width={25} disableLink={true} />
+                <Logo
+                  width={25}
+                  height={25}
+                  disableLink={true}
+                  className="w-12 h-12"
+                />
                 <span className="text-sm font-normal">
                   {isSearching ? (
                     <span className="searching-animation">
