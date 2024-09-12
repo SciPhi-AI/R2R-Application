@@ -189,8 +189,8 @@ importers:
         specifier: ^1.148.0
         version: 1.148.0
       r2r-js:
-        specifier: file:/Users/nolantremelling/R2R/js/sdk/r2r-js-0.3.1.tgz
-        version: file:../R2R/js/sdk/r2r-js-0.3.1.tgz
+        specifier: ^0.3.0
+        version: 0.3.0
       radix-ui:
         specifier: ^1.0.1
         version: 1.0.1(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -4887,9 +4887,8 @@ packages:
   queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
 
-  r2r-js@file:../R2R/js/sdk/r2r-js-0.3.1.tgz:
-    resolution: {integrity: sha512-3IWPjHZ7TmXiBC+VWoTsu1+NccMiuXjR+R+meMPxsul8fAytsQu1SnQTIbYs/811IidE7GKjR4+xEu0+JpqHQw==, tarball: file:../R2R/js/sdk/r2r-js-0.3.1.tgz}
-    version: 0.3.1
+  r2r-js@0.3.0:
+    resolution: {integrity: sha512-BfgFwEmh0fzQ8/3WjfEWy8Pt1F/CTKYKEk+YXPzD91j3xcmrzOzAOFk6okV6e0dStfCj6PalPtFFxMGX1skRog==}
 
   radix-ui@1.0.1:
     resolution: {integrity: sha512-qfGibbqtbOlxP3b+1JjbLUc8Q7+e9DL8gFycLtkBkoAQyUkKuHAEBfFUcyG5MaQHjqRuML+YLtt/R1/dUYQafQ==}
@@ -11979,7 +11978,7 @@ snapshots:
 
   queue-microtask@1.2.3: {}
 
-  r2r-js@file:../R2R/js/sdk/r2r-js-0.3.1.tgz:
+  r2r-js@0.3.0:
     dependencies:
       axios: 1.7.7
       form-data: 4.0.0
