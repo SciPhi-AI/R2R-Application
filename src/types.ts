@@ -90,8 +90,13 @@ export interface DocumentInfoDialogProps {
 }
 
 export interface DocumentChunk {
-  chunk_order: number;
+  fragment_id: string;
+  extraction_id: string;
+  document_id: string;
+  user_id: string;
+  group_ids: string[];
   text: string;
+  metadata: { [key: string]: any };
 }
 
 export interface EditPromptDialogProps {

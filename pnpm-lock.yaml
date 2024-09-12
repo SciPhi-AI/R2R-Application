@@ -2775,8 +2775,8 @@ packages:
   axios@1.7.2:
     resolution: {integrity: sha512-2A8QhOMrbomlDuiLeK9XibIBzuHeRcqqNOHp0Cyp5EoJ1IFDh+XZH3A6BkXtv0K4gFGCI0Y4BM7B1wOEi0Rmgw==}
 
-  axios@1.7.5:
-    resolution: {integrity: sha512-fZu86yCo+svH3uqJ/yTdQ0QHpQu5oL+/QE+QPSv6BZSkDAoky9vytxp7u5qk83OJFS3kEBcesWni9WTZAv3tSw==}
+  axios@1.7.7:
+    resolution: {integrity: sha512-S4kL7XrjgBmvdGut0sN3yJxqYzrDOnivkBiN0OFs6hLiUam3UPvswUo0kqGyhqUZGEOytHyumEdXsAkgCOUf3Q==}
 
   axobject-query@3.1.1:
     resolution: {integrity: sha512-goKlv8DZrK9hUh975fnHzhNIO4jUnFCfv/dszV5VwUGDFjI6vQ2VwoyjYjYNEbBE8AH87TduWP5uyDR1D+Iteg==}
@@ -4842,11 +4842,11 @@ packages:
   posthog-js@1.148.0:
     resolution: {integrity: sha512-nydf+aret26YViDBwH7DdN/c8dmCzQGNQ1yredeE47UlbpJ3J/iTgskNdmGJIofFcdSagcwAE/FF7s++YfTtvg==}
 
-  posthog-js@1.157.2:
-    resolution: {integrity: sha512-ATYKGs+Q51u26nHHhrhWNh1whqFm7j/rwQQYw+y6/YzNmRlo+YsqrGZji9nqXb9/4fo0ModDr+ZmuOI3hKkUXA==}
+  posthog-js@1.161.3:
+    resolution: {integrity: sha512-TQ77jtLemkUJUyJAPrwGay6tLqcAmXEM1IJgXOx5Tr4UohiTx8JTznzrCuh/SdwPIrbcSM1r2YPwb72XwTC3wg==}
 
-  posthog-node@4.1.1:
-    resolution: {integrity: sha512-hva26cNSz62H76blhWUF8mZmE3Q81KTrkkpHEZlD00qDov/phLQCrKQnxwjiAN3yI9pv/0/uwte6Gluy1xBmUA==}
+  posthog-node@4.2.0:
+    resolution: {integrity: sha512-hgyCYMyzMvuF3qWMw6JvS8gT55v7Mtp5wKWcnDrw+nu39D0Tk9BXD7I0LOBp0lGlHEPaXCEVYUtviNKrhMALGA==}
     engines: {node: '>=15.0.0'}
 
   preact@10.22.1:
@@ -9144,7 +9144,7 @@ snapshots:
     transitivePeerDependencies:
       - debug
 
-  axios@1.7.5:
+  axios@1.7.7:
     dependencies:
       follow-redirects: 1.15.6
       form-data: 4.0.0
@@ -11937,15 +11937,15 @@ snapshots:
       preact: 10.22.1
       web-vitals: 4.2.2
 
-  posthog-js@1.157.2:
+  posthog-js@1.161.3:
     dependencies:
       fflate: 0.4.8
       preact: 10.22.1
       web-vitals: 4.2.2
 
-  posthog-node@4.1.1:
+  posthog-node@4.2.0:
     dependencies:
-      axios: 1.7.5
+      axios: 1.7.7
       rusha: 0.8.14
     transitivePeerDependencies:
       - debug
@@ -11980,10 +11980,10 @@ snapshots:
 
   r2r-js@0.3.0:
     dependencies:
-      axios: 1.7.5
+      axios: 1.7.7
       form-data: 4.0.0
-      posthog-js: 1.157.2
-      posthog-node: 4.1.1
+      posthog-js: 1.161.3
+      posthog-node: 4.2.0
       uuid: 10.0.0
     transitivePeerDependencies:
       - debug
