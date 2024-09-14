@@ -3,6 +3,8 @@ import { Loader } from 'lucide-react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
+import PdfPreviewDialog from '@/components/ChatDemo/utils/pdfPreviewDialog';
+import { Button } from '@/components/ui/Button';
 import {
   Dialog,
   DialogContent,
@@ -61,6 +63,10 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
   const [documentChunks, setDocumentChunks] = useState<DocumentChunk[]>([]);
   const { getClient } = useUserContext();
 
+  // New state variables for PDF preview
+  const [pdfPreviewOpen, setPdfPreviewOpen] = useState(false);
+  const [initialPage, setInitialPage] = useState<number>(1); // Default to page 1
+
   useEffect(() => {
     const fetchDocumentInfo = async () => {
       setLoading(true);
@@ -93,77 +99,113 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
     }
   }, [open, documentId, getClient]);
 
+  const handleOpenPdfPreview = (page?: number) => {
+    if (page && page > 0) {
+      setInitialPage(page);
+    } else {
+      setInitialPage(1);
+    }
+    setPdfPreviewOpen(true);
+  };
+
+  const handleClosePdfPreview = () => {
+    setPdfPreviewOpen(false);
+    setInitialPage(1);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="text-white max-w-4xl">
-        <div className="mt-4 space-y-2 h-[calc(90vh-120px)] overflow-y-auto pr-4 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-300 -mr-4">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-bold mb-2">
-              Document Overview
-            </DialogTitle>
-          </DialogHeader>
-          {loading ? (
-            <Loader className="mx-auto mt-20 animate-spin" size={64} />
-          ) : (
-            <>
-              {documentOverview && (
-                <div className="grid grid-cols-1 gap-2 mb-4">
-                  <InfoRow label="Document ID" value={documentOverview.id} />
-                  <InfoRow label="Title" value={documentOverview.title} />
-                  <InfoRow label="Type" value={documentOverview.type} />
-                  <InfoRow
-                    label="Dates"
-                    values={[
-                      {
-                        label: 'Created',
-                        value: formatDate(documentOverview.created_at),
-                      },
-                      {
-                        label: 'Updated',
-                        value: formatDate(documentOverview.updated_at),
-                      },
-                    ]}
-                  />
-                  <InfoRow
-                    label="Status"
-                    values={[
-                      {
-                        label: 'Ingestion',
-                        value: documentOverview.ingestion_status,
-                      },
-                      {
-                        label: 'Restructuring',
-                        value: documentOverview.restructuring_status,
-                      },
-                    ]}
-                  />
-                  <InfoRow label="Version" value={documentOverview.version} />
-                  <InfoRow label="User ID" value={documentOverview.user_id} />
-                  <ExpandableInfoRow
-                    label="Group IDs"
-                    values={documentOverview.group_ids}
-                  />
-                  <InfoRow
-                    label="Metadata"
-                    values={[
-                      {
-                        label: 'Title',
-                        value: documentOverview.metadata?.title,
-                      },
-                      {
-                        label: 'Version',
-                        value: documentOverview.metadata?.version,
-                      },
-                    ]}
-                  />
-                </div>
-              )}
-              <ExpandableDocumentChunks chunks={documentChunks} />
-            </>
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
+    <>
+      <Dialog open={open} onOpenChange={onClose}>
+        <DialogContent className="text-white max-w-4xl">
+          <div className="mt-4 space-y-2 h-[calc(90vh-120px)] overflow-y-auto pr-4 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-300 -mr-4">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-bold mb-2">
+                Document Overview
+              </DialogTitle>
+            </DialogHeader>
+            {loading ? (
+              <Loader className="mx-auto mt-20 animate-spin" size={64} />
+            ) : (
+              <>
+                {documentOverview && (
+                  <div className="grid grid-cols-1 gap-2 mb-4">
+                    <InfoRow label="Document ID" value={documentOverview.id} />
+                    <InfoRow label="Title" value={documentOverview.title} />
+                    <InfoRow label="Type" value={documentOverview.type} />
+                    <InfoRow
+                      label="Dates"
+                      values={[
+                        {
+                          label: 'Created',
+                          value: formatDate(documentOverview.created_at),
+                        },
+                        {
+                          label: 'Updated',
+                          value: formatDate(documentOverview.updated_at),
+                        },
+                      ]}
+                    />
+                    <InfoRow
+                      label="Status"
+                      values={[
+                        {
+                          label: 'Ingestion',
+                          value: documentOverview.ingestion_status,
+                        },
+                        {
+                          label: 'Restructuring',
+                          value: documentOverview.restructuring_status,
+                        },
+                      ]}
+                    />
+                    <InfoRow label="Version" value={documentOverview.version} />
+                    <InfoRow label="User ID" value={documentOverview.user_id} />
+                    <ExpandableInfoRow
+                      label="Group IDs"
+                      values={documentOverview.group_ids}
+                    />
+                    <InfoRow
+                      label="Metadata"
+                      values={[
+                        {
+                          label: 'Title',
+                          value: documentOverview.metadata?.title,
+                        },
+                        {
+                          label: 'Version',
+                          value: documentOverview.metadata?.version,
+                        },
+                      ]}
+                    />
+                  </div>
+                )}
+                {documentOverview &&
+                  documentOverview.type &&
+                  ['pdf', 'application/pdf'].includes(
+                    documentOverview.type.toLowerCase()
+                  ) && (
+                    <div className="flex justify-end">
+                      <Button
+                        onClick={() => handleOpenPdfPreview()}
+                        color="filled"
+                      >
+                        Preview PDF
+                      </Button>
+                    </div>
+                  )}
+                <ExpandableDocumentChunks chunks={documentChunks} />
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+      <PdfPreviewDialog
+        documentId={documentId}
+        open={pdfPreviewOpen}
+        onClose={handleClosePdfPreview}
+        initialPage={initialPage}
+      />
+    </>
   );
 };
 
