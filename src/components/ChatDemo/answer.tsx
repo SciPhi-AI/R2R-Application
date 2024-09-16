@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { FileText } from 'lucide-react';
 import { FC } from 'react';
+import React, { useState, useEffect } from 'react';
 import Markdown from 'react-markdown';
 
 import {
@@ -15,18 +16,51 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import { Button } from '@/components/ui/Button';
 import { Message } from '@/types';
 import { Source } from '@/types';
 
-const SourceItem: FC<{ source: Source }> = ({ source }) => {
+const SourceItem: FC<{
+  source: Source;
+  onOpenPdfPreview: (documentId: string, page?: number) => void;
+}> = ({ source, onOpenPdfPreview }) => {
   const { id, score, metadata, text } = source;
 
+  const isPdf =
+    metadata.document_type === 'pdf' ||
+    metadata.unstructured_filetype === 'application/pdf';
+  const pageNumber = metadata.unstructured_page_number;
+
+  const handleOpenPdfPreview = () => {
+    if (source.document_id) {
+      onOpenPdfPreview(source.document_id, pageNumber);
+    }
+  };
+
   return (
-    <div className="bg-zinc-700 p-3 rounded-lg mb-2" style={{ width: '100%' }}>
-      <h3 className="text-xs font-medium text-zinc-200 mb-1">
-        {metadata.title} (Similarity: {score.toFixed(3)})
-      </h3>
-      <p className="text-xs text-zinc-400">{text}</p>
+    <div
+      className="bg-zinc-700 p-4 rounded-lg mb-2 flex items-center"
+      style={{ width: '100%' }}
+    >
+      <div className="flex-grow mr-4">
+        <h3 className="text-sm font-medium text-zinc-200 mb-1">
+          {metadata.title} (Similarity: {score.toFixed(3)})
+        </h3>
+        <p className="text-xs text-zinc-400">{text}</p>
+      </div>
+      {isPdf && (
+        <div className="flex-shrink-0">
+          <Button
+            onClick={handleOpenPdfPreview}
+            color="filled"
+            className="text-white font-bold flex items-center"
+            title={`Open PDF${pageNumber ? ` (Page ${pageNumber})` : ''}`}
+          >
+            <FileText size={16} className="mr-2" />
+            PDF
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
@@ -76,7 +110,8 @@ export const Answer: FC<{
   isStreaming: boolean;
   isSearching: boolean;
   mode: 'rag' | 'rag_agent';
-}> = ({ message, isStreaming, isSearching, mode }) => {
+  onOpenPdfPreview: (documentId: string, page?: number) => void;
+}> = ({ message, isStreaming, isSearching, mode, onOpenPdfPreview }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [parsedSources, setParsedSources] = useState<Source[]>([]);
 
@@ -134,7 +169,11 @@ export const Answer: FC<{
               <div className="space-y-2 pt-2">
                 <div className="space-y-2 max-h-60 overflow-y-auto">
                   {parsedSources.map((item: Source) => (
-                    <SourceItem key={item.id} source={item} />
+                    <SourceItem
+                      key={item.id}
+                      source={item}
+                      onOpenPdfPreview={onOpenPdfPreview}
+                    />
                   ))}
                 </div>
               </div>

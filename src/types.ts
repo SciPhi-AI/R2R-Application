@@ -270,6 +270,7 @@ export interface Source {
   title: string;
   snippet: string;
   id: string;
+  document_id?: string;
   score: number;
   link: string;
   isFamilyFriendly: boolean;
