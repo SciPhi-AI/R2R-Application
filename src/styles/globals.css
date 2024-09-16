@@ -264,3 +264,45 @@ a {
   height: 100%;
   overflow: hidden;
 }
+
+.col-checkbox {
+  min-width: 50px;
+  width: 5%;
+}
+.col-id {
+  width: 12%;
+}
+.col-title {
+  width: 12.5%;
+}
+.col-groupIds {
+  width: 10%;
+}
+.col-userId {
+  width: 12.5%;
+}
+.col-type {
+  width: 7%;
+}
+.col-metadata {
+  width: 11%;
+}
+.col-version {
+  width: 7%;
+}
+.col-ingestionStatus {
+  width: 11%;
+}
+.col-restructuringStatus {
+  width: 11%;
+}
+.col-createdAt {
+  width: 11%;
+}
+.col-updatedAt {
+  width: 13%;
+}
+.col-actions {
+  min-width: 110px;
+  width: 12%;
+}

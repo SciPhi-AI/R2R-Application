@@ -76,14 +76,14 @@ export interface DocumentInfoType {
   title: string;
   version: string;
   size_in_bytes: number;
-  ingestion_status: string;
+  ingestion_status: IngestionStatus;
   restructuring_status: string;
   created_at: string;
   updated_at: string;
 }
 
 export interface DocumentInfoDialogProps {
-  documentId: string;
+  id: string;
   apiUrl?: string;
   open: boolean;
   onClose: () => void;
@@ -298,7 +298,7 @@ export type TagColor = 'rose' | 'amber' | 'emerald' | 'zinc' | 'indigo' | 'sky';
 
 export interface UpdateButtonContainerProps {
   apiUrl?: string;
-  documentId: string;
+  id: string;
   onUpdateSuccess: () => void;
   showToast: (message: {
     title: string;
@@ -309,7 +309,7 @@ export interface UpdateButtonContainerProps {
 
 export interface UpdateButtonProps {
   userId: string;
-  documentId: string;
+  id: string;
   onUpdateSuccess: () => void;
   showToast?: (message: {
     title: string;

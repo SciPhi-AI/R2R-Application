@@ -22,7 +22,7 @@ import { Source } from '@/types';
 
 const SourceItem: FC<{
   source: Source;
-  onOpenPdfPreview: (documentId: string, page?: number) => void;
+  onOpenPdfPreview: (id: string, page?: number) => void;
 }> = ({ source, onOpenPdfPreview }) => {
   const { id, score, metadata, text } = source;
 
@@ -110,7 +110,7 @@ export const Answer: FC<{
   isStreaming: boolean;
   isSearching: boolean;
   mode: 'rag' | 'rag_agent';
-  onOpenPdfPreview: (documentId: string, page?: number) => void;
+  onOpenPdfPreview: (id: string, page?: number) => void;
 }> = ({ message, isStreaming, isSearching, mode, onOpenPdfPreview }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [parsedSources, setParsedSources] = useState<Source[]>([]);

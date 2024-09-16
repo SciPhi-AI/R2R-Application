@@ -4,8 +4,9 @@ import {
   ChevronDownSquare,
   FileSearch2,
   Filter,
+  SlidersHorizontal,
+  Loader,
 } from 'lucide-react';
-import { Loader } from 'lucide-react';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 
 import { DeleteButton } from '@/components/ChatDemo/deleteButton';
@@ -31,40 +32,16 @@ import {
 } from '@/components/ui/tooltip';
 import { useToast } from '@/components/ui/use-toast';
 import { useUserContext } from '@/context/UserContext';
-import { IngestionStatus } from '@/types';
+import { IngestionStatus, DocumentInfoType } from '@/types';
 
 interface DocumentFilterCriteria {
   sort: 'title' | 'date';
   order: 'asc' | 'desc';
 }
 
-interface DocumentInfoType {
-  id: string;
-  group_ids: string[];
-  user_id: string;
-  type: string;
-  metadata: any;
-  title: string;
-  version: string;
-  size_in_bytes: number;
-  ingestion_status: IngestionStatus;
-  restructuring_status: string;
-  created_at: string;
-  updated_at: string;
-}
-
 const MAX_RETRIES = 5;
 const RETRY_DELAY = 2000;
 const DOCUMENTS_PER_PAGE = 10;
-const columnWidths = {
-  checkbox: '5%',
-  title: '25%',
-  documentId: '15%',
-  userId: '15%',
-  updatedAt: '20%',
-  status: '10%',
-  actions: '10%',
-};
 
 const Index: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -80,19 +57,17 @@ const Index: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const { pipeline, getClient } = useUserContext();
-  const [statusFilter, setStatusFilter] = useState<
-    Record<IngestionStatus, boolean>
-  >({
+
+  // Updated statusFilter state to include only success, failure, and pending
+  const [statusFilter, setStatusFilter] = useState<{
+    success: boolean;
+    failure: boolean;
+    pending: boolean;
+  }>({
     success: true,
     failure: true,
     pending: true,
-    parsing: false,
-    chunking: false,
-    embedding: false,
-    storing: false,
   });
-
-  const documentsPerPage = 10;
 
   const userId = null;
 
@@ -116,8 +91,8 @@ const Index: React.FC = () => {
           results
             .filter(
               (doc: DocumentInfoType) =>
-                doc.ingestion_status !== 'success' &&
-                doc.ingestion_status !== 'failure'
+                doc.ingestion_status !== IngestionStatus.SUCCESS &&
+                doc.ingestion_status !== IngestionStatus.FAILURE
             )
             .map((doc: DocumentInfoType) => doc.id)
         );
@@ -153,7 +128,7 @@ const Index: React.FC = () => {
 
     if (checked) {
       const successDocumentIds = currentDocuments
-        .filter((doc) => doc.ingestion_status === 'success')
+        .filter((doc) => doc.ingestion_status === IngestionStatus.SUCCESS)
         .map((doc) => doc.id);
       setSelectedDocumentIds((prevSelected) =>
         Array.from(new Set([...prevSelected, ...successDocumentIds]))
@@ -173,11 +148,10 @@ const Index: React.FC = () => {
   const filteredAndSortedDocuments = useMemo(() => {
     let filtered = getFilteredAndSortedDocuments(documents, filterCriteria);
     filtered = filtered.filter((doc) => {
-      if (
-        doc.ingestion_status === 'success' ||
-        doc.ingestion_status === 'failure'
-      ) {
-        return statusFilter[doc.ingestion_status];
+      if (doc.ingestion_status === IngestionStatus.SUCCESS) {
+        return statusFilter.success;
+      } else if (doc.ingestion_status === IngestionStatus.FAILURE) {
+        return statusFilter.failure;
       } else {
         // Treat all other statuses as 'pending'
         return statusFilter.pending;
@@ -214,21 +188,7 @@ const Index: React.FC = () => {
     if (currentPage > newTotalPages) {
       setCurrentPage(1);
     }
-  }, [filteredAndSortedDocuments.length, DOCUMENTS_PER_PAGE, currentPage]);
-
-  useEffect(() => {
-    if (
-      currentPage >
-      Math.ceil(filteredAndSortedDocuments.length / documentsPerPage)
-    ) {
-      setCurrentPage(
-        Math.max(
-          1,
-          Math.ceil(filteredAndSortedDocuments.length / documentsPerPage)
-        )
-      );
-    }
-  }, [filteredAndSortedDocuments.length, currentPage, documentsPerPage]);
+  }, [filteredAndSortedDocuments.length, currentPage]);
 
   const [selectedDocumentId, setSelectedDocumentId] = useState('');
   const [isDocumentInfoDialogOpen, setIsDocumentInfoDialogOpen] =
@@ -239,20 +199,6 @@ const Index: React.FC = () => {
       .writeText(text)
       .then(() => toast({ title: 'Copied!', description }))
       .catch((err) => console.error('Could not copy text: ', err));
-  };
-
-  const copyUserToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text).then(
-      () => {
-        toast({
-          title: 'Copied!',
-          description: 'User ID copied to clipboard',
-        });
-      },
-      (err) => {
-        console.error('Could not copy text: ', err);
-      }
-    );
   };
 
   useEffect(() => {
@@ -290,14 +236,13 @@ const Index: React.FC = () => {
         return newDocuments;
       });
 
-      // Update pending documents list
       setPendingDocuments((prevPending) =>
         prevPending.filter((id) =>
           updatedDocuments.some(
             (doc: DocumentInfoType) =>
               doc.id === id &&
-              doc.ingestion_status !== 'success' &&
-              doc.ingestion_status !== 'failure'
+              doc.ingestion_status !== IngestionStatus.SUCCESS &&
+              doc.ingestion_status !== IngestionStatus.FAILURE
           )
         )
       );
@@ -341,7 +286,7 @@ const Index: React.FC = () => {
   };
 
   const renderSortButton = (label: string, sortKey: 'title' | 'date') => (
-    <div className="flex items-center">
+    <div className="flex items-center justify-center">
       <span className="mr-2">{label}</span>
       <TooltipProvider>
         <Tooltip>
@@ -374,6 +319,131 @@ const Index: React.FC = () => {
     </div>
   );
 
+  type ColumnKey =
+    | 'checkbox'
+    | 'id'
+    | 'title'
+    | 'groupIds'
+    | 'userId'
+    | 'type'
+    | 'metadata'
+    | 'version'
+    | 'ingestionStatus'
+    | 'restructuringStatus'
+    | 'createdAt'
+    | 'updatedAt'
+    | 'actions';
+
+  const columns: {
+    key: ColumnKey;
+    label: string;
+  }[] = [
+    { key: 'checkbox', label: '' },
+    { key: 'title', label: 'Title' },
+    { key: 'id', label: 'Document ID' },
+    { key: 'groupIds', label: 'Group IDs' },
+    { key: 'userId', label: 'User ID' },
+    { key: 'type', label: 'Type' },
+    { key: 'metadata', label: 'Metadata' },
+    { key: 'version', label: 'Version' },
+    { key: 'createdAt', label: 'Created At' },
+    { key: 'updatedAt', label: 'Updated At' },
+    { key: 'ingestionStatus', label: 'Ingestion Status' },
+    { key: 'restructuringStatus', label: 'Restructuring' },
+    { key: 'actions', label: 'Actions' },
+  ];
+
+  const initialVisibleColumns: Record<string, boolean> = {
+    groupIds: false,
+    userId: true,
+    type: false,
+    metadata: false,
+    title: true,
+    version: false,
+    ingestionStatus: true,
+    restructuringStatus: true,
+    createdAt: false,
+    updatedAt: true,
+  };
+
+  const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>(
+    initialVisibleColumns
+  );
+
+  const renderColumnContent = (key: string, doc: DocumentInfoType) => {
+    switch (key) {
+      case 'groupIds':
+        return doc.group_ids.join(', ') || 'N/A';
+      case 'userId':
+        return (
+          <div
+            className="cursor-pointer"
+            onClick={() =>
+              copyToClipboard(doc.user_id, 'User ID copied to clipboard')
+            }
+          >
+            {doc.user_id
+              ? `${doc.user_id.substring(0, 8)}...${doc.user_id.slice(-4)}`
+              : 'N/A'}
+          </div>
+        );
+      case 'type':
+        return doc.type || 'N/A';
+      case 'metadata':
+        return JSON.stringify(doc.metadata) || 'N/A';
+      case 'title':
+        return doc.title || 'N/A';
+      case 'version':
+        return doc.version || 'N/A';
+      case 'ingestionStatus':
+        return (
+          <Badge
+            variant={(() => {
+              switch (doc.ingestion_status) {
+                case IngestionStatus.SUCCESS:
+                  return 'success';
+                case IngestionStatus.FAILURE:
+                  return 'destructive';
+                default:
+                  return 'pending';
+              }
+            })()}
+          >
+            {doc.ingestion_status === IngestionStatus.SUCCESS ||
+            doc.ingestion_status === IngestionStatus.FAILURE
+              ? doc.ingestion_status
+              : 'pending'}
+          </Badge>
+        );
+      case 'restructuringStatus':
+        return (
+          <Badge
+            variant={(() => {
+              switch (doc.restructuring_status) {
+                case 'success':
+                  return 'success';
+                case 'failure':
+                  return 'destructive';
+                default:
+                  return 'pending';
+              }
+            })()}
+          >
+            {doc.restructuring_status === 'success' ||
+            doc.restructuring_status === 'failure'
+              ? doc.restructuring_status
+              : 'pending'}
+          </Badge>
+        );
+      case 'createdAt':
+        return formatDate(doc.created_at);
+      case 'updatedAt':
+        return formatDate(doc.updated_at);
+      default:
+        return 'N/A';
+    }
+  };
+
   return (
     <Layout pageTitle="Documents">
       <main className="w-full flex flex-col container h-screen-[calc(100%-4rem)]">
@@ -386,7 +456,59 @@ const Index: React.FC = () => {
             ) : (
               <>
                 <div className="flex justify-between items-center">
-                  <div className="flex items-center space-x-4"></div>
+                  <div className="flex items-center space-x-4 mt-8">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button color="light">
+                          <SlidersHorizontal className="h-4 w-4" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent align="start">
+                        <div className="grid gap-4">
+                          <div className="space-y-2">
+                            <h4 className="font-medium leading-none">
+                              Toggle Columns
+                            </h4>
+                            <p className="text-sm text-muted-foreground">
+                              Select which columns to display in the table.
+                            </p>
+                          </div>
+                          <div className="grid gap-2">
+                            {columns
+                              .filter(
+                                (col) =>
+                                  !['checkbox', 'actions', 'id'].includes(
+                                    col.key
+                                  )
+                              )
+                              .map((col) => (
+                                <div
+                                  key={col.key}
+                                  className="flex items-center space-x-2"
+                                >
+                                  <Checkbox
+                                    id={`column-toggle-${col.key}`}
+                                    checked={visibleColumns[col.key]}
+                                    onCheckedChange={(checked) =>
+                                      setVisibleColumns((prev) => ({
+                                        ...prev,
+                                        [col.key]: checked === true,
+                                      }))
+                                    }
+                                  />
+                                  <label
+                                    htmlFor={`column-toggle-${col.key}`}
+                                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                  >
+                                    {col.label}
+                                  </label>
+                                </div>
+                              ))}
+                          </div>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
                   <div className="flex justify-center">
                     <div className="mt-6 pr-2">
                       <UploadButton
@@ -425,294 +547,355 @@ const Index: React.FC = () => {
 
                 <div className="mt-4 flex justify-center">
                   <div
-                    className="table-container w-full max-w-full sm:max-w-screen-sm md:max-w-screen-md lg:max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-screen-2xl"
+                    className="table-container w-full overflow-x-auto"
                     style={{
-                      height: '600px',
-                      overflowY: 'auto',
+                      maxHeight: '600px',
                     }}
                   >
-                    <table className="w-full bg-zinc-800 border border-gray-600">
-                      <thead className="sticky top-0 bg-zinc-800">
-                        <tr className="border-b border-gray-600">
-                          <th
-                            className="px-4 py-2 text-left text-white"
-                            style={{ width: columnWidths.checkbox }}
-                          >
-                            <Checkbox
-                              checked={isAllSelected}
-                              onCheckedChange={handleSelectAll}
-                              disabled={currentDocuments.length === 0}
-                            />
-                          </th>
-                          <th
-                            className="px-4 py-2 text-left text-white"
-                            style={{ width: columnWidths.title }}
-                          >
-                            {renderSortButton('Title', 'title')}
-                          </th>
-                          <th
-                            className="px-4 py-2 text-left text-white"
-                            style={{ width: columnWidths.documentId }}
-                          >
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <div>Document ID</div>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>
-                                    Click on a Document ID to copy it to
-                                    clipboard
-                                  </p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          </th>
-                          <th
-                            className="px-4 py-2 text-left text-white"
-                            style={{ width: columnWidths.userId }}
-                          >
-                            User ID
-                          </th>
-                          <th
-                            className="px-4 py-2 text-left text-white"
-                            style={{ width: columnWidths.updatedAt }}
-                          >
-                            {renderSortButton('Updated At', 'date')}
-                          </th>
-                          <th
-                            className="px-4 py-2 text-left text-white"
-                            style={{ width: columnWidths.status }}
-                          >
-                            <div className="flex items-center">
-                              <span className="mr-2">Status</span>
-                              <Popover>
-                                <PopoverTrigger asChild>
-                                  <Filter className="h-4 w-4 hover:bg-zinc-500 cursor-pointer" />
-                                </PopoverTrigger>
-                                <PopoverContent className="w-80 z-5000000">
-                                  <div className="grid gap-4">
-                                    <div className="space-y-2">
-                                      <h4 className="font-medium leading-none">
-                                        Filter by Status
-                                      </h4>
-                                      <p className="text-sm text-muted-foreground">
-                                        Select which statuses to display in the
-                                        table.
-                                      </p>
-                                    </div>
-                                    <div className="grid gap-2">
-                                      {(
-                                        [
-                                          'success',
-                                          'failure',
-                                          'pending',
-                                        ] as const
-                                      ).map((status) => (
-                                        <div
-                                          key={status}
-                                          className="flex items-center space-x-2"
-                                        >
-                                          <Checkbox
-                                            id={`filter-${status}`}
-                                            checked={statusFilter[status]}
-                                            onCheckedChange={() =>
-                                              setStatusFilter((prev) => ({
-                                                ...prev,
-                                                [status]: !prev[status],
-                                              }))
-                                            }
-                                          />
-                                          <label
-                                            htmlFor={`filter-${status}`}
-                                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                          >
-                                            {status.charAt(0).toUpperCase() +
-                                              status.slice(1)}
-                                          </label>
+                    <div className="overflow-x-auto">
+                      <table className="w-full bg-zinc-800 border border-gray-600 table-fixed">
+                        <colgroup>
+                          {columns
+                            .filter(
+                              (col) =>
+                                col.key === 'checkbox' ||
+                                col.key === 'id' ||
+                                col.key === 'actions' ||
+                                visibleColumns[col.key]
+                            )
+                            .map((col) => (
+                              <col key={col.key} className={`col-${col.key}`} />
+                            ))}
+                        </colgroup>
+                        <thead className="sticky top-0 bg-zinc-800 z-10">
+                          <tr className="border-b border-gray-600">
+                            {columns.map((col) => {
+                              const isVisible =
+                                col.key === 'checkbox' ||
+                                col.key === 'id' ||
+                                col.key === 'actions' ||
+                                visibleColumns[col.key];
+
+                              if (!isVisible) return null;
+
+                              let alignmentClass = 'text-center';
+                              if (col.key === 'actions') {
+                                alignmentClass = 'text-right';
+                              } else if (col.key === 'checkbox') {
+                                alignmentClass = 'text-center';
+                              } else if (col.key === 'id') {
+                                alignmentClass = 'text-left';
+                              }
+
+                              let cellContent;
+
+                              if (col.key === 'checkbox') {
+                                cellContent = (
+                                  <Checkbox
+                                    checked={isAllSelected}
+                                    onCheckedChange={handleSelectAll}
+                                    disabled={currentDocuments.length === 0}
+                                  />
+                                );
+                              } else if (
+                                col.key === 'title' &&
+                                visibleColumns[col.key]
+                              ) {
+                                cellContent = renderSortButton(
+                                  'Title',
+                                  'title'
+                                );
+                              } else if (
+                                col.key === 'ingestionStatus' &&
+                                visibleColumns[col.key]
+                              ) {
+                                cellContent = (
+                                  <div className="flex items-center justify-center">
+                                    <span className="mr-2">Status</span>
+                                    <Popover>
+                                      <PopoverTrigger asChild>
+                                        <Filter className="h-4 w-4 hover:bg-zinc-500 cursor-pointer" />
+                                      </PopoverTrigger>
+                                      <PopoverContent className="w-80 z-50">
+                                        <div className="grid gap-4">
+                                          <div className="space-y-2">
+                                            <h4 className="font-medium leading-none">
+                                              Filter by Status
+                                            </h4>
+                                            <p className="text-sm text-muted-foreground">
+                                              Select which statuses to display
+                                              in the table.
+                                            </p>
+                                          </div>
+                                          <div className="grid gap-2">
+                                            {/* Success Checkbox */}
+                                            <div className="flex items-center space-x-2">
+                                              <Checkbox
+                                                id={`filter-success`}
+                                                checked={statusFilter.success}
+                                                onCheckedChange={(checked) =>
+                                                  setStatusFilter((prev) => ({
+                                                    ...prev,
+                                                    success: checked === true,
+                                                  }))
+                                                }
+                                              />
+                                              <label
+                                                htmlFor={`filter-success`}
+                                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                              >
+                                                Success
+                                              </label>
+                                            </div>
+                                            {/* Failure Checkbox */}
+                                            <div className="flex items-center space-x-2">
+                                              <Checkbox
+                                                id={`filter-failure`}
+                                                checked={statusFilter.failure}
+                                                onCheckedChange={(checked) =>
+                                                  setStatusFilter((prev) => ({
+                                                    ...prev,
+                                                    failure: checked === true,
+                                                  }))
+                                                }
+                                              />
+                                              <label
+                                                htmlFor={`filter-failure`}
+                                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                              >
+                                                Failure
+                                              </label>
+                                            </div>
+                                            {/* Pending Checkbox */}
+                                            <div className="flex items-center space-x-2">
+                                              <Checkbox
+                                                id={`filter-pending`}
+                                                checked={statusFilter.pending}
+                                                onCheckedChange={(checked) =>
+                                                  setStatusFilter((prev) => ({
+                                                    ...prev,
+                                                    pending: checked === true,
+                                                  }))
+                                                }
+                                              />
+                                              <label
+                                                htmlFor={`filter-pending`}
+                                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                              >
+                                                Pending
+                                              </label>
+                                            </div>
+                                          </div>
                                         </div>
-                                      ))}
-                                    </div>
+                                      </PopoverContent>
+                                    </Popover>
                                   </div>
-                                </PopoverContent>
-                              </Popover>
-                            </div>
-                          </th>
-                          <th
-                            className="px-4 py-2 text-left text-white"
-                            style={{ width: columnWidths.actions }}
-                          >
-                            Actions
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {currentDocuments.map((doc) => (
-                          <tr key={doc.id}>
-                            <td
-                              className="px-4 py-2  text-white"
-                              style={{ width: columnWidths.checkbox }}
-                            >
-                              <Checkbox
-                                checked={selectedDocumentIds.includes(doc.id)}
-                                onCheckedChange={(checked) => {
-                                  setSelectedDocumentIds((prevSelected) =>
-                                    checked
-                                      ? [...prevSelected, doc.id]
-                                      : prevSelected.filter(
-                                          (id) => id !== doc.id
-                                        )
+                                );
+                              } else if (['actions', 'id'].includes(col.key)) {
+                                cellContent = col.label;
+                              } else if (visibleColumns[col.key]) {
+                                cellContent = col.label;
+                              } else {
+                                return null;
+                              }
+
+                              return (
+                                <th
+                                  key={col.key}
+                                  className={`px-4 py-2 text-white ${alignmentClass} ${
+                                    ['createdAt', 'updatedAt'].includes(col.key)
+                                      ? 'whitespace-nowrap'
+                                      : ''
+                                  }`}
+                                >
+                                  <div className="overflow-x-auto">
+                                    {cellContent}
+                                  </div>
+                                </th>
+                              );
+                            })}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {currentDocuments.map((doc) => (
+                            <tr key={doc.id}>
+                              {columns.map((col) => {
+                                const isVisible =
+                                  col.key === 'checkbox' ||
+                                  col.key === 'id' ||
+                                  col.key === 'actions' ||
+                                  visibleColumns[col.key];
+
+                                if (!isVisible) return null;
+
+                                let alignmentClass = 'text-center';
+                                if (col.key === 'actions') {
+                                  alignmentClass = 'text-right';
+                                } else if (col.key === 'checkbox') {
+                                  alignmentClass = 'text-center';
+                                } else if (col.key === 'id') {
+                                  alignmentClass = 'text-left';
+                                }
+
+                                let cellContent;
+
+                                if (col.key === 'checkbox') {
+                                  cellContent = (
+                                    <Checkbox
+                                      checked={selectedDocumentIds.includes(
+                                        doc.id
+                                      )}
+                                      onCheckedChange={(checked) => {
+                                        setSelectedDocumentIds(
+                                          (prevSelected) =>
+                                            checked === true
+                                              ? [...prevSelected, doc.id]
+                                              : prevSelected.filter(
+                                                  (id) => id !== doc.id
+                                                )
+                                        );
+                                      }}
+                                      disabled={
+                                        doc.ingestion_status !==
+                                        IngestionStatus.SUCCESS
+                                      }
+                                    />
                                   );
-                                }}
-                                disabled={doc.ingestion_status !== 'success'}
-                              />
-                            </td>
-                            <td
-                              className="px-4 py-2  text-white"
-                              style={{ width: columnWidths.title }}
-                            >
-                              <div className="overflow-x-auto whitespace-nowrap">
-                                {doc.title || 'N/A'}
-                              </div>
-                            </td>
-                            <td
-                              className="px-4 py-2  text-white"
-                              style={{ width: columnWidths.documentId }}
-                            >
-                              <div
-                                className="overflow-x-auto whitespace-nowrap cursor-pointer"
-                                onClick={() =>
-                                  copyToClipboard(
-                                    doc.id,
-                                    'Document ID copied to clipboard'
-                                  )
+                                } else if (col.key === 'id') {
+                                  cellContent = (
+                                    <div
+                                      className="cursor-pointer"
+                                      onClick={() =>
+                                        copyToClipboard(
+                                          doc.id,
+                                          'Document ID copied to clipboard'
+                                        )
+                                      }
+                                    >
+                                      {doc.id
+                                        ? `${doc.id.substring(0, 8)}...${doc.id.slice(
+                                            -4
+                                          )}`
+                                        : 'N/A'}
+                                    </div>
+                                  );
+                                } else if (col.key === 'actions') {
+                                  cellContent = (
+                                    <div className="flex space-x-1 justify-end">
+                                      <TooltipProvider>
+                                        <Tooltip>
+                                          <TooltipTrigger>
+                                            <UpdateButtonContainer
+                                              id={doc.id}
+                                              onUpdateSuccess={fetchDocuments}
+                                              showToast={toast}
+                                            />
+                                          </TooltipTrigger>
+                                          <TooltipContent>
+                                            <p>Update Document</p>
+                                          </TooltipContent>
+                                        </Tooltip>
+                                      </TooltipProvider>
+                                      <TooltipProvider>
+                                        <Tooltip>
+                                          <TooltipTrigger>
+                                            <Button
+                                              onClick={() => {
+                                                setSelectedDocumentId(doc.id);
+                                                setIsDocumentInfoDialogOpen(
+                                                  true
+                                                );
+                                              }}
+                                              color={
+                                                doc.ingestion_status ===
+                                                IngestionStatus.SUCCESS
+                                                  ? 'filled'
+                                                  : 'disabled'
+                                              }
+                                              shape="slim"
+                                              disabled={
+                                                doc.ingestion_status !==
+                                                IngestionStatus.SUCCESS
+                                              }
+                                              className={`${
+                                                doc.ingestion_status !==
+                                                IngestionStatus.SUCCESS
+                                                  ? 'cursor-not-allowed'
+                                                  : ''
+                                              }`}
+                                            >
+                                              <FileSearch2 className="w-8 h-8" />
+                                            </Button>
+                                          </TooltipTrigger>
+                                          <TooltipContent>
+                                            <p>View Document Chunks</p>
+                                          </TooltipContent>
+                                        </Tooltip>
+                                      </TooltipProvider>
+                                    </div>
+                                  );
+                                } else if (visibleColumns[col.key]) {
+                                  cellContent = renderColumnContent(
+                                    col.key,
+                                    doc
+                                  );
+                                } else {
+                                  return null;
                                 }
-                              >
-                                {doc.id
-                                  ? `${doc.id.substring(0, 8)}...${doc.id.slice(-4)}`
-                                  : 'N/A'}
-                              </div>
-                            </td>
-                            <td
-                              className="px-4 py-2  text-white"
-                              style={{ width: columnWidths.userId }}
-                            >
-                              <div
-                                className="overflow-x-auto whitespace-nowrap cursor-pointer"
-                                onClick={() =>
-                                  copyToClipboard(
-                                    doc.user_id,
-                                    'User ID copied to clipboard'
-                                  )
+
+                                return (
+                                  <td
+                                    key={col.key}
+                                    className={`px-4 py-2 text-white ${alignmentClass} ${
+                                      ['createdAt', 'updatedAt'].includes(
+                                        col.key
+                                      )
+                                        ? 'whitespace-nowrap'
+                                        : ''
+                                    }`}
+                                  >
+                                    <div className="overflow-x-auto">
+                                      {cellContent}
+                                    </div>
+                                  </td>
+                                );
+                              })}
+                            </tr>
+                          ))}
+                          {blankRows.map((_, index) => (
+                            <tr key={`blank-${index}`}>
+                              {columns.map((col) => {
+                                const isVisible =
+                                  col.key === 'checkbox' ||
+                                  col.key === 'id' ||
+                                  col.key === 'actions' ||
+                                  visibleColumns[col.key];
+
+                                if (!isVisible) return null;
+
+                                let alignmentClass = 'text-center';
+                                if (col.key === 'actions') {
+                                  alignmentClass = 'text-right';
+                                } else if (col.key === 'checkbox') {
+                                  alignmentClass = 'text-center';
+                                } else if (col.key === 'id') {
+                                  alignmentClass = 'text-left';
                                 }
-                              >
-                                {doc.user_id
-                                  ? `${doc.user_id.substring(0, 8)}...${doc.user_id.slice(-4)}`
-                                  : 'N/A'}
-                              </div>
-                            </td>
-                            <td
-                              className="px-4 py-2  text-white"
-                              style={{ width: columnWidths.updatedAt }}
-                            >
-                              <div className="overflow-x-auto whitespace-nowrap">
-                                {formatDate(doc.updated_at)}
-                              </div>
-                            </td>
-                            <td
-                              className="px-4 py-2 text-white"
-                              style={{ width: columnWidths.status }}
-                            >
-                              <div className="overflow-x-auto whitespace-nowrap">
-                                <Badge
-                                  variant={(() => {
-                                    switch (doc.ingestion_status) {
-                                      case 'success':
-                                        return 'success';
-                                      case 'failure':
-                                        return 'destructive';
-                                      default:
-                                        return 'pending';
-                                    }
-                                  })()}
-                                >
-                                  {doc.ingestion_status === 'success' ||
-                                  doc.ingestion_status === 'failure'
-                                    ? doc.ingestion_status
-                                    : 'pending'}
-                                </Badge>
-                              </div>
-                            </td>
-                            <td
-                              className="px-4 py-2  text-white"
-                              style={{ width: columnWidths.actions }}
-                            >
-                              <div className="flex space-x-2">
-                                <TooltipProvider>
-                                  <Tooltip>
-                                    <TooltipTrigger>
-                                      <UpdateButtonContainer
-                                        documentId={doc.id}
-                                        onUpdateSuccess={fetchDocuments}
-                                        showToast={toast}
-                                      />
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                      <p>Update Document</p>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                </TooltipProvider>
-                                <TooltipProvider>
-                                  <Tooltip>
-                                    <TooltipTrigger>
-                                      <Button
-                                        onClick={() => {
-                                          setSelectedDocumentId(doc.id);
-                                          setIsDocumentInfoDialogOpen(true);
-                                        }}
-                                        color={
-                                          doc.ingestion_status === 'success'
-                                            ? 'filled'
-                                            : 'disabled'
-                                        }
-                                        shape="slim"
-                                        disabled={
-                                          doc.ingestion_status !== 'success'
-                                        }
-                                        className={
-                                          doc.ingestion_status !== 'success'
-                                            ? 'cursor-not-allowed'
-                                            : ''
-                                        }
-                                      >
-                                        <FileSearch2 className="h-8 w-8" />
-                                      </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                      <p>View Document Chunks</p>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                </TooltipProvider>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                        {blankRows.map((_, index) => (
-                          <tr key={`blank-${index}`}>
-                            {Array(6)
-                              .fill(null)
-                              .map((_, cellIndex) => (
-                                <td
-                                  key={`blank-${index}-${cellIndex}`}
-                                  className="px-4 py-[16px] text-white"
-                                >
-                                  &nbsp;
-                                </td>
-                              ))}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+
+                                return (
+                                  <td
+                                    key={`blank-${index}-${col.key}`}
+                                    className={`px-4 py-[16px] text-white ${alignmentClass}`}
+                                  >
+                                    &nbsp;
+                                  </td>
+                                );
+                              })}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
 
@@ -733,7 +916,7 @@ const Index: React.FC = () => {
         </div>
       </main>
       <DocumentInfoDialog
-        documentId={selectedDocumentId}
+        id={selectedDocumentId}
         open={isDocumentInfoDialogOpen}
         onClose={() => setIsDocumentInfoDialogOpen(false)}
       />

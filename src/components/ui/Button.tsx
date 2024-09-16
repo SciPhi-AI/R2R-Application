@@ -13,7 +13,7 @@ const colorStyles = {
     'bg-red-600 text-white hover:bg-red-500 dark:bg-red-600 dark:text-white dark:hover:bg-red-500',
   amber:
     'bg-amber-500 text-white hover:bg-amber-600 dark:bg-amber-500 dark:text-white dark:hover:bg-amber-600',
-  blue: 'bg-zinc-900 text-white hover:bg-zinc-700 dark:bg-blue-600/10 dark:text-blue-600 dark:ring-1 dark:ring-inset dark:ring-blue-600/20 dark:hover:bg-blue-600/10 dark:hover:text-blue-300 dark:hover:ring-blue-300',
+  blue: 'bg-zinc-900 text-white hover:bg-zinc-700 dark:bg-blue-600/10 dark:text-blue-600 dark:ring-1 dark:ring-inset dark:ring-blue-600/20 dark:hover:bg-blue-600/10 dark:hover:text-blue-300',
   blue_filled:
     'bg-zinc-900 text-white hover:bg-zinc-700 dark:bg-blue-600 dark:text-white dark:hover:bg-opacity-90',
   text: 'text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-500',
@@ -33,23 +33,40 @@ const shapeStyles = {
   slim: 'rounded-md px-0.5 py-0.5',
 };
 
-type ButtonProps = {
+type ButtonBaseProps = {
   color?: keyof typeof colorStyles;
   shape?: keyof typeof shapeStyles;
   className?: string;
-  href?: string;
   disabled?: boolean;
-} & React.ButtonHTMLAttributes<HTMLButtonElement>;
+  children: React.ReactNode;
+};
 
-export function Button({
-  color = 'primary',
-  shape = 'default',
-  className,
-  children,
-  href,
-  disabled = false,
-  ...props
-}: ButtonProps) {
+type ButtonAsButton = ButtonBaseProps &
+  React.ButtonHTMLAttributes<HTMLButtonElement> & {
+    href?: undefined;
+  };
+
+type ButtonAsAnchor = ButtonBaseProps &
+  React.AnchorHTMLAttributes<HTMLAnchorElement> & {
+    href: string;
+  };
+
+type ButtonProps = ButtonAsButton | ButtonAsAnchor;
+
+const Button = React.forwardRef<
+  HTMLButtonElement | HTMLAnchorElement,
+  ButtonProps
+>((props, ref) => {
+  const {
+    color = 'primary',
+    shape = 'default',
+    className,
+    children,
+    href,
+    disabled = false,
+    ...restProps
+  } = props;
+
   const buttonClassName = clsx(
     'inline-flex gap-0.5 justify-center overflow-hidden font-medium transition',
     colorStyles[color],
@@ -59,24 +76,30 @@ export function Button({
 
   const commonProps = {
     className: buttonClassName,
-    disabled: disabled,
+    ref: ref,
+    ...restProps,
   };
 
   if (href && !disabled) {
     return (
-      <Link
-        href={href}
-        {...commonProps}
-        {...(props as unknown as React.AnchorHTMLAttributes<HTMLAnchorElement>)}
-      >
-        {children}
+      <Link href={href} passHref legacyBehavior>
+        <a {...(commonProps as React.AnchorHTMLAttributes<HTMLAnchorElement>)}>
+          {children}
+        </a>
       </Link>
     );
   }
 
   return (
-    <button {...commonProps} {...props}>
+    <button
+      disabled={disabled}
+      {...(commonProps as React.ButtonHTMLAttributes<HTMLButtonElement>)}
+    >
       {children}
     </button>
   );
-}
+});
+
+Button.displayName = 'Button';
+
+export { Button };

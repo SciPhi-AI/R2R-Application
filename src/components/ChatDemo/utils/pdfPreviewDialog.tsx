@@ -26,14 +26,14 @@ const MIN_PDF_HEIGHT = 400;
 const MAX_PDF_HEIGHT = 700;
 
 interface PdfPreviewDialogProps {
-  documentId: string;
+  id: string;
   open: boolean;
   onClose: () => void;
   initialPage?: number;
 }
 
 const PdfPreviewDialog: React.FC<PdfPreviewDialogProps> = ({
-  documentId,
+  id,
   open,
   onClose,
   initialPage = 1,
@@ -97,7 +97,7 @@ const PdfPreviewDialog: React.FC<PdfPreviewDialogProps> = ({
           throw new Error('Failed to get authenticated client');
         }
 
-        const blob = await client.downloadFile(documentId);
+        const blob = await client.downloadFile(id);
         setPdfBlob(blob);
         setCurrentPage(initialPage);
         setZoom(1);
@@ -109,7 +109,7 @@ const PdfPreviewDialog: React.FC<PdfPreviewDialogProps> = ({
       }
     };
 
-    if (open && documentId) {
+    if (open && id) {
       fetchPdf();
     }
 
@@ -121,7 +121,7 @@ const PdfPreviewDialog: React.FC<PdfPreviewDialogProps> = ({
       setZoom(1);
       setIsDragging(false);
     };
-  }, [open, documentId, getClient, initialPage]);
+  }, [open, id, getClient, initialPage]);
 
   const onDocumentLoadSuccess = (pdf: pdfjs.PDFDocumentProxy) => {
     setNumPages(pdf.numPages);

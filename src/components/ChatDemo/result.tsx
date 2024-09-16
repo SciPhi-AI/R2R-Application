@@ -303,8 +303,8 @@ export const Result: FC<{
     return () => clearTimeout(debouncedParseStreaming);
   }, [query, userId, pipelineUrl]);
 
-  const handleOpenPdfPreview = (documentId: string, page?: number) => {
-    setPdfPreviewDocumentId(documentId);
+  const handleOpenPdfPreview = (id: string, page?: number) => {
+    setPdfPreviewDocumentId(id);
     if (page && page > 0) {
       setInitialPage(page);
     } else {
@@ -359,7 +359,7 @@ export const Result: FC<{
           </div>
         )}
       <PdfPreviewDialog
-        documentId={pdfPreviewDocumentId || ''}
+        id={pdfPreviewDocumentId || ''}
         open={pdfPreviewOpen}
         onClose={handleClosePdfPreview}
         initialPage={initialPage}
