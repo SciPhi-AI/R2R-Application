@@ -192,8 +192,8 @@ importers:
         specifier: ^1.148.0
         version: 1.148.0
       r2r-js:
-        specifier: file:/Users/nolantremelling/R2R/js/sdk/r2r-js-0.3.1.tgz
-        version: file:../R2R/js/sdk/r2r-js-0.3.1.tgz
+        specifier: ^0.3.2
+        version: 0.3.2
       radix-ui:
         specifier: ^1.0.1
         version: 1.0.1(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -5102,8 +5102,8 @@ packages:
   posthog-js@1.148.0:
     resolution: {integrity: sha512-nydf+aret26YViDBwH7DdN/c8dmCzQGNQ1yredeE47UlbpJ3J/iTgskNdmGJIofFcdSagcwAE/FF7s++YfTtvg==}
 
-  posthog-js@1.161.3:
-    resolution: {integrity: sha512-TQ77jtLemkUJUyJAPrwGay6tLqcAmXEM1IJgXOx5Tr4UohiTx8JTznzrCuh/SdwPIrbcSM1r2YPwb72XwTC3wg==}
+  posthog-js@1.161.5:
+    resolution: {integrity: sha512-KGkb12grSQvGRauH6z+AUB83c4dgWqzmJFDjyMXarWRafaLN80HzjN1jk806x27HvdDXi21jtwiXekioWzEQ9g==}
 
   posthog-node@4.2.0:
     resolution: {integrity: sha512-hgyCYMyzMvuF3qWMw6JvS8gT55v7Mtp5wKWcnDrw+nu39D0Tk9BXD7I0LOBp0lGlHEPaXCEVYUtviNKrhMALGA==}
@@ -5147,9 +5147,8 @@ packages:
   queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
 
-  r2r-js@file:../R2R/js/sdk/r2r-js-0.3.1.tgz:
-    resolution: {integrity: sha512-w/zXhWbdmPPtR6/o8M9BlHchKvuVfzipFRcrPHVK8bASDfmjbose6i3KC0m+Agehyv4etWiqO3z5NGa/37YOGQ==, tarball: file:../R2R/js/sdk/r2r-js-0.3.1.tgz}
-    version: 0.3.1
+  r2r-js@0.3.2:
+    resolution: {integrity: sha512-kIBUqGnXHBgVmeZH0Ps9dYDNPqOsD+vbx20XRs63huLP+48h+8HVE/rZwV43t+jld0snO8rdfPB8VKxeMLK+uQ==}
 
   radix-ui@1.0.1:
     resolution: {integrity: sha512-qfGibbqtbOlxP3b+1JjbLUc8Q7+e9DL8gFycLtkBkoAQyUkKuHAEBfFUcyG5MaQHjqRuML+YLtt/R1/dUYQafQ==}
@@ -12609,7 +12608,7 @@ snapshots:
       preact: 10.22.1
       web-vitals: 4.2.2
 
-  posthog-js@1.161.3:
+  posthog-js@1.161.5:
     dependencies:
       fflate: 0.4.8
       preact: 10.22.1
@@ -12650,11 +12649,11 @@ snapshots:
 
   queue-microtask@1.2.3: {}
 
-  r2r-js@file:../R2R/js/sdk/r2r-js-0.3.1.tgz:
+  r2r-js@0.3.2:
     dependencies:
       axios: 1.7.7
       form-data: 4.0.0
-      posthog-js: 1.161.3
+      posthog-js: 1.161.5
       posthog-node: 4.2.0
       uuid: 10.0.0
     transitivePeerDependencies:
