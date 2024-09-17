@@ -48,18 +48,18 @@ const VectorSearchResultItem: FC<{
           <span className="text-xs text-zinc-400 ml-2 whitespace-nowrap">
             Similarity Score: {source.score.toFixed(3)}
             {isPdf && (
-            <div className="flex-shrink-0">
-              <Button
-                onClick={handleOpenPdfPreview}
-                color="filled"
-                className="text-white font-bold flex items-center z-10000"
-                title={`Open PDF${pageNumber ? ` (Page ${pageNumber})` : ''}`}
-              >
-                <FileText size={16} className="mr-2" />
-                PDF
-              </Button>
-            </div>
-            )}            
+              <div className="flex-shrink-0">
+                <Button
+                  onClick={handleOpenPdfPreview}
+                  color="filled"
+                  className="text-white font-bold flex items-center z-10000"
+                  title={`Open PDF${pageNumber ? ` (Page ${pageNumber})` : ''}`}
+                >
+                  <FileText size={16} className="mr-2" />
+                  PDF
+                </Button>
+              </div>
+            )}
           </span>
         </div>
 
@@ -73,7 +73,6 @@ const VectorSearchResultItem: FC<{
           {/* Similarity: {score.toFixed(3)} */}
         </p>
       </div>
-      
     </div>
   );
 };
@@ -99,7 +98,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
   const [pdfPreviewOpen, setPdfPreviewOpen] = useState(false);
   const handleClosePdfPreview = () => {
     setPdfPreviewOpen(false);
-  }
+  };
   const [initialPage, setInitialPage] = useState<number>(1);
   const [pdfPreviewDocumentId, setPdfPreviewDocumentId] = useState<
     string | null
@@ -120,7 +119,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
 
     setPdfPreviewOpen(true);
   };
-  
+
   console.log('in search results, kgEntityResults = ', kgLocalSearchResult);
   return (
     <div className="flex justify-center text-zinc-200 bg-zinc-900">
