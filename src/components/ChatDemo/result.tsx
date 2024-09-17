@@ -26,28 +26,6 @@ const KG_GLOBAL_SEARCH_END_TOKEN = '</kg_global_search>';
 const COMPLETION_START_TOKEN = '<completion>';
 const COMPLETION_END_TOKEN = '</completion>';
 
-interface VectorSearchResult {
-  fragment_id: string;
-  extraction_id: string;
-  document_id: string;
-  user_id: string;
-  group_ids: string;
-  score: number;
-  text: string;
-  metadata: string;
-}
-
-interface KGLocalSearchResult {
-  query: string;
-  entities: Record<string, any>;
-  relationships: Record<string, any>;
-  communities: Record<string, any>;
-}
-
-interface KGGlobalSearchResult {
-  query: string;
-  search_result: string[];
-}
 
 export const Result: FC<{
   query: string;

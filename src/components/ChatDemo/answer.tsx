@@ -18,64 +18,24 @@ import {
 } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/Button';
 import { Message } from '@/types';
-import { VectorSearchResult } from '@/types';
+import { VectorSearchResult, KGEntity, KGTriple, KGCommunity, KGLocalSearchResult } from '@/types';
 import {
   SearchResults,
 } from '@/components/SearchResults';
 
-interface Entity {
-  name: string;
-  description: string;
-}
 
-interface Triple {
-  subject: string;
-  predicate: string;
-  object: string;
-}
-
-interface Community {
-  summary: {
-    title: string;
-    summary: string;
-    explanation: string;
-  }[];
-}
-
-interface KGLocalSource {
-  query: string;
-  entities: { [key: string]: string };
-  relationships: { [key: string]: string };
-  communities: {
-    [key: string]: Community;
-  };
-}
-
-function parseKGLocalSources(payload: string): KGLocalSource {
-  // if (payload == null) {
-  //   return {
-  //     query: '',
-  //     entities: {},
-  //     relationships: {},
-  //     communities: {}
-  //   };
-  // }
-  console.log('payload = ', payload);
+function parseKGLocalSources(payload: string): KGLocalSearchResult {
   const data = JSON.parse(payload);
-  console.log('data = ', data);
 
-  const entities: Record<string, Entity> = {};
-  for (const [key, value] of Object.entries(data.entities)) {
-    entities[key] = {
-      name: value.name,
-      description: value.description,
-    };
-  }
-  console.log('entities = ', entities);
+  const entities: KGEntity[] = Object.entries(data.entities).map(([key, value]) => ({
+    id: key,
+    name: value.name,
+    description: value.description,
+  }));
 
-  const relationships: Record<string, Triple> = data.relationships;
+  const relationships: KGTriple[] = data.relationships;
 
-  const communities: Community[] = Object.values(data.communities).map(
+  const communities: KGCommunity[] = Object.values(data.communities).map(
     (community: any) => {
       const parsedSummary = JSON.parse(community.summary);
       return {
@@ -139,74 +99,6 @@ const SourceItem: FC<{
   );
 };
 
-interface LocalKGEntitySourceItemProps {
-  source: KGLocalSource;
-}
-
-const LocalKGEntitySourceItem: FC<LocalKGEntitySourceItemProps> = ({
-  entity,
-}) => {
-  console.log('local kg entity = ', entity);
-  return (
-    <div
-      className="bg-zinc-700 p-4 rounded-lg mb-2 flex items-center"
-      style={{ width: '100%' }}
-    >
-      <div className="flex-grow mr-4">
-        <h3 className="text-sm font-medium text-zinc-200 mb-1">
-          {entity.name}
-        </h3>
-        <p className="text-xs text-zinc-400">{entity.description}</p>
-      </div>
-    </div>
-  );
-};
-const LocalKGEntities: FC<LocalKGEntitySourceItemProps> = ({ source }) => {
-  console.log('source = ', source);
-  return (
-    <div>
-      <div className="space-y-2 pt-2">
-        {source && (
-          <>
-            {Object.entries(source.entities).map(([key, entity]) => (
-              <LocalKGEntitySourceItem key={key} entity={entity} />
-            ))}
-          </>
-        )}
-      </div>
-    </div>
-  );
-};
-
-const LocalKGCommunitySourceItem: FC<{ community: Community }> = ({
-  community,
-}) => {
-  console.log('parsing community community = ', community);
-  return (
-    <div className="bg-zinc-700 p-4 rounded-lg mb-2">
-      <h3 className="text-sm font-medium text-zinc-200 mb-1">
-        {community.title}
-      </h3>
-      <p className="text-xs text-zinc-400 mb-2">{community.summary}</p>
-      <p className="text-xs text-zinc-400 mb-2">{community.explanation}</p>
-    </div>
-  );
-};
-
-const LocalKGCommunities: FC<LocalKGEntitySourceItemProps> = ({ source }) => {
-  console.log('source = ', source);
-  return (
-    <div>
-      <div className="space-y-2 pt-2">
-        {source.communities &&
-          source.communities.map((community, index) => (
-            <LocalKGCommunitySourceItem key={index} community={community} />
-          ))}
-      </div>
-    </div>
-  );
-};
-
 function formatMarkdownNewLines(markdown: string) {
   return markdown
     .replace(/\[(\d+)]/g, '[$1]($1)')
@@ -230,8 +122,8 @@ const parseSources = (sources: string | object): VectorSearchResult[] => {
     const jsonArrayString = `[${individualSources.join(',')}]`;
 
     try {
-      const partialParsedSources = JSON.parse(jsonArrayString);
-      return partialParsedSources.map((source: any) => {
+      const partialParsedVectorSearch = JSON.parse(jsonArrayString);
+      return partialParsedVectorSearch.map((source: any) => {
         const parsedSource = JSON.parse(source);
         return {
           ...parsedSource,
@@ -255,43 +147,39 @@ export const Answer: FC<{
   onOpenPdfPreview: (documentId: string, page?: number) => void;
 }> = ({ message, isStreaming, isSearching, mode, onOpenPdfPreview }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isKgLocalEntitiesOpen, setIsKgLocalEntitiesOpen] = useState(false);
-  const [isKgLocalCommunitiesOpen, setIsKgLocalCommunitiesOpen] =
-    useState(false);
 
-  const [parsedSources, setParsedSources] = useState<VectorSearchResult[]>([]);
+  const [parsedVectorSearch, setParsedVectorSearch] = useState<VectorSearchResult[]>([]);
   const [parsedKgLocal, setParsedKgLocal] =
     useState<KGLocalSearchResult | null>(null);
-  const showKgLocalAccordion = mode === 'rag' && parsedKgLocal !== null;
 
-  console.log('message = ', message);
   useEffect(() => {
     if (message.sources) {
       try {
-        const parsed = parseSources(message.sources);
-        setParsedSources(parsed);
+        const parsedVectorSearchData = parseSources(message.sources);
+        setParsedVectorSearch(parsedVectorSearchData);
       } catch (error) {
         console.error('Failed to parse sources:', error);
-        setParsedSources([]);
+        setParsedVectorSearch([]);
       }
     } else {
-      setParsedSources([]);
+      setParsedVectorSearch([]);
     }
   }, [message.sources]);
 
   useEffect(() => {
     if (message.kgLocal) {
-      const parsedKGData = parseKGLocalSources(message.kgLocal);
-      setParsedKgLocal(parsedKGData); // parsedKGData);
+      const parsedKGLocalData = parseKGLocalSources(message.kgLocal);
+      console.log('parsedKGLocalData = ', parsedKGLocalData);
+      setParsedKgLocal(parsedKGLocalData);
     }
   }, [message.kgLocal]);
 
   const showSourcesAccordion =
-    mode === 'rag' || (mode === 'rag_agent' && parsedSources.length > 0);
+    mode === 'rag' || (mode === 'rag_agent' && parsedVectorSearch.length > 0);
   const showNoSourcesFound =
     mode === 'rag_agent' &&
     message.searchPerformed &&
-    parsedSources.length === 0;
+    parsedVectorSearch.length === 0;
 
   return (
     <div className="mt-4">
@@ -326,8 +214,8 @@ export const Answer: FC<{
               <div className="space-y-2 pt-2">
                 <div className="space-y-2 max-h-60 overflow-y-auto">
                   <SearchResults
-                    vectorSearchResults={parsedSources}
-                    kgSearchResults={parsedKgLocal}
+                    vectorSearchResults={parsedVectorSearch}
+                    kgLocalSearchResult={parsedKgLocal}
                   />
                 </div>
               </div>
@@ -370,7 +258,7 @@ export const Answer: FC<{
                 pre: (props) => <pre style={{ color: 'white' }} {...props} />,
                 a: ({ href, ...props }) => {
                   if (!href) return null;
-                  const source = parsedSources[+href - 1];
+                  const source = parsedVectorSearch[+href - 1];
                   if (!source) return null;
                   const metadata = source.metadata;
                   return (
