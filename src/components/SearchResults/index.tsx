@@ -1,7 +1,7 @@
 import { FileText } from 'lucide-react';
 import React, { FC, useEffect, useState, useRef } from 'react';
 
-// import * as React from "react"
+import PdfPreviewDialog from '@/components/ChatDemo/utils/pdfPreviewDialog';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -27,6 +27,8 @@ const VectorSearchResultItem: FC<{
   const pageNumber = metadata.unstructured_page_number;
 
   const handleOpenPdfPreview = () => {
+    console.log('handleOpenPdfPreview');
+    console.log('document_id = ', document_id);
     if (document_id) {
       onOpenPdfPreview(document_id, pageNumber);
     }
@@ -45,6 +47,19 @@ const VectorSearchResultItem: FC<{
           <div className="flex-grow"></div>
           <span className="text-xs text-zinc-400 ml-2 whitespace-nowrap">
             Similarity Score: {source.score.toFixed(3)}
+            {isPdf && (
+            <div className="flex-shrink-0">
+              <Button
+                onClick={handleOpenPdfPreview}
+                color="filled"
+                className="text-white font-bold flex items-center z-10000"
+                title={`Open PDF${pageNumber ? ` (Page ${pageNumber})` : ''}`}
+              >
+                <FileText size={16} className="mr-2" />
+                PDF
+              </Button>
+            </div>
+            )}            
           </span>
         </div>
 
@@ -58,19 +73,7 @@ const VectorSearchResultItem: FC<{
           {/* Similarity: {score.toFixed(3)} */}
         </p>
       </div>
-      {isPdf && (
-        <div className="flex-shrink-0">
-          <Button
-            onClick={handleOpenPdfPreview}
-            color="filled"
-            className="text-white font-bold flex items-center"
-            title={`Open PDF${pageNumber ? ` (Page ${pageNumber})` : ''}`}
-          >
-            <FileText size={16} className="mr-2" />
-            PDF
-          </Button>
-        </div>
-      )}
+      
     </div>
   );
 };
@@ -93,12 +96,31 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
   vectorSearchResults,
   kgLocalSearchResult,
 }) => {
-  const handleOpenPdfPreview = (documentId: string, page?: number) => {
+  const [pdfPreviewOpen, setPdfPreviewOpen] = useState(false);
+  const handleClosePdfPreview = () => {
+    setPdfPreviewOpen(false);
+  }
+  const [initialPage, setInitialPage] = useState<number>(1);
+  const [pdfPreviewDocumentId, setPdfPreviewDocumentId] = useState<
+    string | null
+  >(null);
+
+  const openPdfPreview = (documentId: string, page?: number) => {
     // Implement the logic to open the PDF preview
-    console.log(
-      `Opening PDF preview for document ID: ${documentId}, page: ${page}`
-    );
+    // console.log(
+    //   `Opening PDF preview for document ID: ${documentId}, page: ${page}`
+    // );
+    setPdfPreviewDocumentId(documentId);
+    if (page && page > 0) {
+      setInitialPage(page);
+    } else {
+      setInitialPage(1);
+    }
+    setPdfPreviewOpen(true);
+
+    setPdfPreviewOpen(true);
   };
+  
   console.log('in search results, kgEntityResults = ', kgLocalSearchResult);
   return (
     <div className="flex justify-center text-zinc-200 bg-zinc-900">
@@ -121,7 +143,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                         <VectorSearchResultItem
                           source={source}
                           index={index}
-                          onOpenPdfPreview={handleOpenPdfPreview}
+                          onOpenPdfPreview={openPdfPreview}
                         />
                       </CardContent>
                     </Card>
@@ -158,6 +180,12 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
           </TabsContent>
         )}
       </Tabs>
+      <PdfPreviewDialog
+        documentId={pdfPreviewDocumentId || ''}
+        open={pdfPreviewOpen}
+        onClose={handleClosePdfPreview}
+        initialPage={initialPage}
+      />
     </div>
   );
 };
