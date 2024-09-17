@@ -267,7 +267,7 @@ export interface Switch {
   tooltipText: string;
 }
 
-export interface Source {
+export interface VectorSearchResult {
   title: string;
   snippet: string;
   id: string;

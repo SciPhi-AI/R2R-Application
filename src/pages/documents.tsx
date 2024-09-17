@@ -32,6 +32,11 @@ import {
 import { useToast } from '@/components/ui/use-toast';
 import { useUserContext } from '@/context/UserContext';
 import { IngestionStatus } from '@/types';
+import {
+  SearchResults,
+  mockVectorSearchResults,
+  mockKGSearchResults,
+} from '@/components/SearchResults';
 
 interface DocumentFilterCriteria {
   sort: 'title' | 'date';
@@ -388,8 +393,12 @@ const Index: React.FC = () => {
                 <div className="flex justify-between items-center">
                   <div className="flex items-center space-x-4"></div>
                   <div className="flex justify-center">
-                    <div className="mt-6 pr-2">
-                      <UploadButton
+                    <SearchResults
+                      vectorSearchResults={mockVectorSearchResults}
+                      kgSearchResults={mockKGSearchResults}
+                    />{' '}
+                    <div className="mt-6 pr-20">
+                      {/* <UploadButton
                         userId={userId}
                         uploadedDocuments={documents}
                         setUploadedDocuments={setDocuments}
@@ -403,10 +412,10 @@ const Index: React.FC = () => {
                         setPendingDocuments={setPendingDocuments}
                         setCurrentPage={setCurrentPage}
                         documentsPerPage={DOCUMENTS_PER_PAGE}
-                      />
+                      /> */}
                     </div>
                     <div className="mt-6">
-                      <DeleteButton
+                      {/* <DeleteButton
                         selectedDocumentIds={selectedDocumentIds}
                         onDelete={() => {
                           setSelectedDocumentIds([]);
@@ -418,7 +427,7 @@ const Index: React.FC = () => {
                           setIsAllSelected(false);
                         }}
                         showToast={toast}
-                      />
+                      /> */}
                     </div>
                   </div>
                 </div>

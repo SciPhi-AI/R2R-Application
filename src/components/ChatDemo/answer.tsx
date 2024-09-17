@@ -18,7 +18,11 @@ import {
 } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/Button';
 import { Message } from '@/types';
-import { Source } from '@/types';
+import { VectorSearchResult } from '@/types';
+import {
+  SearchResults,
+  mockVectorSearchResults,
+} from '@/components/SearchResults';
 
 interface Entity {
   name: string;
@@ -57,31 +61,32 @@ function parseKGLocalSources(payload: string): KGLocalSource {
   //     communities: {}
   //   };
   // }
-  console.log('payload = ', payload)
+  console.log('payload = ', payload);
   const data = JSON.parse(payload);
-  console.log('data = ', data)
+  console.log('data = ', data);
 
   const entities: Record<string, Entity> = {};
   for (const [key, value] of Object.entries(data.entities)) {
     entities[key] = {
       name: value.name,
-      description: value.description
+      description: value.description,
     };
   }
-  console.log('entities = ', entities)
+  console.log('entities = ', entities);
 
   const relationships: Record<string, Triple> = data.relationships;
 
-  const communities: Community[] = Object.values(data.communities).map((community: any) => {
-    const parsedSummary = JSON.parse(community.summary);
-    return {
-      title: parsedSummary.title,
-      summary: parsedSummary.summary,
-      explanation: parsedSummary.explanation
-    };
-  });
-  console.log('communities = ', communities)
-
+  const communities: Community[] = Object.values(data.communities).map(
+    (community: any) => {
+      const parsedSummary = JSON.parse(community.summary);
+      return {
+        title: parsedSummary.title,
+        summary: parsedSummary.summary,
+        explanation: parsedSummary.explanation,
+      };
+    }
+  );
+  console.log('communities = ', communities);
 
   return {
     query: data.query,
@@ -91,7 +96,7 @@ function parseKGLocalSources(payload: string): KGLocalSource {
   };
 }
 const SourceItem: FC<{
-  source: Source;
+  source: VectorSearchResult;
   onOpenPdfPreview: (documentId: string, page?: number) => void;
 }> = ({ source, onOpenPdfPreview }) => {
   const { id, score, metadata, text } = source;
@@ -139,9 +144,10 @@ interface LocalKGEntitySourceItemProps {
   source: KGLocalSource;
 }
 
-
-const LocalKGEntitySourceItem: FC<LocalKGEntitySourceItemProps> = ({ entity }) => {
-  console.log("local kg entity = ", entity)
+const LocalKGEntitySourceItem: FC<LocalKGEntitySourceItemProps> = ({
+  entity,
+}) => {
+  console.log('local kg entity = ', entity);
   return (
     <div
       className="bg-zinc-700 p-4 rounded-lg mb-2 flex items-center"
@@ -157,30 +163,31 @@ const LocalKGEntitySourceItem: FC<LocalKGEntitySourceItemProps> = ({ entity }) =
   );
 };
 const LocalKGEntities: FC<LocalKGEntitySourceItemProps> = ({ source }) => {
-
-  console.log('source = ', source)
+  console.log('source = ', source);
   return (
     <div>
-        <div className="space-y-2 pt-2">
-          {source && (
-            <>
-              {Object.entries(source.entities).map(
-                ([key, entity]) => (
-                  <LocalKGEntitySourceItem key={key} entity={entity} />
-                )
-              )}
-            </>
-          )}
-        </div>
+      <div className="space-y-2 pt-2">
+        {source && (
+          <>
+            {Object.entries(source.entities).map(([key, entity]) => (
+              <LocalKGEntitySourceItem key={key} entity={entity} />
+            ))}
+          </>
+        )}
+      </div>
     </div>
   );
 };
 
-const LocalKGCommunitySourceItem: FC<{ community: Community }> = ({ community }) => {
+const LocalKGCommunitySourceItem: FC<{ community: Community }> = ({
+  community,
+}) => {
   console.log('parsing community community = ', community);
   return (
     <div className="bg-zinc-700 p-4 rounded-lg mb-2">
-      <h3 className="text-sm font-medium text-zinc-200 mb-1">{community.title}</h3>
+      <h3 className="text-sm font-medium text-zinc-200 mb-1">
+        {community.title}
+      </h3>
       <p className="text-xs text-zinc-400 mb-2">{community.summary}</p>
       <p className="text-xs text-zinc-400 mb-2">{community.explanation}</p>
     </div>
@@ -188,13 +195,14 @@ const LocalKGCommunitySourceItem: FC<{ community: Community }> = ({ community })
 };
 
 const LocalKGCommunities: FC<LocalKGEntitySourceItemProps> = ({ source }) => {
-  console.log('source = ', source)
+  console.log('source = ', source);
   return (
     <div>
       <div className="space-y-2 pt-2">
-        {source.communities && source.communities.map((community, index) => (
-          <LocalKGCommunitySourceItem key={index} community={community} />
-        ))}
+        {source.communities &&
+          source.communities.map((community, index) => (
+            <LocalKGCommunitySourceItem key={index} community={community} />
+          ))}
       </div>
     </div>
   );
@@ -209,7 +217,7 @@ function formatMarkdownNewLines(markdown: string) {
     });
 }
 
-const parseSources = (sources: string | object): Source[] => {
+const parseSources = (sources: string | object): VectorSearchResult[] => {
   if (typeof sources === 'string') {
     // Split the string into individual JSON object strings
     const individualSources = sources.split(',"{"').map((source, index) => {
@@ -237,7 +245,7 @@ const parseSources = (sources: string | object): Source[] => {
     }
   }
 
-  return sources as Source[];
+  return sources as VectorSearchResult[];
 };
 
 export const Answer: FC<{
@@ -249,13 +257,15 @@ export const Answer: FC<{
 }> = ({ message, isStreaming, isSearching, mode, onOpenPdfPreview }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isKgLocalEntitiesOpen, setIsKgLocalEntitiesOpen] = useState(false);
-  const [isKgLocalCommunitiesOpen, setIsKgLocalCommunitiesOpen] = useState(false);
+  const [isKgLocalCommunitiesOpen, setIsKgLocalCommunitiesOpen] =
+    useState(false);
 
-  const [parsedSources, setParsedSources] = useState<Source[]>([]);
-  const [parsedKgLocal, setParsedKgLocal] = useState<KGLocalSearchResult | null>(null);
+  const [parsedSources, setParsedSources] = useState<VectorSearchResult[]>([]);
+  const [parsedKgLocal, setParsedKgLocal] =
+    useState<KGLocalSearchResult | null>(null);
   const showKgLocalAccordion = mode === 'rag' && parsedKgLocal !== null;
 
-  console.log('message = ', message)
+  console.log('message = ', message);
   useEffect(() => {
     if (message.sources) {
       try {
@@ -272,7 +282,7 @@ export const Answer: FC<{
 
   useEffect(() => {
     if (message.kgLocal) {
-      console.log('message.kgLocal = ', message.kgLocal)
+      console.log('message.kgLocal = ', message.kgLocal);
       const parsedKGData = parseKGLocalSources(message.kgLocal);
       // console.log('message.kgLocal = ', message.kgLocal)
       // console.log('parsedKGData = ', parsedKGData)
@@ -315,7 +325,7 @@ export const Answer: FC<{
                       Searching over sources...
                     </span>
                   ) : (
-                    `Vector Search Sources`
+                    `Sources`
                   )}
                 </span>
               </div>
@@ -323,20 +333,24 @@ export const Answer: FC<{
             <AccordionContent>
               <div className="space-y-2 pt-2">
                 <div className="space-y-2 max-h-60 overflow-y-auto">
-                  {parsedSources.map((item: Source) => (
+                  <SearchResults
+                    vectorSearchResults={parsedSources}
+                    kgSearchResults={parsedKgLocal}
+                  />
+                  {/* {parsedSources.map((item: VectorSearchResult) => (
                     <SourceItem
                       key={item.id}
                       source={item}
                       onOpenPdfPreview={onOpenPdfPreview}
                     />
-                  ))}
+                  ))} */}
                 </div>
               </div>
             </AccordionContent>
           </AccordionItem>
         </Accordion>
       )}
-
+      {/* 
       {showKgLocalAccordion && (
         <Accordion
           type="single"
@@ -403,7 +417,7 @@ export const Answer: FC<{
         </Accordion>
 
         
-      )}      
+      )}       */}
 
       {showNoSourcesFound && (
         <div className="flex items-center justify-between py-2 text-sm text-zinc-400">

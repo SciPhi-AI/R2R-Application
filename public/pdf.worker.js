@@ -1553,7 +1553,7 @@ class ChunkedStreamManager {
     this._promisesByRequest = new Map();
     this.progressiveDataLength = 0;
     this.aborted = !1;
-    this._loadedStreamCapability = Promise.withResolvers();
+    // this._loadedStreamCapability = Promise.withResolvers();
   }
   sendRequest(e, t) {
     const i = this.pdfNetworkStream.getRangeReader(e, t);
@@ -1595,7 +1595,7 @@ class ChunkedStreamManager {
     this._chunksNeededByRequest.set(t, i);
     for (const t of e) this.stream.hasChunk(t) || i.add(t);
     if (0 === i.size) return Promise.resolve();
-    const a = Promise.withResolvers();
+    // const a = Promise.withResolvers();
     this._promisesByRequest.set(t, a);
     const s = [];
     for (const e of i) {
@@ -34306,7 +34306,7 @@ class PartialEvaluator {
     }
     if (t.cacheKey && this.fontCache.has(t.cacheKey))
       return this.fontCache.get(t.cacheKey);
-    const { promise: n, resolve: g } = Promise.withResolvers();
+    // const { promise: n, resolve: g } = Promise.withResolvers();
     let o;
     try {
       o = this.preEvaluateFont(t);
@@ -56005,7 +56005,7 @@ class MessageHandler {
   }
   sendWithPromise(e, t, i) {
     const a = this.callbackId++,
-      s = Promise.withResolvers();
+      // s = Promise.withResolvers();
     this.callbackCapabilities[a] = s;
     try {
       this.comObj.postMessage(
@@ -56031,7 +56031,7 @@ class MessageHandler {
     return new ReadableStream(
       {
         start: (i) => {
-          const o = Promise.withResolvers();
+          // const o = Promise.withResolvers();
           this.streamControllers[s] = {
             controller: i,
             startCall: o,
@@ -56053,7 +56053,7 @@ class MessageHandler {
           return o.promise;
         },
         pull: (e) => {
-          const t = Promise.withResolvers();
+          // const t = Promise.withResolvers();
           this.streamControllers[s].pullCall = t;
           g.postMessage({
             sourceName: r,
@@ -56066,7 +56066,7 @@ class MessageHandler {
         },
         cancel: (e) => {
           assert(e instanceof Error, 'cancel must have a valid reason');
-          const t = Promise.withResolvers();
+          // const t = Promise.withResolvers();
           this.streamControllers[s].cancelCall = t;
           this.streamControllers[s].isClosed = !0;
           g.postMessage({
@@ -56095,7 +56095,7 @@ class MessageHandler {
           const g = this.desiredSize;
           this.desiredSize -= r;
           if (g > 0 && this.desiredSize <= 0) {
-            this.sinkCapability = Promise.withResolvers();
+            // this.sinkCapability = Promise.withResolvers();
             this.ready = this.sinkCapability.promise;
           }
           s.postMessage(
@@ -56128,7 +56128,7 @@ class MessageHandler {
             });
           }
         },
-        sinkCapability: Promise.withResolvers(),
+        // sinkCapability: Promise.withResolvers(),
         onPull: null,
         onCancel: null,
         isCancelled: !1,
@@ -56369,7 +56369,7 @@ class WorkerTask {
   constructor(e) {
     this.name = e;
     this.terminated = !1;
-    this._capability = Promise.withResolvers();
+    // this._capability = Promise.withResolvers();
   }
   get finished() {
     return this._capability.promise;
@@ -56484,7 +56484,7 @@ class WorkerMessageHandler {
           password: t,
           rangeChunkSize: a,
         },
-        h = Promise.withResolvers();
+        // h = Promise.withResolvers();
       let Q;
       if (e) {
         try {
