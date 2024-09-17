@@ -17,10 +17,38 @@ import { UploadButton } from './upload';
 
 const FUNCTION_START_TOKEN = '<function_call>';
 const FUNCTION_END_TOKEN = '</function_call>';
-const SEARCH_START_TOKEN = '<search>';
-const SEARCH_END_TOKEN = '</search>';
-const LLM_START_TOKEN = '<completion>';
-const LLM_END_TOKEN = '</completion>';
+const VECTOR_SEARCH_START_TOKEN = '<vector_search>';
+const VECTOR_SEARCH_END_TOKEN = '</vector_search>';
+const KG_LOCAL_SEARCH_START_TOKEN = '<kg_local_search>';
+const KG_LOCAL_SEARCH_END_TOKEN = '</kg_local_search>';
+const KG_GLOBAL_SEARCH_START_TOKEN = '<kg_global_search>';
+const KG_GLOBAL_SEARCH_END_TOKEN = '</kg_global_search>';
+const COMPLETION_START_TOKEN = '<completion>';
+const COMPLETION_END_TOKEN = '</completion>';
+
+interface VectorSearchResult {
+  fragment_id: string;
+  extraction_id: string;
+  document_id: string;
+  user_id: string;
+  group_ids: string;
+  score: number;
+  text: string;
+  metadata: string;
+
+}
+
+interface KGLocalSearchResult {
+  query: string;
+  entities: Record<string, any>;
+  relationships: Record<string, any>;
+  communities: Record<string, any>;
+}
+
+interface KGGlobalSearchResult {
+  query: string;
+  search_result: string[];
+}
 
 export const Result: FC<{
   query: string;
@@ -86,6 +114,7 @@ export const Result: FC<{
   const updateLastMessage = (
     content?: string,
     sources?: string,
+    kgLocalSources?: string,
     isStreaming?: boolean,
     searchPerformed?: boolean
   ) => {
@@ -97,7 +126,11 @@ export const Result: FC<{
           lastMessage.content += content;
         }
         if (sources !== undefined) {
+          console.log('setting last sources = ', sources)
           lastMessage.sources = sources;
+        }
+        if (kgLocalSources !== undefined) {
+          lastMessage.kgLocal = kgLocalSources;
         }
         if (isStreaming !== undefined) {
           lastMessage.isStreaming = isStreaming;
@@ -190,8 +223,16 @@ export const Result: FC<{
 
       let buffer = '';
       let inLLMResponse = false;
-      let sourcesContent = '';
-
+      let sourcesContent: {
+        vector: VectorSearchResult[];
+        kgLocal: KGLocalSearchResult | null;
+        kgGlobal: KGGlobalSearchResult | null;
+      } = {
+        vector: [],
+        kgLocal: null,
+        kgGlobal: null,
+      };
+    
       while (true) {
         const { done, value } = await reader.read();
         if (done) {
@@ -201,85 +242,139 @@ export const Result: FC<{
         buffer += decoder.decode(value, { stream: true });
 
         if (mode === 'rag') {
-          if (buffer.includes(SEARCH_END_TOKEN)) {
-            const [results, rest] = buffer.split(SEARCH_END_TOKEN);
-            sourcesContent = results.replace(SEARCH_START_TOKEN, '');
-            const formattedSources = sourcesContent
-              .split('\n')
-              .filter((line) => line.trim() !== '')
+
+          if (buffer.includes(VECTOR_SEARCH_END_TOKEN)) {
+            const [results, rest] = buffer.split(VECTOR_SEARCH_END_TOKEN);
+
+            const vectorResults = results.replace(VECTOR_SEARCH_START_TOKEN, '');
+            const vectorResultsList = JSON.parse(vectorResults);
+
+            const formattedSources = vectorResultsList
               .map((line) => {
                 try {
-                  return JSON.stringify(JSON.parse(line));
+                  console.log('parsing line as JSON:', line);
+                  return JSON.parse(line);
                 } catch (error) {
                   console.error('Error parsing source line:', error);
                   return null;
                 }
               })
-              .filter(Boolean)
-              .join(',');
+
             updateLastMessage(
               undefined,
-              `[${formattedSources}]`,
+              formattedSources,
+              undefined,
               undefined,
               true
             );
-            buffer = rest || '';
-            setIsSearching(false);
           }
+  
+        // Handle KG local search results
+        if (buffer.includes(KG_LOCAL_SEARCH_END_TOKEN)) {
+          const [results, rest] = buffer.split(KG_LOCAL_SEARCH_END_TOKEN);
+          const kgLocalResult = results.split(KG_LOCAL_SEARCH_START_TOKEN)[1];
+          console.log('kgLocalResult = ', kgLocalResult)
+          const parsedKgLocalResult: KGLocalSearchResult = JSON.parse(kgLocalResult);
+          console.log('parsedKgLocalResult = ', parsedKgLocalResult)
+          updateLastMessage(
+            undefined,
+            undefined,
+            parsedKgLocalResult,
+            undefined,
+            true
+          );
 
-          if (buffer.includes(LLM_START_TOKEN)) {
-            inLLMResponse = true;
-            buffer = buffer.split(LLM_START_TOKEN)[1] || '';
-          }
-
-          if (inLLMResponse) {
-            const endTokenIndex = buffer.indexOf(LLM_END_TOKEN);
-            let chunk = '';
-
-            if (endTokenIndex !== -1) {
-              chunk = buffer.slice(0, endTokenIndex);
-              buffer = buffer.slice(endTokenIndex + LLM_END_TOKEN.length);
-              inLLMResponse = false;
-            } else {
-              chunk = buffer;
-              buffer = '';
-            }
-
-            updateLastMessage(chunk);
-          }
-        } else {
-          if (buffer.includes(FUNCTION_END_TOKEN)) {
-            const [results, rest] = buffer.split(FUNCTION_END_TOKEN);
-            sourcesContent = results
-              .replace(FUNCTION_START_TOKEN, '')
-              .replace(/^[\s\S]*?<results>([\s\S]*)<\/results>[\s\S]*$/, '$1');
-            updateLastMessage(undefined, sourcesContent, undefined, true);
-            buffer = rest || '';
-            setIsSearching(false);
-          }
-
-          if (buffer.includes(LLM_START_TOKEN)) {
-            inLLMResponse = true;
-            buffer = buffer.split(LLM_START_TOKEN)[1] || '';
-          }
-
-          if (inLLMResponse) {
-            const endTokenIndex = buffer.indexOf(LLM_END_TOKEN);
-            let chunk = '';
-
-            if (endTokenIndex !== -1) {
-              chunk = buffer.slice(0, endTokenIndex);
-              buffer = buffer.slice(endTokenIndex + LLM_END_TOKEN.length);
-              inLLMResponse = false;
-            } else {
-              chunk = buffer;
-              buffer = '';
-            }
-
-            updateLastMessage(chunk);
-          }
+          buffer = rest || '';
         }
       }
+    }
+        //   sourcesContent.kgLocal = kgLocalResults
+        //     .split('\n')
+        //     .filter((line) => line.trim() !== '')
+        //     .map((line) => {
+        //       try {
+        //         return JSON.parse(line);
+        //       } catch (error) {
+        //         console.error('Error parsing KG local search result:', error);
+        //         return null;
+        //       }
+        //     })
+        //     .filter(Boolean);
+        //   buffer = rest || '';
+        // }
+
+        // // Handle KG global search results
+        // if (buffer.includes(KG_GLOBAL_SEARCH_END_TOKEN)) {
+        //   const [results, rest] = buffer.split(KG_GLOBAL_SEARCH_END_TOKEN);
+        //   const kgGlobalResults = results.replace(KG_GLOBAL_SEARCH_START_TOKEN, '');
+        //   sourcesContent.kgGlobal = kgGlobalResults
+        //     .split('\n')
+        //     .filter((line) => line.trim() !== '')
+        //     .map((line) => {
+        //       try {
+        //         return JSON.parse(line);
+        //       } catch (error) {
+        //         console.error('Error parsing KG global search result:', error);
+        //         return null;
+        //       }
+        //     })
+        //     .filter(Boolean);
+        //   buffer = rest || '';
+        // }
+
+        //   if (buffer.includes(COMPLETION_START_TOKEN)) {
+        //     inLLMResponse = true;
+        //     buffer = buffer.split(COMPLETION_START_TOKEN)[1] || '';
+        //   }
+
+        //   if (inLLMResponse) {
+        //     const endTokenIndex = buffer.indexOf(COMPLETION_END_TOKEN);
+        //     let chunk = '';
+
+        //     if (endTokenIndex !== -1) {
+        //       chunk = buffer.slice(0, endTokenIndex);
+        //       buffer = buffer.slice(endTokenIndex + COMPLETION_END_TOKEN.length);
+        //       inLLMResponse = false;
+        //     } else {
+        //       chunk = buffer;
+        //       buffer = '';
+        //     }
+
+        //     updateLastMessage(chunk);
+        //   }
+        // } else {
+        //   if (buffer.includes(FUNCTION_END_TOKEN)) {
+        //     const [results, rest] = buffer.split(FUNCTION_END_TOKEN);
+        //     sourcesContent = results
+        //       .replace(FUNCTION_START_TOKEN, '')
+        //       .replace(/^[\s\S]*?<results>([\s\S]*)<\/results>[\s\S]*$/, '$1');
+        //     updateLastMessage(undefined, sourcesContent, undefined, true);
+        //     buffer = rest || '';
+        //     setIsSearching(false);
+        //   }
+
+        //   if (buffer.includes(LLM_START_TOKEN)) {
+        //     inLLMResponse = true;
+        //     buffer = buffer.split(LLM_START_TOKEN)[1] || '';
+        //   }
+
+        //   if (inLLMResponse) {
+        //     const endTokenIndex = buffer.indexOf(LLM_END_TOKEN);
+        //     let chunk = '';
+
+        //     if (endTokenIndex !== -1) {
+        //       chunk = buffer.slice(0, endTokenIndex);
+        //       buffer = buffer.slice(endTokenIndex + LLM_END_TOKEN.length);
+        //       inLLMResponse = false;
+        //     } else {
+        //       chunk = buffer;
+        //       buffer = '';
+        //     }
+
+        //     updateLastMessage(chunk);
+        //   }
+        // }
+      // }
     } catch (err: unknown) {
       console.error('Error in streaming:', err);
       setError(err instanceof Error ? err.message : String(err));
@@ -287,7 +382,7 @@ export const Result: FC<{
       setIsStreaming(false);
       setIsSearching(false);
       setIsProcessingQuery(false);
-      updateLastMessage(undefined, undefined, false);
+      // updateLastMessage(undefined, undefined, false);
     }
   };
 

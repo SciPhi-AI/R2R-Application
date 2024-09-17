@@ -174,6 +174,7 @@ export interface Message {
   timestamp?: number;
   isStreaming?: boolean;
   sources?: string | null;
+  kgLocal?: string | null;
   searchPerformed?: boolean;
 }
 

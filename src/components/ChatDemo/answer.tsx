@@ -20,6 +20,76 @@ import { Button } from '@/components/ui/Button';
 import { Message } from '@/types';
 import { Source } from '@/types';
 
+interface Entity {
+  name: string;
+  description: string;
+}
+
+interface Triple {
+  subject: string;
+  predicate: string;
+  object: string;
+}
+
+interface Community {
+  summary: {
+    title: string;
+    summary: string;
+    explanation: string;
+  }[];
+}
+
+interface KGLocalSource {
+  query: string;
+  entities: { [key: string]: string };
+  relationships: { [key: string]: string };
+  communities: {
+    [key: string]: Community;
+  };
+}
+
+function parseKGLocalSources(payload: string): KGLocalSource {
+  // if (payload == null) {
+  //   return {
+  //     query: '',
+  //     entities: {},
+  //     relationships: {},
+  //     communities: {}
+  //   };
+  // }
+  console.log('payload = ', payload)
+  const data = JSON.parse(payload);
+  console.log('data = ', data)
+
+  const entities: Record<string, Entity> = {};
+  for (const [key, value] of Object.entries(data.entities)) {
+    entities[key] = {
+      name: value.name,
+      description: value.description
+    };
+  }
+  console.log('entities = ', entities)
+
+  const relationships: Record<string, Triple> = data.relationships;
+
+  const communities: Community[] = Object.values(data.communities).map((community: any) => {
+    const parsedSummary = JSON.parse(community.summary);
+    return {
+      title: parsedSummary.title,
+      summary: parsedSummary.summary,
+      explanation: parsedSummary.explanation
+    };
+  });
+  console.log('communities = ', communities)
+
+
+  return {
+    query: data.query,
+    entities,
+    relationships,
+    communities,
+  };
+}
 const SourceItem: FC<{
   source: Source;
   onOpenPdfPreview: (documentId: string, page?: number) => void;
@@ -61,6 +131,71 @@ const SourceItem: FC<{
           </Button>
         </div>
       )}
+    </div>
+  );
+};
+
+interface LocalKGEntitySourceItemProps {
+  source: KGLocalSource;
+}
+
+
+const LocalKGEntitySourceItem: FC<LocalKGEntitySourceItemProps> = ({ entity }) => {
+  console.log("local kg entity = ", entity)
+  return (
+    <div
+      className="bg-zinc-700 p-4 rounded-lg mb-2 flex items-center"
+      style={{ width: '100%' }}
+    >
+      <div className="flex-grow mr-4">
+        <h3 className="text-sm font-medium text-zinc-200 mb-1">
+          {entity.name}
+        </h3>
+        <p className="text-xs text-zinc-400">{entity.description}</p>
+      </div>
+    </div>
+  );
+};
+const LocalKGEntities: FC<LocalKGEntitySourceItemProps> = ({ source }) => {
+
+  console.log('source = ', source)
+  return (
+    <div>
+        <div className="space-y-2 pt-2">
+          {source && (
+            <>
+              {Object.entries(source.entities).map(
+                ([key, entity]) => (
+                  <LocalKGEntitySourceItem key={key} entity={entity} />
+                )
+              )}
+            </>
+          )}
+        </div>
+    </div>
+  );
+};
+
+const LocalKGCommunitySourceItem: FC<{ community: Community }> = ({ community }) => {
+  console.log('parsing community community = ', community);
+  return (
+    <div className="bg-zinc-700 p-4 rounded-lg mb-2">
+      <h3 className="text-sm font-medium text-zinc-200 mb-1">{community.title}</h3>
+      <p className="text-xs text-zinc-400 mb-2">{community.summary}</p>
+      <p className="text-xs text-zinc-400 mb-2">{community.explanation}</p>
+    </div>
+  );
+};
+
+const LocalKGCommunities: FC<LocalKGEntitySourceItemProps> = ({ source }) => {
+  console.log('source = ', source)
+  return (
+    <div>
+      <div className="space-y-2 pt-2">
+        {source.communities && source.communities.map((community, index) => (
+          <LocalKGCommunitySourceItem key={index} community={community} />
+        ))}
+      </div>
     </div>
   );
 };
@@ -113,8 +248,14 @@ export const Answer: FC<{
   onOpenPdfPreview: (documentId: string, page?: number) => void;
 }> = ({ message, isStreaming, isSearching, mode, onOpenPdfPreview }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [parsedSources, setParsedSources] = useState<Source[]>([]);
+  const [isKgLocalEntitiesOpen, setIsKgLocalEntitiesOpen] = useState(false);
+  const [isKgLocalCommunitiesOpen, setIsKgLocalCommunitiesOpen] = useState(false);
 
+  const [parsedSources, setParsedSources] = useState<Source[]>([]);
+  const [parsedKgLocal, setParsedKgLocal] = useState<KGLocalSearchResult | null>(null);
+  const showKgLocalAccordion = mode === 'rag' && parsedKgLocal !== null;
+
+  console.log('message = ', message)
   useEffect(() => {
     if (message.sources) {
       try {
@@ -128,6 +269,20 @@ export const Answer: FC<{
       setParsedSources([]);
     }
   }, [message.sources]);
+
+  useEffect(() => {
+    if (message.kgLocal) {
+      console.log('message.kgLocal = ', message.kgLocal)
+      const parsedKGData = parseKGLocalSources(message.kgLocal);
+      // console.log('message.kgLocal = ', message.kgLocal)
+      // console.log('parsedKGData = ', parsedKGData)
+      // Example usage
+      // const kgLocalSource = `{"query":"test123","entities":{"0":{"name":"Egg-laying Tetrapods","description":"Egg-laying tetrapods are a subgroup of tetrapods characterized by their reproductive method of laying eggs. This group includes various species, such as chameleons and crocodiles, and is defined as a specific subset within the broader category of tetrapods. Their unique reproductive strategy distinguishes them from other tetrapod groups."},"1":{"name":"Sulla","description":"Sulla was a Roman general and statesman known for his military campaigns, particularly his seizure of Athens in 86 BC. During this event, he confiscated the city's library and transferred its contents to Rome, highlighting his role in the cultural and political shifts of the time. This action underscores Sulla's influence in expanding Roman access to knowledge and resources from conquered territories."},
+      // "relationships":{},"communities":{"0":{"summary":"{\n    \"title\": \"Scala Naturae and Tetrapods\",\n    \"summary\": \"The community centers around Aristotle's Scala Naturae, which classifies living beings, particularly focusing on tetrapods. Tetrapods, as a significant subgroup, include various species and highlight the distinctions between different biological classifications.\",\n    \"rating\": 4.5,\n    \"rating_explanation\": \"The impact severity rating is moderate due to the foundational role of Scala Naturae in biological classification and its implications for understanding biodiversity.\",\n    \"findings\": [\n        {\n            \"summary\": \"Scala Naturae as a foundational classification system"} } } }`
+      // const parsedKGData = parseKGLocalSources(kgLocalSource);
+      setParsedKgLocal(parsedKGData); // parsedKGData);
+    }
+  }, [message.kgLocal]);
 
   const showSourcesAccordion =
     mode === 'rag' || (mode === 'rag_agent' && parsedSources.length > 0);
@@ -160,7 +315,7 @@ export const Answer: FC<{
                       Searching over sources...
                     </span>
                   ) : (
-                    `View ${parsedSources.length} Sources`
+                    `Vector Search Sources`
                   )}
                 </span>
               </div>
@@ -181,6 +336,74 @@ export const Answer: FC<{
           </AccordionItem>
         </Accordion>
       )}
+
+      {showKgLocalAccordion && (
+        <Accordion
+          type="single"
+          collapsible
+          className="w-full mt-4"
+          onValueChange={(value) => setIsKgLocalEntitiesOpen(value === 'kgLocal')}
+        >
+          <AccordionItem value="kgents">
+            <AccordionTrigger className="py-2 text-lg font-bold text-zinc-200 hover:no-underline">
+              <div className="flex items-center justify-between w-full">
+                <Logo
+                  width={25}
+                  height={25}
+                  disableLink={true}
+                  className="w-12 h-12"
+                />
+                <span className="text-sm font-normal">
+                  Related Entities
+                </span>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="space-y-2 pt-2">
+                {parsedKgLocal && (
+                  <LocalKGEntities source={parsedKgLocal} />
+                )}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+
+        
+      )}
+ {showKgLocalAccordion && (
+        <Accordion
+          type="single"
+          collapsible
+          className="w-full mt-4"
+          onValueChange={(value) => setIsKgLocalEntitiesOpen(value === 'kgLocal')}
+        >
+          <AccordionItem value="kgcoms">
+            <AccordionTrigger className="py-2 text-lg font-bold text-zinc-200 hover:no-underline">
+              <div className="flex items-center justify-between w-full">
+                <Logo
+                  width={25}
+                  height={25}
+                  disableLink={true}
+                  className="w-12 h-12"
+                />
+                <span className="text-sm font-normal">
+                  Related Communities
+                </span>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="space-y-2 pt-2">
+                {parsedKgLocal && (
+                  <LocalKGCommunities source={parsedKgLocal} />
+                )}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+        </Accordion>
+
+        
+      )}      
 
       {showNoSourcesFound && (
         <div className="flex items-center justify-between py-2 text-sm text-zinc-400">
@@ -246,7 +469,7 @@ export const Answer: FC<{
                                 {metadata?.snippet ?? ''}
                               </div>
                               <div className="line-clamp-4 text-zinc-300 break-words">
-                                {metadata?.text ?? ''}
+                                {source.text}
                               </div>
                             </div>
                           </div>
