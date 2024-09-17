@@ -9,6 +9,7 @@ import {
   PopoverTrigger,
 } from '@/components/ChatDemo/popover';
 import { Skeleton } from '@/components/ChatDemo/skeleton';
+import { SearchResults } from '@/components/SearchResults';
 import { Logo } from '@/components/shared/Logo';
 import {
   Accordion,
@@ -18,20 +19,24 @@ import {
 } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/Button';
 import { Message } from '@/types';
-import { VectorSearchResult, KGEntity, KGTriple, KGCommunity, KGLocalSearchResult } from '@/types';
 import {
-  SearchResults,
-} from '@/components/SearchResults';
-
+  VectorSearchResult,
+  KGEntity,
+  KGTriple,
+  KGCommunity,
+  KGLocalSearchResult,
+} from '@/types';
 
 function parseKGLocalSources(payload: string): KGLocalSearchResult {
   const data = JSON.parse(payload);
 
-  const entities: KGEntity[] = Object.entries(data.entities).map(([key, value]) => ({
-    id: key,
-    name: value.name,
-    description: value.description,
-  }));
+  const entities: KGEntity[] = Object.entries(data.entities).map(
+    ([key, value]) => ({
+      id: key,
+      name: value.name,
+      description: value.description,
+    })
+  );
 
   const relationships: KGTriple[] = data.relationships;
 
@@ -148,7 +153,9 @@ export const Answer: FC<{
 }> = ({ message, isStreaming, isSearching, mode, onOpenPdfPreview }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const [parsedVectorSearch, setParsedVectorSearch] = useState<VectorSearchResult[]>([]);
+  const [parsedVectorSearch, setParsedVectorSearch] = useState<
+    VectorSearchResult[]
+  >([]);
   const [parsedKgLocal, setParsedKgLocal] =
     useState<KGLocalSearchResult | null>(null);
 

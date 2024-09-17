@@ -349,9 +349,9 @@ export interface KGCommunity {
 
 export interface KGLocalSearchResult {
   query: string;
-  entities: KGEntity[]
-  relationships: KGTriple[]
-  communities: KGCommunity[]
+  entities: KGEntity[];
+  relationships: KGTriple[];
+  communities: KGCommunity[];
 }
 
 // export interface KGGlobalSearchResult {

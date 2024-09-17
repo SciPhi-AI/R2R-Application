@@ -8,7 +8,7 @@ import React, { FC, useEffect, useState, useRef } from 'react';
 
 import PdfPreviewDialog from '@/components/ChatDemo/utils/pdfPreviewDialog';
 import { useUserContext } from '@/context/UserContext';
-import { Message, RagGenerationConfig } from '@/types';
+import { Message, RagGenerationConfig, KGLocalSearchResult } from '@/types';
 
 import { Answer } from './answer';
 import { DefaultQueries } from './DefaultQueries';
@@ -25,7 +25,6 @@ const KG_GLOBAL_SEARCH_START_TOKEN = '<kg_global_search>';
 const KG_GLOBAL_SEARCH_END_TOKEN = '</kg_global_search>';
 const COMPLETION_START_TOKEN = '<completion>';
 const COMPLETION_END_TOKEN = '</completion>';
-
 
 export const Result: FC<{
   query: string;
@@ -103,7 +102,6 @@ export const Result: FC<{
           lastMessage.content += content;
         }
         if (sources !== undefined) {
-          console.log('setting last sources = ', sources);
           lastMessage.sources = sources;
         }
         if (kgLocalSources !== undefined) {
@@ -200,7 +198,7 @@ export const Result: FC<{
 
       let buffer = '';
       let inLLMResponse = false;
-      let sourcesContent: {
+      const sourcesContent: {
         vector: VectorSearchResult[];
         kgLocal: KGLocalSearchResult | null;
         kgGlobal: KGGlobalSearchResult | null;
@@ -253,8 +251,7 @@ export const Result: FC<{
             const [results, rest] = buffer.split(KG_LOCAL_SEARCH_END_TOKEN);
             const kgLocalResult = results.split(KG_LOCAL_SEARCH_START_TOKEN)[1];
             console.log('kgLocalResult = ', kgLocalResult);
-            const parsedKgLocalResult: KGLocalSearchResult =
-              JSON.parse(kgLocalResult);
+            const parsedKgLocalResult = JSON.parse(kgLocalResult);
             console.log('parsedKgLocalResult = ', parsedKgLocalResult);
             updateLastMessage(
               undefined,
@@ -266,95 +263,70 @@ export const Result: FC<{
 
             buffer = rest || '';
           }
+
+          if (buffer.includes(COMPLETION_START_TOKEN)) {
+            inLLMResponse = true;
+            buffer = buffer.split(COMPLETION_START_TOKEN)[1] || '';
+          }
+
+          if (inLLMResponse) {
+            const endTokenIndex = buffer.indexOf(COMPLETION_END_TOKEN);
+            let chunk = '';
+
+            if (endTokenIndex !== -1) {
+              chunk = buffer.slice(0, endTokenIndex);
+              buffer = buffer.slice(
+                endTokenIndex + COMPLETION_END_TOKEN.length
+              );
+              inLLMResponse = false;
+            } else {
+              chunk = buffer;
+              buffer = '';
+            }
+
+            updateLastMessage(chunk);
+          }
+        } else {
+          if (buffer.includes(FUNCTION_END_TOKEN)) {
+            const [results, rest] = buffer.split(FUNCTION_END_TOKEN);
+            const functionEndToken = results
+              .replace(FUNCTION_START_TOKEN, '')
+              .replace(/^[\s\S]*?<results>([\s\S]*)<\/results>[\s\S]*$/, '$1');
+            updateLastMessage(
+              undefined,
+              sourcesContent,
+              undefined,
+              undefined,
+              true
+            );
+            buffer = rest || '';
+            setIsSearching(false);
+          }
+
+          if (buffer.includes(COMPLETION_START_TOKEN)) {
+            inLLMResponse = true;
+            buffer = buffer.split(COMPLETION_START_TOKEN)[1] || '';
+          }
+
+          if (inLLMResponse) {
+            const endTokenIndex = buffer.indexOf(COMPLETION_END_TOKEN);
+            let chunk = '';
+
+            if (endTokenIndex !== -1) {
+              chunk = buffer.slice(0, endTokenIndex);
+              buffer = buffer.slice(
+                endTokenIndex + COMPLETION_END_TOKEN.length
+              );
+              inLLMResponse = false;
+            } else {
+              chunk = buffer;
+              buffer = '';
+            }
+
+            updateLastMessage(chunk);
+          }
         }
       }
-      //   sourcesContent.kgLocal = kgLocalResults
-      //     .split('\n')
-      //     .filter((line) => line.trim() !== '')
-      //     .map((line) => {
-      //       try {
-      //         return JSON.parse(line);
-      //       } catch (error) {
-      //         console.error('Error parsing KG local search result:', error);
-      //         return null;
-      //       }
-      //     })
-      //     .filter(Boolean);
-      //   buffer = rest || '';
-      // }
-
-      // // Handle KG global search results
-      // if (buffer.includes(KG_GLOBAL_SEARCH_END_TOKEN)) {
-      //   const [results, rest] = buffer.split(KG_GLOBAL_SEARCH_END_TOKEN);
-      //   const kgGlobalResults = results.replace(KG_GLOBAL_SEARCH_START_TOKEN, '');
-      //   sourcesContent.kgGlobal = kgGlobalResults
-      //     .split('\n')
-      //     .filter((line) => line.trim() !== '')
-      //     .map((line) => {
-      //       try {
-      //         return JSON.parse(line);
-      //       } catch (error) {
-      //         console.error('Error parsing KG global search result:', error);
-      //         return null;
-      //       }
-      //     })
-      //     .filter(Boolean);
-      //   buffer = rest || '';
-      // }
-
-      //   if (buffer.includes(COMPLETION_START_TOKEN)) {
-      //     inLLMResponse = true;
-      //     buffer = buffer.split(COMPLETION_START_TOKEN)[1] || '';
-      //   }
-
-      //   if (inLLMResponse) {
-      //     const endTokenIndex = buffer.indexOf(COMPLETION_END_TOKEN);
-      //     let chunk = '';
-
-      //     if (endTokenIndex !== -1) {
-      //       chunk = buffer.slice(0, endTokenIndex);
-      //       buffer = buffer.slice(endTokenIndex + COMPLETION_END_TOKEN.length);
-      //       inLLMResponse = false;
-      //     } else {
-      //       chunk = buffer;
-      //       buffer = '';
-      //     }
-
-      //     updateLastMessage(chunk);
-      //   }
-      // } else {
-      //   if (buffer.includes(FUNCTION_END_TOKEN)) {
-      //     const [results, rest] = buffer.split(FUNCTION_END_TOKEN);
-      //     sourcesContent = results
-      //       .replace(FUNCTION_START_TOKEN, '')
-      //       .replace(/^[\s\S]*?<results>([\s\S]*)<\/results>[\s\S]*$/, '$1');
-      //     updateLastMessage(undefined, sourcesContent, undefined, true);
-      //     buffer = rest || '';
-      //     setIsSearching(false);
-      //   }
-
-      //   if (buffer.includes(LLM_START_TOKEN)) {
-      //     inLLMResponse = true;
-      //     buffer = buffer.split(LLM_START_TOKEN)[1] || '';
-      //   }
-
-      //   if (inLLMResponse) {
-      //     const endTokenIndex = buffer.indexOf(LLM_END_TOKEN);
-      //     let chunk = '';
-
-      //     if (endTokenIndex !== -1) {
-      //       chunk = buffer.slice(0, endTokenIndex);
-      //       buffer = buffer.slice(endTokenIndex + LLM_END_TOKEN.length);
-      //       inLLMResponse = false;
-      //     } else {
-      //       chunk = buffer;
-      //       buffer = '';
-      //     }
-
-      //     updateLastMessage(chunk);
-      //   }
-      // }
-      // }
     } catch (err: unknown) {
       console.error('Error in streaming:', err);
       setError(err instanceof Error ? err.message : String(err));
