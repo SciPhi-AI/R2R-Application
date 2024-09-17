@@ -229,6 +229,7 @@ export interface Message {
   timestamp?: number;
   isStreaming?: boolean;
   sources?: string | null;
+  kgLocal?: string | null;
   searchPerformed?: boolean;
 }
 
@@ -321,30 +322,6 @@ export interface Switch {
   tooltipText: string;
 }
 
-export interface Source {
-  title: string;
-  snippet: string;
-  id: string;
-  document_id?: string;
-  score: number;
-  link: string;
-  isFamilyFriendly: boolean;
-  displayUrl: string;
-  deepLinks: { snippet: string; name: string; url: string }[];
-  dateLastCrawled: string;
-  cachedPageUrl: string;
-  language: string;
-  primaryImageOfPage?: {
-    thumbnailUrl: string;
-    width: number;
-    height: number;
-    imageId: string;
-  };
-  isNavigational: boolean;
-  metadata: any;
-  text: string;
-}
-
 export interface SpinnerProps {
   className?: string;
 }
@@ -404,3 +381,43 @@ export type Collection = {
   created_at?: string;
   updated_at?: string;
 };
+
+export interface VectorSearchResult {
+  fragment_id: string;
+  extraction_id: string;
+  document_id: string;
+  user_id: string;
+  group_ids: string[];
+  score: number;
+  text: string;
+  metadata: Record<string, any>;
+}
+
+export interface KGEntity {
+  name: string;
+  description: string;
+}
+
+export interface KGTriple {
+  subject: string;
+  predicate: string;
+  object: string;
+}
+
+export interface KGCommunity {
+  title: string;
+  summary: string;
+  explanation: string;
+}
+
+export interface KGLocalSearchResult {
+  query: string;
+  entities: KGEntity[];
+  relationships: KGTriple[];
+  communities: KGCommunity[];
+}
+
+// export interface KGGlobalSearchResult {
+//   query: string;
+//   search_result: string[];
+// }
