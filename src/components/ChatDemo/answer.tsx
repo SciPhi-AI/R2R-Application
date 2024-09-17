@@ -9,6 +9,7 @@ import {
   PopoverTrigger,
 } from '@/components/ChatDemo/popover';
 import { Skeleton } from '@/components/ChatDemo/skeleton';
+import { SearchResults } from '@/components/SearchResults';
 import { Logo } from '@/components/shared/Logo';
 import {
   Accordion,
@@ -18,13 +19,51 @@ import {
 } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/Button';
 import { Message } from '@/types';
-import { Source } from '@/types';
+import {
+  VectorSearchResult,
+  KGEntity,
+  KGTriple,
+  KGCommunity,
+  KGLocalSearchResult,
+} from '@/types';
 
+function parseKGLocalSources(payload: string): KGLocalSearchResult {
+  const data = JSON.parse(payload);
+
+  const entities: KGEntity[] = Object.entries(data.entities).map(
+    ([key, value]: [string, any]) => ({
+      id: key,
+      name: value.name,
+      description: value.description,
+    })
+  );
+
+  const relationships: KGTriple[] = data.relationships;
+
+  const communities: KGCommunity[] = Object.values(data.communities).map(
+    (community: any) => {
+      const parsedSummary = JSON.parse(community.summary);
+      return {
+        title: parsedSummary.title,
+        summary: parsedSummary.summary,
+        explanation: parsedSummary.explanation,
+      };
+    }
+  );
+  console.log('communities = ', communities);
+
+  return {
+    query: data.query,
+    entities,
+    relationships,
+    communities,
+  };
+}
 const SourceItem: FC<{
-  source: Source;
+  source: VectorSearchResult;
   onOpenPdfPreview: (documentId: string, page?: number) => void;
 }> = ({ source, onOpenPdfPreview }) => {
-  const { id, score, metadata, text } = source;
+  const { document_id, score, metadata, text } = source;
 
   const isPdf =
     metadata.document_type === 'pdf' ||
@@ -74,7 +113,7 @@ function formatMarkdownNewLines(markdown: string) {
     });
 }
 
-const parseSources = (sources: string | object): Source[] => {
+const parseSources = (sources: string | object): VectorSearchResult[] => {
   if (typeof sources === 'string') {
     // Split the string into individual JSON object strings
     const individualSources = sources.split(',"{"').map((source, index) => {
@@ -88,8 +127,8 @@ const parseSources = (sources: string | object): Source[] => {
     const jsonArrayString = `[${individualSources.join(',')}]`;
 
     try {
-      const partialParsedSources = JSON.parse(jsonArrayString);
-      return partialParsedSources.map((source: any) => {
+      const partialParsedVectorSearch = JSON.parse(jsonArrayString);
+      return partialParsedVectorSearch.map((source: any) => {
         const parsedSource = JSON.parse(source);
         return {
           ...parsedSource,
@@ -102,7 +141,7 @@ const parseSources = (sources: string | object): Source[] => {
     }
   }
 
-  return sources as Source[];
+  return sources as VectorSearchResult[];
 };
 
 export const Answer: FC<{
@@ -113,28 +152,41 @@ export const Answer: FC<{
   onOpenPdfPreview: (documentId: string, page?: number) => void;
 }> = ({ message, isStreaming, isSearching, mode, onOpenPdfPreview }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [parsedSources, setParsedSources] = useState<Source[]>([]);
+
+  const [parsedVectorSearch, setParsedVectorSearch] = useState<
+    VectorSearchResult[]
+  >([]);
+  const [parsedKgLocal, setParsedKgLocal] =
+    useState<KGLocalSearchResult | null>(null);
 
   useEffect(() => {
     if (message.sources) {
       try {
-        const parsed = parseSources(message.sources);
-        setParsedSources(parsed);
+        const parsedVectorSearchData = parseSources(message.sources);
+        setParsedVectorSearch(parsedVectorSearchData);
       } catch (error) {
         console.error('Failed to parse sources:', error);
-        setParsedSources([]);
+        setParsedVectorSearch([]);
       }
     } else {
-      setParsedSources([]);
+      setParsedVectorSearch([]);
     }
   }, [message.sources]);
 
+  useEffect(() => {
+    if (message.kgLocal) {
+      const parsedKGLocalData = parseKGLocalSources(message.kgLocal);
+      console.log('parsedKGLocalData = ', parsedKGLocalData);
+      setParsedKgLocal(parsedKGLocalData);
+    }
+  }, [message.kgLocal]);
+
   const showSourcesAccordion =
-    mode === 'rag' || (mode === 'rag_agent' && parsedSources.length > 0);
+    mode === 'rag' || (mode === 'rag_agent' && parsedVectorSearch.length > 0);
   const showNoSourcesFound =
     mode === 'rag_agent' &&
     message.searchPerformed &&
-    parsedSources.length === 0;
+    parsedVectorSearch.length === 0;
 
   return (
     <div className="mt-4">
@@ -160,7 +212,7 @@ export const Answer: FC<{
                       Searching over sources...
                     </span>
                   ) : (
-                    `View ${parsedSources.length} Sources`
+                    `Sources`
                   )}
                 </span>
               </div>
@@ -168,13 +220,10 @@ export const Answer: FC<{
             <AccordionContent>
               <div className="space-y-2 pt-2">
                 <div className="space-y-2 max-h-60 overflow-y-auto">
-                  {parsedSources.map((item: Source) => (
-                    <SourceItem
-                      key={item.id}
-                      source={item}
-                      onOpenPdfPreview={onOpenPdfPreview}
-                    />
-                  ))}
+                  <SearchResults
+                    vectorSearchResults={parsedVectorSearch}
+                    kgLocalSearchResult={parsedKgLocal}
+                  />
                 </div>
               </div>
             </AccordionContent>
@@ -216,7 +265,7 @@ export const Answer: FC<{
                 pre: (props) => <pre style={{ color: 'white' }} {...props} />,
                 a: ({ href, ...props }) => {
                   if (!href) return null;
-                  const source = parsedSources[+href - 1];
+                  const source = parsedVectorSearch[+href - 1];
                   if (!source) return null;
                   const metadata = source.metadata;
                   return (
@@ -246,7 +295,7 @@ export const Answer: FC<{
                                 {metadata?.snippet ?? ''}
                               </div>
                               <div className="line-clamp-4 text-zinc-300 break-words">
-                                {metadata?.text ?? ''}
+                                {source.text}
                               </div>
                             </div>
                           </div>

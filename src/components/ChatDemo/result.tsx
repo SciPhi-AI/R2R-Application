@@ -8,7 +8,12 @@ import React, { FC, useEffect, useState, useRef } from 'react';
 
 import PdfPreviewDialog from '@/components/ChatDemo/utils/pdfPreviewDialog';
 import { useUserContext } from '@/context/UserContext';
-import { Message, RagGenerationConfig } from '@/types';
+import {
+  Message,
+  RagGenerationConfig,
+  KGLocalSearchResult,
+  VectorSearchResult,
+} from '@/types';
 
 import { Answer } from './answer';
 import { DefaultQueries } from './DefaultQueries';
@@ -17,10 +22,14 @@ import { UploadButton } from './upload';
 
 const FUNCTION_START_TOKEN = '<function_call>';
 const FUNCTION_END_TOKEN = '</function_call>';
-const SEARCH_START_TOKEN = '<search>';
-const SEARCH_END_TOKEN = '</search>';
-const LLM_START_TOKEN = '<completion>';
-const LLM_END_TOKEN = '</completion>';
+const VECTOR_SEARCH_START_TOKEN = '<search>';
+const VECTOR_SEARCH_END_TOKEN = '</search>';
+const KG_LOCAL_SEARCH_START_TOKEN = '<kg_local_search>';
+const KG_LOCAL_SEARCH_END_TOKEN = '</kg_local_search>';
+const KG_GLOBAL_SEARCH_START_TOKEN = '<kg_global_search>';
+const KG_GLOBAL_SEARCH_END_TOKEN = '</kg_global_search>';
+const COMPLETION_START_TOKEN = '<completion>';
+const COMPLETION_END_TOKEN = '</completion>';
 
 export const Result: FC<{
   query: string;
@@ -86,6 +95,7 @@ export const Result: FC<{
   const updateLastMessage = (
     content?: string,
     sources?: string,
+    kgLocalSources?: string,
     isStreaming?: boolean,
     searchPerformed?: boolean
   ) => {
@@ -98,6 +108,9 @@ export const Result: FC<{
         }
         if (sources !== undefined) {
           lastMessage.sources = sources;
+        }
+        if (kgLocalSources !== undefined) {
+          lastMessage.kgLocal = kgLocalSources;
         }
         if (isStreaming !== undefined) {
           lastMessage.isStreaming = isStreaming;
@@ -190,7 +203,15 @@ export const Result: FC<{
 
       let buffer = '';
       let inLLMResponse = false;
-      let sourcesContent = '';
+      const sourcesContent: {
+        vector: VectorSearchResult[];
+        kgLocal: KGLocalSearchResult | null;
+        // kgGlobal: KGGlobalSearchResult | null;
+      } = {
+        vector: [],
+        kgLocal: null,
+        // kgGlobal: null,
+      };
 
       while (true) {
         const { done, value } = await reader.read();
@@ -201,44 +222,67 @@ export const Result: FC<{
         buffer += decoder.decode(value, { stream: true });
 
         if (mode === 'rag') {
-          if (buffer.includes(SEARCH_END_TOKEN)) {
-            const [results, rest] = buffer.split(SEARCH_END_TOKEN);
-            sourcesContent = results.replace(SEARCH_START_TOKEN, '');
-            const formattedSources = sourcesContent
-              .split('\n')
-              .filter((line) => line.trim() !== '')
-              .map((line) => {
-                try {
-                  return JSON.stringify(JSON.parse(line));
-                } catch (error) {
-                  console.error('Error parsing source line:', error);
-                  return null;
-                }
-              })
-              .filter(Boolean)
-              .join(',');
+          if (buffer.includes(VECTOR_SEARCH_END_TOKEN)) {
+            const [results, rest] = buffer.split(VECTOR_SEARCH_END_TOKEN);
+
+            const vectorResults = results.replace(
+              VECTOR_SEARCH_START_TOKEN,
+              ''
+            );
+            console.log('vectorResults = ', vectorResults);
+            const vectorResultsList = JSON.parse(vectorResults);
+
+            const formattedSources = vectorResultsList.map((line: string) => {
+              try {
+                console.log('parsing line as JSON:', line);
+                return JSON.parse(line);
+              } catch (error) {
+                console.error('Error parsing source line:', error);
+                return null;
+              }
+            });
+
             updateLastMessage(
               undefined,
-              `[${formattedSources}]`,
+              formattedSources,
+              undefined,
               undefined,
               true
             );
-            buffer = rest || '';
-            setIsSearching(false);
           }
 
-          if (buffer.includes(LLM_START_TOKEN)) {
+          // Handle KG local search results
+          if (buffer.includes(KG_LOCAL_SEARCH_END_TOKEN)) {
+            const [results, rest] = buffer.split(KG_LOCAL_SEARCH_END_TOKEN);
+            const kgLocalResult = results.split(KG_LOCAL_SEARCH_START_TOKEN)[1];
+            console.log('kgLocalResult = ', kgLocalResult);
+            const parsedKgLocalResult = JSON.parse(kgLocalResult);
+            console.log('parsedKgLocalResult = ', parsedKgLocalResult);
+            updateLastMessage(
+              undefined,
+              undefined,
+              parsedKgLocalResult,
+              undefined,
+              true
+            );
+
+            buffer = rest || '';
+          }
+
+          if (buffer.includes(COMPLETION_START_TOKEN)) {
             inLLMResponse = true;
-            buffer = buffer.split(LLM_START_TOKEN)[1] || '';
+            buffer = buffer.split(COMPLETION_START_TOKEN)[1] || '';
           }
 
           if (inLLMResponse) {
-            const endTokenIndex = buffer.indexOf(LLM_END_TOKEN);
+            const endTokenIndex = buffer.indexOf(COMPLETION_END_TOKEN);
             let chunk = '';
 
             if (endTokenIndex !== -1) {
               chunk = buffer.slice(0, endTokenIndex);
-              buffer = buffer.slice(endTokenIndex + LLM_END_TOKEN.length);
+              buffer = buffer.slice(
+                endTokenIndex + COMPLETION_END_TOKEN.length
+              );
               inLLMResponse = false;
             } else {
               chunk = buffer;
@@ -250,26 +294,35 @@ export const Result: FC<{
         } else {
           if (buffer.includes(FUNCTION_END_TOKEN)) {
             const [results, rest] = buffer.split(FUNCTION_END_TOKEN);
-            sourcesContent = results
+            const sourcesContent = results
               .replace(FUNCTION_START_TOKEN, '')
               .replace(/^[\s\S]*?<results>([\s\S]*)<\/results>[\s\S]*$/, '$1');
-            updateLastMessage(undefined, sourcesContent, undefined, true);
+            console.log('sourcesContent = ', sourcesContent);
+            updateLastMessage(
+              undefined,
+              sourcesContent,
+              undefined,
+              undefined,
+              true
+            );
             buffer = rest || '';
             setIsSearching(false);
           }
 
-          if (buffer.includes(LLM_START_TOKEN)) {
+          if (buffer.includes(COMPLETION_START_TOKEN)) {
             inLLMResponse = true;
-            buffer = buffer.split(LLM_START_TOKEN)[1] || '';
+            buffer = buffer.split(COMPLETION_START_TOKEN)[1] || '';
           }
 
           if (inLLMResponse) {
-            const endTokenIndex = buffer.indexOf(LLM_END_TOKEN);
+            const endTokenIndex = buffer.indexOf(COMPLETION_END_TOKEN);
             let chunk = '';
 
             if (endTokenIndex !== -1) {
               chunk = buffer.slice(0, endTokenIndex);
-              buffer = buffer.slice(endTokenIndex + LLM_END_TOKEN.length);
+              buffer = buffer.slice(
+                endTokenIndex + COMPLETION_END_TOKEN.length
+              );
               inLLMResponse = false;
             } else {
               chunk = buffer;
@@ -287,7 +340,7 @@ export const Result: FC<{
       setIsStreaming(false);
       setIsSearching(false);
       setIsProcessingQuery(false);
-      updateLastMessage(undefined, undefined, false);
+      // updateLastMessage(undefined, undefined, false);
     }
   };
 

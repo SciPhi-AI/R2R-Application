@@ -128,21 +128,6 @@ export const Navbar = forwardRef<React.ElementRef<'nav'>, NavbarProps>(
               )}
             </div>
             <div className="flex items-center space-x-4">
-              {isSignedIn && isAdmin && (
-                <Select onValueChange={toggleViewMode}>
-                  <SelectTrigger className="w-30 rounded-md py-1 px-3">
-                    <SelectValue
-                      placeholder={
-                        viewMode === 'admin' ? 'Admin View' : 'User View'
-                      }
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="admin">Admin View</SelectItem>
-                    <SelectItem value="user">User View</SelectItem>
-                  </SelectContent>
-                </Select>
-              )}
               <Button
                 color="primary"
                 shape="outline_wide"
