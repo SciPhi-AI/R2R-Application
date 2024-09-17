@@ -39,17 +39,18 @@ type ButtonBaseProps = {
   className?: string;
   disabled?: boolean;
   children: React.ReactNode;
+  as?: 'button' | 'anchor';
 };
 
-type ButtonAsButton = ButtonBaseProps &
-  React.ButtonHTMLAttributes<HTMLButtonElement> & {
-    href?: undefined;
-  };
+export type ButtonAsButton = ButtonBaseProps & {
+  as?: 'button';
+  href?: undefined;
+} & React.ButtonHTMLAttributes<HTMLButtonElement>;
 
-type ButtonAsAnchor = ButtonBaseProps &
-  React.AnchorHTMLAttributes<HTMLAnchorElement> & {
-    href: string;
-  };
+type ButtonAsAnchor = ButtonBaseProps & {
+  as: 'anchor';
+  href: string;
+} & React.AnchorHTMLAttributes<HTMLAnchorElement>;
 
 type ButtonProps = ButtonAsButton | ButtonAsAnchor;
 
@@ -58,6 +59,7 @@ const Button = React.forwardRef<
   ButtonProps
 >((props, ref) => {
   const {
+    as = 'button',
     color = 'primary',
     shape = 'default',
     className,
@@ -74,30 +76,36 @@ const Button = React.forwardRef<
     className
   );
 
-  const commonProps = {
-    className: buttonClassName,
-    ref: ref,
-    ...restProps,
-  };
+  if (as === 'anchor') {
+    if (!href) {
+      throw new Error(
+        "The 'href' prop is required when using Button as 'anchor'."
+      );
+    }
 
-  if (href && !disabled) {
     return (
       <Link href={href} passHref legacyBehavior>
-        <a {...(commonProps as React.AnchorHTMLAttributes<HTMLAnchorElement>)}>
+        <a
+          ref={ref as React.Ref<HTMLAnchorElement>}
+          className={buttonClassName}
+          {...(restProps as React.AnchorHTMLAttributes<HTMLAnchorElement>)}
+        >
           {children}
         </a>
       </Link>
     );
+  } else {
+    return (
+      <button
+        ref={ref as React.Ref<HTMLButtonElement>}
+        disabled={disabled}
+        className={buttonClassName}
+        {...(restProps as React.ButtonHTMLAttributes<HTMLButtonElement>)}
+      >
+        {children}
+      </button>
+    );
   }
-
-  return (
-    <button
-      disabled={disabled}
-      {...(commonProps as React.ButtonHTMLAttributes<HTMLButtonElement>)}
-    >
-      {children}
-    </button>
-  );
 });
 
 Button.displayName = 'Button';
