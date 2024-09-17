@@ -31,7 +31,7 @@ function parseKGLocalSources(payload: string): KGLocalSearchResult {
   const data = JSON.parse(payload);
 
   const entities: KGEntity[] = Object.entries(data.entities).map(
-    ([key, value]) => ({
+    ([key, value]: [string, any]) => ({
       id: key,
       name: value.name,
       description: value.description,
@@ -63,7 +63,7 @@ const SourceItem: FC<{
   source: VectorSearchResult;
   onOpenPdfPreview: (documentId: string, page?: number) => void;
 }> = ({ source, onOpenPdfPreview }) => {
-  const { id, score, metadata, text } = source;
+  const { document_id, score, metadata, text } = source;
 
   const isPdf =
     metadata.document_type === 'pdf' ||

@@ -19,7 +19,7 @@ const VectorSearchResultItem: FC<{
   index: number;
   onOpenPdfPreview: (documentId: string, page?: number) => void;
 }> = ({ source, index, onOpenPdfPreview }) => {
-  const { id, score, metadata, text } = source;
+  const { document_id, score, metadata, text } = source;
 
   const isPdf =
     metadata.document_type === 'pdf' ||
@@ -27,8 +27,8 @@ const VectorSearchResultItem: FC<{
   const pageNumber = metadata.unstructured_page_number;
 
   const handleOpenPdfPreview = () => {
-    if (source.document_id) {
-      onOpenPdfPreview(source.document_id, pageNumber);
+    if (document_id) {
+      onOpenPdfPreview(document_id, pageNumber);
     }
   };
 

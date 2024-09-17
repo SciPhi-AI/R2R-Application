@@ -8,7 +8,12 @@ import React, { FC, useEffect, useState, useRef } from 'react';
 
 import PdfPreviewDialog from '@/components/ChatDemo/utils/pdfPreviewDialog';
 import { useUserContext } from '@/context/UserContext';
-import { Message, RagGenerationConfig, KGLocalSearchResult } from '@/types';
+import {
+  Message,
+  RagGenerationConfig,
+  KGLocalSearchResult,
+  VectorSearchResult,
+} from '@/types';
 
 import { Answer } from './answer';
 import { DefaultQueries } from './DefaultQueries';
@@ -201,11 +206,11 @@ export const Result: FC<{
       const sourcesContent: {
         vector: VectorSearchResult[];
         kgLocal: KGLocalSearchResult | null;
-        kgGlobal: KGGlobalSearchResult | null;
+        // kgGlobal: KGGlobalSearchResult | null;
       } = {
         vector: [],
         kgLocal: null,
-        kgGlobal: null,
+        // kgGlobal: null,
       };
 
       while (true) {
@@ -227,7 +232,7 @@ export const Result: FC<{
             console.log('vectorResults = ', vectorResults);
             const vectorResultsList = JSON.parse(vectorResults);
 
-            const formattedSources = vectorResultsList.map((line) => {
+            const formattedSources = vectorResultsList.map((line: string) => {
               try {
                 console.log('parsing line as JSON:', line);
                 return JSON.parse(line);
@@ -287,21 +292,21 @@ export const Result: FC<{
             updateLastMessage(chunk);
           }
         } else {
-          if (buffer.includes(FUNCTION_END_TOKEN)) {
-            const [results, rest] = buffer.split(FUNCTION_END_TOKEN);
-            const functionEndToken = results
-              .replace(FUNCTION_START_TOKEN, '')
-              .replace(/^[\s\S]*?<results>([\s\S]*)<\/results>[\s\S]*$/, '$1');
-            updateLastMessage(
-              undefined,
-              sourcesContent,
-              undefined,
-              undefined,
-              true
-            );
-            buffer = rest || '';
-            setIsSearching(false);
-          }
+          // if (buffer.includes(FUNCTION_END_TOKEN)) {
+          //   const [results, rest] = buffer.split(FUNCTION_END_TOKEN);
+          //   const functionEndToken = results
+          //     .replace(FUNCTION_START_TOKEN, '')
+          //     .replace(/^[\s\S]*?<results>([\s\S]*)<\/results>[\s\S]*$/, '$1');
+          //   updateLastMessage(
+          //     undefined,
+          //     sourcesContent,
+          //     undefined,
+          //     undefined,
+          //     true
+          //   );
+          //   buffer = rest || '';
+          //   setIsSearching(false);
+          // }
 
           if (buffer.includes(COMPLETION_START_TOKEN)) {
             inLLMResponse = true;
