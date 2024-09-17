@@ -5,7 +5,7 @@ import { useUserContext } from '@/context/UserContext';
 import { UpdateButtonProps } from '@/types';
 
 export const UpdateButton: React.FC<UpdateButtonProps> = ({
-  documentId,
+  id,
   onUpdateSuccess,
   showToast = () => {},
 }) => {
@@ -34,7 +34,7 @@ export const UpdateButton: React.FC<UpdateButtonProps> = ({
         const metadata = { title: file.name };
 
         await client.updateFiles([file], {
-          document_ids: [documentId],
+          document_ids: [id],
           metadatas: [metadata],
         });
         showToast({

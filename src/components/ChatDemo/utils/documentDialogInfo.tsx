@@ -53,7 +53,7 @@ const formatValue = (value: any) => {
 };
 
 const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
-  documentId,
+  id,
   open,
   onClose,
 }) => {
@@ -76,10 +76,10 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
           throw new Error('Failed to get authenticated client');
         }
 
-        const overview = await client.documentsOverview([documentId]);
+        const overview = await client.documentsOverview([id]);
         setDocumentOverview(overview.results[0] || null);
 
-        const chunks = await client.documentChunks(documentId);
+        const chunks = await client.documentChunks(id);
         setDocumentChunks(
           Array.isArray(chunks.results)
             ? (chunks.results as DocumentChunk[])
@@ -94,10 +94,10 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
       }
     };
 
-    if (open && documentId) {
+    if (open && id) {
       fetchDocumentInfo();
     }
-  }, [open, documentId, getClient]);
+  }, [open, id, getClient]);
 
   const handleOpenPdfPreview = (page?: number) => {
     if (page && page > 0) {
@@ -200,7 +200,7 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
         </DialogContent>
       </Dialog>
       <PdfPreviewDialog
-        documentId={documentId}
+        id={id}
         open={pdfPreviewOpen}
         onClose={handleClosePdfPreview}
         initialPage={initialPage}

@@ -38,6 +38,7 @@ const NavItems: React.FC<NavItemsProps> = ({
 }) => {
   const commonItems = [
     { path: '/documents', label: 'Documents' },
+    // { path: '/collections', label: 'Collections' },
     { path: '/chat', label: 'Chat' },
   ];
 

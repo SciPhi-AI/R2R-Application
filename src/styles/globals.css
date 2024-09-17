@@ -264,3 +264,30 @@ a {
   height: 100%;
   overflow: hidden;
 }
+
+.table-fixed {
+  table-layout: fixed;
+}
+
+td > div,
+th > div {
+  max-width: 100%;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+col.flex-grow {
+  width: 1%;
+}
+
+th,
+td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
