@@ -21,7 +21,6 @@ import { Message } from '@/types';
 import { VectorSearchResult } from '@/types';
 import {
   SearchResults,
-  mockVectorSearchResults,
 } from '@/components/SearchResults';
 
 interface Entity {
@@ -282,14 +281,7 @@ export const Answer: FC<{
 
   useEffect(() => {
     if (message.kgLocal) {
-      console.log('message.kgLocal = ', message.kgLocal);
       const parsedKGData = parseKGLocalSources(message.kgLocal);
-      // console.log('message.kgLocal = ', message.kgLocal)
-      // console.log('parsedKGData = ', parsedKGData)
-      // Example usage
-      // const kgLocalSource = `{"query":"test123","entities":{"0":{"name":"Egg-laying Tetrapods","description":"Egg-laying tetrapods are a subgroup of tetrapods characterized by their reproductive method of laying eggs. This group includes various species, such as chameleons and crocodiles, and is defined as a specific subset within the broader category of tetrapods. Their unique reproductive strategy distinguishes them from other tetrapod groups."},"1":{"name":"Sulla","description":"Sulla was a Roman general and statesman known for his military campaigns, particularly his seizure of Athens in 86 BC. During this event, he confiscated the city's library and transferred its contents to Rome, highlighting his role in the cultural and political shifts of the time. This action underscores Sulla's influence in expanding Roman access to knowledge and resources from conquered territories."},
-      // "relationships":{},"communities":{"0":{"summary":"{\n    \"title\": \"Scala Naturae and Tetrapods\",\n    \"summary\": \"The community centers around Aristotle's Scala Naturae, which classifies living beings, particularly focusing on tetrapods. Tetrapods, as a significant subgroup, include various species and highlight the distinctions between different biological classifications.\",\n    \"rating\": 4.5,\n    \"rating_explanation\": \"The impact severity rating is moderate due to the foundational role of Scala Naturae in biological classification and its implications for understanding biodiversity.\",\n    \"findings\": [\n        {\n            \"summary\": \"Scala Naturae as a foundational classification system"} } } }`
-      // const parsedKGData = parseKGLocalSources(kgLocalSource);
       setParsedKgLocal(parsedKGData); // parsedKGData);
     }
   }, [message.kgLocal]);
@@ -337,87 +329,12 @@ export const Answer: FC<{
                     vectorSearchResults={parsedSources}
                     kgSearchResults={parsedKgLocal}
                   />
-                  {/* {parsedSources.map((item: VectorSearchResult) => (
-                    <SourceItem
-                      key={item.id}
-                      source={item}
-                      onOpenPdfPreview={onOpenPdfPreview}
-                    />
-                  ))} */}
                 </div>
               </div>
             </AccordionContent>
           </AccordionItem>
         </Accordion>
       )}
-      {/* 
-      {showKgLocalAccordion && (
-        <Accordion
-          type="single"
-          collapsible
-          className="w-full mt-4"
-          onValueChange={(value) => setIsKgLocalEntitiesOpen(value === 'kgLocal')}
-        >
-          <AccordionItem value="kgents">
-            <AccordionTrigger className="py-2 text-lg font-bold text-zinc-200 hover:no-underline">
-              <div className="flex items-center justify-between w-full">
-                <Logo
-                  width={25}
-                  height={25}
-                  disableLink={true}
-                  className="w-12 h-12"
-                />
-                <span className="text-sm font-normal">
-                  Related Entities
-                </span>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="space-y-2 pt-2">
-                {parsedKgLocal && (
-                  <LocalKGEntities source={parsedKgLocal} />
-                )}
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-
-        
-      )}
- {showKgLocalAccordion && (
-        <Accordion
-          type="single"
-          collapsible
-          className="w-full mt-4"
-          onValueChange={(value) => setIsKgLocalEntitiesOpen(value === 'kgLocal')}
-        >
-          <AccordionItem value="kgcoms">
-            <AccordionTrigger className="py-2 text-lg font-bold text-zinc-200 hover:no-underline">
-              <div className="flex items-center justify-between w-full">
-                <Logo
-                  width={25}
-                  height={25}
-                  disableLink={true}
-                  className="w-12 h-12"
-                />
-                <span className="text-sm font-normal">
-                  Related Communities
-                </span>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="space-y-2 pt-2">
-                {parsedKgLocal && (
-                  <LocalKGCommunities source={parsedKgLocal} />
-                )}
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-        </Accordion>
-
-        
-      )}       */}
 
       {showNoSourcesFound && (
         <div className="flex items-center justify-between py-2 text-sm text-zinc-400">
