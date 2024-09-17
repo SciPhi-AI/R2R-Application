@@ -292,22 +292,18 @@ export const Result: FC<{
             updateLastMessage(chunk);
           }
         } else {
-          // if (buffer.includes(FUNCTION_END_TOKEN)) {
-          //   const [results, rest] = buffer.split(FUNCTION_END_TOKEN);
-          //   const functionEndToken = results
-          //     .replace(FUNCTION_START_TOKEN, '')
-          //     .replace(/^[\s\S]*?<results>([\s\S]*)<\/results>[\s\S]*$/, '$1');
-          //   updateLastMessage(
-          //     undefined,
-          //     sourcesContent,
-          //     undefined,
-          //     undefined,
-          //     true
-          //   );
-          //   buffer = rest || '';
-          //   setIsSearching(false);
-          // }
 
+          if (buffer.includes(FUNCTION_END_TOKEN)) {
+            const [results, rest] = buffer.split(FUNCTION_END_TOKEN);
+            let sourcesContent = results
+              .replace(FUNCTION_START_TOKEN, '')
+              .replace(/^[\s\S]*?<results>([\s\S]*)<\/results>[\s\S]*$/, '$1');
+            updateLastMessage(undefined, sourcesContent, undefined, undefined, true);
+            buffer = rest || '';
+            setIsSearching(false);
+          }
+
+                      
           if (buffer.includes(COMPLETION_START_TOKEN)) {
             inLLMResponse = true;
             buffer = buffer.split(COMPLETION_START_TOKEN)[1] || '';
