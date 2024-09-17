@@ -180,7 +180,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
         )}
       </Tabs>
       <PdfPreviewDialog
-        documentId={pdfPreviewDocumentId || ''}
+        id={pdfPreviewDocumentId || ''}
         open={pdfPreviewOpen}
         onClose={handleClosePdfPreview}
         initialPage={initialPage}
