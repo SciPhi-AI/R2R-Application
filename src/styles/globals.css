@@ -265,44 +265,29 @@ a {
   overflow: hidden;
 }
 
-.col-checkbox {
-  min-width: 50px;
-  width: 5%;
+.table-fixed {
+  table-layout: fixed;
 }
-.col-id {
-  width: 12%;
+
+td > div,
+th > div {
+  max-width: 100%;
+  overflow-x: auto;
+  white-space: nowrap;
 }
-.col-title {
-  width: 12.5%;
+
+table {
+  table-layout: fixed;
+  width: 100%;
 }
-.col-groupIds {
-  width: 10%;
+
+col.flex-grow {
+  width: 1%;
 }
-.col-userId {
-  width: 12.5%;
-}
-.col-type {
-  width: 7%;
-}
-.col-metadata {
-  width: 11%;
-}
-.col-version {
-  width: 7%;
-}
-.col-ingestionStatus {
-  width: 11%;
-}
-.col-restructuringStatus {
-  width: 11%;
-}
-.col-createdAt {
-  width: 11%;
-}
-.col-updatedAt {
-  width: 13%;
-}
-.col-actions {
-  min-width: 110px;
-  width: 12%;
+
+th,
+td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

@@ -3,102 +3,17 @@ import { UserSearch } from 'lucide-react';
 import Link from 'next/link';
 import React, { useState, useEffect, useCallback } from 'react';
 
+import Table, { Column } from '@/components/ChatDemo/Table';
 import UserInfoDialog from '@/components/ChatDemo/utils/userDialogInfo';
 import Layout from '@/components/Layout';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/Button';
-import Pagination from '@/components/ui/pagination';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { useToast } from '@/components/ui/use-toast';
 import { useUserContext } from '@/context/UserContext';
 import { formatFileSize } from '@/lib/utils';
 
 const USERS_PER_PAGE = 10;
-
-const UserTable = ({
-  users,
-  copyToClipboard,
-  setSelectedUserID,
-  setIsUserInfoDialogOpen,
-}: {
-  users: any[];
-  copyToClipboard: (text: string, description: string) => void;
-  setSelectedUserID: React.Dispatch<React.SetStateAction<string | undefined>>;
-  setIsUserInfoDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
-}) => {
-  const emptyRows = Array(USERS_PER_PAGE - users.length).fill(null);
-
-  return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead className="w-48 text-white">User ID</TableHead>
-          <TableHead className="w-36 text-white"></TableHead>
-          <TableHead className="w-48 text-white">Email</TableHead>
-          <TableHead className="w-36 text-white">Number of Files</TableHead>
-          <TableHead className="w-36 text-white">Total File Size</TableHead>
-          <TableHead className="w-24 text-white">Actions</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {users.map((user) => (
-          <TableRow key={user.user_id} className="h-16">
-            <TableCell className="font-medium">
-              <div
-                className="overflow-x-auto whitespace-nowrap cursor-pointer"
-                onClick={() => {
-                  const text = user.user_id;
-                  const description = 'User ID copied to clipboard';
-                  copyToClipboard(text, description);
-                }}
-              >
-                {user.user_id
-                  ? `${user.user_id.substring(0, 8)}...${user.user_id.slice(-8)}`
-                  : 'N/A'}
-              </div>
-            </TableCell>
-            <TableCell>
-              {user.is_superuser && (
-                <Badge variant="secondary">Superuser</Badge>
-              )}
-            </TableCell>
-            <TableCell className="font-medium">
-              {user.email ? user.email : 'N/A'}
-            </TableCell>
-            <TableCell>{user.num_files}</TableCell>
-            <TableCell>{formatFileSize(user.total_size_in_bytes)}</TableCell>
-            <TableCell>
-              <Button
-                onClick={() => {
-                  setSelectedUserID(user.user_id);
-                  setIsUserInfoDialogOpen(true);
-                }}
-                color="filled"
-                shape="slim"
-                className="flex justify-center items-center"
-              >
-                <UserSearch className="h-6 w-6" />
-              </Button>
-            </TableCell>
-          </TableRow>
-        ))}
-        {emptyRows.map((_, index) => (
-          <TableRow key={`empty-${index}`} className="h-16">
-            <TableCell colSpan={6}></TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  );
-};
 
 const Index: React.FC = () => {
   const { getClient, pipeline } = useUserContext();
@@ -111,13 +26,6 @@ const Index: React.FC = () => {
 
   const { toast } = useToast();
 
-  const copyToClipboard = (text: string, description: string) => {
-    navigator.clipboard
-      .writeText(text)
-      .then(() => toast({ title: 'Copied!', description }))
-      .catch((err) => console.error('Could not copy text: ', err));
-  };
-
   const fetchUsers = useCallback(async () => {
     try {
       const client = await getClient();
@@ -126,6 +34,7 @@ const Index: React.FC = () => {
       }
 
       const data = await client.usersOverview();
+      console.log('data:', data);
       setUsers(data.results || []);
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -140,17 +49,33 @@ const Index: React.FC = () => {
     }
   }, [pipeline?.deploymentUrl, fetchUsers]);
 
-  const totalUsers = users.length;
-  const totalPages = Math.ceil(totalUsers / USERS_PER_PAGE);
-
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
   };
 
-  const paginatedUsers = users.slice(
-    (currentPage - 1) * USERS_PER_PAGE,
-    currentPage * USERS_PER_PAGE
-  );
+  const columns: Column<any>[] = [
+    {
+      key: 'user_id',
+      label: 'User ID',
+      truncate: true,
+      copyable: true,
+      renderCell: (user) =>
+        `${user.user_id.substring(0, 8)}...${user.user_id.slice(-8)}`,
+    },
+    {
+      key: 'is_superuser',
+      label: 'Role',
+      renderCell: (user) =>
+        user.is_superuser ? <Badge variant="secondary">Superuser</Badge> : null,
+    },
+    { key: 'email', label: 'Email' },
+    { key: 'num_files', label: 'Number of Files' },
+    {
+      key: 'total_size_in_bytes',
+      label: 'Total File Size',
+      renderCell: (user) => formatFileSize(user.total_size_in_bytes),
+    },
+  ];
 
   return (
     <Layout pageTitle="Users Overview" includeFooter={false}>
@@ -161,7 +86,7 @@ const Index: React.FC = () => {
               <Loader className="mx-auto mt-20 animate-spin" size={64} />
             ) : (
               <>
-                {totalUsers <= 5 && showAlert && (
+                {users.length <= 5 && showAlert && (
                   <div className="flex justify-center items-center">
                     <Alert
                       onClose={() => setShowAlert(false)}
@@ -194,16 +119,30 @@ const Index: React.FC = () => {
                     </Alert>
                   </div>
                 )}
-                <UserTable
-                  users={paginatedUsers}
-                  copyToClipboard={copyToClipboard}
-                  setSelectedUserID={setSelectedUserID}
-                  setIsUserInfoDialogOpen={setIsUserInfoDialogOpen}
-                />
-                <Pagination
+                <Table
+                  data={users}
+                  currentData={users.slice(
+                    (currentPage - 1) * USERS_PER_PAGE,
+                    currentPage * USERS_PER_PAGE
+                  )}
+                  columns={columns}
+                  itemsPerPage={USERS_PER_PAGE}
                   currentPage={currentPage}
-                  totalPages={totalPages}
                   onPageChange={handlePageChange}
+                  totalItems={users.length}
+                  actions={(user) => (
+                    <Button
+                      onClick={() => {
+                        setSelectedUserID(user.user_id);
+                        setIsUserInfoDialogOpen(true);
+                      }}
+                      color="filled"
+                      shape="slim"
+                      className="flex justify-center items-center"
+                    >
+                      <UserSearch className="h-8 w-8" />
+                    </Button>
+                  )}
                 />
               </>
             )}

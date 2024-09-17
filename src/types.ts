@@ -1,5 +1,35 @@
 import { r2rClient } from 'r2r-js';
 
+export interface Column<T> {
+  key: keyof T;
+  label: string;
+  sortable?: boolean;
+  filterable?: boolean;
+  render?: (item: T) => React.ReactNode; // For custom cell rendering
+}
+
+export interface SortCriteria<T> {
+  key: keyof T;
+  order: 'asc' | 'desc';
+}
+
+export interface FilterCriteria<T> {
+  [key: string]: any; // Define as per your filtering needs
+}
+
+export interface TableProps<T> {
+  data: T[];
+  columns: Column<T>[];
+  initialSort?: SortCriteria<T>;
+  initialFilters?: FilterCriteria<T>;
+  onRowSelect?: (selectedIds: string[]) => void;
+  pagination?: {
+    itemsPerPage: number;
+    initialPage?: number;
+  };
+  // Add more props as needed
+}
+
 export interface AdminBadgeProps {
   isAdmin: boolean;
   viewMode: 'admin' | 'user';
@@ -50,6 +80,31 @@ export interface Document {
   id: string;
   text: string;
   metadata: any;
+  group_ids?: string[];
+}
+
+export interface Document {
+  id: string;
+  text: string;
+  metadata: any;
+}
+
+export interface User {
+  id?: string;
+  user_id: string;
+  email: string;
+  is_active: boolean;
+  is_superuser: boolean;
+  created_at: string;
+  updated_at: string;
+  is_verified: boolean;
+  group_ids: string[];
+
+  // Optional fields
+  hashed_password?: string;
+  verification_code_expiry?: string;
+  name?: string;
+  profile_picture?: string;
 }
 
 export interface DocumentFilterCriteria {
@@ -341,3 +396,11 @@ export interface UserContextProps {
   viewMode: 'admin' | 'user';
   setViewMode: React.Dispatch<React.SetStateAction<'admin' | 'user'>>;
 }
+
+export type Collection = {
+  name: string;
+  group_id: string;
+  description?: string;
+  created_at?: string;
+  updated_at?: string;
+};
