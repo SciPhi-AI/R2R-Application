@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { Button } from '@/components/ui/Button';
 
 interface PaginationProps {
@@ -7,12 +8,19 @@ interface PaginationProps {
   onPageChange: (pageNumber: number) => void;
 }
 
-const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPageChange }) => {
+const Pagination: React.FC<PaginationProps> = ({
+  currentPage,
+  totalPages,
+  onPageChange,
+}) => {
   const isPreviousDisabled = currentPage <= 1;
   const isNextDisabled = currentPage >= totalPages;
 
   return (
-    <nav className="flex justify-center items-center mt-4" aria-label="Pagination">
+    <nav
+      className="flex justify-center items-center mt-4"
+      aria-label="Pagination"
+    >
       <Button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={isPreviousDisabled}

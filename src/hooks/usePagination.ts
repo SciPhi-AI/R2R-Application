@@ -25,7 +25,7 @@ interface UsePaginationReturn<T> {
   updateData?: (newData: T[], newTotalEntries: number) => void;
 }
 
-const usePagination = <T,>({
+const usePagination = <T>({
   key,
   fetchData,
   initialPage = 1,
@@ -33,7 +33,9 @@ const usePagination = <T,>({
   initialPrefetchPages = 5,
   prefetchThreshold = 2,
   includeUpdateData = false,
-}: UsePaginationProps<T> & { includeUpdateData?: boolean }): UsePaginationReturn<T> => {
+}: UsePaginationProps<T> & {
+  includeUpdateData?: boolean;
+}): UsePaginationReturn<T> => {
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [totalEntries, setTotalEntries] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
@@ -131,17 +133,20 @@ const usePagination = <T,>({
   // Handle page change
   const goToPage = (page: number) => {
     if (page < 1 || page > totalPages) {
-        return;
+      return;
     }
     setCurrentPage(page);
   };
 
   // Update data buffer and pagination state
-  const updateData = useCallback((newData: T[], newTotalEntries: number) => {
-    setBuffer(newData);
-    setTotalEntries(newTotalEntries);
-    setTotalPages(calculateTotalPages(newTotalEntries));
-  }, [calculateTotalPages]);
+  const updateData = useCallback(
+    (newData: T[], newTotalEntries: number) => {
+      setBuffer(newData);
+      setTotalEntries(newTotalEntries);
+      setTotalPages(calculateTotalPages(newTotalEntries));
+    },
+    [calculateTotalPages]
+  );
 
   // Reset pagination state when the key changes
   useEffect(() => {

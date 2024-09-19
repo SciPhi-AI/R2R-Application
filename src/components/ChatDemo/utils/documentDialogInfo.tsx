@@ -11,10 +11,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { useUserContext } from '@/context/UserContext';
-import { DocumentInfoDialogProps, DocumentChunk } from '@/types';
 import Pagination from '@/components/ui/pagination';
+import { useUserContext } from '@/context/UserContext';
 import usePagination from '@/hooks/usePagination';
+import { DocumentInfoDialogProps, DocumentChunk } from '@/types';
 
 interface DocumentOverview {
   created_at?: string;
@@ -60,20 +60,27 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
   onClose,
 }) => {
   const [loading, setLoading] = useState(true);
-  const [documentOverview, setDocumentOverview] = useState<DocumentOverview | null>(null);
+  const [documentOverview, setDocumentOverview] =
+    useState<DocumentOverview | null>(null);
 
   const { getClient } = useUserContext();
 
   const [pdfPreviewOpen, setPdfPreviewOpen] = useState(false);
   const [initialPage, setInitialPage] = useState<number>(1);
 
-  const fetchDocumentOverview = useCallback(async (client: any, documentId: string) => {
-    const overview = await client.documentsOverview([documentId]);
-    return overview.results[0] || null;
-  }, []);
+  const fetchDocumentOverview = useCallback(
+    async (client: any, documentId: string) => {
+      const overview = await client.documentsOverview([documentId]);
+      return overview.results[0] || null;
+    },
+    []
+  );
 
   const fetchDocumentChunks = useCallback(
-    async (offset: number, limit: number): Promise<{ results: DocumentChunk[]; total_entries: number }> => {
+    async (
+      offset: number,
+      limit: number
+    ): Promise<{ results: DocumentChunk[]; total_entries: number }> => {
       const client = await getClient();
       if (!client) {
         throw new Error('Failed to get authenticated client');
@@ -81,7 +88,9 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
 
       const chunksResponse = await client.documentChunks(id, offset, limit);
       return {
-        results: Array.isArray(chunksResponse.results) ? chunksResponse.results : [],
+        results: Array.isArray(chunksResponse.results)
+          ? chunksResponse.results
+          : [],
         total_entries: chunksResponse.total_entries || 0,
       };
     },
@@ -370,10 +379,7 @@ const ExpandableChunk: React.FC<{
           <InfoRow label="Extraction ID" value={chunk.extraction_id} />
           <InfoRow label="Document ID" value={chunk.document_id} />
           <InfoRow label="User ID" value={chunk.user_id} />
-          <ExpandableInfoRow
-            label="Group IDs"
-            values={chunk.group_ids}
-          />
+          <ExpandableInfoRow label="Group IDs" values={chunk.group_ids} />
           <div className="space-y-2">
             <span className="font-medium">Text:</span>
             <p className="pl-4 pr-2 py-2">{chunk.text}</p>

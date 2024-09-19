@@ -10,11 +10,11 @@ import DocumentInfoDialog from '@/components/ChatDemo/utils/documentDialogInfo';
 import Layout from '@/components/Layout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/Button';
+import Pagination from '@/components/ui/pagination';
 import { useToast } from '@/components/ui/use-toast';
 import { useUserContext } from '@/context/UserContext';
-import { IngestionStatus, DocumentInfoType } from '@/types';
 import usePagination from '@/hooks/usePagination';
-import Pagination from '@/components/ui/pagination';
+import { IngestionStatus, DocumentInfoType } from '@/types';
 
 const Index: React.FC = () => {
   const [selectedDocumentIds, setSelectedDocumentIds] = useState<string[]>([]);
@@ -23,10 +23,14 @@ const Index: React.FC = () => {
   const { toast } = useToast();
   const { pipeline, getClient } = useUserContext();
   const [selectedDocumentId, setSelectedDocumentId] = useState('');
-  const [isDocumentInfoDialogOpen, setIsDocumentInfoDialogOpen] = useState(false);
+  const [isDocumentInfoDialogOpen, setIsDocumentInfoDialogOpen] =
+    useState(false);
 
   const fetchDocuments = useCallback(
-    async (offset: number, limit: number): Promise<{ results: DocumentInfoType[]; total_entries: number }> => {
+    async (
+      offset: number,
+      limit: number
+    ): Promise<{ results: DocumentInfoType[]; total_entries: number }> => {
       if (!pipeline?.deploymentUrl) {
         console.error('No pipeline deployment URL available');
         return { results: [], total_entries: 0 };
@@ -81,7 +85,10 @@ const Index: React.FC = () => {
   });
 
   const refetchDocuments = useCallback(async () => {
-    const { results, total_entries } = await fetchDocuments((currentPage - 1) * 10, 10);
+    const { results, total_entries } = await fetchDocuments(
+      (currentPage - 1) * 10,
+      10
+    );
     updateData(results, total_entries);
   }, [currentPage, fetchDocuments, updateData]);
 
@@ -120,7 +127,13 @@ const Index: React.FC = () => {
     } catch (error) {
       console.error('Error fetching pending documents:', error);
     }
-  }, [pipeline?.deploymentUrl, getClient, pendingDocuments, goToPage, currentPage]);
+  }, [
+    pipeline?.deploymentUrl,
+    getClient,
+    pendingDocuments,
+    goToPage,
+    currentPage,
+  ]);
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
@@ -167,7 +180,10 @@ const Index: React.FC = () => {
     {
       key: 'group_ids',
       label: 'Group IDs',
-      renderCell: (doc) => (doc.group_ids && doc.group_ids.length > 0) ? doc.group_ids.join(', ') : 'N/A',
+      renderCell: (doc) =>
+        doc.group_ids && doc.group_ids.length > 0
+          ? doc.group_ids.join(', ')
+          : 'N/A',
       selected: false,
     },
     {
@@ -330,15 +346,15 @@ const Index: React.FC = () => {
         </div>
       </main>
       {selectedDocumentId && (
-  <DocumentInfoDialog
-    id={selectedDocumentId}
-    open={isDocumentInfoDialogOpen}
-    onClose={() => {
-      setIsDocumentInfoDialogOpen(false);
-      setSelectedDocumentId('');
-    }}
-  />
-)}
+        <DocumentInfoDialog
+          id={selectedDocumentId}
+          open={isDocumentInfoDialogOpen}
+          onClose={() => {
+            setIsDocumentInfoDialogOpen(false);
+            setSelectedDocumentId('');
+          }}
+        />
+      )}
     </Layout>
   );
 };
