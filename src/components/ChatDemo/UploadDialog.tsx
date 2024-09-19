@@ -78,7 +78,7 @@ export const UploadDialog: React.FC<UploadDialogProps> = ({
                   key={index}
                   className="flex items-center justify-between mb-2"
                 >
-                  <span className="truncate">
+                  <span className="truncate max-w-xs">
                     {(file as any).webkitRelativePath || file.name}
                   </span>
                   <button
