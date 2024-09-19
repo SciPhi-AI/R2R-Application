@@ -13,32 +13,23 @@ import { Button } from '@/components/ui/Button';
 import { useToast } from '@/components/ui/use-toast';
 import { useUserContext } from '@/context/UserContext';
 import { IngestionStatus, DocumentInfoType } from '@/types';
-
-const MAX_RETRIES = 5;
-const RETRY_DELAY = 2000;
+import usePagination from '@/hooks/usePagination';
+import Pagination from '@/components/ui/pagination';
 
 const Index: React.FC = () => {
-  const [documents, setDocuments] = useState<DocumentInfoType[]>([]);
   const [selectedDocumentIds, setSelectedDocumentIds] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [pendingDocuments, setPendingDocuments] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const { pipeline, getClient } = useUserContext();
   const [selectedDocumentId, setSelectedDocumentId] = useState('');
-  const [isDocumentInfoDialogOpen, setIsDocumentInfoDialogOpen] =
-    useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentData = documents.slice(indexOfFirstItem, indexOfLastItem);
+  const [isDocumentInfoDialogOpen, setIsDocumentInfoDialogOpen] = useState(false);
 
   const fetchDocuments = useCallback(
-    async (retryCount = 0) => {
+    async (offset: number, limit: number): Promise<{ results: DocumentInfoType[]; total_entries: number }> => {
       if (!pipeline?.deploymentUrl) {
         console.error('No pipeline deployment URL available');
-        return [];
+        return { results: [], total_entries: 0 };
       }
 
       try {
@@ -47,9 +38,8 @@ const Index: React.FC = () => {
           throw new Error('Failed to get authenticated client');
         }
 
-        const data = await client.documentsOverview();
+        const data = await client.documentsOverview(undefined, offset, limit);
         const results: DocumentInfoType[] = data.results;
-        setDocuments(results);
         setPendingDocuments(
           results
             .filter(
@@ -59,24 +49,41 @@ const Index: React.FC = () => {
             )
             .map((doc: DocumentInfoType) => doc.id)
         );
-        setIsLoading(false);
         setError(null);
         setSelectedDocumentIds([]);
 
-        return results;
+        return { results, total_entries: data.total_entries };
       } catch (error) {
         console.error('Error fetching documents:', error);
-        if (retryCount < MAX_RETRIES) {
-          setTimeout(() => fetchDocuments(retryCount + 1), RETRY_DELAY);
-        } else {
-          setIsLoading(false);
-          setError('Failed to fetch documents. Please try again later.');
-        }
+        setError('Failed to fetch documents. Please try again later.');
+        return { results: [], total_entries: 0 };
       }
-      return [];
     },
     [pipeline?.deploymentUrl, getClient]
   );
+
+  const {
+    currentPage,
+    totalPages,
+    data: documents,
+    loading: isLoading,
+    prefetching,
+    goToPage,
+    updateData,
+  } = usePagination<DocumentInfoType>({
+    key: 'documents',
+    fetchData: fetchDocuments,
+    initialPage: 1,
+    pageSize: 10,
+    initialPrefetchPages: 5,
+    prefetchThreshold: 2,
+    includeUpdateData: true,
+  });
+
+  const refetchDocuments = useCallback(async () => {
+    const { results, total_entries } = await fetchDocuments((currentPage - 1) * 10, 10);
+    updateData(results, total_entries);
+  }, [currentPage, fetchDocuments, updateData]);
 
   const fetchPendingDocuments = useCallback(async () => {
     if (!pipeline?.deploymentUrl) {
@@ -95,18 +102,10 @@ const Index: React.FC = () => {
         pendingDocuments.includes(doc.id)
       );
 
-      setDocuments((prevDocuments: DocumentInfoType[]) => {
-        const newDocuments = [...prevDocuments];
-        updatedDocuments.forEach((updatedDoc: DocumentInfoType) => {
-          const index = newDocuments.findIndex(
-            (doc) => doc.id === updatedDoc.id
-          );
-          if (index !== -1) {
-            newDocuments[index] = updatedDoc;
-          }
-        });
-        return newDocuments;
-      });
+      // If there are updates, refresh the current page
+      if (updatedDocuments.length > 0) {
+        goToPage(currentPage);
+      }
 
       setPendingDocuments((prevPending) =>
         prevPending.filter((id) =>
@@ -121,11 +120,7 @@ const Index: React.FC = () => {
     } catch (error) {
       console.error('Error fetching pending documents:', error);
     }
-  }, [pipeline?.deploymentUrl, getClient, pendingDocuments]);
-
-  useEffect(() => {
-    fetchDocuments();
-  }, [fetchDocuments]);
+  }, [pipeline?.deploymentUrl, getClient, pendingDocuments, goToPage, currentPage]);
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
@@ -145,12 +140,12 @@ const Index: React.FC = () => {
 
   const handleSelectAll = (selected: boolean) => {
     if (selected) {
-      const currentPageIds = currentData.map((doc) => doc.id);
+      const currentPageIds = documents.map((doc) => doc.id);
       setSelectedDocumentIds((prev) => [
         ...new Set([...prev, ...currentPageIds]),
       ]);
     } else {
-      const currentPageIds = currentData.map((doc) => doc.id);
+      const currentPageIds = documents.map((doc) => doc.id);
       setSelectedDocumentIds((prev) =>
         prev.filter((id) => !currentPageIds.includes(id))
       );
@@ -165,10 +160,6 @@ const Index: React.FC = () => {
     }
   };
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
   const columns: Column<DocumentInfoType>[] = [
     { key: 'title', label: 'Title', sortable: true },
     { key: 'id', label: 'Document ID', truncate: true, copyable: true },
@@ -176,7 +167,7 @@ const Index: React.FC = () => {
     {
       key: 'group_ids',
       label: 'Group IDs',
-      renderCell: (doc) => doc.group_ids.join(', ') || 'N/A',
+      renderCell: (doc) => (doc.group_ids && doc.group_ids.length > 0) ? doc.group_ids.join(', ') : 'N/A',
       selected: false,
     },
     {
@@ -247,7 +238,7 @@ const Index: React.FC = () => {
     <div className="flex space-x-1 justify-end">
       <UpdateButtonContainer
         id={doc.id}
-        onUpdateSuccess={fetchDocuments}
+        onUpdateSuccess={() => goToPage(currentPage)}
         showToast={toast}
       />
       <Button
@@ -283,8 +274,11 @@ const Index: React.FC = () => {
                   <UploadButton
                     userId={null}
                     uploadedDocuments={documents}
-                    setUploadedDocuments={setDocuments}
-                    onUploadSuccess={fetchDocuments}
+                    setUploadedDocuments={() => {}}
+                    onUploadSuccess={async () => {
+                      await goToPage(1);
+                      return [];
+                    }}
                     showToast={toast}
                     setPendingDocuments={setPendingDocuments}
                     setCurrentPage={() => {}}
@@ -293,19 +287,21 @@ const Index: React.FC = () => {
                   <DeleteButton
                     selectedDocumentIds={selectedDocumentIds}
                     onDelete={() => setSelectedDocumentIds([])}
-                    onSuccess={fetchDocuments}
+                    onSuccess={async () => {
+                      await goToPage(1);
+                      await refetchDocuments();
+                    }}
                     showToast={toast}
                   />
                 </div>
 
                 <Table
                   data={documents}
-                  currentData={currentData}
+                  currentData={documents}
                   columns={columns}
-                  itemsPerPage={itemsPerPage}
                   onSelectAll={handleSelectAll}
                   onSelectItem={handleSelectItem}
-                  selectedItems={currentData.filter((doc) =>
+                  selectedItems={documents.filter((doc) =>
                     selectedDocumentIds.includes(doc.id)
                   )}
                   actions={renderActions}
@@ -313,19 +309,36 @@ const Index: React.FC = () => {
                   initialFilters={{}}
                   tableHeight="600px"
                   currentPage={currentPage}
-                  onPageChange={handlePageChange}
+                  onPageChange={goToPage}
                   totalItems={documents.length}
                 />
+
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={goToPage}
+                />
+
+                {prefetching && (
+                  <div className="flex justify-center mt-4">
+                    <Loader className="animate-spin" size={24} />
+                  </div>
+                )}
               </>
             )}
           </div>
         </div>
       </main>
-      <DocumentInfoDialog
-        id={selectedDocumentId}
-        open={isDocumentInfoDialogOpen}
-        onClose={() => setIsDocumentInfoDialogOpen(false)}
-      />
+      {selectedDocumentId && (
+  <DocumentInfoDialog
+    id={selectedDocumentId}
+    open={isDocumentInfoDialogOpen}
+    onClose={() => {
+      setIsDocumentInfoDialogOpen(false);
+      setSelectedDocumentId('');
+    }}
+  />
+)}
     </Layout>
   );
 };
