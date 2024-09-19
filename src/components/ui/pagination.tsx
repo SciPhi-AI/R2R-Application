@@ -13,9 +13,8 @@ const Pagination: React.FC<PaginationProps> = ({
   totalPages,
   onPageChange,
 }) => {
-  const safeCurrentPage = Math.min(currentPage, Math.max(1, totalPages));
-  const isPreviousDisabled = safeCurrentPage <= 1;
-  const isNextDisabled = safeCurrentPage >= totalPages;
+  const isPreviousDisabled = currentPage <= 1;
+  const isNextDisabled = currentPage >= totalPages;
 
   return (
     <nav
@@ -23,7 +22,7 @@ const Pagination: React.FC<PaginationProps> = ({
       aria-label="Pagination"
     >
       <Button
-        onClick={() => onPageChange(safeCurrentPage - 1)}
+        onClick={() => onPageChange(currentPage - 1)}
         disabled={isPreviousDisabled}
         color={isPreviousDisabled ? 'disabled' : 'filled'}
         className="px-4 py-2 mx-1 w-32"
@@ -32,10 +31,10 @@ const Pagination: React.FC<PaginationProps> = ({
         &lt; Previous
       </Button>
       <span className="mx-2">
-        Page {safeCurrentPage} of {Math.max(1, totalPages)}
+        Page {currentPage} of {totalPages}
       </span>
       <Button
-        onClick={() => onPageChange(safeCurrentPage + 1)}
+        onClick={() => onPageChange(currentPage + 1)}
         disabled={isNextDisabled}
         color={isNextDisabled ? 'disabled' : 'filled'}
         className="px-4 py-2 mx-1 w-32"

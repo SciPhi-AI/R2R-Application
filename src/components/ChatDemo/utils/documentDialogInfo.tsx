@@ -1,7 +1,7 @@
 import { format, parseISO } from 'date-fns';
 import { Loader } from 'lucide-react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 
 import PdfPreviewDialog from '@/components/ChatDemo/utils/pdfPreviewDialog';
 import { Button } from '@/components/ui/Button';
@@ -11,7 +11,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import Pagination from '@/components/ui/pagination';
 import { useUserContext } from '@/context/UserContext';
+import usePagination from '@/hooks/usePagination';
 import { DocumentInfoDialogProps, DocumentChunk } from '@/types';
 
 interface DocumentOverview {
@@ -60,15 +62,59 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
   const [loading, setLoading] = useState(true);
   const [documentOverview, setDocumentOverview] =
     useState<DocumentOverview | null>(null);
-  const [documentChunks, setDocumentChunks] = useState<DocumentChunk[]>([]);
+
   const { getClient } = useUserContext();
 
-  // New state variables for PDF preview
   const [pdfPreviewOpen, setPdfPreviewOpen] = useState(false);
-  const [initialPage, setInitialPage] = useState<number>(1); // Default to page 1
+  const [initialPage, setInitialPage] = useState<number>(1);
+
+  const fetchDocumentOverview = useCallback(
+    async (client: any, documentId: string) => {
+      const overview = await client.documentsOverview([documentId]);
+      return overview.results[0] || null;
+    },
+    []
+  );
+
+  const fetchDocumentChunks = useCallback(
+    async (
+      offset: number,
+      limit: number
+    ): Promise<{ results: DocumentChunk[]; total_entries: number }> => {
+      const client = await getClient();
+      if (!client) {
+        throw new Error('Failed to get authenticated client');
+      }
+
+      const chunksResponse = await client.documentChunks(id, offset, limit);
+      return {
+        results: Array.isArray(chunksResponse.results)
+          ? chunksResponse.results
+          : [],
+        total_entries: chunksResponse.total_entries || 0,
+      };
+    },
+    [getClient, id]
+  );
+
+  const {
+    currentPage,
+    totalPages,
+    data: currentChunks,
+    loading: chunksLoading,
+    prefetching,
+    goToPage,
+  } = usePagination<DocumentChunk>({
+    key: id,
+    fetchData: fetchDocumentChunks,
+    initialPage: 1,
+    pageSize: 10,
+    initialPrefetchPages: 5,
+    prefetchThreshold: 2,
+  });
 
   useEffect(() => {
-    const fetchDocumentInfo = async () => {
+    const fetchData = async () => {
       setLoading(true);
       try {
         const client = await getClient();
@@ -76,28 +122,20 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
           throw new Error('Failed to get authenticated client');
         }
 
-        const overview = await client.documentsOverview([id]);
-        setDocumentOverview(overview.results[0] || null);
-
-        const chunks = await client.documentChunks(id);
-        setDocumentChunks(
-          Array.isArray(chunks.results)
-            ? (chunks.results as DocumentChunk[])
-            : []
-        );
+        const overview = await fetchDocumentOverview(client, id);
+        setDocumentOverview(overview);
       } catch (error) {
-        console.error('Error fetching document information:', error);
+        console.error('Error fetching document overview:', error);
         setDocumentOverview(null);
-        setDocumentChunks([]);
       } finally {
         setLoading(false);
       }
     };
 
     if (open && id) {
-      fetchDocumentInfo();
+      fetchData();
     }
-  }, [open, id, getClient]);
+  }, [open, id, getClient, fetchDocumentOverview]);
 
   const handleOpenPdfPreview = (page?: number) => {
     if (page && page > 0) {
@@ -193,7 +231,18 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
                       </Button>
                     </div>
                   )}
-                <ExpandableDocumentChunks chunks={documentChunks} />
+                <ExpandableDocumentChunks chunks={currentChunks} />
+
+                {/* Display Loader only for active page loads */}
+                {chunksLoading && (
+                  <Loader className="mx-auto mt-4 animate-spin" size={32} />
+                )}
+
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={goToPage}
+                />
               </>
             )}
           </div>
@@ -273,7 +322,7 @@ const ExpandableDocumentChunks: React.FC<{ chunks: DocumentChunk[] }> = ({
 
   return (
     <div className="mt-4">
-      <div className="flex justify-between items-center mb-2 mt-16">
+      <div className="flex justify-between items-center mb-2">
         <h3 className="text-xl font-bold">Document Chunks</h3>
         <button
           onClick={toggleAllExpanded}
@@ -330,7 +379,7 @@ const ExpandableChunk: React.FC<{
           <InfoRow label="Extraction ID" value={chunk.extraction_id} />
           <InfoRow label="Document ID" value={chunk.document_id} />
           <InfoRow label="User ID" value={chunk.user_id} />
-          <InfoRow label="Group IDs" value={chunk.group_ids} />
+          <ExpandableInfoRow label="Group IDs" values={chunk.group_ids} />
           <div className="space-y-2">
             <span className="font-medium">Text:</span>
             <p className="pl-4 pr-2 py-2">{chunk.text}</p>
