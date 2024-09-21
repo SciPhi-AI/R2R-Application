@@ -17,6 +17,11 @@ import {
 import { useToast } from '@/components/ui/use-toast';
 import { useUserContext } from '@/context/UserContext';
 
+interface Collection {
+  collection_id: string;
+  name: string;
+}
+
 const Index: React.FC = () => {
   const searchParams = useSearchParams();
   const { toast } = useToast();
@@ -24,6 +29,9 @@ const Index: React.FC = () => {
   const [hasAttemptedFetch, setHasAttemptedFetch] = useState(false);
   const [searchLimit, setSearchLimit] = useState(10);
   const [searchFilters, setSearchFilters] = useState('{}');
+  const [selectedCollectionIds, setSelectedCollectionIds] = useState<string[]>(
+    []
+  );
   const [kgSearchType, setKgSearchType] = useState<'local' | 'global'>('local');
   const [
     max_llm_queries_for_global_search,
@@ -63,6 +71,7 @@ const Index: React.FC = () => {
   });
   const contentAreaRef = useRef<HTMLDivElement>(null);
   const [uploadedDocuments, setUploadedDocuments] = useState<string[]>([]);
+  const [collections, setCollections] = useState<Collection[]>([]);
 
   const [userId, setUserId] = useState(null);
 
@@ -128,6 +137,30 @@ const Index: React.FC = () => {
     fetchDocuments();
   }, [pipeline, getClient]);
 
+  useEffect(() => {
+    const fetchCollections = async () => {
+      if (pipeline) {
+        try {
+          const client = await getClient();
+          if (!client) {
+            throw new Error('Failed to get authenticated client');
+          }
+          const collectionsData = await client.collectionsOverview();
+          setCollections(
+            collectionsData.results.map((collection: Collection) => ({
+              collection_id: collection.collection_id,
+              name: collection.name,
+            }))
+          );
+        } catch (error) {
+          console.error('Error fetching collections:', error);
+        }
+      }
+    };
+
+    fetchCollections();
+  }, [pipeline, getClient]);
+
   const safeJsonParse = (jsonString: string) => {
     if (typeof jsonString !== 'string') {
       console.warn('Input is not a string:', jsonString);
@@ -168,6 +201,9 @@ const Index: React.FC = () => {
           setTemperature={setTemperature}
           topP={topP}
           setTopP={setTopP}
+          collections={collections}
+          selectedCollectionIds={selectedCollectionIds}
+          setSelectedCollectionIds={setSelectedCollectionIds}
         />
 
         {/* Main Content */}
@@ -217,6 +253,7 @@ const Index: React.FC = () => {
                   switches={switches}
                   hasAttemptedFetch={hasAttemptedFetch}
                   mode={mode}
+                  selectedCollectionIds={selectedCollectionIds}
                 />
               </div>
 

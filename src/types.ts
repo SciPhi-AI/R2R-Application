@@ -80,7 +80,7 @@ export interface Document {
   id: string;
   text: string;
   metadata: any;
-  group_ids?: string[];
+  collection_ids?: string[];
 }
 
 export interface Document {
@@ -90,15 +90,15 @@ export interface Document {
 }
 
 export interface User {
-  id?: string;
-  user_id: string;
+  id: string;
+  user_id?: string;
   email: string;
   is_active: boolean;
   is_superuser: boolean;
   created_at: string;
   updated_at: string;
   is_verified: boolean;
-  group_ids: string[];
+  collection_ids: string[];
 
   // Optional fields
   hashed_password?: string;
@@ -125,7 +125,7 @@ export enum IngestionStatus {
 export interface DocumentInfoType {
   id: string;
   user_id: string;
-  group_ids: string[];
+  collection_ids: string[];
   type: string;
   metadata: Record<string, any>;
   title: string;
@@ -149,7 +149,7 @@ export interface DocumentChunk {
   extraction_id: string;
   document_id: string;
   user_id: string;
-  group_ids: string[];
+  collection_ids: string[];
   text: string;
   metadata: { [key: string]: any };
 }
@@ -306,6 +306,9 @@ export interface SidebarProps {
   setTemperature: (value: number) => void;
   topP: number;
   setTopP: (value: number) => void;
+  collections: Array<{ collection_id: string; name: string }>;
+  selectedCollectionIds: string[];
+  setSelectedCollectionIds: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 export interface SingleSwitchProps {
@@ -376,7 +379,7 @@ export interface UserContextProps {
 
 export type Collection = {
   name: string;
-  group_id: string;
+  collection_id: string;
   description?: string;
   created_at?: string;
   updated_at?: string;
@@ -387,7 +390,7 @@ export interface VectorSearchResult {
   extraction_id: string;
   document_id: string;
   user_id: string;
-  group_ids: string[];
+  collection_ids: string[];
   score: number;
   text: string;
   metadata: Record<string, any>;

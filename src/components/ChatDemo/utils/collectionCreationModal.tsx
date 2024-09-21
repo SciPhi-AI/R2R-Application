@@ -48,10 +48,14 @@ const CollectionCreationModal: React.FC<CollectionCreationModalProps> = ({
         throw new Error('Failed to get authenticated client');
       }
 
-      await client.createGroup(name.trim(), description.trim() || undefined);
+      await client.createCollection(
+        name.trim(),
+        description.trim() || undefined
+      );
       toast({
         title: 'Collection Created',
         description: `Collection "${name}" has been successfully created.`,
+        variant: 'success',
       });
       setName('');
       setDescription('');
@@ -104,7 +108,7 @@ const CollectionCreationModal: React.FC<CollectionCreationModalProps> = ({
             placeholder="Enter collection description (optional)"
           />
         </div>
-        <DialogFooter className="mt-6 flex justify-end space-x-2">
+        <DialogFooter className="mt-6">
           <Button color="filled" onClick={handleClose} disabled={isCreating}>
             Cancel
           </Button>

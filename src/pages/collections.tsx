@@ -39,13 +39,15 @@ const Index: React.FC = () => {
           throw new Error('Failed to get authenticated client');
         }
 
-        const data = await client.groupsOverview();
+        const data = await client.collectionsOverview();
+        console.log('data:', data);
 
         const collectionsArray = Array.isArray(data.results)
           ? data.results
           : [];
 
         setCollections(collectionsArray);
+
         setIsLoading(false);
         return collectionsArray;
       } catch (error) {
@@ -62,14 +64,11 @@ const Index: React.FC = () => {
     fetchCollections();
   }, [fetchCollections]);
 
-  // Mock data removed. Assuming fetchCollections handles real data.
-
   const handleAddCollection = () => {
     setIsModalOpen(true);
   };
 
   const handleCollectionCreated = () => {
-    // Refresh the collections list after a new collection is created
     fetchCollections();
   };
 
@@ -83,12 +82,12 @@ const Index: React.FC = () => {
     const items = [...currentCollections];
 
     while (items.length < ITEMS_PER_PAGE) {
-      items.push({ group_id: `empty-${items.length}`, name: '' });
+      items.push({ collection_id: `empty-${items.length}`, name: '' });
     }
 
     return items.map((collection) => (
       <div
-        key={collection.group_id}
+        key={collection.collection_id}
         className="w-full h-[120px] flex justify-center"
       >
         {collection.name ? (

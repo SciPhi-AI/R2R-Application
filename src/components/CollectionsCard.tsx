@@ -73,7 +73,7 @@ export function CollectionCard({
   const mouseY = useMotionValue(0);
 
   const handleClick = () => {
-    router.push(`/collection/${collection.group_id}`);
+    router.push(`/collection/${collection.collection_id}`);
   };
 
   function onMouseMove({
@@ -90,7 +90,7 @@ export function CollectionCard({
     <div
       onClick={handleClick}
       onMouseMove={onMouseMove}
-      className={`group relative overflow-hidden cursor-pointer rounded-2xl bg-zinc-800 transition-shadow hover:shadow-md hover:shadow-zinc-900/5 dark:bg-white/2.5 dark:hover:shadow-black/5 ${className}`}
+      className={`group relative overflow-hidden cursor-pointer rounded-2xl bg-zinc-800 transition-shadow hover:shadow-md hover:shadow-zinc-900/5 dark:bg-white/2.5 dark:hover:shadow-black/5 hover:cursor-pointer ${className}`}
     >
       <div className="absolute inset-0">
         <ResourcePattern
@@ -103,10 +103,17 @@ export function CollectionCard({
           ]}
         />
       </div>
-      <div className="relative z-10 flex flex-col items-center justify-center rounded-2xl p-4 sm:p-6 w-full h-full">
-        <h2 className="text-xl font-medium text-center truncate w-full text-white mb-2">
+      <div className="relative flex flex-col rounded-2xl p-4 sm:p-6 w-full h-full -mt-4">
+        <h2 className="text-xl font-medium truncate w-full text-white mb-2">
           {collection.name}
         </h2>
+        <p className="text-white">
+          {collection.description
+            ? collection.description.length > 32
+              ? `${collection.description.substring(0, 32)}...`
+              : collection.description
+            : ''}
+        </p>
         {children}
       </div>
     </div>

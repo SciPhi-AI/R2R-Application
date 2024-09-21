@@ -18,7 +18,7 @@ import { DocumentInfoDialogProps, DocumentChunk } from '@/types';
 
 interface DocumentOverview {
   created_at?: string;
-  group_ids?: string[];
+  collection_ids?: string[];
   id?: string;
   ingestion_status?: string;
   metadata?: { title?: string; version?: string };
@@ -199,8 +199,8 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
                     <InfoRow label="Version" value={documentOverview.version} />
                     <InfoRow label="User ID" value={documentOverview.user_id} />
                     <ExpandableInfoRow
-                      label="Group IDs"
-                      values={documentOverview.group_ids}
+                      label="Collection IDs"
+                      values={documentOverview.collection_ids}
                     />
                     <InfoRow
                       label="Metadata"
@@ -379,7 +379,10 @@ const ExpandableChunk: React.FC<{
           <InfoRow label="Extraction ID" value={chunk.extraction_id} />
           <InfoRow label="Document ID" value={chunk.document_id} />
           <InfoRow label="User ID" value={chunk.user_id} />
-          <ExpandableInfoRow label="Group IDs" values={chunk.group_ids} />
+          <ExpandableInfoRow
+            label="Collection IDs"
+            values={chunk.collection_ids}
+          />
           <div className="space-y-2">
             <span className="font-medium">Text:</span>
             <p className="pl-4 pr-2 py-2">{chunk.text}</p>

@@ -50,6 +50,7 @@ export const Result: FC<{
   hasAttemptedFetch: boolean;
   switches: any;
   mode: 'rag' | 'rag_agent';
+  selectedCollectionIds: string[];
 }> = ({
   query,
   setQuery,
@@ -69,6 +70,7 @@ export const Result: FC<{
   hasAttemptedFetch,
   switches,
   mode,
+  selectedCollectionIds,
 }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isStreaming, setIsStreaming] = useState<boolean>(false);
@@ -175,6 +177,10 @@ export const Result: FC<{
         filters: search_filters,
         search_limit: search_limit,
         index_measure: IndexMeasure.COSINE_DISTANCE, // You might want to make this configurable
+        selected_collection_ids:
+          selectedCollectionIds.length > 0
+            ? [selectedCollectionIds].flat()
+            : undefined,
       };
 
       const kgSearchSettings: KGSearchSettings = {

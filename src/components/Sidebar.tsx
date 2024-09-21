@@ -5,6 +5,7 @@ import SingleSwitch from '@/components/ChatDemo/SingleSwitch';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import ModelSelector from '@/components/ui/ModelSelector';
+import { MultiSelect } from '@/components/ui/multi-select';
 import {
   Select,
   SelectContent,
@@ -14,6 +15,12 @@ import {
 } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { SidebarProps } from '@/types';
+
+const dummyCollections = [
+  { value: 'collection1', label: 'Collection 1' },
+  { value: 'collection2', label: 'Collection 2' },
+  { value: 'collection3', label: 'Collection 3' },
+];
 
 const Sidebar: React.FC<SidebarProps> = ({
   isOpen,
@@ -37,6 +44,9 @@ const Sidebar: React.FC<SidebarProps> = ({
   setTemperature,
   topP,
   setTopP,
+  collections,
+  selectedCollectionIds,
+  setSelectedCollectionIds,
 }) => {
   return (
     <>
@@ -87,6 +97,19 @@ const Sidebar: React.FC<SidebarProps> = ({
                 type="text"
                 value={searchFilters}
                 onChange={(e) => setSearchFilters(e.target.value)}
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="selectedCollections">Selected Collections</Label>
+              <MultiSelect
+                id="selectedCollections"
+                options={collections.map((collection) => ({
+                  value: collection.collection_id,
+                  label: collection.name,
+                }))}
+                value={selectedCollectionIds}
+                onChange={setSelectedCollectionIds}
               />
             </div>
 
