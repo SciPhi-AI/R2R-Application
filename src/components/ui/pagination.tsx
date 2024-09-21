@@ -15,12 +15,10 @@ const Pagination: React.FC<PaginationProps> = ({
 }) => {
   const isPreviousDisabled = currentPage <= 1;
   const isNextDisabled = currentPage >= totalPages;
+  const displayTotalPages = totalPages < 1 ? 1 : totalPages;
 
   return (
-    <nav
-      className="flex justify-center items-center mt-4"
-      aria-label="Pagination"
-    >
+    <nav className="flex justify-center items-center" aria-label="Pagination">
       <Button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={isPreviousDisabled}
@@ -31,7 +29,7 @@ const Pagination: React.FC<PaginationProps> = ({
         &lt; Previous
       </Button>
       <span className="mx-2">
-        Page {currentPage} of {totalPages}
+        Page {currentPage} of {displayTotalPages}
       </span>
       <Button
         onClick={() => onPageChange(currentPage + 1)}

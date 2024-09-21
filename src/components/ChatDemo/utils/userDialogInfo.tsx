@@ -27,7 +27,7 @@ interface UserOverview {
   is_verified: boolean;
   created_at: string;
   updated_at: string;
-  group_ids: string[];
+  collection_ids: string[];
   num_files: number;
   total_size_in_bytes: number;
   document_ids: string[];
@@ -123,7 +123,7 @@ const UserInfoDialog: React.FC<UserInfoDialogProps> = ({
               />
               <ExpandableInfoRow
                 label="Group Memberships"
-                values={userOverview.group_ids}
+                values={userOverview.collection_ids}
               />
               <InfoRow
                 label="File Statistics"

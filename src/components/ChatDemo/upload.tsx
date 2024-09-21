@@ -107,6 +107,7 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
         onClick={() => setIsDialogOpen(true)}
         disabled={isUploading}
         className={`pl-2 pr-2 text-white py-2 px-4`}
+        style={{ zIndex: 20 }}
       >
         {isUploading ? 'Uploading...' : 'Upload File(s)'}
       </Button>

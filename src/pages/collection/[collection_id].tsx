@@ -1,19 +1,17 @@
-// @/pages/[groupId].tsx
-
-import { Loader, FileSearch2 } from 'lucide-react';
+import { Loader, FileSearch2, Users, FileText } from 'lucide-react';
 import { useRouter } from 'next/router';
 import React, { useState, useEffect, useCallback } from 'react';
 
 import { DeleteButton } from '@/components/ChatDemo/deleteButton';
+import { RemoveButton } from '@/components/ChatDemo/remove';
 import Table, { Column } from '@/components/ChatDemo/Table';
-import UpdateButtonContainer from '@/components/ChatDemo/UpdateButtonContainer';
-import { UploadButton } from '@/components/ChatDemo/upload';
-import AssignDocumentToGroupDialog from '@/components/ChatDemo/utils/AssignDocumentToGroupDialog';
+import AssignDocumentToCollectionDialog from '@/components/ChatDemo/utils/AssignDocumentToCollectionDialog';
 import AssignUserToGroupDialog from '@/components/ChatDemo/utils/AssignUserToGroupDialog';
 import DocumentInfoDialog from '@/components/ChatDemo/utils/documentDialogInfo';
 import Layout from '@/components/Layout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/Button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/use-toast';
 import { useUserContext } from '@/context/UserContext';
 import { DocumentInfoType, IngestionStatus, User } from '@/types';
@@ -22,7 +20,7 @@ const MAX_RETRIES = 5;
 const RETRY_DELAY = 2000;
 const ITEMS_PER_PAGE = 10;
 
-const GroupIdPage: React.FC = () => {
+const CollectionIdPage: React.FC = () => {
   const router = useRouter();
   const { getClient, pipeline } = useUserContext();
   const [documents, setDocuments] = useState<DocumentInfoType[]>([]);
@@ -39,6 +37,7 @@ const GroupIdPage: React.FC = () => {
     useState(false);
   const [isAssignUserDialogOpen, setIsAssignUserDialogOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [activeTab, setActiveTab] = useState('documents');
   const itemsPerPage = ITEMS_PER_PAGE;
 
   const currentData = documents.slice(
@@ -62,24 +61,17 @@ const GroupIdPage: React.FC = () => {
         }
 
         const [documentsData, usersData] = await Promise.all([
-          client.documentsOverview(),
-          client.usersOverview(),
+          client.getDocumentsInCollection(currentGroupId),
+          client.getUsersInCollection(currentGroupId),
         ]);
 
-        const filteredDocuments = (documentsData.results || []).filter(
-          (doc: DocumentInfoType) => doc.group_ids?.includes(currentGroupId)
-        );
-        const filteredUsers = (usersData.results || []).filter((user: User) =>
-          user.group_ids?.includes(currentGroupId)
-        );
-
+        console.log('rawDocuments', documentsData.results);
         console.log('rawUsers', usersData.results);
-        console.log('filteredUsers:', filteredUsers);
 
-        setDocuments(filteredDocuments);
-        setUsers(filteredUsers);
+        setDocuments(documentsData.results);
+        setUsers(usersData.results);
         setPendingDocuments(
-          filteredDocuments
+          documentsData.results
             .filter(
               (doc: DocumentInfoType) =>
                 doc.ingestion_status !== IngestionStatus.SUCCESS &&
@@ -91,7 +83,7 @@ const GroupIdPage: React.FC = () => {
         setError(null);
         setSelectedDocumentIds([]);
 
-        return [filteredDocuments, filteredUsers];
+        return [documentsData.results, usersData.results];
       } catch (error) {
         console.error('Error fetching data:', error);
         if (retryCount < MAX_RETRIES) {
@@ -119,27 +111,14 @@ const GroupIdPage: React.FC = () => {
           throw new Error('Failed to get authenticated client');
         }
 
-        const data = await client.documentsOverview();
-        const updatedDocuments = data.results.filter((doc: DocumentInfoType) =>
-          pendingDocuments.includes(doc.id)
-        );
+        const updatedDocuments =
+          await client.getDocumentsInCollection(currentGroupId);
 
-        setDocuments((prevDocuments) => {
-          const newDocuments = [...prevDocuments];
-          updatedDocuments.forEach((updatedDoc: DocumentInfoType) => {
-            const index = newDocuments.findIndex(
-              (doc) => doc.id === updatedDoc.id
-            );
-            if (index !== -1) {
-              newDocuments[index] = updatedDoc;
-            }
-          });
-          return newDocuments;
-        });
+        setDocuments(updatedDocuments.results);
 
         setPendingDocuments((prevPending) =>
           prevPending.filter((id) =>
-            updatedDocuments.some(
+            updatedDocuments.results.some(
               (doc: DocumentInfoType) =>
                 doc.id === id &&
                 doc.ingestion_status !== IngestionStatus.SUCCESS &&
@@ -151,25 +130,28 @@ const GroupIdPage: React.FC = () => {
         console.error('Error fetching pending documents:', error);
       }
     },
-    [getClient, pendingDocuments]
+    [getClient]
   );
 
   useEffect(() => {
+    console.log('Router query:', router.query);
     if (router.isReady) {
-      const currentGroupId = router.query.groupId;
+      const currentGroupId = router.query.collection_id;
       if (typeof currentGroupId === 'string') {
         fetchData(currentGroupId);
       } else {
-        setError('Invalid group ID');
+        setError('Invalid collection ID');
         setIsLoading(false);
       }
     }
-  }, [router.isReady, router.query.groupId, fetchData]);
+  }, [router.isReady, router.query.collection_id, fetchData]);
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
     const currentGroupId =
-      typeof router.query.groupId === 'string' ? router.query.groupId : '';
+      typeof router.query.collection_id === 'string'
+        ? router.query.collection_id
+        : '';
 
     if (pendingDocuments.length > 0 && currentGroupId) {
       intervalId = setInterval(() => {
@@ -182,7 +164,7 @@ const GroupIdPage: React.FC = () => {
         clearInterval(intervalId);
       }
     };
-  }, [pendingDocuments, fetchPendingDocuments, router.query.groupId]);
+  }, [pendingDocuments, fetchPendingDocuments, router.query.collection_id]);
 
   const handleSelectAll = (selected: boolean) => {
     if (selected) {
@@ -221,9 +203,9 @@ const GroupIdPage: React.FC = () => {
       selected: false,
     },
     {
-      key: 'group_ids',
-      label: 'Group IDs',
-      renderCell: (doc) => doc.group_ids.join(', ') || 'N/A',
+      key: 'collection_ids',
+      label: 'Collection IDs',
+      renderCell: (doc) => doc.collection_ids.join(', ') || 'N/A',
       selected: false,
     },
     {
@@ -293,13 +275,11 @@ const GroupIdPage: React.FC = () => {
 
   const renderActions = (doc: DocumentInfoType) => (
     <div className="flex space-x-1 justify-end">
-      <UpdateButtonContainer
-        id={doc.id}
-        onUpdateSuccess={() =>
-          fetchData(
-            typeof router.query.groupId === 'string' ? router.query.groupId : ''
-          )
-        }
+      <RemoveButton
+        itemId={doc.id}
+        collectionId={currentGroupId}
+        itemType="document"
+        onSuccess={() => fetchData(currentGroupId)}
         showToast={toast}
       />
       <Button
@@ -315,7 +295,7 @@ const GroupIdPage: React.FC = () => {
         shape="slim"
         disabled={doc.ingestion_status !== IngestionStatus.SUCCESS}
       >
-        <FileSearch2 className="h-8 w-8" />
+        <FileSearch2 className="h-6 w-6" />
       </Button>
     </div>
   );
@@ -328,25 +308,22 @@ const GroupIdPage: React.FC = () => {
 
   const renderUserActions = (user: User) => (
     <div className="flex space-x-1 justify-end">
-      <Button
-        onClick={() => {
-          // Handle user action
-          toast({
-            title: 'Action not implemented',
-            description: 'This feature is coming soon.',
-          });
-        }}
-        color="primary"
-        shape="slim"
-      >
-        Edit
-      </Button>
+      <RemoveButton
+        itemId={user.id?.toString() || ''}
+        collectionId={currentGroupId}
+        itemType="user"
+        onSuccess={() => fetchData(currentGroupId)}
+        showToast={toast}
+      />
     </div>
   );
 
   const handleAssignSuccess = () => {
-    if (router.query.groupId && typeof router.query.groupId === 'string') {
-      fetchData(router.query.groupId);
+    if (
+      router.query.collection_id &&
+      typeof router.query.collection_id === 'string'
+    ) {
+      fetchData(router.query.collection_id);
     }
   };
 
@@ -373,7 +350,9 @@ const GroupIdPage: React.FC = () => {
   }
 
   const currentGroupId =
-    typeof router.query.groupId === 'string' ? router.query.groupId : '';
+    typeof router.query.collection_id === 'string'
+      ? router.query.collection_id
+      : '';
 
   return (
     <Layout
@@ -381,110 +360,108 @@ const GroupIdPage: React.FC = () => {
       includeFooter={false}
     >
       <main className="w-full flex flex-col container h-screen-[calc(100%-4rem)] mt-5">
-        <div className="flex space-x-4">
-          <div className="w-1/2">
-            <h2 className="text-xl font-semibold mb-2">Documents</h2>
-            <div className="flex justify-end items-center space-x-2 -mb-6">
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="w-full h-full flex flex-col mt-4"
+        >
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="documents" className="flex items-center">
+              <FileText className="w-4 h-4 mr-2" />
+              Documents
+            </TabsTrigger>
+            <TabsTrigger value="users" className="flex items-center">
+              <Users className="w-4 h-4 mr-2" />
+              Users
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="documents" className="flex-grow flex flex-col">
+            <div className="flex justify-end items-center space-x-2 mt-6 -mb-6">
               <Button
                 onClick={() => setIsAssignDocumentDialogOpen(true)}
                 type="button"
                 color="filled"
                 shape="rounded"
-                className={`pl-2 pr-2 text-white py-2 px-4`}
+                className="pl-2 pr-2 text-white py-2 px-4"
+                style={{ zIndex: 20 }}
               >
-                Add File to Group
+                Manage Files
               </Button>
-              <UploadButton
-                userId={null}
-                uploadedDocuments={documents}
-                setUploadedDocuments={setDocuments}
-                onUploadSuccess={() => fetchData(currentGroupId)}
-                showToast={toast}
-                setPendingDocuments={setPendingDocuments}
-                setCurrentPage={() => {}}
-                documentsPerPage={itemsPerPage}
-              />
-              <Button
-                onClick={() => setIsAssignDocumentDialogOpen(true)}
-                type="button"
-                color="danger"
-                shape="rounded"
-                className={`pl-2 pr-2 text-white py-2 px-4`}
-              >
-                Remove File(s)
-              </Button>
-              <DeleteButton
-                selectedDocumentIds={selectedDocumentIds}
-                onDelete={() => setSelectedDocumentIds([])}
-                onSuccess={() => fetchData(currentGroupId)}
-                showToast={toast}
+            </div>
+            <div className="flex-grow overflow-auto">
+              <Table
+                data={documents}
+                currentData={currentData}
+                columns={columns}
+                itemsPerPage={itemsPerPage}
+                onSelectAll={handleSelectAll}
+                onSelectItem={(itemId: string, selected: boolean) => {
+                  const item = documents.find((doc) => doc.id === itemId);
+                  if (item) {
+                    handleSelectItem(item, selected);
+                  }
+                }}
+                selectedItems={selectedDocumentIds}
+                actions={renderActions}
+                initialSort={{ key: 'title', order: 'asc' }}
+                initialFilters={{}}
+                currentPage={currentPage}
+                onPageChange={handlePageChange}
+                totalItems={documents.length}
               />
             </div>
-            <Table
-              data={documents}
-              currentData={currentData}
-              columns={columns}
-              itemsPerPage={itemsPerPage}
-              onSelectAll={handleSelectAll}
-              onSelectItem={handleSelectItem}
-              selectedItems={documents.filter((doc) =>
-                selectedDocumentIds.includes(doc.id)
-              )}
-              actions={renderActions}
-              initialSort={{ key: 'title', order: 'asc' }}
-              initialFilters={{}}
-              tableHeight="600px"
-              currentPage={currentPage}
-              onPageChange={handlePageChange}
-              totalItems={documents.length}
-            />
-          </div>
-          <div className="w-1/2">
-            <h2 className="text-xl font-semibold mb-2">Users</h2>
-            <div className="flex justify-end items-center space-x-2 -mb-6">
+          </TabsContent>
+          <TabsContent value="users" className="flex-grow flex flex-col">
+            <div className="flex justify-end items-center space-x-2 mt-6 -mb-6">
               <Button
                 onClick={() => setIsAssignUserDialogOpen(true)}
                 type="button"
                 color="filled"
                 shape="rounded"
-                className={`pl-2 pr-2 text-white py-2 px-4`}
+                className="pl-2 pr-2 text-white py-2 px-4"
+                style={{ zIndex: 20 }}
               >
-                Add User to Group
-              </Button>
-              <Button
-                onClick={() => setIsAssignDocumentDialogOpen(true)}
-                type="button"
-                color="danger"
-                shape="rounded"
-                className={`pl-2 pr-2 text-white py-2 px-4`}
-              >
-                Remove User(s)
+                Manage Users
               </Button>
             </div>
-            {/* <Table
-              data={users}
-              currentData={users.slice(
-                (currentPage - 1) * itemsPerPage,
-                currentPage * itemsPerPage
-              )}
-              columns={userColumns}
-              itemsPerPage={itemsPerPage}
-              onSelectAll={(selected) => {
-                // Implement select all for users if needed
-              }}
-              onSelectItem={(item: User, selected: boolean) => {
-                // Implement select item for users if needed
-              }}
-              selectedItems={[]} // Manage selected users if necessary
-              actions={renderUserActions}
-              initialSort={{ key: 'name', order: 'asc' }}
-              initialFilters={{}}
-              tableHeight="600px"
-              currentPage={currentPage}
-              onPageChange={handlePageChange}
-              totalItems={users.length}
-            /> */}
-          </div>
+            <div className="flex-grow overflow-auto">
+              <Table
+                data={users}
+                currentData={users.slice(
+                  (currentPage - 1) * itemsPerPage,
+                  currentPage * itemsPerPage
+                )}
+                columns={userColumns}
+                itemsPerPage={itemsPerPage}
+                onSelectAll={(selected) => {
+                  // Implement select all for users if needed
+                }}
+                onSelectItem={(itemId: string, selected: boolean) => {
+                  const item = documents.find((doc) => doc.id === itemId);
+                  if (item) {
+                    handleSelectItem(item, selected);
+                  }
+                }}
+                selectedItems={[]} // Manage selected users if necessary
+                actions={renderUserActions}
+                initialSort={{ key: 'name', order: 'asc' }}
+                initialFilters={{}}
+                currentPage={currentPage}
+                onPageChange={handlePageChange}
+                totalItems={users.length}
+              />
+            </div>
+          </TabsContent>
+        </Tabs>
+        <div className="mt-5 flex justify-end">
+          <DeleteButton
+            collectionId={currentGroupId}
+            isCollection={true}
+            onSuccess={() => router.push('/collections')}
+            showToast={toast}
+            selectedDocumentIds={[]}
+            onDelete={() => {}}
+          />
         </div>
       </main>
       <DocumentInfoDialog
@@ -492,20 +469,20 @@ const GroupIdPage: React.FC = () => {
         open={isDocumentInfoDialogOpen}
         onClose={() => setIsDocumentInfoDialogOpen(false)}
       />
-      <AssignDocumentToGroupDialog
+      <AssignDocumentToCollectionDialog
         open={isAssignDocumentDialogOpen}
         onClose={() => setIsAssignDocumentDialogOpen(false)}
-        groupId={currentGroupId}
+        collection_id={currentGroupId}
         onAssignSuccess={handleAssignSuccess}
       />
       <AssignUserToGroupDialog
         open={isAssignUserDialogOpen}
         onClose={() => setIsAssignUserDialogOpen(false)}
-        groupId={currentGroupId}
+        collection_id={currentGroupId}
         onAssignSuccess={handleAssignSuccess}
       />
     </Layout>
   );
 };
 
-export default GroupIdPage;
+export default CollectionIdPage;

@@ -42,8 +42,8 @@ interface TableProps<T> {
   columns: Column<T>[];
   itemsPerPage?: number;
   onSelectAll?: (selected: boolean) => void;
-  onSelectItem?: (item: T, selected: boolean) => void;
-  selectedItems?: T[];
+  onSelectItem?: (itemId: string, selected: boolean) => void;
+  selectedItems?: string[]; // Changed from T[] to string[]
   actions?: (item: T) => React.ReactNode;
   initialSort?: { key: string; order: 'asc' | 'desc' };
   initialFilters?: Record<string, any>;
@@ -51,9 +51,12 @@ interface TableProps<T> {
   currentPage: number;
   onPageChange: (page: number) => void;
   totalItems: number;
+  onSort?: (key: string, order: 'asc' | 'desc') => void;
+  onFilter?: (filters: Record<string, any>) => void;
+  showPagination?: boolean;
 }
 
-function Table<T extends { id: string }>({
+function Table<T extends { [key: string]: any }>({
   data,
   currentData,
   columns,
@@ -68,6 +71,9 @@ function Table<T extends { id: string }>({
   currentPage,
   onPageChange,
   totalItems,
+  onSort,
+  onFilter,
+  showPagination = true,
 }: TableProps<T>) {
   const [sort, setSort] = useState(
     initialSort || { key: '', order: 'asc' as const }
@@ -78,8 +84,9 @@ function Table<T extends { id: string }>({
   );
 
   const filteredAndSortedData = useMemo(() => {
-    let result = [...data];
+    let result = [...currentData];
 
+    // Apply filters
     Object.entries(filters).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
         result = result.filter((item) => {
@@ -90,7 +97,10 @@ function Table<T extends { id: string }>({
           } else if (column?.filterType === 'select') {
             return itemValue === value;
           } else if (typeof value === 'string') {
-            return itemValue.toLowerCase().includes(value.toLowerCase());
+            return itemValue
+              .toString()
+              .toLowerCase()
+              .includes(value.toLowerCase());
           }
           return itemValue === value;
         });
@@ -113,19 +123,27 @@ function Table<T extends { id: string }>({
     }
 
     return result;
-  }, [data, filters, sort, columns]);
+  }, [currentData, filters, sort, columns]);
 
-  const totalPages = Math.ceil(filteredAndSortedData.length / itemsPerPage);
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
 
   const handleSort = (key: string) => {
-    setSort((prev) => ({
+    const newSort: { key: string; order: 'asc' | 'desc' } = {
       key,
-      order: prev.key === key && prev.order === 'asc' ? 'desc' : 'asc',
-    }));
+      order: sort.key === key && sort.order === 'asc' ? 'desc' : 'asc',
+    };
+    setSort(newSort);
+    if (onSort) {
+      onSort(newSort.key, newSort.order);
+    }
   };
 
   const handleFilter = (key: string, value: any) => {
-    setFilters((prev) => ({ ...prev, [key]: value }));
+    const newFilters = { ...filters, [key]: value };
+    setFilters(newFilters);
+    if (onFilter) {
+      onFilter(newFilters);
+    }
     onPageChange(1);
   };
 
@@ -134,7 +152,7 @@ function Table<T extends { id: string }>({
   };
 
   const isAllSelected = currentData.every((item) =>
-    selectedItems.includes(item)
+    selectedItems.includes(item.id)
   );
 
   const handleSelectAllInternal = (checked: boolean) => {
@@ -143,9 +161,12 @@ function Table<T extends { id: string }>({
     }
   };
 
-  const handleSelectItemInternal = (item: T, checked: boolean) => {
-    if (onSelectItem) {
-      onSelectItem(item, checked);
+  const handleSelectItemInternal = (
+    item: T,
+    checked: boolean | 'indeterminate'
+  ) => {
+    if (onSelectItem && typeof checked === 'boolean') {
+      onSelectItem(item.id, checked);
     }
   };
 
@@ -165,10 +186,11 @@ function Table<T extends { id: string }>({
     return content;
   };
 
-  const emptyRowsCount = Math.max(0, itemsPerPage - currentData.length);
+  const visibleRowsCount = filteredAndSortedData.length;
+  const emptyRowsCount = Math.max(0, itemsPerPage - visibleRowsCount);
 
   return (
-    <div>
+    <div className="flex flex-col h-full">
       <div className="flex justify-between items-center mb-4">
         <Popover>
           <PopoverTrigger asChild>
@@ -190,12 +212,14 @@ function Table<T extends { id: string }>({
                     <Checkbox
                       id={`column-toggle-${col.key}`}
                       checked={visibleColumns[col.key]}
-                      onCheckedChange={(checked) =>
-                        setVisibleColumns((prev) => ({
-                          ...prev,
-                          [col.key]: checked === true,
-                        }))
-                      }
+                      onCheckedChange={(checked: boolean | 'indeterminate') => {
+                        if (typeof checked === 'boolean') {
+                          setVisibleColumns((prev) => ({
+                            ...prev,
+                            [col.key]: checked,
+                          }));
+                        }
+                      }}
                     />
                     <label
                       htmlFor={`column-toggle-${col.key}`}
@@ -286,14 +310,17 @@ function Table<T extends { id: string }>({
                                         checked={(
                                           filters[col.key] || []
                                         ).includes(option)}
-                                        onCheckedChange={(checked) => {
+                                        onCheckedChange={(
+                                          checked: boolean | 'indeterminate'
+                                        ) => {
                                           const currentFilters =
                                             filters[col.key] || [];
-                                          const newFilters = checked
-                                            ? [...currentFilters, option]
-                                            : currentFilters.filter(
-                                                (f: string) => f !== option
-                                              );
+                                          const newFilters =
+                                            checked === true
+                                              ? [...currentFilters, option]
+                                              : currentFilters.filter(
+                                                  (f: string) => f !== option
+                                                );
                                           handleFilter(col.key, newFilters);
                                         }}
                                       />
@@ -348,14 +375,14 @@ function Table<T extends { id: string }>({
             </tr>
           </thead>
           <tbody>
-            {currentData.map((item) => (
+            {filteredAndSortedData.map((item) => (
               <tr key={item.id}>
                 {onSelectItem && (
                   <td className="w-[50px] px-4 py-2 text-white text-center">
                     <Checkbox
-                      checked={selectedItems.includes(item)}
-                      onCheckedChange={(checked) =>
-                        handleSelectItemInternal(item, checked === true)
+                      checked={selectedItems.includes(item.id)}
+                      onCheckedChange={(checked: boolean | 'indeterminate') =>
+                        handleSelectItemInternal(item, checked as boolean)
                       }
                     />
                   </td>
@@ -379,12 +406,8 @@ function Table<T extends { id: string }>({
                 )}
               </tr>
             ))}
-            {Array.from({
-              length: Math.max(0, itemsPerPage - currentData.length),
-            }).map((_, index) => (
-              <tr key={`empty-${index}`} style={{ height: '53px' }}>
-                {' '}
-                {/* Adjust this height as needed */}
+            {Array.from({ length: emptyRowsCount }).map((_, index) => (
+              <tr key={`empty-${index}`} style={{ height: '50px' }}>
                 {onSelectItem && <td></td>}
                 {columns.map((col) =>
                   visibleColumns[col.key] ? <td key={col.key}></td> : null
@@ -395,9 +418,8 @@ function Table<T extends { id: string }>({
           </tbody>
         </table>
       </div>
-
-      {totalPages > 1 && (
-        <div className="flex justify-center mt-4">
+      {showPagination && (
+        <div className="mt-4">
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
