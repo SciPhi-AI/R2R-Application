@@ -50,10 +50,13 @@ export const DeleteButton: React.FC<ExtendedDeleteButtonProps> = ({
         onSuccess();
         router.push('/collections');
       } else if (selectedDocumentIds.length > 0) {
-        for (let i = 0; i < selectedDocumentIds.length; i++) {
-          const key = 'document_id';
-          const value = selectedDocumentIds[i];
-          await client.delete({ [key]: value });
+        // Delete documents one by one to ensure correct format
+        for (const documentId of selectedDocumentIds) {
+          await client.delete({
+            document_id: {
+              $eq: documentId,
+            },
+          });
         }
         showToast({
           variant: 'success',

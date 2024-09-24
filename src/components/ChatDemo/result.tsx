@@ -8,12 +8,7 @@ import React, { FC, useEffect, useState, useRef } from 'react';
 
 import PdfPreviewDialog from '@/components/ChatDemo/utils/pdfPreviewDialog';
 import { useUserContext } from '@/context/UserContext';
-import {
-  Message,
-  RagGenerationConfig,
-  KGLocalSearchResult,
-  VectorSearchResult,
-} from '@/types';
+import { Message } from '@/types';
 
 import { Answer } from './answer';
 import { DefaultQueries } from './DefaultQueries';
@@ -22,12 +17,10 @@ import { UploadButton } from './upload';
 
 const FUNCTION_START_TOKEN = '<function_call>';
 const FUNCTION_END_TOKEN = '</function_call>';
-const VECTOR_SEARCH_START_TOKEN = '<search>';
-const VECTOR_SEARCH_END_TOKEN = '</search>';
-const KG_LOCAL_SEARCH_START_TOKEN = '<kg_local_search>';
-const KG_LOCAL_SEARCH_END_TOKEN = '</kg_local_search>';
-const KG_GLOBAL_SEARCH_START_TOKEN = '<kg_global_search>';
-const KG_GLOBAL_SEARCH_END_TOKEN = '</kg_global_search>';
+const SEARCH_START_TOKEN = '<search>';
+const SEARCH_END_TOKEN = '</search>';
+const KG_SEARCH_START_TOKEN = '<kg_search>';
+const KG_SEARCH_END_TOKEN = '</kg_search>';
 const COMPLETION_START_TOKEN = '<completion>';
 const COMPLETION_END_TOKEN = '</completion>';
 
@@ -96,8 +89,7 @@ export const Result: FC<{
 
   const updateLastMessage = (
     content?: string,
-    sources?: string,
-    kgLocalSources?: string,
+    sources?: Record<string, string | null>,
     isStreaming?: boolean,
     searchPerformed?: boolean
   ) => {
@@ -105,23 +97,18 @@ export const Result: FC<{
       const updatedMessages = [...prevMessages];
       const lastMessage = updatedMessages[updatedMessages.length - 1];
       if (lastMessage.role === 'assistant') {
-        if (content !== undefined) {
-          lastMessage.content += content;
-        }
-        if (sources !== undefined) {
-          lastMessage.sources = sources;
-        }
-        if (kgLocalSources !== undefined) {
-          lastMessage.kgLocal = kgLocalSources;
-        }
-        if (isStreaming !== undefined) {
-          lastMessage.isStreaming = isStreaming;
-        }
-        if (searchPerformed !== undefined) {
-          lastMessage.searchPerformed = searchPerformed;
-        }
+        return [
+          ...updatedMessages.slice(0, -1),
+          {
+            ...lastMessage,
+            ...(content !== undefined && { content }),
+            ...(sources !== undefined && { sources }),
+            ...(isStreaming !== undefined && { isStreaming }),
+            ...(searchPerformed !== undefined && { searchPerformed }),
+          },
+        ];
       }
-      return updatedMessages;
+      return prevMessages;
     });
   };
 
@@ -139,6 +126,7 @@ export const Result: FC<{
       content: query,
       id: Date.now().toString(),
       timestamp: Date.now(),
+      sources: {},
     };
 
     const newAssistantMessage: Message = {
@@ -147,7 +135,7 @@ export const Result: FC<{
       id: (Date.now() + 1).toString(),
       timestamp: Date.now() + 1,
       isStreaming: true,
-      sources: null,
+      sources: {},
       searchPerformed: false,
     };
 
@@ -156,6 +144,13 @@ export const Result: FC<{
       newUserMessage,
       newAssistantMessage,
     ]);
+
+    let buffer = '';
+    const inLLMResponse = false;
+    let fullContent = '';
+    let vectorSearchSources = null;
+    let kgSearchResult = null;
+    let inCompletion = false;
 
     try {
       const client = await getClient();
@@ -176,7 +171,7 @@ export const Result: FC<{
         use_hybrid_search: switches.hybrid_search?.checked ?? false,
         filters: search_filters,
         search_limit: search_limit,
-        index_measure: IndexMeasure.COSINE_DISTANCE, // You might want to make this configurable
+        index_measure: IndexMeasure.COSINE_DISTANCE,
         selected_collection_ids:
           selectedCollectionIds.length > 0
             ? [selectedCollectionIds].flat()
@@ -207,18 +202,6 @@ export const Result: FC<{
       const reader = streamResponse.getReader();
       const decoder = new TextDecoder();
 
-      let buffer = '';
-      let inLLMResponse = false;
-      const sourcesContent: {
-        vector: VectorSearchResult[];
-        kgLocal: KGLocalSearchResult | null;
-        // kgGlobal: KGGlobalSearchResult | null;
-      } = {
-        vector: [],
-        kgLocal: null,
-        // kgGlobal: null,
-      };
-
       while (true) {
         const { done, value } = await reader.read();
         if (done) {
@@ -227,117 +210,58 @@ export const Result: FC<{
 
         buffer += decoder.decode(value, { stream: true });
 
-        if (mode === 'rag') {
-          if (buffer.includes(VECTOR_SEARCH_END_TOKEN)) {
-            const [results, rest] = buffer.split(VECTOR_SEARCH_END_TOKEN);
+        if (buffer.includes(FUNCTION_END_TOKEN)) {
+          const [functionCall, rest] = buffer.split(FUNCTION_END_TOKEN);
+          buffer = rest || '';
 
-            const vectorResults = results.replace(
-              VECTOR_SEARCH_START_TOKEN,
-              ''
-            );
-            console.log('vectorResults = ', vectorResults);
-            const vectorResultsList = JSON.parse(vectorResults);
-
-            const formattedSources = vectorResultsList.map((line: string) => {
-              try {
-                console.log('parsing line as JSON:', line);
-                return JSON.parse(line);
-              } catch (error) {
-                console.error('Error parsing source line:', error);
-                return null;
-              }
-            });
-
-            updateLastMessage(
-              undefined,
-              formattedSources,
-              undefined,
-              undefined,
-              true
-            );
-          }
-
-          // Handle KG local search results
-          if (buffer.includes(KG_LOCAL_SEARCH_END_TOKEN)) {
-            const [results, rest] = buffer.split(KG_LOCAL_SEARCH_END_TOKEN);
-            const kgLocalResult = results.split(KG_LOCAL_SEARCH_START_TOKEN)[1];
-            console.log('kgLocalResult = ', kgLocalResult);
-            const parsedKgLocalResult = JSON.parse(kgLocalResult);
-            console.log('parsedKgLocalResult = ', parsedKgLocalResult);
-            updateLastMessage(
-              undefined,
-              undefined,
-              parsedKgLocalResult,
-              undefined,
-              true
-            );
-
+          if (functionCall.includes(SEARCH_END_TOKEN)) {
+            const [searchResults, rest] = functionCall.split(SEARCH_END_TOKEN);
+            vectorSearchSources = searchResults.includes(SEARCH_START_TOKEN)
+              ? searchResults.split(SEARCH_START_TOKEN)[1]
+              : searchResults.trim();
             buffer = rest || '';
-          }
-
-          if (buffer.includes(COMPLETION_START_TOKEN)) {
-            inLLMResponse = true;
-            buffer = buffer.split(COMPLETION_START_TOKEN)[1] || '';
-          }
-
-          if (inLLMResponse) {
-            const endTokenIndex = buffer.indexOf(COMPLETION_END_TOKEN);
-            let chunk = '';
-
-            if (endTokenIndex !== -1) {
-              chunk = buffer.slice(0, endTokenIndex);
-              buffer = buffer.slice(
-                endTokenIndex + COMPLETION_END_TOKEN.length
-              );
-              inLLMResponse = false;
-            } else {
-              chunk = buffer;
-              buffer = '';
-            }
-
-            updateLastMessage(chunk);
-          }
-        } else {
-          if (buffer.includes(FUNCTION_END_TOKEN)) {
-            const [results, rest] = buffer.split(FUNCTION_END_TOKEN);
-            const sourcesContent = results
-              .replace(FUNCTION_START_TOKEN, '')
-              .replace(/^[\s\S]*?<results>([\s\S]*)<\/results>[\s\S]*$/, '$1');
-            console.log('sourcesContent = ', sourcesContent);
-            updateLastMessage(
-              undefined,
-              sourcesContent,
-              undefined,
-              undefined,
-              true
-            );
-            buffer = rest || '';
-            setIsSearching(false);
-          }
-
-          if (buffer.includes(COMPLETION_START_TOKEN)) {
-            inLLMResponse = true;
-            buffer = buffer.split(COMPLETION_START_TOKEN)[1] || '';
-          }
-
-          if (inLLMResponse) {
-            const endTokenIndex = buffer.indexOf(COMPLETION_END_TOKEN);
-            let chunk = '';
-
-            if (endTokenIndex !== -1) {
-              chunk = buffer.slice(0, endTokenIndex);
-              buffer = buffer.slice(
-                endTokenIndex + COMPLETION_END_TOKEN.length
-              );
-              inLLMResponse = false;
-            } else {
-              chunk = buffer;
-              buffer = '';
-            }
-
-            updateLastMessage(chunk);
           }
         }
+
+        if (buffer.includes(SEARCH_END_TOKEN)) {
+          const [searchResults, rest] = buffer.split(SEARCH_END_TOKEN);
+          vectorSearchSources = searchResults.includes(SEARCH_START_TOKEN)
+            ? searchResults.split(SEARCH_START_TOKEN)[1]
+            : searchResults.trim();
+          buffer = rest || '';
+        }
+
+        if (buffer.includes(KG_SEARCH_END_TOKEN)) {
+          const [kgResults, rest] = buffer.split(KG_SEARCH_END_TOKEN);
+          kgSearchResult = kgResults.includes(KG_SEARCH_START_TOKEN)
+            ? kgResults.split(KG_SEARCH_START_TOKEN)[1]
+            : kgResults.trim();
+          buffer = rest || '';
+        }
+
+        if (buffer.includes(COMPLETION_START_TOKEN)) {
+          inCompletion = true;
+          buffer = buffer.split(COMPLETION_START_TOKEN)[1] || '';
+        }
+
+        if (inCompletion) {
+          const endTokenIndex = buffer.indexOf(COMPLETION_END_TOKEN);
+          if (endTokenIndex !== -1) {
+            fullContent += buffer.slice(0, endTokenIndex);
+            buffer = buffer.slice(endTokenIndex + COMPLETION_END_TOKEN.length);
+            inCompletion = false;
+          } else {
+            fullContent += buffer;
+            buffer = '';
+          }
+        }
+
+        updateLastMessage(
+          fullContent,
+          { vector: vectorSearchSources, kg: kgSearchResult },
+          inCompletion,
+          true
+        );
       }
     } catch (err: unknown) {
       console.error('Error in streaming:', err);
@@ -345,8 +269,13 @@ export const Result: FC<{
     } finally {
       setIsStreaming(false);
       setIsSearching(false);
+      updateLastMessage(
+        fullContent,
+        { vector: vectorSearchSources, kg: kgSearchResult },
+        false
+      );
+      setQuery('');
       setIsProcessingQuery(false);
-      // updateLastMessage(undefined, undefined, false);
     }
   };
 
@@ -392,8 +321,8 @@ export const Result: FC<{
                 isSearching={
                   index === messages.length - 1 ? isSearching : false
                 }
-                mode={mode}
-                onOpenPdfPreview={handleOpenPdfPreview}
+                // mode={mode}
+                // onOpenPdfPreview={handleOpenPdfPreview}
               />
             )}
           </React.Fragment>
@@ -401,7 +330,9 @@ export const Result: FC<{
         <div ref={messagesEndRef} />
       </div>
       {error && <div className="text-red-500">Error: {error}</div>}
-      {!query && <DefaultQueries setQuery={setQuery} mode={mode} />}
+      {!query && messages.length === 0 && (
+        <DefaultQueries setQuery={setQuery} mode={mode} />
+      )}
       {hasAttemptedFetch &&
         uploadedDocuments?.length === 0 &&
         pipelineUrl &&
