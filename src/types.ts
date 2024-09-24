@@ -225,11 +225,10 @@ export interface LogoProps {
 export interface Message {
   role: 'system' | 'user' | 'assistant';
   content: string;
-  id?: string;
-  timestamp?: number;
+  id: string;
+  timestamp: number;
   isStreaming?: boolean;
-  sources?: string | null;
-  kgLocal?: string | null;
+  sources?: Record<string, string | null>;
   searchPerformed?: boolean;
 }
 
@@ -420,7 +419,11 @@ export interface KGLocalSearchResult {
   communities: KGCommunity[];
 }
 
-// export interface KGGlobalSearchResult {
-//   query: string;
-//   search_result: string[];
-// }
+export interface KGSearchResult {
+  method: 'local' | 'global';
+  content: any;
+  result_type: 'entity' | 'relationship' | 'community' | 'global';
+  fragment_ids: string[];
+  document_ids: string[];
+  metadata: Record<string, any>;
+}

@@ -23,6 +23,7 @@ import {
   VectorSearchResult,
   KGEntity,
   KGTriple,
+  KGSearchResult,
   KGCommunity,
   KGLocalSearchResult,
 } from '@/types';
@@ -113,201 +114,261 @@ function formatMarkdownNewLines(markdown: string) {
     });
 }
 
-const parseSources = (sources: string | object): VectorSearchResult[] => {
+interface Source extends VectorSearchResult {
+  id: string;
+  score: number;
+  metadata: {
+    title?: string;
+    text?: string;
+    documentid?: string;
+    snippet?: string;
+  };
+}
+
+const parseVectorSearchSources = (sources: string | object): Source[] => {
   if (typeof sources === 'string') {
-    // Split the string into individual JSON object strings
-    const individualSources = sources.split(',"{"').map((source, index) => {
-      if (index === 0) {
-        return source;
-      } // First element is already properly formatted
-      return `{"${source}`; // Wrap the subsequent elements with leading `{"`
-    });
-
-    // Wrap the individual sources in a JSON array format
-    const jsonArrayString = `[${individualSources.join(',')}]`;
-
     try {
-      const partialParsedVectorSearch = JSON.parse(jsonArrayString);
-      return partialParsedVectorSearch.map((source: any) => {
-        const parsedSource = JSON.parse(source);
-        return {
-          ...parsedSource,
-          text: parsedSource.text || '',
-        };
-      });
+      const cleanedSources = sources;
+      return JSON.parse(cleanedSources);
     } catch (error) {
       console.error('Failed to parse sources:', error);
-      throw new Error('Invalid sources format');
+      return [];
     }
   }
-
-  return sources as VectorSearchResult[];
+  return sources as Source[];
 };
+
+const SourceInfo: React.FC<{ isSearching: boolean; sourcesCount: number }> = ({
+  isSearching,
+  sourcesCount,
+}) => (
+  <div className="flex items-center justify-between w-full">
+    <Logo width={50} height={50} disableLink={true} />
+    <span className="text-sm font-normal text-white">
+      {isSearching ? (
+        <span className="searching-animation">Searching over sources...</span>
+      ) : sourcesCount > 0 ? (
+        `View ${sourcesCount} Sources`
+      ) : (
+        'No sources found'
+      )}
+    </span>
+  </div>
+);
 
 export const Answer: FC<{
   message: Message;
   isStreaming: boolean;
   isSearching: boolean;
-  mode: 'rag' | 'rag_agent';
-  onOpenPdfPreview: (id: string, page?: number) => void;
-}> = ({ message, isStreaming, isSearching, mode, onOpenPdfPreview }) => {
+}> = ({ message, isStreaming, isSearching }) => {
   const [isOpen, setIsOpen] = useState(false);
-
-  const [parsedVectorSearch, setParsedVectorSearch] = useState<
-    VectorSearchResult[]
-  >([]);
-  const [parsedKgLocal, setParsedKgLocal] =
-    useState<KGLocalSearchResult | null>(null);
-
+  const [parsedVectorSources, setParsedVectorSources] = useState<Source[]>([]);
+  const [parsedEntities, setParsedEntities] = useState<KGSearchResult[]>([]);
+  const [parsedCommunities, setParsedCommunities] = useState<KGSearchResult[]>(
+    []
+  );
   useEffect(() => {
-    if (message.sources) {
-      try {
-        const parsedVectorSearchData = parseSources(message.sources);
-        setParsedVectorSearch(parsedVectorSearchData);
-      } catch (error) {
-        console.error('Failed to parse sources:', error);
-        setParsedVectorSearch([]);
-      }
-    } else {
-      setParsedVectorSearch([]);
+    if (message.sources && message.sources.vector) {
+      const parsed = parseVectorSearchSources(message.sources.vector);
+      setParsedVectorSources(parsed);
+    }
+
+    if (message.sources && message.sources.kg) {
+      const kgLocalResult: KGSearchResult[] = JSON.parse(message.sources.kg);
+
+      const entitiesArray = kgLocalResult.filter(
+        (item: any) => item.result_type === 'entity'
+      );
+      const communitiesArray = kgLocalResult.filter(
+        (item: any) => item.result_type === 'community'
+      );
+      setParsedEntities(entitiesArray);
+      setParsedCommunities(communitiesArray);
     }
   }, [message.sources]);
 
-  useEffect(() => {
-    if (message.kgLocal) {
-      const parsedKGLocalData = parseKGLocalSources(message.kgLocal);
-      console.log('parsedKGLocalData = ', parsedKGLocalData);
-      setParsedKgLocal(parsedKGLocalData);
-    }
-  }, [message.kgLocal]);
+  const AnimatedEllipsis: FC = () => {
+    const [dots, setDots] = useState('');
 
-  const showSourcesAccordion =
-    mode === 'rag' || (mode === 'rag_agent' && parsedVectorSearch.length > 0);
-  const showNoSourcesFound =
-    mode === 'rag_agent' &&
-    message.searchPerformed &&
-    parsedVectorSearch.length === 0;
+    useEffect(() => {
+      const interval = setInterval(() => {
+        setDots((prevDots) => (prevDots.length >= 3 ? '' : prevDots + '.'));
+      }, 200);
 
+      return () => clearInterval(interval);
+    }, []);
+
+    return (
+      <span
+        style={{
+          color: 'white',
+          display: 'inline-block',
+          width: '1em',
+          height: '1em',
+          textAlign: 'left',
+        }}
+      >
+        {dots}
+      </span>
+    );
+  };
+
+  const renderContent = () => {
+    const paragraphs = message.content.split('\n\n');
+    return paragraphs.map((paragraph, index) => (
+      <Markdown
+        key={index}
+        components={{
+          h1: (props) => <h1 className="white" {...props} />,
+          h2: (props) => <h2 className="white" {...props} />,
+          h3: (props) => <h3 style={{ color: 'white' }} {...props} />,
+          h4: (props) => <h4 style={{ color: 'white' }} {...props} />,
+          h5: (props) => <h5 style={{ color: 'white' }} {...props} />,
+          h6: (props) => <h6 style={{ color: 'white' }} {...props} />,
+          strong: (props) => (
+            <strong style={{ color: 'white', fontWeight: 'bold' }} {...props} />
+          ),
+          p: ({ children }) => (
+            <p style={{ color: 'white', display: 'inline' }}>
+              {children}
+              {isStreaming && index === paragraphs.length - 1 && (
+                <AnimatedEllipsis />
+              )}
+            </p>
+          ),
+          li: (props) => <li style={{ color: 'white' }} {...props} />,
+          blockquote: (props) => (
+            <blockquote style={{ color: 'white' }} {...props} />
+          ),
+          em: (props) => <em style={{ color: 'white' }} {...props} />,
+          code: (props) => <code style={{ color: 'white' }} {...props} />,
+          pre: (props) => <pre style={{ color: 'white' }} {...props} />,
+
+          a: ({ href, ...props }) => {
+            if (!href) return null;
+            let source: Source | KGSearchResult | null = null;
+            let isKGElement = false;
+
+            if (+href - 1 < parsedVectorSources.length) {
+              source = parsedVectorSources[+href - 1];
+            } else if (
+              +href - 1 >= parsedVectorSources.length &&
+              +href - 1 < parsedVectorSources.length + parsedEntities.length
+            ) {
+              source = parsedEntities[+href - parsedVectorSources.length - 1];
+              isKGElement = true;
+            } else if (
+              +href - 1 >=
+              parsedVectorSources.length + parsedEntities.length
+            ) {
+              source =
+                parsedCommunities[
+                  +href - parsedVectorSources.length - parsedEntities.length - 1
+                ];
+              isKGElement = true;
+            }
+            if (!source) return null;
+
+            const metadata = isKGElement
+              ? (source as KGSearchResult).content
+              : (source as Source).metadata;
+            const title = isKGElement ? metadata.name : metadata.title;
+            const description = isKGElement
+              ? metadata.description
+              : (source as Source).text;
+            return (
+              <span className="inline-block w-4">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <span
+                      title={title}
+                      className="inline-block cursor-pointer transform scale-[60%] no-underline font-medium w-6 text-center h-6 rounded-full origin-top-left"
+                      style={{ background: 'var(--popover)' }}
+                    >
+                      {href}
+                    </span>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    align="start"
+                    className="max-w-screen-md flex flex-col gap-2 bg-zinc-800 shadow-transparent ring-zinc-600 border-zinc-600 ring-4 text-xs"
+                  >
+                    <div className="text-zinc-200 text-ellipsis overflow-hidden whitespace-nowrap font-medium">
+                      {title ? `Title: ${title}` : ''}
+                      {!isKGElement && metadata?.documentid
+                        ? `, DocumentId: ${metadata.documentid.slice(0, 8)}`
+                        : ''}
+                    </div>
+                    <div className="flex gap-4">
+                      <div className="flex-1">
+                        {!isKGElement && (
+                          <div className="line-clamp-4 text-zinc-300 break-words">
+                            {metadata?.snippet ?? ''}
+                          </div>
+                        )}
+                        <div className="line-clamp-4 text-zinc-300 break-words">
+                          {description ?? ''}
+                        </div>
+                      </div>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </span>
+            );
+          },
+        }}
+      >
+        {formatMarkdownNewLines(paragraph)}
+      </Markdown>
+    ));
+  };
   return (
     <div className="mt-4">
-      {showSourcesAccordion && (
-        <Accordion
-          type="single"
-          collapsible
-          className="w-full"
-          onValueChange={(value) => setIsOpen(value === 'answer')}
-        >
-          <AccordionItem value="answer">
-            <AccordionTrigger className="py-2 text-lg font-bold text-zinc-200 hover:no-underline">
-              <div className="flex items-center justify-between w-full">
-                <Logo
-                  width={25}
-                  height={25}
-                  disableLink={true}
-                  className="w-12 h-12"
-                />
-                <span className="text-sm font-normal">
-                  {isSearching ? (
-                    <span className="searching-animation">
-                      Searching over sources...
-                    </span>
-                  ) : (
-                    `Sources`
-                  )}
-                </span>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="space-y-2 pt-2">
-                <div className="space-y-2 max-h-60 overflow-y-auto">
-                  <SearchResults
-                    vectorSearchResults={parsedVectorSearch}
-                    kgLocalSearchResult={parsedKgLocal}
-                  />
-                </div>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-      )}
-
-      {showNoSourcesFound && (
-        <div className="flex items-center justify-between py-2 text-sm text-zinc-400">
-          <Logo width={25} disableLink={true} />
-          <span>No sources found</span>
-        </div>
-      )}
+      <Accordion
+        type="single"
+        collapsible
+        className="w-full"
+        onValueChange={(value) => setIsOpen(value === 'answer')}
+      >
+        <AccordionItem value="answer">
+          <AccordionTrigger className="py-2 text-lg font-bold text-zinc-200 hover:no-underline text-white">
+            <SourceInfo
+              isSearching={isSearching}
+              sourcesCount={
+                parsedVectorSources.length +
+                parsedEntities.length +
+                parsedCommunities.length
+              }
+            />
+          </AccordionTrigger>
+          <AccordionContent>
+            {!isSearching && parsedVectorSources.length > 0 && (
+              <SearchResults
+                vectorSearchResults={parsedVectorSources}
+                entities={parsedEntities}
+                communities={parsedCommunities}
+              />
+            )}
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
 
       <div className="space-y-4 mt-4">
-        {message.content ? (
-          <div className="prose prose-sm max-w-full text-zinc-300 overflow-y-auto max-h-[700px] prose-headings:text-white prose-p:text-white prose-strong:text-white prose-code:text-white">
-            <Markdown
-              components={{
-                h1: (props) => <h1 className="prose-heading" {...props} />,
-                h2: (props) => <h2 className="prose-heading" {...props} />,
-                h3: (props) => <h3 style={{ color: 'white' }} {...props} />,
-                h4: (props) => <h4 style={{ color: 'white' }} {...props} />,
-                h5: (props) => <h5 style={{ color: 'white' }} {...props} />,
-                h6: (props) => <h6 style={{ color: 'white' }} {...props} />,
-                strong: (props) => (
-                  <strong
-                    style={{ color: 'white', fontWeight: 'bold' }}
-                    {...props}
-                  />
-                ),
-                p: (props) => <p style={{ color: 'white' }} {...props} />,
-                li: (props) => <li style={{ color: 'white' }} {...props} />,
-                blockquote: (props) => (
-                  <blockquote style={{ color: 'white' }} {...props} />
-                ),
-                em: (props) => <em style={{ color: 'white' }} {...props} />,
-                code: (props) => <code style={{ color: 'white' }} {...props} />,
-                pre: (props) => <pre style={{ color: 'white' }} {...props} />,
-                a: ({ href, ...props }) => {
-                  if (!href) return null;
-                  const source = parsedVectorSearch[+href - 1];
-                  if (!source) return null;
-                  const metadata = source.metadata;
-                  return (
-                    <span className="inline-block w-4">
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <span
-                            title={metadata?.title}
-                            className="inline-block cursor-pointer transform scale-[60%] no-underline font-medium bg-zinc-700 hover:bg-zinc-500 w-6 text-center h-6 rounded-full origin-top-left"
-                          >
-                            {href}
-                          </span>
-                        </PopoverTrigger>
-                        <PopoverContent
-                          align="start"
-                          className="max-w-screen-md flex flex-col gap-2 bg-zinc-800 shadow-transparent ring-zinc-600 border-zinc-600 ring-4 text-xs"
-                        >
-                          <div className="text-zinc-200 text-ellipsis overflow-hidden whitespace-nowrap font-medium">
-                            {metadata.title ? `Title: ${metadata.title}` : ''}
-                            {metadata?.documentid
-                              ? `, DocumentId: ${metadata.documentid.slice(0, 8)}`
-                              : ''}
-                          </div>
-                          <div className="flex gap-4">
-                            <div className="flex-1">
-                              <div className="line-clamp-4 text-zinc-300 break-words">
-                                {metadata?.snippet ?? ''}
-                              </div>
-                              <div className="line-clamp-4 text-zinc-300 break-words">
-                                {source.text}
-                              </div>
-                            </div>
-                          </div>
-                        </PopoverContent>
-                      </Popover>
-                    </span>
-                  );
-                },
-              }}
-            >
-              {formatMarkdownNewLines(message.content)}
-            </Markdown>
+        {message.content || isStreaming ? (
+          <div className="prose prose-sm max-w-full text-zinc-300 overflow-y-auto max-h-[700px] prose-headings:text-white prose-p:text-white prose-strong:text-white prose-code:text-white p-4 rounded-lg">
+            {message.content ? (
+              renderContent()
+            ) : (
+              <div
+                style={{
+                  color: 'white',
+                  display: 'inline-block',
+                  width: '1em',
+                  height: '1em',
+                }}
+              >
+                <AnimatedEllipsis />
+              </div>
+            )}
           </div>
         ) : (
           <div className="flex flex-col gap-2">

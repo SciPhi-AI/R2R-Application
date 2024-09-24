@@ -34,7 +34,6 @@ const Index: React.FC = () => {
       }
 
       const data = await client.usersOverview();
-      console.log('data:', data);
       setUsers(data.results || []);
     } catch (error) {
       console.error('Error fetching users:', error);

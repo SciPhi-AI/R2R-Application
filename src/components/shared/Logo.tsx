@@ -31,7 +31,7 @@ export function Logo({
       src="/images/sciphi.svg"
       width={width}
       height={height}
-      className="w-full h-full"
+      className={className}
       priority={true}
       {...rest}
     />
