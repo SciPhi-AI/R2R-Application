@@ -5,7 +5,7 @@ export interface Column<T> {
   label: string;
   sortable?: boolean;
   filterable?: boolean;
-  render?: (item: T) => React.ReactNode; // For custom cell rendering
+  render?: (item: T) => React.ReactNode;
 }
 
 export interface SortCriteria<T> {
@@ -14,7 +14,7 @@ export interface SortCriteria<T> {
 }
 
 export interface FilterCriteria<T> {
-  [key: string]: any; // Define as per your filtering needs
+  [key: string]: any;
 }
 
 export interface TableProps<T> {
@@ -26,21 +26,6 @@ export interface TableProps<T> {
   pagination?: {
     itemsPerPage: number;
     initialPage?: number;
-  };
-  // Add more props as needed
-}
-
-export interface AdminBadgeProps {
-  isAdmin: boolean;
-  viewMode: 'admin' | 'user';
-  onToggle: () => void;
-}
-
-export interface AnalyticsData {
-  [key: string]: any;
-  percentiles?: Record<string, number | string>;
-  filtered_logs?: {
-    [key: string]: any[];
   };
 }
 
@@ -80,12 +65,6 @@ export interface Document {
   text: string;
   metadata: any;
   collection_ids?: string[];
-}
-
-export interface Document {
-  id: string;
-  text: string;
-  metadata: any;
 }
 
 export interface User {
@@ -241,7 +220,7 @@ export interface NavbarProps {
 
 export interface NavItemsProps {
   isAuthenticated: boolean;
-  effectiveRole: 'admin' | 'user';
+  role: 'admin' | 'user';
   pathname: string;
 }
 
@@ -327,8 +306,6 @@ export interface SpinnerProps {
   className?: string;
 }
 
-export type TagColor = 'rose' | 'amber' | 'emerald' | 'zinc' | 'indigo' | 'sky';
-
 export interface UpdateButtonContainerProps {
   apiUrl?: string;
   id: string;
@@ -367,6 +344,10 @@ export interface UserContextProps {
     password: string,
     instanceUrl: string
   ) => Promise<{ success: boolean; userRole: 'admin' | 'user' }>;
+  loginWithToken: (
+    token: string,
+    instanceUrl: string
+  ) => Promise<{ success: boolean; userRole: 'admin' | 'user' }>;
   logout: () => Promise<void>;
   register: (
     email: string,
@@ -379,7 +360,6 @@ export interface UserContextProps {
   viewMode: 'admin' | 'user';
   setViewMode: React.Dispatch<React.SetStateAction<'admin' | 'user'>>;
   isSuperUser: () => boolean;
-  checkAdminPrivileges: () => Promise<void>;
 }
 
 export type Collection = {

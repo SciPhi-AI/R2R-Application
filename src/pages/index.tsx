@@ -21,19 +21,15 @@ import { useUserContext } from '@/context/UserContext';
 
 const HomePage = () => {
   const router = useRouter();
-  const { isAuthenticated, isSuperUser, checkAdminPrivileges, pipeline } =
-    useUserContext();
+  const { isAuthenticated, isSuperUser, pipeline } = useUserContext();
   const [copied, setCopied] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      checkAdminPrivileges();
-      if (!isSuperUser()) {
-        router.replace('/documents');
-      }
+    if (isAuthenticated && !isSuperUser()) {
+      router.replace('/documents');
     }
-  }, [isAuthenticated, isSuperUser, checkAdminPrivileges, router]);
+  }, [isAuthenticated, router]);
 
   useEffect(() => {
     if (!isAuthenticated) {

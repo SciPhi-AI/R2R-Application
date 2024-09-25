@@ -10,8 +10,7 @@ import { initializePostHog } from '@/lib/posthog-client';
 
 function MyAppContent({ Component, pageProps }: AppProps) {
   const { setTheme } = useTheme();
-  const { isAuthenticated, isSuperUser, checkAdminPrivileges, authState } =
-    useUserContext();
+  const { isAuthenticated, isSuperUser, authState } = useUserContext();
   const router = useRouter();
 
   useEffect(() => {
@@ -31,10 +30,6 @@ function MyAppContent({ Component, pageProps }: AppProps) {
       return;
     }
 
-    if (authState.userRole === null) {
-      await checkAdminPrivileges();
-    }
-
     if (isSuperUser()) {
       // Superusers can access all routes
       return;
@@ -44,13 +39,7 @@ function MyAppContent({ Component, pageProps }: AppProps) {
       // Non-superusers are redirected to /documents if they try to access any other page
       router.replace('/documents');
     }
-  }, [
-    isAuthenticated,
-    isSuperUser,
-    checkAdminPrivileges,
-    authState.userRole,
-    router,
-  ]);
+  }, [isAuthenticated, isSuperUser, authState.userRole, router]);
 
   useEffect(() => {
     checkAccess();

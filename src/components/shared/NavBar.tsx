@@ -24,9 +24,10 @@ const NavItem: React.FC<NavItemProps> = ({ href, children, isActive }) => (
     {children}
   </Link>
 );
+
 const NavItems: React.FC<NavItemsProps> = ({
   isAuthenticated,
-  effectiveRole,
+  role,
   pathname,
 }) => {
   const homeItem = { path: '/', label: 'Home' };
@@ -45,9 +46,9 @@ const NavItems: React.FC<NavItemsProps> = ({
   ];
 
   const items =
-    effectiveRole === 'admin'
+    role === 'admin'
       ? [homeItem, ...commonItems, ...adminItems]
-      : [homeItem, ...commonItems];
+      : [...commonItems];
 
   if (!isAuthenticated) {
     return null;
@@ -89,8 +90,7 @@ export const Navbar = forwardRef<React.ElementRef<'nav'>, NavbarProps>(
     }, [isAuthenticated]);
 
     const isAdmin = isAuthenticated && authState.userRole === 'admin';
-    const effectiveRole =
-      viewMode === 'user' ? 'user' : authState.userRole || 'user';
+    const role = viewMode === 'user' ? 'user' : authState.userRole || 'user';
 
     const handleLogout = async () => {
       await logout();
@@ -121,7 +121,7 @@ export const Navbar = forwardRef<React.ElementRef<'nav'>, NavbarProps>(
                   <span className="text-zinc-400">|</span>
                   <NavItems
                     isAuthenticated={isAuthenticated}
-                    effectiveRole={effectiveRole}
+                    role={role}
                     pathname={pathname}
                   />
                 </>

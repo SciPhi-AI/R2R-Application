@@ -11,6 +11,17 @@ import React, {
 import { AuthenticationError } from '@/lib/CustomErrors';
 import { AuthState, Pipeline, UserContextProps } from '@/types';
 
+function isAuthState(obj: any): obj is AuthState {
+  const validRoles = ['admin', 'user', null];
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    typeof obj.isAuthenticated === 'boolean' &&
+    (typeof obj.email === 'string' || obj.email === null) &&
+    (validRoles.includes(obj.userRole) || obj.userRole === null)
+  );
+}
+
 const UserContext = createContext<UserContextProps>({
   pipeline: null,
   setPipeline: () => {},
@@ -18,6 +29,7 @@ const UserContext = createContext<UserContextProps>({
   setSelectedModel: () => {},
   isAuthenticated: false,
   login: async () => ({ success: false, userRole: 'user' }),
+  loginWithToken: async () => ({ success: false, userRole: 'user' }),
   logout: async () => {},
   register: async () => {},
   authState: {
@@ -30,7 +42,6 @@ const UserContext = createContext<UserContextProps>({
   viewMode: 'admin',
   setViewMode: () => {},
   isSuperUser: () => false,
-  checkAdminPrivileges: async () => {},
 });
 
 export const useUserContext = () => useContext(UserContext);
@@ -62,7 +73,14 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
     if (typeof window !== 'undefined') {
       const storedAuthState = sessionStorage.getItem('authState');
       if (storedAuthState) {
-        return JSON.parse(storedAuthState);
+        const parsed = JSON.parse(storedAuthState);
+        if (isAuthState(parsed)) {
+          return parsed;
+        } else {
+          console.warn(
+            'Invalid authState found in sessionStorage. Resetting to default.'
+          );
+        }
       }
     }
     return {
@@ -78,62 +96,119 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const [lastLoginTime, setLastLoginTime] = useState<number | null>(null);
 
-  const login = async (
-    email: string,
-    password: string,
-    instanceUrl: string
-  ): Promise<{ success: boolean; userRole: 'admin' | 'user' }> => {
-    console.log(`Attempting login for ${email} to ${instanceUrl}`);
-    const newClient = new r2rClient(instanceUrl);
-    try {
-      const tokens = await newClient.login(email, password);
-
-      sessionStorage.setItem('accessToken', tokens.access_token.token);
-      sessionStorage.setItem('refreshToken', tokens.refresh_token.token);
-
-      newClient.setTokens(
-        tokens.access_token.token,
-        tokens.refresh_token.token
-      );
-
-      setClient(newClient);
-
-      let userRole: 'admin' | 'user' = 'user';
+  const login = useCallback(
+    async (
+      email: string,
+      password: string,
+      instanceUrl: string
+    ): Promise<{ success: boolean; userRole: 'admin' | 'user' }> => {
+      console.log(`Attempting login for ${email} to ${instanceUrl}`);
+      const newClient = new r2rClient(instanceUrl);
       try {
-        await newClient.appSettings();
-        userRole = 'admin';
-      } catch (error) {
-        if (
-          error instanceof Error &&
-          'status' in error &&
-          error.status === 403
-        ) {
-          console.log('User does not have admin privileges');
-        } else {
-          console.error('Unexpected error when checking user role:', error);
+        const tokens = await newClient.login(email, password);
+
+        sessionStorage.setItem('accessToken', tokens.access_token.token);
+        sessionStorage.setItem('refreshToken', tokens.refresh_token.token);
+
+        newClient.setTokens(
+          tokens.access_token.token,
+          tokens.refresh_token.token
+        );
+
+        setClient(newClient);
+
+        let userRole: 'admin' | 'user' = 'user';
+        try {
+          await newClient.appSettings();
+          userRole = 'admin';
+        } catch (error) {
+          if (
+            error instanceof Error &&
+            'status' in error &&
+            error.status === 403
+          ) {
+            console.log('User does not have admin privileges');
+          } else {
+            console.error('Unexpected error when checking user role:', error);
+          }
         }
+
+        const newAuthState: AuthState = {
+          isAuthenticated: true,
+          email,
+          userRole,
+        };
+        setAuthState(newAuthState);
+        sessionStorage.setItem('authState', JSON.stringify(newAuthState));
+
+        setLastLoginTime(Date.now());
+
+        const newPipeline: Pipeline = { deploymentUrl: instanceUrl };
+        setPipeline(newPipeline);
+        sessionStorage.setItem('pipeline', JSON.stringify(newPipeline));
+
+        return { success: true, userRole };
+      } catch (error) {
+        console.error('Login failed:', error);
+        throw error;
       }
+    },
+    []
+  );
 
-      const newAuthState: AuthState = {
-        isAuthenticated: true,
-        email,
-        userRole,
-      };
-      setAuthState(newAuthState);
-      sessionStorage.setItem('authState', JSON.stringify(newAuthState));
+  const loginWithToken = useCallback(
+    async (
+      token: string,
+      instanceUrl: string
+    ): Promise<{ success: boolean; userRole: 'admin' | 'user' }> => {
+      console.log(`Attempting login with token to ${instanceUrl}`);
+      const newClient = new r2rClient(instanceUrl);
+      try {
+        const result = await newClient.loginWithToken(token);
 
-      setLastLoginTime(Date.now());
+        sessionStorage.setItem('accessToken', result.access_token.token);
 
-      const newPipeline = { deploymentUrl: instanceUrl };
-      setPipeline(newPipeline);
-      sessionStorage.setItem('pipeline', JSON.stringify(newPipeline));
+        newClient.setTokens(result.access_token.token, '');
+        setClient(newClient);
 
-      return { success: true, userRole };
-    } catch (error) {
-      console.error('Login failed:', error);
-      throw error;
-    }
-  };
+        let userRole: 'admin' | 'user' = 'user';
+        try {
+          await newClient.appSettings();
+          userRole = 'admin';
+        } catch (error) {
+          if (
+            error instanceof Error &&
+            'status' in error &&
+            error.status === 403
+          ) {
+            console.log('User does not have admin privileges');
+          } else {
+            console.error('Unexpected error when checking user role:', error);
+          }
+        }
+
+        const newAuthState: AuthState = {
+          isAuthenticated: true,
+          email: '',
+          userRole,
+        };
+        setAuthState(newAuthState);
+        sessionStorage.setItem('authState', JSON.stringify(newAuthState));
+
+        setLastLoginTime(Date.now());
+
+        const newPipeline: Pipeline = { deploymentUrl: instanceUrl };
+        setPipeline(newPipeline);
+        sessionStorage.setItem('pipeline', JSON.stringify(newPipeline));
+
+        return { success: true, userRole };
+      } catch (error) {
+        console.error('Login with token failed:', error);
+        throw error;
+      }
+    },
+    []
+  );
 
   const logout = useCallback(async () => {
     console.log('Logging out user');
@@ -156,61 +231,34 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
     setPipeline(null);
     setClient(null);
     console.log('User logged out successfully');
-  }, [client, authState]);
+  }, [client, authState.isAuthenticated]);
 
-  const register = async (
-    email: string,
-    password: string,
-    instanceUrl: string
-  ) => {
-    console.log(`Attempting to register user: ${email}`);
-    const newClient = new r2rClient(instanceUrl);
-    if (newClient) {
-      try {
-        await newClient.register(email, password);
-        console.log('User registered successfully');
-      } catch (error) {
-        console.error('Failed to create user:', error);
-        throw error;
-      }
-    } else {
-      console.error('Client is not initialized');
-      throw new Error('Client is not initialized');
-    }
-  };
-
-  const checkAdminPrivileges = useCallback(async () => {
-    if (client && authState.isAuthenticated) {
-      try {
-        await client.appSettings();
-        setAuthState((prevState) => ({
-          ...prevState,
-          userRole: 'admin',
-        }));
-        sessionStorage.setItem(
-          'authState',
-          JSON.stringify({
-            ...authState,
-            userRole: 'admin',
-          })
-        );
-      } catch (error) {
-        if (
-          error instanceof Error &&
-          'status' in error &&
-          error.status === 403
-        ) {
-          console.log('User does not have admin privileges');
-        } else {
-          console.error('Unexpected error when checking user role:', error);
+  const register = useCallback(
+    async (email: string, password: string, instanceUrl: string) => {
+      console.log(`Attempting to register user: ${email}`);
+      const newClient = new r2rClient(instanceUrl);
+      if (newClient) {
+        try {
+          await newClient.register(email, password);
+          console.log('User registered successfully');
+        } catch (error) {
+          console.error('Failed to create user:', error);
+          throw error;
         }
+      } else {
+        console.error('Client is not initialized');
+        throw new Error('Client is not initialized');
       }
-    }
-  }, [client, authState]);
+    },
+    []
+  );
 
   const refreshTokenPeriodically = useCallback(async () => {
     if (authState.isAuthenticated && client) {
-      if (lastLoginTime && Date.now() - lastLoginTime < 5 * 60 * 1000) {
+      if (
+        lastLoginTime &&
+        Date.now() - lastLoginTime < 5 * 60 * 1000 // 5 minutes
+      ) {
         return;
       }
       console.log('Attempting to refresh token');
@@ -235,11 +283,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
         if (error instanceof AuthenticationError) {
           console.log('Authentication error, attempting to re-login');
           try {
-            await login(
-              authState.email!,
-              sessionStorage.getItem('password')!,
-              pipeline!.deploymentUrl
-            );
+            throw new Error('Silent re-authentication not implemented');
           } catch (loginError) {
             console.error('Failed to re-authenticate:', loginError);
             await logout();
@@ -249,7 +293,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
         }
       }
     }
-  }, [authState, client, login, logout, lastLoginTime, pipeline]);
+  }, [authState.isAuthenticated, client, lastLoginTime, logout]);
 
   const getClient = useCallback((): r2rClient | null => {
     return client;
@@ -301,11 +345,11 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
           refreshTokenPeriodically();
           refreshInterval = setInterval(
             refreshTokenPeriodically,
-            55 * 60 * 1000
+            55 * 60 * 1000 // 55 minutes
           );
         },
         5 * 60 * 1000
-      );
+      ); // 5 minutes
 
       return () => {
         clearTimeout(initialDelay);
@@ -322,31 +366,44 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [selectedModel]);
 
+  const contextValue = React.useMemo(
+    () => ({
+      pipeline,
+      setPipeline,
+      selectedModel,
+      setSelectedModel,
+      isAuthenticated: authState.isAuthenticated,
+      authState,
+      login,
+      loginWithToken,
+      logout,
+      register,
+      getClient,
+      client,
+      viewMode,
+      setViewMode,
+      isSuperUser,
+    }),
+    [
+      pipeline,
+      selectedModel,
+      authState,
+      client,
+      viewMode,
+      isSuperUser,
+      login,
+      loginWithToken,
+      logout,
+      register,
+      getClient,
+    ]
+  );
+
   if (!isReady) {
     return null;
   }
 
   return (
-    <UserContext.Provider
-      value={{
-        pipeline,
-        setPipeline,
-        selectedModel,
-        setSelectedModel,
-        isAuthenticated: authState.isAuthenticated,
-        authState,
-        login,
-        logout,
-        register,
-        getClient,
-        client,
-        viewMode,
-        setViewMode,
-        isSuperUser,
-        checkAdminPrivileges,
-      }}
-    >
-      {children}
-    </UserContext.Provider>
+    <UserContext.Provider value={contextValue}>{children}</UserContext.Provider>
   );
 };

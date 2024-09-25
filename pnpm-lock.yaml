@@ -5774,7 +5774,7 @@ packages:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
 
   r2r-js@file:../R2R/js/sdk/r2r-js-0.3.5.tgz:
-    resolution: {integrity: sha512-682BOdpubM/9chYfQTfKzAtoAXM7qaSr/xWb/RSKUIxKOMEqhJJa9FtpF1M0VkgyB8UgZxHCpCN5zhC456DqQg==, tarball: file:../R2R/js/sdk/r2r-js-0.3.5.tgz}
+    resolution: {integrity: sha512-PX3heO65c/UKoxYrxQQtlVzq9w28yY9n7wNPOBHskMEuIUVi8My9ZQ/n4KoSHi0pn2KoOSl9KXVjBi0WzwKljA==, tarball: file:../R2R/js/sdk/r2r-js-0.3.5.tgz}
     version: 0.3.5
 
   radix-ui@1.0.1:
