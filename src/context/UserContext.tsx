@@ -102,7 +102,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
       password: string,
       instanceUrl: string
     ): Promise<{ success: boolean; userRole: 'admin' | 'user' }> => {
-      console.log(`Attempting login for ${email} to ${instanceUrl}`);
       const newClient = new r2rClient(instanceUrl);
       try {
         const tokens = await newClient.login(email, password);
@@ -127,7 +126,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
             'status' in error &&
             error.status === 403
           ) {
-            console.log('User does not have admin privileges');
           } else {
             console.error('Unexpected error when checking user role:', error);
           }
@@ -161,7 +159,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
       token: string,
       instanceUrl: string
     ): Promise<{ success: boolean; userRole: 'admin' | 'user' }> => {
-      console.log(`Attempting login with token to ${instanceUrl}`);
       const newClient = new r2rClient(instanceUrl);
       try {
         const result = await newClient.loginWithToken(token);
@@ -181,7 +178,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
             'status' in error &&
             error.status === 403
           ) {
-            console.log('User does not have admin privileges');
           } else {
             console.error('Unexpected error when checking user role:', error);
           }
@@ -211,7 +207,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 
   const logout = useCallback(async () => {
-    console.log('Logging out user');
     if (client && authState.isAuthenticated) {
       try {
         await client.logout();
@@ -230,17 +225,14 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
     sessionStorage.removeItem('refreshToken');
     setPipeline(null);
     setClient(null);
-    console.log('User logged out successfully');
   }, [client, authState.isAuthenticated]);
 
   const register = useCallback(
     async (email: string, password: string, instanceUrl: string) => {
-      console.log(`Attempting to register user: ${email}`);
       const newClient = new r2rClient(instanceUrl);
       if (newClient) {
         try {
           await newClient.register(email, password);
-          console.log('User registered successfully');
         } catch (error) {
           console.error('Failed to create user:', error);
           throw error;
@@ -261,7 +253,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
       ) {
         return;
       }
-      console.log('Attempting to refresh token');
       try {
         const newTokens = await client.refreshAccessToken();
         sessionStorage.setItem(
@@ -277,11 +268,9 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
           newTokens.results.refresh_token.token
         );
         setLastLoginTime(Date.now());
-        console.log('Token refreshed successfully');
       } catch (error) {
         console.error('Failed to refresh token:', error);
         if (error instanceof AuthenticationError) {
-          console.log('Authentication error, attempting to re-login');
           try {
             throw new Error('Silent re-authentication not implemented');
           } catch (loginError) {
@@ -301,7 +290,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     if (authState.isAuthenticated && pipeline && !client) {
-      console.log('Initializing client after authentication');
       const newClient = new r2rClient(pipeline.deploymentUrl);
       const accessToken = sessionStorage.getItem('accessToken');
       const refreshToken = sessionStorage.getItem('refreshToken');
@@ -315,7 +303,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     const handleRouteChange = () => {
       if (authState.isAuthenticated && !client && pipeline) {
-        console.log('Initializing client after route change');
         const newClient = new r2rClient(pipeline.deploymentUrl);
         const accessToken = sessionStorage.getItem('accessToken');
         const refreshToken = sessionStorage.getItem('refreshToken');
@@ -339,7 +326,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
     let refreshInterval: NodeJS.Timeout;
 
     if (authState.isAuthenticated) {
-      console.log('Setting up token refresh interval');
       const initialDelay = setTimeout(
         () => {
           refreshTokenPeriodically();

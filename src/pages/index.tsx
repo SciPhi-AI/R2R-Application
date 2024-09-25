@@ -180,7 +180,7 @@ const HomePage = () => {
                           color="light"
                           onClick={() =>
                             window.open(
-                              'https://r2r-docs.sciphi.ai/python-sdk',
+                              'https://r2r-docs.sciphi.ai/documentation/python-sdk/introduction',
                               '_blank'
                             )
                           }
@@ -231,7 +231,7 @@ const HomePage = () => {
                           color="light"
                           onClick={() =>
                             window.open(
-                              'https://r2r-docs.sciphi.ai/js-sdk',
+                              'https://r2r-docs.sciphi.ai/documentation/js-sdk/introduction',
                               '_blank'
                             )
                           }
@@ -246,7 +246,7 @@ const HomePage = () => {
                           color="light"
                           onClick={() =>
                             window.open(
-                              'https://github.com/SciPhi-AI/R2R/tree/dev/js',
+                              'https://github.com/SciPhi-AI/R2R/tree/main/js/sdk',
                               '_blank'
                             )
                           }

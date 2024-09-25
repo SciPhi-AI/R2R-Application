@@ -201,7 +201,7 @@ const CarouselPrevious = React.forwardRef<
   return (
     <Button
       ref={ref}
-      color="primary"
+      color="light"
       shape="slim"
       className={cn(
         'absolute h-8 w-8 rounded-full',
@@ -231,7 +231,7 @@ const CarouselNext = React.forwardRef<
     <Button
       ref={ref}
       as="button"
-      color="primary"
+      color="light"
       shape="slim"
       className={cn(
         'absolute h-8 w-8 rounded-full',

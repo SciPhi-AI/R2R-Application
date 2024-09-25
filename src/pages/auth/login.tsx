@@ -4,7 +4,6 @@ import { useRouter } from 'next/router';
 import React, { useState, useEffect, useCallback } from 'react';
 
 import Layout from '@/components/Layout';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/input';
 import { useUserContext } from '@/context/UserContext';
@@ -18,6 +17,7 @@ const LoginPage: React.FC = () => {
   const [showDeploymentUrl, setShowDeploymentUrl] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [serverHealth, setServerHealth] = useState(false);
   const [loginSuccess, setLoginSuccess] = useState(false);
   const { login, loginWithToken, authState } = useUserContext();
   const router = useRouter();
@@ -94,26 +94,45 @@ const LoginPage: React.FC = () => {
     }
   };
 
-  const toggleDeploymentUrlVisibility = () => {
-    setShowDeploymentUrl(!showDeploymentUrl);
+  const toggleDeploymentUrlVisibility = (forceShow?: boolean) => {
+    setShowDeploymentUrl(
+      forceShow !== undefined ? forceShow : !showDeploymentUrl
+    );
   };
+
+  const handleToggleDeploymentUrl = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    event.preventDefault();
+    toggleDeploymentUrlVisibility();
+  };
+
+  const checkDeploymentHealth = useCallback(async () => {
+    try {
+      const response = await fetch(`${deploymentUrl}/v2/health`);
+      const data = await response.json();
+      console.log('Health check response:', data);
+      const isHealthy = data.results?.response?.trim().toLowerCase() === 'ok';
+      setServerHealth(isHealthy);
+      if (!isHealthy) {
+        setShowDeploymentUrl(true);
+      }
+      return isHealthy;
+    } catch (error) {
+      console.error('Health check failed:', error);
+      setServerHealth(false);
+      setShowDeploymentUrl(true);
+      return false;
+    }
+  }, [deploymentUrl]);
+
+  useEffect(() => {
+    checkDeploymentHealth();
+  }, [checkDeploymentHealth, deploymentUrl]);
 
   return (
     <Layout includeFooter={false}>
-      <div className="flex flex-col items-center justify-start min-h-screen p-8 gap-16">
-        <Alert className="w-5/6">
-          <AlertTitle>Getting Started with R2R</AlertTitle>
-          <AlertDescription>
-            <br />
-            You can interact with your R2R deployment as an admin or a user. To
-            sign in as an admin, use the default credentials provided below. To
-            sign in as a user, you can sign up for an account using the sign up
-            workflow below.
-            <br /> <br />
-            If your R2R deployment is not running at localhost:7272, you can
-            point to the appropriate URL using deployment settings below.
-          </AlertDescription>
-        </Alert>
+      <div className="flex flex-col items-center justify-center min-h-screen p-8 gap-16">
         <div className="bg-zinc-100 dark:bg-zinc-800 shadow-md rounded px-8 pt-6 pb-8 mb-4 w-full max-w-md flex flex-col">
           <div className="flex-grow">
             {showDeploymentUrl && (
@@ -124,6 +143,19 @@ const LoginPage: React.FC = () => {
                 >
                   R2R Deployment URL
                 </label>
+                {serverHealth === false && (
+                  <span className="text-red-400 text-sm font-bold mb-2 block">
+                    Unable to connect to the deployment. Check its status or
+                    enter a custom URL.
+                  </span>
+                )}
+                {serverHealth === true && (
+                  <span className="text-green-500 text-sm font-bold mb-2 block">
+                    Successfully connected to the deployment. Only change this
+                    if you&apos;re using a different deployment.
+                  </span>
+                )}
+
                 <Input
                   id="deploymentUrl"
                   name="deploymentUrl"
@@ -200,7 +232,7 @@ const LoginPage: React.FC = () => {
                 onClick={handleSubmit}
                 color="filled"
                 className="w-full my-2"
-                disabled={isLoading}
+                disabled={isLoading || !serverHealth}
               >
                 {isLoading ? 'Signing in...' : 'Sign in with Email'}
               </Button>
@@ -248,7 +280,7 @@ const LoginPage: React.FC = () => {
 
             <div className="mt-auto -mb-6 -ml-5">
               <Button
-                onClick={toggleDeploymentUrlVisibility}
+                onClick={handleToggleDeploymentUrl}
                 color="transparent"
                 className=""
                 shape="slim"

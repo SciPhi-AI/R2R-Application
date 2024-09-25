@@ -106,12 +106,12 @@ const Index: React.FC = () => {
                         </Link>{' '}
                         and{' '}
                         <Link
-                          href="https://r2r-docs.sciphi.ai/cookbooks/groups"
+                          href="https://r2r-docs.sciphi.ai/cookbooks/collections"
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-indigo-500"
                         >
-                          group management
+                          collection management
                         </Link>
                         .
                       </AlertDescription>
