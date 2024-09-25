@@ -47,7 +47,6 @@ export interface AnalyticsData {
 export interface AuthState {
   isAuthenticated: boolean;
   email: string | null;
-  password: string | null;
   userRole: 'admin' | 'user' | null;
 }
 
@@ -367,13 +366,20 @@ export interface UserContextProps {
     email: string,
     password: string,
     instanceUrl: string
-  ) => Promise<void>;
+  ) => Promise<{ success: boolean; userRole: 'admin' | 'user' }>;
   logout: () => Promise<void>;
+  register: (
+    email: string,
+    password: string,
+    instanceUrl: string
+  ) => Promise<void>;
   authState: AuthState;
   getClient: () => r2rClient | null;
   client: r2rClient | null;
   viewMode: 'admin' | 'user';
   setViewMode: React.Dispatch<React.SetStateAction<'admin' | 'user'>>;
+  isSuperUser: () => boolean;
+  checkAdminPrivileges: () => Promise<void>;
 }
 
 export type Collection = {

@@ -1,7 +1,7 @@
 import type { AppProps } from 'next/app';
 import { useRouter } from 'next/router';
 import { useTheme } from 'next-themes';
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { UserProvider, useUserContext } from '@/context/UserContext';
@@ -10,7 +10,8 @@ import { initializePostHog } from '@/lib/posthog-client';
 
 function MyAppContent({ Component, pageProps }: AppProps) {
   const { setTheme } = useTheme();
-  const { isAuthenticated, authState, viewMode } = useUserContext();
+  const { isAuthenticated, isSuperUser, checkAdminPrivileges, authState } =
+    useUserContext();
   const router = useRouter();
 
   useEffect(() => {
@@ -18,27 +19,42 @@ function MyAppContent({ Component, pageProps }: AppProps) {
     initializePostHog();
   }, []);
 
-  useEffect(() => {
-    const protectedRoutes = [
-      '/documents',
-      '/chat',
-      '/users',
-      '/logs',
-      '/analytics',
-      '/settings',
-    ];
-    const adminRoutes = ['/users', '/logs', '/analytics', '/settings'];
+  const checkAccess = useCallback(async () => {
+    const publicRoutes = ['/auth/login', '/auth/signup'];
+    const userRoutes = ['/documents', '/chat'];
+    const currentPath = router.pathname;
 
-    if (!isAuthenticated && protectedRoutes.includes(router.pathname)) {
-      router.replace('/login');
-    } else if (
-      isAuthenticated &&
-      (authState.userRole !== 'admin' || viewMode === 'user') &&
-      adminRoutes.includes(router.pathname)
-    ) {
-      router.replace('/');
+    if (!isAuthenticated) {
+      if (!publicRoutes.includes(currentPath)) {
+        router.replace('/auth/login');
+      }
+      return;
     }
-  }, [isAuthenticated, authState.userRole, viewMode, router]);
+
+    if (authState.userRole === null) {
+      await checkAdminPrivileges();
+    }
+
+    if (isSuperUser()) {
+      // Superusers can access all routes
+      return;
+    }
+
+    if (!userRoutes.includes(currentPath)) {
+      // Non-superusers are redirected to /documents if they try to access any other page
+      router.replace('/documents');
+    }
+  }, [
+    isAuthenticated,
+    isSuperUser,
+    checkAdminPrivileges,
+    authState.userRole,
+    router,
+  ]);
+
+  useEffect(() => {
+    checkAccess();
+  }, [checkAccess]);
 
   return <Component {...pageProps} />;
 }

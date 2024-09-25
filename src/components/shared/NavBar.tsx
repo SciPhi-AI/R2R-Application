@@ -5,13 +5,6 @@ import { forwardRef, useEffect, useState, ReactNode } from 'react';
 
 import { Logo } from '@/components/shared/Logo';
 import { Button } from '@/components/ui/Button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { useUserContext } from '@/context/UserContext';
 import { NavbarProps, NavItemsProps } from '@/types';
 
@@ -36,6 +29,8 @@ const NavItems: React.FC<NavItemsProps> = ({
   effectiveRole,
   pathname,
 }) => {
+  const homeItem = { path: '/', label: 'Home' };
+
   const commonItems = [
     { path: '/documents', label: 'Documents' },
     // { path: '/collections', label: 'Collections' },
@@ -50,7 +45,9 @@ const NavItems: React.FC<NavItemsProps> = ({
   ];
 
   const items =
-    effectiveRole === 'admin' ? [...commonItems, ...adminItems] : commonItems;
+    effectiveRole === 'admin'
+      ? [homeItem, ...commonItems, ...adminItems]
+      : [homeItem, ...commonItems];
 
   if (!isAuthenticated) {
     return null;
@@ -76,8 +73,14 @@ const NavItems: React.FC<NavItemsProps> = ({
 export const Navbar = forwardRef<React.ElementRef<'nav'>, NavbarProps>(
   function Header({ className }, ref) {
     const pathname = usePathname();
-    const { logout, isAuthenticated, authState, viewMode, setViewMode } =
-      useUserContext();
+    const {
+      logout,
+      isAuthenticated,
+      authState,
+      viewMode,
+      setViewMode,
+      isSuperUser,
+    } = useUserContext();
     const router = useRouter();
     const [isSignedIn, setIsSignedIn] = useState(false);
 
@@ -89,13 +92,9 @@ export const Navbar = forwardRef<React.ElementRef<'nav'>, NavbarProps>(
     const effectiveRole =
       viewMode === 'user' ? 'user' : authState.userRole || 'user';
 
-    const toggleViewMode = (value: 'admin' | 'user') => {
-      setViewMode(value);
-    };
-
     const handleLogout = async () => {
       await logout();
-      router.push('/login');
+      router.push('/auth/login');
     };
 
     const isChatPage = router.pathname.includes('/chat');
@@ -108,7 +107,10 @@ export const Navbar = forwardRef<React.ElementRef<'nav'>, NavbarProps>(
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-14 items-center">
             <div className="flex items-center space-x-4">
-              <Link href="/" className="flex-shrink-0 flex items-center">
+              <Link
+                href={isSuperUser() ? '/' : '/documents'}
+                className="flex-shrink-0 flex items-center"
+              >
                 <Logo className="h-12 w-auto" />
                 <span className="ml-2 text-xl font-bold text-white">
                   SciPhi
@@ -117,9 +119,6 @@ export const Navbar = forwardRef<React.ElementRef<'nav'>, NavbarProps>(
               {isSignedIn && (
                 <>
                   <span className="text-zinc-400">|</span>
-                  <NavItem href="/" isActive={pathname === '/'}>
-                    Home
-                  </NavItem>
                   <NavItems
                     isAuthenticated={isAuthenticated}
                     effectiveRole={effectiveRole}
