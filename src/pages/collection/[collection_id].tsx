@@ -6,7 +6,7 @@ import { DeleteButton } from '@/components/ChatDemo/deleteButton';
 import { RemoveButton } from '@/components/ChatDemo/remove';
 import Table, { Column } from '@/components/ChatDemo/Table';
 import AssignDocumentToCollectionDialog from '@/components/ChatDemo/utils/AssignDocumentToCollectionDialog';
-import AssignUserToGroupDialog from '@/components/ChatDemo/utils/AssignUserToGroupDialog';
+import AssignUserToCollectionDialog from '@/components/ChatDemo/utils/AssignUserToCollectionDialog';
 import DocumentInfoDialog from '@/components/ChatDemo/utils/documentDialogInfo';
 import Layout from '@/components/Layout';
 import { Badge } from '@/components/ui/badge';
@@ -46,7 +46,7 @@ const CollectionIdPage: React.FC = () => {
   );
 
   const fetchData = useCallback(
-    async (currentGroupId: string, retryCount = 0): Promise<any[]> => {
+    async (currentCollectionId: string, retryCount = 0): Promise<any[]> => {
       if (!pipeline?.deploymentUrl) {
         console.error('No pipeline deployment URL available');
         setError('No pipeline deployment URL available');
@@ -61,8 +61,8 @@ const CollectionIdPage: React.FC = () => {
         }
 
         const [documentsData, usersData] = await Promise.all([
-          client.getDocumentsInCollection(currentGroupId),
-          client.getUsersInCollection(currentGroupId),
+          client.getDocumentsInCollection(currentCollectionId),
+          client.getUsersInCollection(currentCollectionId),
         ]);
 
         console.log('rawDocuments', documentsData.results);
@@ -89,7 +89,7 @@ const CollectionIdPage: React.FC = () => {
         if (retryCount < MAX_RETRIES) {
           return new Promise((resolve) =>
             setTimeout(
-              () => resolve(fetchData(currentGroupId, retryCount + 1)),
+              () => resolve(fetchData(currentCollectionId, retryCount + 1)),
               RETRY_DELAY
             )
           );
@@ -104,7 +104,7 @@ const CollectionIdPage: React.FC = () => {
   );
 
   const fetchPendingDocuments = useCallback(
-    async (currentGroupId: string) => {
+    async (currentCollectionId: string) => {
       try {
         const client = await getClient();
         if (!client) {
@@ -112,7 +112,7 @@ const CollectionIdPage: React.FC = () => {
         }
 
         const updatedDocuments =
-          await client.getDocumentsInCollection(currentGroupId);
+          await client.getDocumentsInCollection(currentCollectionId);
 
         setDocuments(updatedDocuments.results);
 
@@ -136,9 +136,9 @@ const CollectionIdPage: React.FC = () => {
   useEffect(() => {
     console.log('Router query:', router.query);
     if (router.isReady) {
-      const currentGroupId = router.query.collection_id;
-      if (typeof currentGroupId === 'string') {
-        fetchData(currentGroupId);
+      const currentCollectionId = router.query.collection_id;
+      if (typeof currentCollectionId === 'string') {
+        fetchData(currentCollectionId);
       } else {
         setError('Invalid collection ID');
         setIsLoading(false);
@@ -148,14 +148,14 @@ const CollectionIdPage: React.FC = () => {
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
-    const currentGroupId =
+    const currentCollectionId =
       typeof router.query.collection_id === 'string'
         ? router.query.collection_id
         : '';
 
-    if (pendingDocuments.length > 0 && currentGroupId) {
+    if (pendingDocuments.length > 0 && currentCollectionId) {
       intervalId = setInterval(() => {
-        fetchPendingDocuments(currentGroupId);
+        fetchPendingDocuments(currentCollectionId);
       }, 2500); // 2.5 seconds interval
     }
 
@@ -277,9 +277,9 @@ const CollectionIdPage: React.FC = () => {
     <div className="flex space-x-1 justify-end">
       <RemoveButton
         itemId={doc.id}
-        collectionId={currentGroupId}
+        collectionId={currentCollectionId}
         itemType="document"
-        onSuccess={() => fetchData(currentGroupId)}
+        onSuccess={() => fetchData(currentCollectionId)}
         showToast={toast}
       />
       <Button
@@ -310,9 +310,9 @@ const CollectionIdPage: React.FC = () => {
     <div className="flex space-x-1 justify-end">
       <RemoveButton
         itemId={user.id?.toString() || ''}
-        collectionId={currentGroupId}
+        collectionId={currentCollectionId}
         itemType="user"
-        onSuccess={() => fetchData(currentGroupId)}
+        onSuccess={() => fetchData(currentCollectionId)}
         showToast={toast}
       />
     </div>
@@ -349,14 +349,14 @@ const CollectionIdPage: React.FC = () => {
     );
   }
 
-  const currentGroupId =
+  const currentCollectionId =
     typeof router.query.collection_id === 'string'
       ? router.query.collection_id
       : '';
 
   return (
     <Layout
-      pageTitle={`Group ${currentGroupId} Overview`}
+      pageTitle={`Collection ${currentCollectionId} Overview`}
       includeFooter={false}
     >
       <main className="w-full flex flex-col container h-screen-[calc(100%-4rem)] mt-5">
@@ -455,7 +455,7 @@ const CollectionIdPage: React.FC = () => {
         </Tabs>
         <div className="mt-5 flex justify-end">
           <DeleteButton
-            collectionId={currentGroupId}
+            collectionId={currentCollectionId}
             isCollection={true}
             onSuccess={() => router.push('/collections')}
             showToast={toast}
@@ -472,13 +472,13 @@ const CollectionIdPage: React.FC = () => {
       <AssignDocumentToCollectionDialog
         open={isAssignDocumentDialogOpen}
         onClose={() => setIsAssignDocumentDialogOpen(false)}
-        collection_id={currentGroupId}
+        collection_id={currentCollectionId}
         onAssignSuccess={handleAssignSuccess}
       />
-      <AssignUserToGroupDialog
+      <AssignUserToCollectionDialog
         open={isAssignUserDialogOpen}
         onClose={() => setIsAssignUserDialogOpen(false)}
-        collection_id={currentGroupId}
+        collection_id={currentCollectionId}
         onAssignSuccess={handleAssignSuccess}
       />
     </Layout>

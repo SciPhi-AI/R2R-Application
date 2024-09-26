@@ -1,8 +1,8 @@
-// components/ChatDemo/DocumentsTable.tsx
-import { Loader, FileSearch2 } from 'lucide-react';
+import { Loader, FileSearch2, FileDown } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
 
 import { DeleteButton } from '@/components/ChatDemo/deleteButton';
+import DownloadFileContainer from '@/components/ChatDemo/DownloadFileContainer';
 import Table, { Column } from '@/components/ChatDemo/Table';
 import UpdateButtonContainer from '@/components/ChatDemo/UpdateButtonContainer';
 import { UploadButton } from '@/components/ChatDemo/upload';
@@ -171,20 +171,23 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
         onUpdateSuccess={() => onPageChange(currentPage)}
         showToast={toast}
       />
+
+      <DownloadFileContainer
+        id={doc.id}
+        fileName={doc.title}
+        showToast={toast}
+      ></DownloadFileContainer>
       <Button
         onClick={() => {
           setSelectedDocumentId(doc.id);
           setIsDocumentInfoDialogOpen(true);
         }}
-        color={
-          doc.ingestion_status === IngestionStatus.SUCCESS
-            ? 'filled'
-            : 'disabled'
-        }
+        color="filled"
         disabled={doc.ingestion_status !== IngestionStatus.SUCCESS}
         shape="slim"
+        tooltip="View Document Info"
       >
-        <FileSearch2 className="h-8 w-8" />
+        <FileSearch2 className="h-6 w-6" />
       </Button>
     </div>
   );
@@ -224,8 +227,8 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
           </div>
 
           <Table
-            data={mappedDocuments} // Use mappedDocuments
-            currentData={mappedDocuments} // Use mappedDocuments
+            data={mappedDocuments}
+            currentData={mappedDocuments}
             columns={columns}
             onSelectAll={handleSelectAllInternal}
             onSelectItem={handleSelectItemInternal}

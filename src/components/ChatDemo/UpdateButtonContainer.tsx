@@ -77,11 +77,12 @@ const UpdateButtonContainer: React.FC<UpdateButtonContainerProps> = ({
         disabled={isUpdating}
         color={isUpdating ? 'disabled' : 'filled'}
         shape="slim"
+        tooltip="Update Document"
       >
         {isUpdating ? (
-          <Spinner className="h-5 w-5 text-white" />
+          <Spinner className="h-6 w-6 text-white" />
         ) : (
-          <FileUp className="h-8 w-8" />
+          <FileUp className="h-6 w-6" />
         )}
       </Button>
       <input

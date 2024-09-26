@@ -122,7 +122,7 @@ const UserInfoDialog: React.FC<UserInfoDialogProps> = ({
                 ]}
               />
               <ExpandableInfoRow
-                label="Group Memberships"
+                label="Collections"
                 values={userOverview.collection_ids}
               />
               <InfoRow
