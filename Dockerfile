@@ -8,17 +8,10 @@ RUN npm install -g pnpm
 COPY package.json pnpm-lock.yaml* ./
 
 # Install dependencies
-ENV NODE_ENV=development
 RUN pnpm install --frozen-lockfile
 
 # Copy the rest of the application code
 COPY . .
-
-# Ensure correct permissions
-RUN chown -R node:node /app
-
-# Switch to non-root user
-USER node
 
 # Build the Next.js application
 RUN pnpm build
@@ -38,12 +31,6 @@ COPY --from=builder /app/next.config.js ./
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
-
-# Ensure correct permissions
-RUN chown -R node:node /app
-
-# Switch to non-root user
-USER node
 
 # Expose the port the app runs on
 EXPOSE 3000

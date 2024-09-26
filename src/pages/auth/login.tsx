@@ -70,6 +70,13 @@ const LoginPage: React.FC = () => {
   }, [redirectAfterLogin]);
 
   const handleOAuthSignIn = async (provider: 'google' | 'github') => {
+    if (!supabase) {
+      setError(
+        'Supabase client is not configured. OAuth sign-in is unavailable.'
+      );
+      return;
+    }
+
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: provider,
