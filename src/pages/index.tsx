@@ -21,13 +21,19 @@ import { useUserContext } from '@/context/UserContext';
 
 const HomePage = () => {
   const router = useRouter();
-  const { isAuthenticated, pipeline } = useUserContext();
+  const { isAuthenticated, isSuperUser, pipeline } = useUserContext();
   const [copied, setCopied] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
+    if (isAuthenticated && !isSuperUser()) {
+      router.replace('/documents');
+    }
+  }, [isAuthenticated, router]);
+
+  useEffect(() => {
     if (!isAuthenticated) {
-      router.push('/login');
+      router.push('/auth/login');
     }
   }, [isAuthenticated, router]);
 
@@ -174,7 +180,7 @@ const HomePage = () => {
                           color="light"
                           onClick={() =>
                             window.open(
-                              'https://r2r-docs.sciphi.ai/python-sdk',
+                              'https://r2r-docs.sciphi.ai/documentation/python-sdk/introduction',
                               '_blank'
                             )
                           }
@@ -225,7 +231,7 @@ const HomePage = () => {
                           color="light"
                           onClick={() =>
                             window.open(
-                              'https://r2r-docs.sciphi.ai/js-sdk',
+                              'https://r2r-docs.sciphi.ai/documentation/js-sdk/introduction',
                               '_blank'
                             )
                           }
@@ -240,7 +246,7 @@ const HomePage = () => {
                           color="light"
                           onClick={() =>
                             window.open(
-                              'https://github.com/SciPhi-AI/R2R/tree/dev/js',
+                              'https://github.com/SciPhi-AI/R2R/tree/main/js/sdk',
                               '_blank'
                             )
                           }

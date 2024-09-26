@@ -15,19 +15,16 @@ import { useToast } from '@/components/ui/use-toast';
 import { useUserContext } from '@/context/UserContext';
 import { User } from '@/types';
 
-interface AssignUserToGroupDialogProps {
+interface AssignUserToCollectionDialogProps {
   open: boolean;
   onClose: () => void;
   collection_id: string;
   onAssignSuccess: () => void;
 }
 
-const AssignUserToGroupDialog: React.FC<AssignUserToGroupDialogProps> = ({
-  open,
-  onClose,
-  collection_id,
-  onAssignSuccess,
-}) => {
+const AssignUserToCollectionDialog: React.FC<
+  AssignUserToCollectionDialogProps
+> = ({ open, onClose, collection_id, onAssignSuccess }) => {
   const { getClient } = useUserContext();
   const { toast } = useToast();
 
@@ -220,4 +217,4 @@ const AssignUserToGroupDialog: React.FC<AssignUserToGroupDialogProps> = ({
   );
 };
 
-export default AssignUserToGroupDialog;
+export default AssignUserToCollectionDialog;

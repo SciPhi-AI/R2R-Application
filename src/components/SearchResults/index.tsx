@@ -1,7 +1,6 @@
-import React, { FC, useEffect, useState, useRef } from 'react';
+import React, { FC, useState } from 'react';
 
 import PdfPreviewDialog from '@/components/ChatDemo/utils/pdfPreviewDialog';
-import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   Carousel,
@@ -121,8 +120,8 @@ const ResultCarousel: FC<{
         </CarouselItem>
       ))}
     </CarouselContent>
-    <CarouselPrevious color="primary" shape="slim" />
-    <CarouselNext color="primary" shape="slim" />
+    <CarouselPrevious />
+    <CarouselNext />
   </Carousel>
 );
 

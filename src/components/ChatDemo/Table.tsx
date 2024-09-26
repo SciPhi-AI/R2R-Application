@@ -1,4 +1,3 @@
-// components/ChatDemo/Table.tsx
 import {
   ChevronUpSquare,
   ChevronDownSquare,
@@ -368,7 +367,7 @@ function Table<T extends { [key: string]: any }>({
                 ) : null
               )}
               {actions && (
-                <th className="w-[110px] px-4 py-2 text-white text-right">
+                <th className="w-[120px] px-4 py-2 text-white text-right">
                   Actions
                 </th>
               )}
