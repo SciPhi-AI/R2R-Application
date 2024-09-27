@@ -113,13 +113,15 @@ const Index: React.FC = () => {
                 </h1>
                 <Button
                   onClick={handleAddCollection}
-                  color="primary"
+                  color="filled"
+                  shape="outline"
                   className="flex items-center space-x-2"
                 >
                   <Plus className="w-5 h-5" />
                   <span>Create New Collection</span>
                 </Button>
               </div>
+              <hr className="w-full border-t border-gray-300" />
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-10 mb-10">
                 {renderCollections()}
