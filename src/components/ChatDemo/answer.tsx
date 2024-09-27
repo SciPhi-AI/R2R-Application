@@ -138,20 +138,18 @@ const parseVectorSearchSources = (sources: string | object): Source[] => {
   return sources as Source[];
 };
 
-const SourceInfo: React.FC<{ isSearching: boolean; sourcesCount: number }> = ({
-  isSearching,
-  sourcesCount,
-}) => (
+const SourceInfo: React.FC<{
+  isSearching: boolean;
+  sourcesCount: number | null;
+}> = ({ isSearching, sourcesCount }) => (
   <div className="flex items-center justify-between w-full">
     <Logo width={50} height={50} disableLink={true} />
     <span className="text-sm font-normal text-white">
       {isSearching ? (
         <span className="searching-animation">Searching over sources...</span>
-      ) : sourcesCount > 0 ? (
+      ) : sourcesCount !== null && sourcesCount > 0 ? (
         `View ${sourcesCount} Sources`
-      ) : (
-        'No sources found'
-      )}
+      ) : null}
     </span>
   </div>
 );
@@ -167,23 +165,33 @@ export const Answer: FC<{
   const [parsedCommunities, setParsedCommunities] = useState<KGSearchResult[]>(
     []
   );
+  const [sourcesCount, setSourcesCount] = useState<number | null>(null);
+
   useEffect(() => {
-    if (message.sources && message.sources.vector) {
-      const parsed = parseVectorSearchSources(message.sources.vector);
-      setParsedVectorSources(parsed);
-    }
+    if (message.sources) {
+      let count = 0;
+      if (message.sources.vector) {
+        const parsed = parseVectorSearchSources(message.sources.vector);
+        setParsedVectorSources(parsed);
+        count += parsed.length;
+      }
 
-    if (message.sources && message.sources.kg) {
-      const kgLocalResult: KGSearchResult[] = JSON.parse(message.sources.kg);
+      if (message.sources.kg) {
+        const kgLocalResult: KGSearchResult[] = JSON.parse(message.sources.kg);
+        const entitiesArray = kgLocalResult.filter(
+          (item: any) => item.result_type === 'entity'
+        );
+        const communitiesArray = kgLocalResult.filter(
+          (item: any) => item.result_type === 'community'
+        );
+        setParsedEntities(entitiesArray);
+        setParsedCommunities(communitiesArray);
+        count += entitiesArray.length + communitiesArray.length;
+      }
 
-      const entitiesArray = kgLocalResult.filter(
-        (item: any) => item.result_type === 'entity'
-      );
-      const communitiesArray = kgLocalResult.filter(
-        (item: any) => item.result_type === 'community'
-      );
-      setParsedEntities(entitiesArray);
-      setParsedCommunities(communitiesArray);
+      setSourcesCount(count > 0 ? count : null);
+    } else {
+      setSourcesCount(null);
     }
   }, [message.sources]);
 
@@ -331,17 +339,10 @@ export const Answer: FC<{
       >
         <AccordionItem value="answer">
           <AccordionTrigger className="py-2 text-lg font-bold text-zinc-200 hover:no-underline text-white">
-            <SourceInfo
-              isSearching={isSearching}
-              sourcesCount={
-                parsedVectorSources.length +
-                parsedEntities.length +
-                parsedCommunities.length
-              }
-            />
+            <SourceInfo isSearching={isSearching} sourcesCount={sourcesCount} />
           </AccordionTrigger>
           <AccordionContent>
-            {!isSearching && parsedVectorSources.length > 0 && (
+            {!isSearching && sourcesCount !== null && sourcesCount > 0 && (
               <SearchResults
                 vectorSearchResults={parsedVectorSources}
                 entities={parsedEntities}

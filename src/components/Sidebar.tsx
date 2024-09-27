@@ -2,6 +2,12 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import React from 'react';
 
 import SingleSwitch from '@/components/ChatDemo/SingleSwitch';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import ModelSelector from '@/components/ui/ModelSelector';
@@ -15,12 +21,6 @@ import {
 } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { SidebarProps } from '@/types';
-
-const dummyCollections = [
-  { value: 'collection1', label: 'Collection 1' },
-  { value: 'collection2', label: 'Collection 2' },
-  { value: 'collection3', label: 'Collection 3' },
-];
 
 const Sidebar: React.FC<SidebarProps> = ({
   isOpen,
@@ -57,10 +57,6 @@ const Sidebar: React.FC<SidebarProps> = ({
         }}
       >
         <div className="p-4 overflow-y-auto h-[calc(100%-var(--header-height))]">
-          <h2 className="text-xl font-bold text-indigo-500 mb-4">
-            Control Panel
-          </h2>
-
           {/* Configuration Fields */}
           <div className="space-y-4 mb-4">
             <h3 className="text-lg font-semibold text-indigo-400 mt-2">
@@ -80,25 +76,6 @@ const Sidebar: React.FC<SidebarProps> = ({
                 />
               ))}
             </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="searchLimit">Search Results Limit</Label>
-              <Input
-                id="searchLimit"
-                value={searchLimit}
-                onChange={(e) => setSearchLimit(Number(e.target.value))}
-              />
-            </div>
-
-            {/* Search Filters Input */}
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="searchFilters">Search Filters</Label>
-              <Input
-                id="searchFilters"
-                type="text"
-                value={searchFilters}
-                onChange={(e) => setSearchFilters(e.target.value)}
-              />
-            </div>
 
             <div className="flex flex-col gap-2">
               <Label htmlFor="selectedCollections">Selected Collections</Label>
@@ -113,100 +90,144 @@ const Sidebar: React.FC<SidebarProps> = ({
               />
             </div>
 
-            <h3 className="text-lg font-semibold text-indigo-400 pt-4">
-              RAG Generation Config
-            </h3>
-            <div className="space-y-2">
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="selectedModel">Selected Model</Label>
-                <ModelSelector id={selectedModel} />
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="top_k">Top K</Label>
-                <Input
-                  id="top_k"
-                  type="number"
-                  value={top_k}
-                  onChange={(e) => setTop_k(Number(e.target.value))}
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="max_tokens_to_sample">
-                  Max Tokens to Sample
-                </Label>
-                <Input
-                  id="max_tokens_to_sample"
-                  type="number"
-                  value={max_tokens_to_sample}
-                  onChange={(e) =>
-                    setMax_tokens_to_sample(Number(e.target.value))
-                  }
-                />
-              </div>
+            <Accordion type="single" collapsible className="w-full">
+              {/* Vector Search Settings */}
+              <AccordionItem value="vectorSearchSettings">
+                <AccordionTrigger className="text-lg font-semibold text-indigo-400 pt-4">
+                  Vector Search Settings
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="searchLimit">Search Results Limit</Label>
+                    <Input
+                      id="searchLimit"
+                      value={searchLimit}
+                      onChange={(e) => setSearchLimit(Number(e.target.value))}
+                    />
+                  </div>
 
-              <Label htmlFor="temperature">Temperature</Label>
-              <div className="flex items-center gap-2">
-                <Slider
-                  id="temperature"
-                  value={[temperature]}
-                  max={2}
-                  step={0.01}
-                  className="w-60"
-                  onValueChange={(value) => setTemperature(value[0])}
-                />
-                <span className="text-sm">{temperature.toFixed(2)}</span>
-              </div>
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="top_p">Top P</Label>
-              <div className="flex items-center gap-2">
-                <Slider
-                  id="top_p"
-                  value={[topP]}
-                  max={1}
-                  step={0.01}
-                  className="w-60"
-                  onValueChange={(value) => setTopP(value[0])}
-                />
-                <span className="text-sm">{topP.toFixed(2)}</span>
-              </div>
-            </div>
+                  {/* Search Filters Input */}
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="searchFilters">Search Filters</Label>
+                    <Input
+                      id="searchFilters"
+                      type="text"
+                      value={searchFilters}
+                      onChange={(e) => setSearchFilters(e.target.value)}
+                    />
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+
+              {/* RAG Generation Config */}
+              <AccordionItem value="ragGenerationConfig">
+                <AccordionTrigger className="text-lg font-semibold text-indigo-400 pt-4">
+                  RAG Generation Config
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="space-y-2">
+                    <div className="flex flex-col gap-2">
+                      <Label htmlFor="selectedModel">Selected Model</Label>
+                      <ModelSelector id={selectedModel} />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Label htmlFor="top_k">Top K</Label>
+                      <Input
+                        id="top_k"
+                        type="number"
+                        value={top_k}
+                        onChange={(e) => setTop_k(Number(e.target.value))}
+                      />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Label htmlFor="max_tokens_to_sample">
+                        Max Tokens to Sample
+                      </Label>
+                      <Input
+                        id="max_tokens_to_sample"
+                        type="number"
+                        value={max_tokens_to_sample}
+                        onChange={(e) =>
+                          setMax_tokens_to_sample(Number(e.target.value))
+                        }
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      <Label htmlFor="top_p">Top P</Label>
+                      <div className="flex items-center gap-2">
+                        <Slider
+                          id="top_p"
+                          value={[topP]}
+                          max={1}
+                          step={0.01}
+                          className="w-60"
+                          onValueChange={(value) => setTopP(value[0])}
+                        />
+                        <span className="text-sm">{topP.toFixed(2)}</span>
+                      </div>
+                    </div>
+
+                    <Label htmlFor="temperature">Temperature</Label>
+                    <div className="flex items-center gap-2">
+                      <Slider
+                        id="temperature"
+                        value={[temperature]}
+                        max={2}
+                        step={0.01}
+                        className="w-60"
+                        onValueChange={(value) => setTemperature(value[0])}
+                      />
+                      <span className="text-sm">{temperature.toFixed(2)}</span>
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+
+              {/* Knowledge Graph Settings */}
+              <AccordionItem value="kgSearchSettings">
+                <AccordionTrigger className="text-lg font-semibold text-indigo-400 pt-4">
+                  KG Search Settings
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="space-y-2">
+                    <div className="flex flex-col gap-2">
+                      <Label htmlFor="kg_search_type">KG Search Type</Label>
+                      <Select
+                        value={kgSearchType}
+                        onValueChange={setKgSearchType}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select KG search type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="local">Local</SelectItem>
+                          <SelectItem value="global">Global</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      <Label htmlFor="max_llm_queries_for_global_search">
+                        Max LLM Queries for Global Search
+                      </Label>
+                      <Input
+                        id="max_llm_queries_for_global_search"
+                        type="number"
+                        value={max_llm_queries_for_global_search}
+                        onChange={(e) =>
+                          setMax_llm_queries_for_global_search(
+                            Number(e.target.value)
+                          )
+                        }
+                      />
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
 
             <br />
-
-            <div className="space-y-4 mb-4">
-              <h3 className="text-lg font-semibold text-indigo-400 mt-2">
-                KG Search Settings
-              </h3>
-              Enabled only if your knowledge graph is constructed.
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="kg_search_type">KG Search Type</Label>
-              <Select value={kgSearchType} onValueChange={setKgSearchType}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select KG search type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="local">Local</SelectItem>
-                  <SelectItem value="global">Global</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="max_llm_queries_for_global_search">
-                Max LLM Queries for Global Search
-              </Label>
-              <Input
-                id="max_llm_queries_for_global_search"
-                type="number"
-                value={max_llm_queries_for_global_search}
-                onChange={(e) =>
-                  setMax_llm_queries_for_global_search(Number(e.target.value))
-                }
-              />
-            </div>
           </div>
         </div>
       </div>
