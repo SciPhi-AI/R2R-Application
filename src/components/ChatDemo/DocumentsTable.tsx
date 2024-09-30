@@ -57,7 +57,7 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
 
   // Mapping function for ingestion status
   const mapIngestionStatus = (status: string): IngestionStatus => {
-    const lowerStatus = status.toLowerCase();
+    const lowerStatus = status?.toLowerCase();
     if (lowerStatus === 'success') {
       return IngestionStatus.SUCCESS;
     }
