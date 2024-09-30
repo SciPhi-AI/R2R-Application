@@ -7,12 +7,18 @@ import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/input';
 import { useUserContext } from '@/context/UserContext';
+import debounce from '@/lib/debounce';
 import { supabase } from '@/lib/supabase';
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('admin@example.com');
   const [password, setPassword] = useState('change_me_immediately');
-  const [deploymentUrl, setDeploymentUrl] = useState('http://localhost:7272');
+  const [rawDeploymentUrl, setRawDeploymentUrl] = useState(
+    'http://localhost:7272'
+  );
+  const [sanitizedDeploymentUrl, setSanitizedDeploymentUrl] = useState(
+    'http://localhost:7272'
+  );
   const [showPassword, setShowPassword] = useState(false);
   const [showDeploymentUrl, setShowDeploymentUrl] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,7 +33,7 @@ const LoginPage: React.FC = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const result = await login(email, password, deploymentUrl);
+      const result = await login(email, password, sanitizedDeploymentUrl);
       console.log(`Login successful. User role: ${result.userRole}`);
       setLoginSuccess(true);
     } catch (error) {
@@ -90,7 +96,7 @@ const LoginPage: React.FC = () => {
       } = await supabase.auth.getSession();
 
       if (session && session.access_token) {
-        await loginWithToken(session.access_token, deploymentUrl);
+        await loginWithToken(session.access_token, sanitizedDeploymentUrl);
         setLoginSuccess(true);
       } else {
         throw new Error('No access token found after OAuth sign-in');
@@ -114,16 +120,47 @@ const LoginPage: React.FC = () => {
     toggleDeploymentUrlVisibility();
   };
 
+  const sanitizeUrl = (url: string): string => {
+    let sanitized = url.trim();
+
+    if (!sanitized || sanitized === 'http://' || sanitized === 'https://') {
+      return 'http://localhost:7272';
+    }
+
+    sanitized = sanitized.replace(/\/+$/, '');
+
+    if (!/^https?:\/\//i.test(sanitized)) {
+      sanitized = 'http://' + sanitized;
+    }
+
+    sanitized = sanitized.replace(/(https?:\/\/)|(\/)+/g, '$1$2');
+
+    return sanitized;
+  };
+
+  const debouncedSanitizeUrl = useCallback(
+    debounce((url: string) => {
+      setSanitizedDeploymentUrl(sanitizeUrl(url));
+    }, 500),
+    []
+  );
+
+  useEffect(() => {
+    debouncedSanitizeUrl(rawDeploymentUrl);
+  }, [rawDeploymentUrl, debouncedSanitizeUrl]);
+
   const checkDeploymentHealth = useCallback(async () => {
     try {
-      const response = await fetch(`${deploymentUrl}/v2/health`);
+      const response = await fetch(`${sanitizedDeploymentUrl}/v2/health`);
       const data = await response.json();
-      console.log('Health check response:', data);
+
       const isHealthy = data.results?.response?.trim().toLowerCase() === 'ok';
+
       setServerHealth(isHealthy);
       if (!isHealthy) {
         setShowDeploymentUrl(true);
       }
+
       return isHealthy;
     } catch (error) {
       console.error('Health check failed:', error);
@@ -131,11 +168,11 @@ const LoginPage: React.FC = () => {
       setShowDeploymentUrl(true);
       return false;
     }
-  }, [deploymentUrl]);
+  }, [sanitizedDeploymentUrl]);
 
   useEffect(() => {
     checkDeploymentHealth();
-  }, [checkDeploymentHealth, deploymentUrl]);
+  }, [checkDeploymentHealth, sanitizedDeploymentUrl]);
 
   return (
     <Layout includeFooter={false}>
@@ -146,7 +183,7 @@ const LoginPage: React.FC = () => {
               <div className="mb-4">
                 <label
                   className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2"
-                  htmlFor="deploymentUrl"
+                  htmlFor="sanitizedDeploymentUrl"
                 >
                   R2R Deployment URL
                 </label>
@@ -168,8 +205,8 @@ const LoginPage: React.FC = () => {
                   name="deploymentUrl"
                   type="text"
                   placeholder="R2R Deployment URL"
-                  value={deploymentUrl}
-                  onChange={(e) => setDeploymentUrl(e.target.value)}
+                  value={rawDeploymentUrl}
+                  onChange={(e) => setRawDeploymentUrl(e.target.value)}
                   autoComplete="url"
                 />
               </div>

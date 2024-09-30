@@ -34,7 +34,7 @@ const NavItems: React.FC<NavItemsProps> = ({
 
   const commonItems = [
     { path: '/documents', label: 'Documents' },
-    // { path: '/collections', label: 'Collections' },
+    { path: '/collections', label: 'Collections' },
     { path: '/chat', label: 'Chat' },
   ];
 
@@ -89,7 +89,6 @@ export const Navbar = forwardRef<React.ElementRef<'nav'>, NavbarProps>(
       setIsSignedIn(isAuthenticated);
     }, [isAuthenticated]);
 
-    const isAdmin = isAuthenticated && authState.userRole === 'admin';
     const role = viewMode === 'user' ? 'user' : authState.userRole || 'user';
 
     const handleLogout = async () => {
@@ -100,10 +99,7 @@ export const Navbar = forwardRef<React.ElementRef<'nav'>, NavbarProps>(
     const isChatPage = router.pathname.includes('/chat');
 
     return (
-      <nav
-        ref={ref}
-        className={`bg-zinc-900 shadow ${isChatPage ? '' : 'sticky'} z-50`}
-      >
+      <nav ref={ref} className={`bg-zinc-900 shadow z-50`}>
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-14 items-center">
             <div className="flex items-center space-x-4">

@@ -15,14 +15,12 @@ import { DefaultQueries } from './DefaultQueries';
 import MessageBubble from './MessageBubble';
 import { UploadButton } from './upload';
 
-const FUNCTION_START_TOKEN = '<function_call>';
-const FUNCTION_END_TOKEN = '</function_call>';
 const SEARCH_START_TOKEN = '<search>';
 const SEARCH_END_TOKEN = '</search>';
 const KG_SEARCH_START_TOKEN = '<kg_search>';
 const KG_SEARCH_END_TOKEN = '</kg_search>';
-const COMPLETION_START_TOKEN = '<completion>';
-const COMPLETION_END_TOKEN = '</completion>';
+const LLM_START_TOKEN = '<completion>';
+const LLM_END_TOKEN = '</completion>';
 
 export const Result: FC<{
   query: string;
@@ -146,11 +144,11 @@ export const Result: FC<{
     ]);
 
     let buffer = '';
-    const inLLMResponse = false;
+    let inLLMResponse = false;
     let fullContent = '';
     let vectorSearchSources = null;
     let kgSearchResult = null;
-    let inCompletion = false;
+    let searchPerformed = false;
 
     try {
       const client = await getClient();
@@ -210,69 +208,75 @@ export const Result: FC<{
 
         buffer += decoder.decode(value, { stream: true });
 
-        if (buffer.includes(FUNCTION_END_TOKEN)) {
-          const [functionCall, rest] = buffer.split(FUNCTION_END_TOKEN);
-          buffer = rest || '';
+        // Handle search results
+        if (
+          buffer.includes(SEARCH_END_TOKEN) ||
+          buffer.includes(KG_SEARCH_END_TOKEN)
+        ) {
+          const [results, rest] = buffer.split(/<\/(?:search|kg_search)>/);
 
-          if (functionCall.includes(SEARCH_END_TOKEN)) {
-            const [searchResults, rest] = functionCall.split(SEARCH_END_TOKEN);
-            vectorSearchSources = searchResults.includes(SEARCH_START_TOKEN)
-              ? searchResults.split(SEARCH_START_TOKEN)[1]
-              : searchResults.trim();
-            buffer = rest || '';
+          if (results.includes(SEARCH_START_TOKEN)) {
+            vectorSearchSources = results
+              .split(SEARCH_START_TOKEN)[1]
+              .split(SEARCH_END_TOKEN)[0];
+            searchPerformed = true;
           }
-        }
 
-        if (buffer.includes(SEARCH_END_TOKEN)) {
-          const [searchResults, rest] = buffer.split(SEARCH_END_TOKEN);
-          vectorSearchSources = searchResults.includes(SEARCH_START_TOKEN)
-            ? searchResults.split(SEARCH_START_TOKEN)[1]
-            : searchResults.trim();
+          if (results.includes(KG_SEARCH_START_TOKEN)) {
+            kgSearchResult = results
+              .split(KG_SEARCH_START_TOKEN)[1]
+              .split(KG_SEARCH_END_TOKEN)[0];
+            searchPerformed = true;
+          }
+
+          updateLastMessage(
+            fullContent,
+            { vector: vectorSearchSources, kg: kgSearchResult },
+            true,
+            searchPerformed
+          );
           buffer = rest || '';
+          setIsSearching(false);
         }
 
-        if (buffer.includes(KG_SEARCH_END_TOKEN)) {
-          const [kgResults, rest] = buffer.split(KG_SEARCH_END_TOKEN);
-          kgSearchResult = kgResults.includes(KG_SEARCH_START_TOKEN)
-            ? kgResults.split(KG_SEARCH_START_TOKEN)[1]
-            : kgResults.trim();
-          buffer = rest || '';
+        // Handle LLM response
+        if (buffer.includes(LLM_START_TOKEN)) {
+          inLLMResponse = true;
+          buffer = buffer.split(LLM_START_TOKEN)[1] || '';
         }
 
-        if (buffer.includes(COMPLETION_START_TOKEN)) {
-          inCompletion = true;
-          buffer = buffer.split(COMPLETION_START_TOKEN)[1] || '';
-        }
+        if (inLLMResponse) {
+          const endTokenIndex = buffer.indexOf(LLM_END_TOKEN);
+          let chunk = '';
 
-        if (inCompletion) {
-          const endTokenIndex = buffer.indexOf(COMPLETION_END_TOKEN);
           if (endTokenIndex !== -1) {
-            fullContent += buffer.slice(0, endTokenIndex);
-            buffer = buffer.slice(endTokenIndex + COMPLETION_END_TOKEN.length);
-            inCompletion = false;
+            chunk = buffer.slice(0, endTokenIndex);
+            buffer = buffer.slice(endTokenIndex + LLM_END_TOKEN.length);
+            inLLMResponse = false;
           } else {
-            fullContent += buffer;
+            chunk = buffer;
             buffer = '';
           }
-        }
 
-        updateLastMessage(
-          fullContent,
-          { vector: vectorSearchSources, kg: kgSearchResult },
-          inCompletion,
-          true
-        );
+          fullContent += chunk;
+          updateLastMessage(
+            fullContent,
+            { vector: vectorSearchSources, kg: kgSearchResult },
+            true,
+            searchPerformed
+          );
+        }
       }
     } catch (err: unknown) {
       console.error('Error in streaming:', err);
       setError(err instanceof Error ? err.message : String(err));
     } finally {
       setIsStreaming(false);
-      setIsSearching(false);
       updateLastMessage(
         fullContent,
         { vector: vectorSearchSources, kg: kgSearchResult },
-        false
+        false,
+        searchPerformed
       );
       setQuery('');
       setIsProcessingQuery(false);
