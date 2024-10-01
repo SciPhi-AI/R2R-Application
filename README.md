@@ -114,7 +114,7 @@ If you'd like to develop the R2R dashboard, you can do so by starting a developm
 ![Login](assets/login.png)
 ![Chat](assets/chat.png)
 ![Documents](assets/documents.png)
-![Collections](assets/page.png)
+![Collections](assets/collections.png)
 
 The R2R Dashboard is a comprehensive tool designed to streamline the management and monitoring of Retrieval-Augmented Generation (RAG) pipelines built with the R2R framework. By providing a user-friendly interface and robust core features, the dashboard helps developers efficiently interact with their RAG systems, enhancing development and operational workflows.
 
