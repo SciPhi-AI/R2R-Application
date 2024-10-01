@@ -229,22 +229,22 @@ const CollectionIdPage: React.FC = () => {
       ),
     },
     {
-      key: 'restructuring_status',
-      label: 'Restructuring',
+      key: 'kg_creation_status',
+      label: 'KG Creation',
       filterable: true,
       filterType: 'multiselect',
       filterOptions: ['success', 'failure', 'pending'],
       renderCell: (doc) => (
         <Badge
           variant={
-            doc.restructuring_status === 'success'
+            doc.kg_creation_status === 'success'
               ? 'success'
-              : doc.restructuring_status === 'failure'
+              : doc.kg_creation_status === 'failure'
                 ? 'destructive'
                 : 'pending'
           }
         >
-          {doc.restructuring_status}
+          {doc.kg_creation_status}
         </Badge>
       ),
       selected: false,

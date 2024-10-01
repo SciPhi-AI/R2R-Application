@@ -22,7 +22,7 @@ interface DocumentOverview {
   id?: string;
   ingestion_status?: string;
   metadata?: { title?: string; version?: string };
-  restructuring_status?: string;
+  kg_creation_status?: string;
   title?: string;
   type?: string;
   updated_at?: string;
@@ -191,8 +191,8 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
                           value: documentOverview.ingestion_status,
                         },
                         {
-                          label: 'Restructuring',
-                          value: documentOverview.restructuring_status,
+                          label: 'KG Creation',
+                          value: documentOverview.kg_creation_status,
                         },
                       ]}
                     />

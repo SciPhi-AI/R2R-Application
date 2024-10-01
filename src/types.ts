@@ -110,7 +110,7 @@ export interface DocumentInfoType {
   version: string;
   size_in_bytes: number;
   ingestion_status: IngestionStatus;
-  restructuring_status: string;
+  kg_creation_status: string;
   created_at: string;
   updated_at: string;
 }
