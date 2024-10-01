@@ -1,7 +1,7 @@
 <h2 align="center">
 R2R Dashboard
 </h2>
-<img src="https://raw.githubusercontent.com/SciPhi-AI/R2R/main/assets/r2r.png" alt="Sciphi Framework">
+<img width="1041" alt="r2r" src="https://github.com/user-attachments/assets/b6ee6a78-5d37-496d-ae10-ce18eee7a1d6">
 <h3 align="center">
 Manage and Monitor Your R2R RAG Applications with Ease
 </h3>
@@ -111,7 +111,12 @@ If you'd like to develop the R2R dashboard, you can do so by starting a developm
 
 # Screenshots
 
-/Users/nolantremelling/R2R/docs/images/chat.png
+![Login](assets/login.png)
+![Chat](assets/chat.png)
+![Documents](assets/documents.png)
+![Collections](assets/collections.png)
+
+The R2R Dashboard is a comprehensive tool designed to streamline the management and monitoring of Retrieval-Augmented Generation (RAG) pipelines built with the R2R framework. By providing a user-friendly interface and robust core features, the dashboard helps developers efficiently interact with their RAG systems, enhancing development and operational workflows.
 
 # Summary
 
