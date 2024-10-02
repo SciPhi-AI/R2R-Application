@@ -97,6 +97,52 @@ const KGSearchResultItem: FC<{ entity: KGSearchResult; index: number }> = ({
   );
 };
 
+const KGCommunitiesSearchResultItem: FC<{
+  entity: KGSearchResult;
+  index: number;
+}> = ({ entity, index }) => {
+  const { content } = entity;
+
+  return (
+    <div className="p-4 mb-2 flex flex-col w-full">
+      <div className="flex-grow">
+        {/* Title */}
+        <div className="flex items-center mb-2">
+          <h3 className="text-sm font-medium overflow-hidden overflow-ellipsis">
+            [{index}] {content.name}
+          </h3>
+        </div>
+
+        {/* Summary */}
+        <h4 className="text-sm font-semibold mb-1">Summary:</h4>
+        <p className="text-xs break-words mb-2">{content.summary}</p>
+
+        {/* Rating */}
+        <h4 className="text-sm font-semibold mb-1">Impact Rating:</h4>
+        <p className="text-xs mb-2">{content.rating} / 10</p>
+
+        {/* Rating Explanation */}
+        <h4 className="text-sm font-semibold mb-1">Rating Explanation:</h4>
+        <p className="text-xs break-words mb-2">{content.rating_explanation}</p>
+
+        {/* Findings */}
+        {content.findings && content.findings.length > 0 && (
+          <div>
+            <h4 className="text-sm font-semibold mb-1">Key Findings:</h4>
+            <ul className="list-disc list-inside text-xs pl-4">
+              {content.findings.map((finding: string, idx: number) => (
+                <li key={idx} className="mb-1">
+                  {finding}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 interface SearchResultsProps {
   vectorSearchResults: VectorSearchResult[];
   entities: KGSearchResult[];
@@ -194,7 +240,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
         <TabsContent value="kgCommunities">
           <ResultCarousel
             items={communities.map((entity) => ({ entity }))}
-            ItemComponent={KGSearchResultItem}
+            ItemComponent={KGCommunitiesSearchResultItem}
             offset={vectorSearchResults.length + entities.length}
           />
         </TabsContent>
