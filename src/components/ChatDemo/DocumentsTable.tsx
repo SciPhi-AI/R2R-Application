@@ -71,7 +71,7 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
     return documents.map((doc) => ({
       ...doc,
       ingestion_status: mapIngestionStatus(doc.ingestion_status),
-      kg_creation_status: mapIngestionStatus(doc.kg_creation_status),
+      kg_extraction_status: mapIngestionStatus(doc.kg_extraction_status),
     }));
   }, [documents]);
 
@@ -119,14 +119,14 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
       },
     },
     {
-      key: 'kg_creation_status',
-      label: 'KG Creation',
+      key: 'kg_extraction_status',
+      label: 'KG Extraction',
       filterable: true,
       filterType: 'multiselect',
       filterOptions: ['success', 'failure', 'pending'],
       renderCell: (doc) => {
         let variant: 'success' | 'destructive' | 'pending' = 'pending';
-        switch (doc.kg_creation_status) {
+        switch (doc.kg_extraction_status) {
           case IngestionStatus.SUCCESS:
             variant = 'success';
             break;
@@ -137,7 +137,7 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
             variant = 'pending';
             break;
         }
-        return <Badge variant={variant}>{doc.kg_creation_status}</Badge>;
+        return <Badge variant={variant}>{doc.kg_extraction_status}</Badge>;
       },
       selected: false,
     },
