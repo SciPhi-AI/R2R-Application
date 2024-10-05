@@ -1,4 +1,4 @@
-import { Loader, FileSearch2, FileDown } from 'lucide-react';
+import { Loader, FileSearch2 } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
 
 import { DeleteButton } from '@/components/ChatDemo/deleteButton';
@@ -43,6 +43,11 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
   onSelectItem,
   selectedItems,
 }) => {
+  console.log('DocumentsTable props:', {
+    totalItems,
+    currentPage,
+    itemsPerPage,
+  });
   const { toast } = useToast();
   const [selectedDocumentId, setSelectedDocumentId] = useState('');
   const [isDocumentInfoDialogOpen, setIsDocumentInfoDialogOpen] =
@@ -55,7 +60,6 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
     ingestion_status: ['success', 'failure', 'pending'],
   });
 
-  // Mapping function for ingestion status
   const mapIngestionStatus = (status: string): IngestionStatus => {
     const lowerStatus = status?.toLowerCase();
     if (lowerStatus === 'success') {
@@ -164,6 +168,13 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
     },
   ];
 
+  const handlePageChangeInternal = (page: number) => {
+    console.log(
+      `DocumentsTable handlePageChangeInternal called with page: ${page}`
+    );
+    onPageChange(page);
+  };
+
   const renderActions = (doc: DocumentInfoType) => (
     <div className="flex space-x-1 justify-end">
       <UpdateButtonContainer
@@ -171,12 +182,11 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
         onUpdateSuccess={() => onPageChange(currentPage)}
         showToast={toast}
       />
-
       <DownloadFileContainer
         id={doc.id}
         fileName={doc.title}
         showToast={toast}
-      ></DownloadFileContainer>
+      />
       <Button
         onClick={() => {
           setSelectedDocumentId(doc.id);
@@ -238,11 +248,13 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
             initialFilters={filters}
             tableHeight="600px"
             currentPage={currentPage}
-            onPageChange={onPageChange}
+            onPageChange={handlePageChangeInternal}
             totalItems={totalItems}
+            itemsPerPage={itemsPerPage}
             onSort={(key, order) => setSortConfig({ key, order })}
             onFilter={(newFilters) => setFilters(newFilters)}
             showPagination={showPagination}
+            loading={loading}
           />
         </>
       )}

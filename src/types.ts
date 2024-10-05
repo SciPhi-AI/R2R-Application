@@ -264,28 +264,58 @@ export interface ServerStats {
 export interface SidebarProps {
   isOpen: boolean;
   onToggle: () => void;
-  switches: any;
+  switches: Record<
+    string,
+    { checked: boolean; label: string; tooltipText: string }
+  >;
   handleSwitchChange: (id: string, checked: boolean) => void;
   searchLimit: number;
   setSearchLimit: (limit: number) => void;
-  searchFilters: string;
-  setSearchFilters: (filters: string) => void;
-  selectedModel: string;
-  kgSearchType: 'local' | 'global';
-  setKgSearchType: (type: 'local' | 'global') => void;
-  max_llm_queries_for_global_search: number;
-  setMax_llm_queries_for_global_search: (value: number) => void;
-  top_k: number;
-  setTop_k: (value: number) => void;
-  max_tokens_to_sample: number;
-  setMax_tokens_to_sample: (value: number) => void;
-  temperature: number;
-  setTemperature: (value: number) => void;
-  topP: number;
-  setTopP: (value: number) => void;
   collections: Array<{ collection_id: string; name: string }>;
   selectedCollectionIds: string[];
   setSelectedCollectionIds: React.Dispatch<React.SetStateAction<string[]>>;
+  config: SidebarConfig;
+  selectedModel?: string;
+
+  // Vector search settings
+  searchFilters: string;
+  setSearchFilters: (filters: string) => void;
+  indexMeasure?: string;
+  setIndexMeasure: (measure: string) => void;
+  includeMetadatas: boolean;
+  setIncludeMetadatas: (value: boolean) => void;
+  probes?: number;
+  setProbes: (value: number) => void;
+  efSearch?: number;
+  setEfSearch: (value: number) => void;
+
+  // Hybrid search settings
+  fullTextWeight?: number;
+  setFullTextWeight: (value: number) => void;
+  semanticWeight?: number;
+  setSemanticWeight: (value: number) => void;
+  fullTextLimit?: number;
+  setFullTextLimit: (value: number) => void;
+  rrfK?: number;
+  setRrfK: (value: number) => void;
+
+  // KG search settings
+  kgSearchType?: 'local' | 'global';
+  setKgSearchType: (type: 'local' | 'global') => void;
+  max_llm_queries_for_global_search?: number;
+  setMax_llm_queries_for_global_search: (value: number) => void;
+  kgSearchLevel?: number | null;
+  setKgSearchLevel: (value: number | null) => void;
+  maxCommunityDescriptionLength?: number;
+  setMaxCommunityDescriptionLength: (value: number) => void;
+  localSearchLimits?: Record<string, number>;
+  setLocalSearchLimits: (limits: Record<string, number>) => void;
+}
+
+export interface SidebarConfig {
+  showVectorSearch: boolean;
+  showKGSearch: boolean;
+  showHybridSearch: boolean;
 }
 
 export interface SingleSwitchProps {
@@ -293,7 +323,7 @@ export interface SingleSwitchProps {
   initialChecked: boolean;
   onChange: (id: string, checked: boolean) => void;
   label: string;
-  tooltipText: string;
+  tooltipText?: string;
 }
 
 export interface Switch {

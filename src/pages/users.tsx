@@ -129,6 +129,7 @@ const Index: React.FC = () => {
                   currentPage={currentPage}
                   onPageChange={handlePageChange}
                   totalItems={users.length}
+                  loading={isLoading}
                   actions={(user) => (
                     <Button
                       onClick={() => {

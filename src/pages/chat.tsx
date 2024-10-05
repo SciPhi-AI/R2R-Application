@@ -27,8 +27,6 @@ const Index: React.FC = () => {
   const { toast } = useToast();
   const [query, setQuery] = useState('');
   const [hasAttemptedFetch, setHasAttemptedFetch] = useState(false);
-  const [searchLimit, setSearchLimit] = useState(10);
-  const [searchFilters, setSearchFilters] = useState('{}');
   const [selectedCollectionIds, setSelectedCollectionIds] = useState<string[]>(
     []
   );
@@ -37,6 +35,24 @@ const Index: React.FC = () => {
     max_llm_queries_for_global_search,
     setMax_llm_queries_for_global_search,
   ] = useState(100);
+
+  const [searchLimit, setSearchLimit] = useState<number>(10);
+  const [searchFilters, setSearchFilters] = useState('{}');
+  const [indexMeasure, setIndexMeasure] = useState<string>('cosine_distance');
+  const [includeMetadatas, setIncludeMetadatas] = useState<boolean>(false);
+  const [probes, setProbes] = useState<number>();
+  const [efSearch, setEfSearch] = useState<number>();
+  const [fullTextWeight, setFullTextWeight] = useState<number>();
+  const [semanticWeight, setSemanticWeight] = useState<number>();
+  const [fullTextLimit, setFullTextLimit] = useState<number>();
+  const [rrfK, setRrfK] = useState<number>();
+  const [maxLlmQueries, setMaxLlmQueries] = useState<number>();
+  const [kgSearchLevel, setKgSearchLevel] = useState<number | null>(null);
+  const [maxCommunityDescriptionLength, setMaxCommunityDescriptionLength] =
+    useState<number>(100);
+  const [localSearchLimits, setLocalSearchLimits] = useState<
+    Record<string, number>
+  >({});
   const [mode, setMode] = useState<'rag' | 'rag_agent'>('rag_agent');
   const [sidebarIsOpen, setSidebarIsOpen] = useState(false);
 
@@ -188,23 +204,48 @@ const Index: React.FC = () => {
           setSearchFilters={setSearchFilters}
           kgSearchType={kgSearchType}
           setKgSearchType={setKgSearchType}
-          selectedModel={selectedModel}
-          max_llm_queries_for_global_search={max_llm_queries_for_global_search}
-          setMax_llm_queries_for_global_search={
-            setMax_llm_queries_for_global_search
-          }
-          top_k={top_k}
+          max_llm_queries_for_global_search={maxLlmQueries}
+          setMax_llm_queries_for_global_search={setMaxLlmQueries}
+          collections={collections}
+          selectedCollectionIds={selectedCollectionIds}
+          setSelectedCollectionIds={setSelectedCollectionIds}
+          indexMeasure={indexMeasure}
+          setIndexMeasure={setIndexMeasure}
+          includeMetadatas={includeMetadatas}
+          setIncludeMetadatas={setIncludeMetadatas}
+          probes={probes}
+          setProbes={setProbes}
+          efSearch={efSearch}
+          setEfSearch={setEfSearch}
+          fullTextWeight={fullTextWeight}
+          setFullTextWeight={setFullTextWeight}
+          semanticWeight={semanticWeight}
+          setSemanticWeight={setSemanticWeight}
+          fullTextLimit={fullTextLimit}
+          setFullTextLimit={setFullTextLimit}
+          rrfK={rrfK}
+          setRrfK={setRrfK}
+          kgSearchLevel={kgSearchLevel}
+          setKgSearchLevel={setKgSearchLevel}
+          maxCommunityDescriptionLength={maxCommunityDescriptionLength}
+          setMaxCommunityDescriptionLength={setMaxCommunityDescriptionLength}
+          localSearchLimits={localSearchLimits}
+          setLocalSearchLimits={setLocalSearchLimits}
+          config={{
+            showVectorSearch: true,
+            showHybridSearch: true,
+            showKGSearch: true,
+          }}
+        />
+
+        {/* top_k={top_k}
           setTop_k={setTop_k}
           max_tokens_to_sample={max_tokens_to_sample}
           setMax_tokens_to_sample={setMax_tokens_to_sample}
           temperature={temperature}
           setTemperature={setTemperature}
           topP={topP}
-          setTopP={setTopP}
-          collections={collections}
-          selectedCollectionIds={selectedCollectionIds}
-          setSelectedCollectionIds={setSelectedCollectionIds}
-        />
+          setTopP={setTopP} */}
 
         {/* Main Content */}
         <div

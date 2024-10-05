@@ -102,7 +102,6 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
     totalPages,
     data: currentChunks,
     loading: chunksLoading,
-    prefetching,
     goToPage,
   } = usePagination<DocumentChunk>({
     key: id,
@@ -311,14 +310,18 @@ const ExpandableInfoRow: React.FC<{
   );
 };
 
-const ExpandableDocumentChunks: React.FC<{ chunks: DocumentChunk[] }> = ({
-  chunks,
-}) => {
+const ExpandableDocumentChunks: React.FC<{
+  chunks: DocumentChunk[] | undefined;
+}> = ({ chunks }) => {
   const [allExpanded, setAllExpanded] = useState(false);
 
   const toggleAllExpanded = () => {
     setAllExpanded(!allExpanded);
   };
+
+  if (!chunks || chunks.length === 0) {
+    return <div>No chunks available.</div>;
+  }
 
   return (
     <div className="mt-4">

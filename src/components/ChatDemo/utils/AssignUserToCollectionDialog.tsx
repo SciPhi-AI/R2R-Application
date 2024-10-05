@@ -188,7 +188,7 @@ const AssignUserToCollectionDialog: React.FC<
           <Table<User>
             data={filteredUsers}
             columns={columns}
-            itemsPerPage={10}
+            itemsPerPage={filteredUsers.length}
             currentData={filteredUsers.slice(0, 10)}
             onSelectAll={handleSelectAll}
             onSelectItem={handleSelectItem}
@@ -200,6 +200,7 @@ const AssignUserToCollectionDialog: React.FC<
             onPageChange={() => {}}
             totalItems={filteredUsers.length}
             showPagination={false}
+            loading={loading}
           />
         )}
         <DialogFooter className="mt-4 flex justify-end space-x-2">

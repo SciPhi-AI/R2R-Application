@@ -4,7 +4,13 @@ import {
   Filter,
   SlidersHorizontal,
 } from 'lucide-react';
-import React, { useState, useMemo } from 'react';
+import React, {
+  useState,
+  useMemo,
+  useCallback,
+  useEffect,
+  useRef,
+} from 'react';
 
 import { Button } from '@/components/ui/Button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -53,6 +59,26 @@ interface TableProps<T> {
   onSort?: (key: string, order: 'asc' | 'desc') => void;
   onFilter?: (filters: Record<string, any>) => void;
   showPagination?: boolean;
+  loading: boolean;
+}
+
+function debounce<F extends (...args: any[]) => any>(func: F, waitFor: number) {
+  let timeout: ReturnType<typeof setTimeout> | null = null;
+
+  const debounced = (...args: Parameters<F>): void => {
+    if (timeout !== null) {
+      clearTimeout(timeout);
+    }
+    timeout = setTimeout(() => func(...args), waitFor);
+  };
+
+  debounced.cancel = () => {
+    if (timeout !== null) {
+      clearTimeout(timeout);
+    }
+  };
+
+  return debounced;
 }
 
 function Table<T extends { [key: string]: any }>({
@@ -73,6 +99,7 @@ function Table<T extends { [key: string]: any }>({
   onSort,
   onFilter,
   showPagination = true,
+  loading,
 }: TableProps<T>) {
   const [sort, setSort] = useState(
     initialSort || { key: '', order: 'asc' as const }
@@ -125,6 +152,43 @@ function Table<T extends { [key: string]: any }>({
   }, [currentData, filters, sort, columns]);
 
   const totalPages = Math.ceil(totalItems / itemsPerPage);
+  console.log('Table pagination values:', {
+    currentPage,
+    totalPages,
+    totalItems,
+    itemsPerPage,
+  });
+
+  const debouncedPageChange = useCallback(
+    debounce((page: number) => {
+      onPageChange(page);
+    }, 300),
+    [onPageChange]
+  );
+
+  const debouncedPageChangeRef = useRef<ReturnType<typeof debounce>>();
+
+  useEffect(() => {
+    debouncedPageChangeRef.current = debounce((page: number) => {
+      onPageChange(page);
+    }, 300);
+
+    return () => {
+      debouncedPageChangeRef.current?.cancel();
+    };
+  }, [onPageChange]);
+
+  const handlePageChangeInternal = (page: number) => {
+    if (page >= 1 && page <= totalPages && !loading) {
+      onPageChange(page);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      debouncedPageChange.cancel();
+    };
+  }, [debouncedPageChange]);
 
   const handleSort = (key: string) => {
     const newSort: { key: string; order: 'asc' | 'desc' } = {
@@ -144,10 +208,6 @@ function Table<T extends { [key: string]: any }>({
       onFilter(newFilters);
     }
     onPageChange(1);
-  };
-
-  const handlePageChangeInternal = (page: number) => {
-    onPageChange(page);
   };
 
   const isAllSelected = currentData.every((item) =>
@@ -422,7 +482,8 @@ function Table<T extends { [key: string]: any }>({
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
-            onPageChange={handlePageChangeInternal}
+            onPageChange={onPageChange}
+            isLoading={loading}
           />
         </div>
       )}

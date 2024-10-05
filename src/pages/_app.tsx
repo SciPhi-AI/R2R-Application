@@ -20,8 +20,12 @@ function MyAppContent({ Component, pageProps }: AppProps) {
 
   const checkAccess = useCallback(async () => {
     const publicRoutes = ['/auth/login', '/auth/signup'];
-    const userRoutes = ['/documents', '/chat'];
+    const userRoutes = ['/documents', '/collections', '/collection', '/chat'];
     const currentPath = router.pathname;
+
+    const isUserRoute = (path: string) => {
+      return userRoutes.some((route) => path.startsWith(route));
+    };
 
     if (!isAuthenticated) {
       if (!publicRoutes.includes(currentPath)) {
@@ -35,7 +39,7 @@ function MyAppContent({ Component, pageProps }: AppProps) {
       return;
     }
 
-    if (!userRoutes.includes(currentPath)) {
+    if (!isUserRoute(currentPath)) {
       // Non-superusers are redirected to /documents if they try to access any other page
       router.replace('/documents');
     }

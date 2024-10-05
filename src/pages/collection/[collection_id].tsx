@@ -46,12 +46,15 @@ const CollectionIdPage: React.FC = () => {
   );
 
   const fetchData = useCallback(
-    async (currentCollectionId: string, retryCount = 0): Promise<any[]> => {
+    async (
+      currentCollectionId: string,
+      retryCount = 0
+    ): Promise<{ results: DocumentInfoType[]; total_entries: number }> => {
       if (!pipeline?.deploymentUrl) {
         console.error('No pipeline deployment URL available');
         setError('No pipeline deployment URL available');
         setIsLoading(false);
-        return [];
+        return { results: [], total_entries: 0 };
       }
 
       try {
@@ -83,7 +86,10 @@ const CollectionIdPage: React.FC = () => {
         setError(null);
         setSelectedDocumentIds([]);
 
-        return [documentsData.results, usersData.results];
+        return {
+          results: documentsData.results,
+          total_entries: documentsData.results.length,
+        };
       } catch (error) {
         console.error('Error fetching data:', error);
         if (retryCount < MAX_RETRIES) {
@@ -96,7 +102,7 @@ const CollectionIdPage: React.FC = () => {
         } else {
           setError('Failed to fetch data. Please try again later.');
           setIsLoading(false);
-          return [];
+          return { results: [], total_entries: 0 };
         }
       }
     },
@@ -138,7 +144,9 @@ const CollectionIdPage: React.FC = () => {
     if (router.isReady) {
       const currentCollectionId = router.query.collection_id;
       if (typeof currentCollectionId === 'string') {
-        fetchData(currentCollectionId);
+        fetchData(currentCollectionId).then(({ results }) => {
+          setDocuments(results);
+        });
       } else {
         setError('Invalid collection ID');
         setIsLoading(false);
@@ -391,7 +399,10 @@ const CollectionIdPage: React.FC = () => {
             <div className="flex-grow overflow-auto">
               <Table
                 data={documents}
-                currentData={currentData}
+                currentData={documents.slice(
+                  (currentPage - 1) * itemsPerPage,
+                  currentPage * itemsPerPage
+                )}
                 columns={columns}
                 itemsPerPage={itemsPerPage}
                 onSelectAll={handleSelectAll}
@@ -408,6 +419,8 @@ const CollectionIdPage: React.FC = () => {
                 currentPage={currentPage}
                 onPageChange={handlePageChange}
                 totalItems={documents.length}
+                loading={isLoading}
+                showPagination={true}
               />
             </div>
           </TabsContent>
@@ -437,10 +450,7 @@ const CollectionIdPage: React.FC = () => {
                   // Implement select all for users if needed
                 }}
                 onSelectItem={(itemId: string, selected: boolean) => {
-                  const item = documents.find((doc) => doc.id === itemId);
-                  if (item) {
-                    handleSelectItem(item, selected);
-                  }
+                  // Implement select item for users if needed
                 }}
                 selectedItems={[]} // Manage selected users if necessary
                 actions={renderUserActions}
@@ -449,6 +459,8 @@ const CollectionIdPage: React.FC = () => {
                 currentPage={currentPage}
                 onPageChange={handlePageChange}
                 totalItems={users.length}
+                loading={isLoading}
+                showPagination={true}
               />
             </div>
           </TabsContent>
