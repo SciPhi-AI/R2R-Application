@@ -1,51 +1,60 @@
-// pages/index.tsx
 import React, { useState, useCallback, useEffect } from 'react';
 
 import DocumentsTable from '@/components/ChatDemo/DocumentsTable';
 import Layout from '@/components/Layout';
 import { useUserContext } from '@/context/UserContext';
-import usePagination from '@/hooks/usePagination';
 import { DocumentInfoType, IngestionStatus } from '@/types';
 
 const Index: React.FC = () => {
   const { pipeline, getClient } = useUserContext();
-  const pageSize = 10;
 
+  const [documents, setDocuments] = useState<DocumentInfoType[]>([]);
   const [pendingDocuments, setPendingDocuments] = useState<string[]>([]);
   const [selectedDocumentIds, setSelectedDocumentIds] = useState<string[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  const fetchDocuments = useCallback(
-    async (offset: number, limit: number) => {
-      if (!pipeline?.deploymentUrl) {
-        console.error('No pipeline deployment URL available');
-        return { results: [], total_entries: 0 };
+  const fetchAllDocuments = useCallback(async () => {
+    if (!pipeline?.deploymentUrl) {
+      console.error('No pipeline deployment URL available');
+      return [];
+    }
+
+    try {
+      const client = await getClient();
+      if (!client) {
+        throw new Error('Failed to get authenticated client');
       }
 
-      try {
-        const client = await getClient();
-        if (!client) {
-          throw new Error('Failed to get authenticated client');
-        }
+      let allDocuments: DocumentInfoType[] = [];
+      let offset = 0;
+      const limit = 100;
+      let totalEntries = 0;
 
+      do {
         const data = await client.documentsOverview(undefined, offset, limit);
-        console.log('data:', data);
-        return { results: data.results, total_entries: data.total_entries };
-      } catch (error) {
-        console.error('Error fetching documents:', error);
-        return { results: [], total_entries: 0 };
-      }
-    },
-    [pipeline?.deploymentUrl, getClient]
-  );
+        allDocuments = allDocuments.concat(data.results);
+        totalEntries = data.total_entries;
+        offset += limit;
+      } while (allDocuments.length < totalEntries);
 
-  const {
-    data: documents,
-    currentPage,
-    totalPages,
-    totalItems,
-    loading,
-    goToPage,
-  } = usePagination<DocumentInfoType>({ fetchData: fetchDocuments, pageSize });
+      return allDocuments;
+    } catch (error) {
+      console.error('Error fetching documents:', error);
+      return [];
+    }
+  }, [pipeline?.deploymentUrl, getClient]);
+
+  const refetchDocuments = useCallback(async () => {
+    setLoading(true);
+    const allDocs = await fetchAllDocuments();
+    setDocuments(allDocs);
+    setSelectedDocumentIds([]);
+    setLoading(false);
+  }, [fetchAllDocuments]);
+
+  useEffect(() => {
+    refetchDocuments();
+  }, [refetchDocuments]);
 
   useEffect(() => {
     const pending = documents
@@ -75,18 +84,6 @@ const Index: React.FC = () => {
     );
   }, []);
 
-  const refetchDocuments = useCallback(() => {
-    goToPage(1);
-    setSelectedDocumentIds([]);
-  }, [goToPage]);
-
-  console.log('Pagination values:', {
-    currentPage,
-    totalPages,
-    totalItems,
-    loading,
-  });
-
   return (
     <Layout pageTitle="Documents">
       <main className="w-full flex flex-col container h-screen-[calc(100%-4rem)]">
@@ -95,10 +92,6 @@ const Index: React.FC = () => {
             <DocumentsTable
               documents={documents}
               loading={loading}
-              totalItems={totalItems}
-              currentPage={currentPage}
-              onPageChange={goToPage}
-              itemsPerPage={pageSize}
               onRefresh={refetchDocuments}
               pendingDocuments={pendingDocuments}
               setPendingDocuments={setPendingDocuments}

@@ -77,6 +77,7 @@ export interface User {
   updated_at: string;
   is_verified: boolean;
   collection_ids: string[];
+  total_size_in_bytes: number;
 
   // Optional fields
   hashed_password?: string;

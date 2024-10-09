@@ -1,5 +1,5 @@
-import { Loader, FileSearch2 } from 'lucide-react';
-import React, { useMemo, useState } from 'react';
+import { Loader, FileSearch2, SlidersHorizontal } from 'lucide-react';
+import React, { useMemo, useState, useEffect } from 'react';
 
 import { DeleteButton } from '@/components/ChatDemo/deleteButton';
 import DownloadFileContainer from '@/components/ChatDemo/DownloadFileContainer';
@@ -9,16 +9,19 @@ import { UploadButton } from '@/components/ChatDemo/upload';
 import DocumentInfoDialog from '@/components/ChatDemo/utils/documentDialogInfo';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/Button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from '@/components/ui/popover';
 import { useToast } from '@/components/ui/use-toast';
 import { IngestionStatus, DocumentInfoType } from '@/types';
 
 interface DocumentsTableProps {
   documents: DocumentInfoType[];
   loading: boolean;
-  totalItems: number;
-  currentPage: number;
-  onPageChange: (page: number) => void;
-  itemsPerPage: number;
   onRefresh: () => void;
   pendingDocuments: string[];
   setPendingDocuments: React.Dispatch<React.SetStateAction<string[]>>;
@@ -26,15 +29,12 @@ interface DocumentsTableProps {
   onSelectAll: (selected: boolean) => void;
   onSelectItem: (itemId: string, selected: boolean) => void;
   selectedItems: string[];
+  hideActions?: boolean; // Optional prop to hide actions if needed
 }
 
 const DocumentsTable: React.FC<DocumentsTableProps> = ({
   documents,
   loading,
-  totalItems,
-  currentPage,
-  onPageChange,
-  itemsPerPage,
   onRefresh,
   pendingDocuments,
   setPendingDocuments,
@@ -42,12 +42,8 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
   onSelectAll,
   onSelectItem,
   selectedItems,
+  hideActions = false,
 }) => {
-  console.log('DocumentsTable props:', {
-    totalItems,
-    currentPage,
-    itemsPerPage,
-  });
   const { toast } = useToast();
   const [selectedDocumentId, setSelectedDocumentId] = useState('');
   const [isDocumentInfoDialogOpen, setIsDocumentInfoDialogOpen] =
@@ -59,6 +55,24 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
   const [filters, setFilters] = useState<Record<string, any>>({
     ingestion_status: ['success', 'failure', 'pending'],
   });
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>(
+    {}
+  );
+
+  useEffect(() => {
+    // Initialize visibleColumns based on the columns definition
+    const initialVisibility: Record<string, boolean> = {};
+    columns.forEach((col) => {
+      initialVisibility[col.key] = col.selected !== false;
+    });
+    setVisibleColumns(initialVisibility);
+  }, [documents]); // Adjust the dependency array as needed
 
   const mapIngestionStatus = (status: string): IngestionStatus => {
     const lowerStatus = status?.toLowerCase();
@@ -168,39 +182,54 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
     },
   ];
 
-  const handlePageChangeInternal = (page: number) => {
-    console.log(
-      `DocumentsTable handlePageChangeInternal called with page: ${page}`
+  const renderActions = (doc: DocumentInfoType) =>
+    hideActions ? null : (
+      <div className="flex space-x-1 justify-end">
+        <UpdateButtonContainer
+          id={doc.id}
+          onUpdateSuccess={() => onRefresh()}
+          showToast={toast}
+        />
+        <DownloadFileContainer
+          id={doc.id}
+          fileName={doc.title}
+          showToast={toast}
+        />
+        <Button
+          onClick={() => {
+            setSelectedDocumentId(doc.id);
+            setIsDocumentInfoDialogOpen(true);
+          }}
+          color="filled"
+          disabled={doc.ingestion_status !== IngestionStatus.SUCCESS}
+          shape="slim"
+          tooltip="View Document Info"
+        >
+          <FileSearch2 className="h-6 w-6" />
+        </Button>
+      </div>
     );
-    onPageChange(page);
-  };
 
-  const renderActions = (doc: DocumentInfoType) => (
-    <div className="flex space-x-1 justify-end">
-      <UpdateButtonContainer
-        id={doc.id}
-        onUpdateSuccess={() => onPageChange(currentPage)}
-        showToast={toast}
-      />
-      <DownloadFileContainer
-        id={doc.id}
-        fileName={doc.title}
-        showToast={toast}
-      />
-      <Button
-        onClick={() => {
-          setSelectedDocumentId(doc.id);
-          setIsDocumentInfoDialogOpen(true);
-        }}
-        color="filled"
-        disabled={doc.ingestion_status !== IngestionStatus.SUCCESS}
-        shape="slim"
-        tooltip="View Document Info"
-      >
-        <FileSearch2 className="h-6 w-6" />
-      </Button>
-    </div>
-  );
+  // Filter documents based on search query
+  const filteredDocuments = useMemo(() => {
+    if (searchQuery.trim() === '') {
+      return mappedDocuments;
+    }
+    const query = searchQuery.toLowerCase();
+    return mappedDocuments.filter(
+      (doc) =>
+        doc.id.toLowerCase().includes(query) ||
+        (doc.title && doc.title.toLowerCase().includes(query))
+    );
+  }, [searchQuery, mappedDocuments]);
+
+  // Handle column visibility changes
+  const handleToggleColumn = (columnKey: string, isVisible: boolean) => {
+    setVisibleColumns((prev) => ({
+      ...prev,
+      [columnKey]: isVisible,
+    }));
+  };
 
   return (
     <div>
@@ -210,36 +239,96 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
         </div>
       ) : (
         <>
-          <div className="flex justify-end items-center space-x-2 -mb-8">
-            <UploadButton
-              userId={null}
-              uploadedDocuments={documents}
-              setUploadedDocuments={() => {}}
-              onUploadSuccess={async () => {
-                await onRefresh();
-                onSelectAll(false);
-                return [];
-              }}
-              showToast={toast}
-              setPendingDocuments={setPendingDocuments}
-              setCurrentPage={() => {}}
-              documentsPerPage={10}
-            />
-            <DeleteButton
-              selectedDocumentIds={selectedItems}
-              onDelete={() => onSelectAll(false)}
-              onSuccess={async () => {
-                await onPageChange(1);
-                await onRefresh();
-              }}
-              showToast={toast}
-            />
+          <div className="flex justify-between items-center mb-4">
+            {/* Left side: Toggle columns button */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button color="light">
+                  <SlidersHorizontal className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="start">
+                <div className="grid gap-4 p-4">
+                  <div className="space-y-2">
+                    <h4 className="font-medium leading-none">Toggle Columns</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Select which columns to display in the table.
+                    </p>
+                  </div>
+                  <div className="grid gap-2">
+                    {columns.map((col) => (
+                      <div
+                        key={col.key}
+                        className="flex items-center space-x-2"
+                      >
+                        <Checkbox
+                          id={`column-toggle-${col.key}`}
+                          checked={visibleColumns[col.key]}
+                          onCheckedChange={(
+                            checked: boolean | 'indeterminate'
+                          ) => {
+                            if (typeof checked === 'boolean') {
+                              handleToggleColumn(col.key, checked);
+                            }
+                          }}
+                        />
+                        <label
+                          htmlFor={`column-toggle-${col.key}`}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                          {col.label}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+
+            {/* Middle: Search input */}
+            <div className="flex-grow mx-4">
+              <Input
+                placeholder="Search by Title or Document ID"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setCurrentPage(1); // Reset to first page on search
+                }}
+              />
+            </div>
+
+            {/* Right side: Upload and Delete buttons */}
+            {!hideActions && (
+              <div className="flex space-x-2">
+                <UploadButton
+                  userId={null}
+                  uploadedDocuments={documents}
+                  setUploadedDocuments={() => {}}
+                  onUploadSuccess={async () => {
+                    await onRefresh();
+                    onSelectAll(false);
+                    return [];
+                  }}
+                  showToast={toast}
+                  setPendingDocuments={setPendingDocuments}
+                  setCurrentPage={() => {}}
+                  documentsPerPage={10}
+                />
+                <DeleteButton
+                  selectedDocumentIds={selectedItems}
+                  onDelete={() => onSelectAll(false)}
+                  onSuccess={async () => {
+                    await onRefresh();
+                  }}
+                  showToast={toast}
+                />
+              </div>
+            )}
           </div>
 
           <Table
-            data={mappedDocuments}
-            currentData={mappedDocuments}
-            columns={columns}
+            data={filteredDocuments}
+            columns={columns.filter((col) => visibleColumns[col.key])}
             onSelectAll={handleSelectAllInternal}
             onSelectItem={handleSelectItemInternal}
             selectedItems={selectedItems}
@@ -248,13 +337,13 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
             initialFilters={filters}
             tableHeight="600px"
             currentPage={currentPage}
-            onPageChange={handlePageChangeInternal}
-            totalItems={totalItems}
+            onPageChange={setCurrentPage}
             itemsPerPage={itemsPerPage}
             onSort={(key, order) => setSortConfig({ key, order })}
             onFilter={(newFilters) => setFilters(newFilters)}
             showPagination={showPagination}
             loading={loading}
+            enableColumnToggle={false}
           />
         </>
       )}

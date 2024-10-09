@@ -399,10 +399,6 @@ const CollectionIdPage: React.FC = () => {
             <div className="flex-grow overflow-auto">
               <Table
                 data={documents}
-                currentData={documents.slice(
-                  (currentPage - 1) * itemsPerPage,
-                  currentPage * itemsPerPage
-                )}
                 columns={columns}
                 itemsPerPage={itemsPerPage}
                 onSelectAll={handleSelectAll}
@@ -418,7 +414,6 @@ const CollectionIdPage: React.FC = () => {
                 initialFilters={{}}
                 currentPage={currentPage}
                 onPageChange={handlePageChange}
-                totalItems={documents.length}
                 loading={isLoading}
                 showPagination={true}
               />
@@ -440,10 +435,6 @@ const CollectionIdPage: React.FC = () => {
             <div className="flex-grow overflow-auto">
               <Table
                 data={users}
-                currentData={users.slice(
-                  (currentPage - 1) * itemsPerPage,
-                  currentPage * itemsPerPage
-                )}
                 columns={userColumns}
                 itemsPerPage={itemsPerPage}
                 onSelectAll={(selected) => {
@@ -458,7 +449,6 @@ const CollectionIdPage: React.FC = () => {
                 initialFilters={{}}
                 currentPage={currentPage}
                 onPageChange={handlePageChange}
-                totalItems={users.length}
                 loading={isLoading}
                 showPagination={true}
               />

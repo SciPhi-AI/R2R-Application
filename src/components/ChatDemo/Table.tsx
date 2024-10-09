@@ -4,13 +4,7 @@ import {
   Filter,
   SlidersHorizontal,
 } from 'lucide-react';
-import React, {
-  useState,
-  useMemo,
-  useCallback,
-  useEffect,
-  useRef,
-} from 'react';
+import React, { useState, useMemo } from 'react';
 
 import { Button } from '@/components/ui/Button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -43,47 +37,26 @@ export interface Column<T> {
 
 interface TableProps<T> {
   data: T[];
-  currentData: T[];
   columns: Column<T>[];
   itemsPerPage?: number;
   onSelectAll?: (selected: boolean) => void;
   onSelectItem?: (itemId: string, selected: boolean) => void;
-  selectedItems?: string[]; // Changed from T[] to string[]
+  selectedItems?: string[];
   actions?: (item: T) => React.ReactNode;
   initialSort?: { key: string; order: 'asc' | 'desc' };
   initialFilters?: Record<string, any>;
   tableHeight?: string;
   currentPage: number;
   onPageChange: (page: number) => void;
-  totalItems: number;
   onSort?: (key: string, order: 'asc' | 'desc') => void;
   onFilter?: (filters: Record<string, any>) => void;
   showPagination?: boolean;
   loading: boolean;
-}
-
-function debounce<F extends (...args: any[]) => any>(func: F, waitFor: number) {
-  let timeout: ReturnType<typeof setTimeout> | null = null;
-
-  const debounced = (...args: Parameters<F>): void => {
-    if (timeout !== null) {
-      clearTimeout(timeout);
-    }
-    timeout = setTimeout(() => func(...args), waitFor);
-  };
-
-  debounced.cancel = () => {
-    if (timeout !== null) {
-      clearTimeout(timeout);
-    }
-  };
-
-  return debounced;
+  enableColumnToggle?: boolean;
 }
 
 function Table<T extends { [key: string]: any }>({
   data,
-  currentData,
   columns,
   itemsPerPage = 10,
   onSelectAll,
@@ -95,11 +68,11 @@ function Table<T extends { [key: string]: any }>({
   tableHeight = '600px',
   currentPage,
   onPageChange,
-  totalItems,
   onSort,
   onFilter,
   showPagination = true,
   loading,
+  enableColumnToggle = true,
 }: TableProps<T>) {
   const [sort, setSort] = useState(
     initialSort || { key: '', order: 'asc' as const }
@@ -110,7 +83,7 @@ function Table<T extends { [key: string]: any }>({
   );
 
   const filteredAndSortedData = useMemo(() => {
-    let result = [...currentData];
+    let result = [...data];
 
     // Apply filters
     Object.entries(filters).forEach(([key, value]) => {
@@ -149,46 +122,21 @@ function Table<T extends { [key: string]: any }>({
     }
 
     return result;
-  }, [currentData, filters, sort, columns]);
+  }, [data, filters, sort, columns]);
 
+  const totalItems = filteredAndSortedData.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
-  console.log('Table pagination values:', {
-    currentPage,
-    totalPages,
-    totalItems,
-    itemsPerPage,
-  });
 
-  const debouncedPageChange = useCallback(
-    debounce((page: number) => {
-      onPageChange(page);
-    }, 300),
-    [onPageChange]
-  );
-
-  const debouncedPageChangeRef = useRef<ReturnType<typeof debounce>>();
-
-  useEffect(() => {
-    debouncedPageChangeRef.current = debounce((page: number) => {
-      onPageChange(page);
-    }, 300);
-
-    return () => {
-      debouncedPageChangeRef.current?.cancel();
-    };
-  }, [onPageChange]);
+  const currentPageData = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredAndSortedData.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredAndSortedData, currentPage, itemsPerPage]);
 
   const handlePageChangeInternal = (page: number) => {
     if (page >= 1 && page <= totalPages && !loading) {
       onPageChange(page);
     }
   };
-
-  useEffect(() => {
-    return () => {
-      debouncedPageChange.cancel();
-    };
-  }, [debouncedPageChange]);
 
   const handleSort = (key: string) => {
     const newSort: { key: string; order: 'asc' | 'desc' } = {
@@ -210,7 +158,7 @@ function Table<T extends { [key: string]: any }>({
     onPageChange(1);
   };
 
-  const isAllSelected = currentData.every((item) =>
+  const isAllSelected = currentPageData.every((item) =>
     selectedItems.includes(item.id)
   );
 
@@ -245,54 +193,58 @@ function Table<T extends { [key: string]: any }>({
     return content;
   };
 
-  const visibleRowsCount = filteredAndSortedData.length;
+  const visibleRowsCount = currentPageData.length;
   const emptyRowsCount = Math.max(0, itemsPerPage - visibleRowsCount);
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex justify-between items-center mb-4">
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button color="light">
-              <SlidersHorizontal className="h-4 w-4" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent align="start">
-            <div className="grid gap-4">
-              <div className="space-y-2">
-                <h4 className="font-medium leading-none">Toggle Columns</h4>
-                <p className="text-sm text-muted-foreground">
-                  Select which columns to display in the table.
-                </p>
+      {enableColumnToggle && (
+        <div className="flex justify-between items-center mb-4">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button color="light">
+                <SlidersHorizontal className="h-4 w-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="start">
+              <div className="grid gap-4 p-4">
+                <div className="space-y-2">
+                  <h4 className="font-medium leading-none">Toggle Columns</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Select which columns to display in the table.
+                  </p>
+                </div>
+                <div className="grid gap-2">
+                  {columns.map((col) => (
+                    <div key={col.key} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`column-toggle-${col.key}`}
+                        checked={visibleColumns[col.key]}
+                        onCheckedChange={(
+                          checked: boolean | 'indeterminate'
+                        ) => {
+                          if (typeof checked === 'boolean') {
+                            setVisibleColumns((prev) => ({
+                              ...prev,
+                              [col.key]: checked,
+                            }));
+                          }
+                        }}
+                      />
+                      <label
+                        htmlFor={`column-toggle-${col.key}`}
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        {col.label}
+                      </label>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div className="grid gap-2">
-                {columns.map((col) => (
-                  <div key={col.key} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`column-toggle-${col.key}`}
-                      checked={visibleColumns[col.key]}
-                      onCheckedChange={(checked: boolean | 'indeterminate') => {
-                        if (typeof checked === 'boolean') {
-                          setVisibleColumns((prev) => ({
-                            ...prev,
-                            [col.key]: checked,
-                          }));
-                        }
-                      }}
-                    />
-                    <label
-                      htmlFor={`column-toggle-${col.key}`}
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      {col.label}
-                    </label>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </PopoverContent>
-        </Popover>
-      </div>
+            </PopoverContent>
+          </Popover>
+        </div>
+      )}
 
       <div
         className="overflow-x-auto"
@@ -306,7 +258,7 @@ function Table<T extends { [key: string]: any }>({
                   <Checkbox
                     checked={isAllSelected}
                     onCheckedChange={handleSelectAllInternal}
-                    disabled={currentData.length === 0}
+                    disabled={currentPageData.length === 0}
                   />
                 </th>
               )}
@@ -434,7 +386,7 @@ function Table<T extends { [key: string]: any }>({
             </tr>
           </thead>
           <tbody>
-            {filteredAndSortedData.map((item) => (
+            {currentPageData.map((item) => (
               <tr key={item.id}>
                 {onSelectItem && (
                   <td className="w-[50px] px-4 py-2 text-white text-center">
@@ -482,7 +434,7 @@ function Table<T extends { [key: string]: any }>({
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
-            onPageChange={onPageChange}
+            onPageChange={handlePageChangeInternal}
             isLoading={loading}
           />
         </div>

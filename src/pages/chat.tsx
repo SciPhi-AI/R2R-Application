@@ -190,6 +190,14 @@ const Index: React.FC = () => {
     }
   };
 
+  const handleAbortRequest = () => {
+    setQuery('');
+  };
+
+  const handleModeChange = (newMode: 'rag' | 'rag_agent') => {
+    setMode(newMode);
+  };
+
   return (
     <Layout pageTitle="Chat" includeFooter={false}>
       <div className="flex flex-col h-screen-[calc(100%-4rem)] overflow-hidden">
@@ -257,10 +265,7 @@ const Index: React.FC = () => {
           >
             {/* Mode Selector */}
             <div className="mode-selector h-0">
-              <Select
-                value={mode}
-                onValueChange={(value) => setMode(value as 'rag' | 'rag_agent')}
-              >
+              <Select value={mode} onValueChange={handleModeChange}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Select Mode" />
                 </SelectTrigger>
@@ -295,6 +300,7 @@ const Index: React.FC = () => {
                   hasAttemptedFetch={hasAttemptedFetch}
                   mode={mode}
                   selectedCollectionIds={selectedCollectionIds}
+                  onAbortRequest={handleAbortRequest}
                 />
               </div>
 

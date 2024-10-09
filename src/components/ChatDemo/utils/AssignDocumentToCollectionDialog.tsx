@@ -10,7 +10,6 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
 import { useUserContext } from '@/context/UserContext';
 import { DocumentInfoType } from '@/types';
@@ -28,78 +27,60 @@ const AssignDocumentToCollectionDialog: React.FC<
   const { getClient } = useUserContext();
   const { toast } = useToast();
 
-  const [allDocuments, setAllDocuments] = useState<DocumentInfoType[]>([]);
-  const [filteredDocuments, setFilteredDocuments] = useState<
-    DocumentInfoType[]
-  >([]);
+  const [documents, setDocuments] = useState<DocumentInfoType[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
   const [pendingDocuments, setPendingDocuments] = useState<string[]>([]);
   const [selectedDocumentIds, setSelectedDocumentIds] = useState<string[]>([]);
   const [assigning, setAssigning] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
 
-  const fetchAllDocuments = useCallback(
-    async (page: number = 1) => {
-      setLoading(true);
-      try {
-        const client = await getClient();
-        if (!client) {
-          throw new Error('Failed to get authenticated client');
-        }
-
-        const data = await client.documentsOverview();
-        console.log('data:', data);
-
-        // Filter out documents that are already in the collection
-        const filteredDocs = (data.results || []).filter(
-          (doc: DocumentInfoType) => !doc.collection_ids.includes(collection_id)
-        );
-
-        setAllDocuments(filteredDocs);
-        setFilteredDocuments(filteredDocs);
-        setTotalItems(filteredDocs.length);
-      } catch (error) {
-        console.error('Error fetching documents:', error);
-        toast({
-          title: 'Error',
-          description: 'Failed to fetch documents. Please try again later.',
-          variant: 'destructive',
-        });
-      } finally {
-        setLoading(false);
+  const fetchAllDocuments = useCallback(async () => {
+    setLoading(true);
+    try {
+      const client = await getClient();
+      if (!client) {
+        throw new Error('Failed to get authenticated client');
       }
-    },
-    [getClient, toast, collection_id]
-  );
+
+      let allDocuments: DocumentInfoType[] = [];
+      let offset = 0;
+      const limit = 100;
+      let totalEntries = 0;
+
+      do {
+        const data = await client.documentsOverview(undefined, offset, limit);
+        totalEntries = data.total_entries;
+        allDocuments = allDocuments.concat(data.results);
+        offset += limit;
+      } while (allDocuments.length < totalEntries);
+
+      // Filter out documents that are already in the collection
+      const filteredDocs = allDocuments.filter(
+        (doc) => !doc.collection_ids.includes(collection_id)
+      );
+
+      setDocuments(filteredDocs);
+    } catch (error) {
+      console.error('Error fetching documents:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch documents. Please try again later.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [getClient, toast, collection_id]);
 
   useEffect(() => {
     if (open) {
-      fetchAllDocuments(1);
+      fetchAllDocuments();
       setSelectedDocumentIds([]);
-      setSearchQuery('');
     }
   }, [open, fetchAllDocuments]);
 
-  useEffect(() => {
-    if (searchQuery.trim() === '') {
-      setFilteredDocuments(allDocuments);
-    } else {
-      const query = searchQuery.toLowerCase();
-      const filtered = allDocuments.filter(
-        (doc) =>
-          doc.id.toLowerCase().includes(query) ||
-          (doc.title && doc.title.toLowerCase().includes(query))
-      );
-      setFilteredDocuments(filtered);
-    }
-  }, [searchQuery, allDocuments]);
-
   const handleSelectAll = (selected: boolean) => {
     if (selected) {
-      setSelectedDocumentIds(filteredDocuments.map((doc) => doc.id));
+      setSelectedDocumentIds(documents.map((doc) => doc.id));
     } else {
       setSelectedDocumentIds([]);
     }
@@ -163,39 +144,28 @@ const AssignDocumentToCollectionDialog: React.FC<
           <DialogTitle className="text-xl font-bold mb-4">
             Assign Documents to Collection
           </DialogTitle>
-          <Input
-            placeholder="Search by Title or Document ID"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="mb-4"
-          />
         </DialogHeader>
         {loading ? (
           <div className="flex justify-center items-center mt-20">
             <Loader className="animate-spin" size={64} />
           </div>
-        ) : filteredDocuments.length === 0 ? (
+        ) : documents.length === 0 ? (
           <div className="text-center py-4">
             All documents are already assigned to this collection.
           </div>
         ) : (
           <>
             <DocumentsTable
-              documents={filteredDocuments}
+              documents={documents}
               loading={false}
-              totalItems={filteredDocuments.length}
-              currentPage={currentPage}
-              onPageChange={(page) => {
-                setCurrentPage(page);
-              }}
-              itemsPerPage={1000}
-              onRefresh={() => fetchAllDocuments(currentPage)}
+              onRefresh={fetchAllDocuments}
               pendingDocuments={pendingDocuments}
               setPendingDocuments={setPendingDocuments}
               onSelectAll={handleSelectAll}
               onSelectItem={handleSelectItem}
               selectedItems={selectedDocumentIds}
               showPagination={false}
+              hideActions={true}
             />
             <DialogFooter className="mt-4 flex justify-end space-x-2">
               <Button

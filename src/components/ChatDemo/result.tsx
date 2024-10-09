@@ -42,6 +42,7 @@ export const Result: FC<{
   switches: any;
   mode: 'rag' | 'rag_agent';
   selectedCollectionIds: string[];
+  onAbortRequest?: () => void;
 }> = ({
   query,
   setQuery,
@@ -62,8 +63,10 @@ export const Result: FC<{
   switches,
   mode,
   selectedCollectionIds,
+  onAbortRequest,
 }) => {
   const [messages, setMessages] = useState<Message[]>([]);
+  const abortControllerRef = useRef<AbortController | null>(null);
   const [isStreaming, setIsStreaming] = useState<boolean>(false);
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -77,7 +80,12 @@ export const Result: FC<{
   const [initialPage, setInitialPage] = useState<number>(1);
 
   useEffect(() => {
+    abortCurrentRequest();
     setMessages([]);
+    setIsStreaming(false);
+    setIsSearching(false);
+    setError(null);
+    setIsProcessingQuery(false);
   }, [mode]);
 
   useEffect(() => {
@@ -92,6 +100,11 @@ export const Result: FC<{
     searchPerformed?: boolean
   ) => {
     setMessages((prevMessages) => {
+      if (prevMessages.length === 0) {
+        console.warn('Attempted to update last message when no messages exist');
+        return prevMessages;
+      }
+
       const updatedMessages = [...prevMessages];
       const lastMessage = updatedMessages[updatedMessages.length - 1];
       if (lastMessage.role === 'assistant') {
@@ -106,14 +119,33 @@ export const Result: FC<{
           },
         ];
       }
+
       return prevMessages;
     });
+  };
+
+  const abortCurrentRequest = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    if (onAbortRequest) {
+      onAbortRequest();
+    }
   };
 
   const parseStreaming = async (query: string): Promise<void> => {
     if (isProcessingQuery) {
       return;
     }
+
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    abortControllerRef.current = new AbortController();
+    const { signal } = abortControllerRef.current;
+
     setIsProcessingQuery(true);
     setIsStreaming(true);
     setIsSearching(true);
@@ -201,6 +233,11 @@ export const Result: FC<{
       const decoder = new TextDecoder();
 
       while (true) {
+        if (signal.aborted) {
+          reader.cancel();
+          break;
+        }
+
         const { done, value } = await reader.read();
         if (done) {
           break;
@@ -268,8 +305,17 @@ export const Result: FC<{
         }
       }
     } catch (err: unknown) {
-      console.error('Error in streaming:', err);
-      setError(err instanceof Error ? err.message : String(err));
+      if (err instanceof Error) {
+        if (err.name === 'AbortError') {
+          console.log('Request was aborted');
+        } else {
+          console.error('Error in streaming:', err.message);
+          setError(err.message);
+        }
+      } else {
+        console.error('Unknown error in streaming:', err);
+        setError('An unknown error occurred');
+      }
     } finally {
       setIsStreaming(false);
       updateLastMessage(
@@ -280,6 +326,7 @@ export const Result: FC<{
       );
       setQuery('');
       setIsProcessingQuery(false);
+      abortControllerRef.current = null;
     }
   };
 

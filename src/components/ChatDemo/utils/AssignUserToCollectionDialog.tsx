@@ -31,55 +31,44 @@ const AssignUserToCollectionDialog: React.FC<
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [assigning, setAssigning] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const fetchAllUsers = useCallback(
-    async (page: number = 1) => {
-      setLoading(true);
-      try {
-        const client = await getClient();
-        if (!client) {
-          throw new Error('Failed to get authenticated client');
-        }
-
-        const data = await client.usersOverview();
-        console.log('data:', data);
-        const usersWithId = data.results.map((user: Omit<User, 'id'>) => ({
-          ...user,
-          id: user.user_id,
-        }));
-        setAllUsers(usersWithId);
-        setFilteredUsers(usersWithId);
-        setTotalItems(data.total_entries || 0);
-      } catch (error) {
-        console.error('Error fetching users:', error);
-        toast({
-          title: 'Error',
-          description: 'Failed to fetch users. Please try again later.',
-          variant: 'destructive',
-        });
-      } finally {
-        setLoading(false);
+  const fetchAllUsers = useCallback(async () => {
+    setLoading(true);
+    try {
+      const client = await getClient();
+      if (!client) {
+        throw new Error('Failed to get authenticated client');
       }
-    },
-    [getClient, toast]
-  );
+
+      const data = await client.usersOverview();
+      const usersWithId = data.results.map((user: Omit<User, 'id'>) => ({
+        ...user,
+        id: user.user_id,
+      }));
+      setAllUsers(usersWithId);
+      setFilteredUsers(usersWithId);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch users. Please try again later.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [getClient, toast]);
 
   useEffect(() => {
     if (open) {
-      fetchAllUsers(1);
+      fetchAllUsers();
       setSelectedUserIds([]);
       setSearchQuery('');
     }
   }, [open, fetchAllUsers]);
-
-  useEffect(() => {
-    console.log('Selected User IDs:', selectedUserIds);
-  }, [selectedUserIds]);
 
   useEffect(() => {
     if (searchQuery.trim() === '') {
@@ -131,14 +120,11 @@ const AssignUserToCollectionDialog: React.FC<
         throw new Error('Failed to get authenticated client');
       }
 
-      const assignPromises = selectedUserIds.map((id) => {
-        const user = allUsers.find((u) => u.id === id);
-        return client.addUserToCollection(user ? user.id : id, collection_id);
-      });
+      const assignPromises = selectedUserIds.map((id) =>
+        client.addUserToCollection(id, collection_id)
+      );
 
-      const results = await Promise.all(assignPromises);
-
-      console.log('Assignment results:', results);
+      await Promise.all(assignPromises);
 
       toast({
         title: 'Success',
@@ -189,7 +175,6 @@ const AssignUserToCollectionDialog: React.FC<
             data={filteredUsers}
             columns={columns}
             itemsPerPage={filteredUsers.length}
-            currentData={filteredUsers.slice(0, 10)}
             onSelectAll={handleSelectAll}
             onSelectItem={handleSelectItem}
             selectedItems={selectedUserIds}
@@ -198,7 +183,6 @@ const AssignUserToCollectionDialog: React.FC<
             tableHeight="400px"
             currentPage={1}
             onPageChange={() => {}}
-            totalItems={filteredUsers.length}
             showPagination={false}
             loading={loading}
           />
