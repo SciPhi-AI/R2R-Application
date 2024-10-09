@@ -36,6 +36,7 @@ const NavItems: React.FC<NavItemsProps> = ({
     { path: '/documents', label: 'Documents' },
     { path: '/collections', label: 'Collections' },
     { path: '/chat', label: 'Chat' },
+    { path: '/search', label: 'Search' },
   ];
 
   const adminItems = [
@@ -95,8 +96,6 @@ export const Navbar = forwardRef<React.ElementRef<'nav'>, NavbarProps>(
       await logout();
       router.push('/auth/login');
     };
-
-    const isChatPage = router.pathname.includes('/chat');
 
     return (
       <nav ref={ref} className={`bg-zinc-900 shadow z-50`}>

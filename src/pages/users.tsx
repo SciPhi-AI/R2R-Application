@@ -1,5 +1,4 @@
-import { Loader } from 'lucide-react';
-import { UserSearch } from 'lucide-react';
+import { Loader, UserSearch } from 'lucide-react';
 import Link from 'next/link';
 import React, { useState, useEffect, useCallback } from 'react';
 
@@ -12,13 +11,14 @@ import { Button } from '@/components/ui/Button';
 import { useToast } from '@/components/ui/use-toast';
 import { useUserContext } from '@/context/UserContext';
 import { formatFileSize } from '@/lib/utils';
+import { User } from '@/types';
 
 const USERS_PER_PAGE = 10;
 
 const Index: React.FC = () => {
   const { getClient, pipeline } = useUserContext();
   const [isLoading, setIsLoading] = useState(true);
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedUserID, setSelectedUserID] = useState<string>();
   const [isUserInfoDialogOpen, setIsUserInfoDialogOpen] = useState(false);
@@ -37,10 +37,15 @@ const Index: React.FC = () => {
       setUsers(data.results || []);
     } catch (error) {
       console.error('Error fetching users:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch users. Please try again later.',
+        variant: 'destructive',
+      });
     } finally {
       setIsLoading(false);
     }
-  }, [getClient]);
+  }, [getClient, toast]);
 
   useEffect(() => {
     if (pipeline?.deploymentUrl) {
@@ -52,14 +57,18 @@ const Index: React.FC = () => {
     setCurrentPage(pageNumber);
   };
 
-  const columns: Column<any>[] = [
+  const columns: Column<User>[] = [
     {
       key: 'user_id',
       label: 'User ID',
       truncate: true,
       copyable: true,
-      renderCell: (user) =>
-        `${user.user_id.substring(0, 8)}...${user.user_id.slice(-8)}`,
+      renderCell: (user) => {
+        if (!user.user_id) {
+          return 'N/A';
+        }
+        return `${user.user_id.substring(0, 8)}...${user.user_id.slice(-8)}`;
+      },
     },
     {
       key: 'is_superuser',
@@ -118,17 +127,13 @@ const Index: React.FC = () => {
                     </Alert>
                   </div>
                 )}
-                <Table
+                <Table<User>
                   data={users}
-                  currentData={users.slice(
-                    (currentPage - 1) * USERS_PER_PAGE,
-                    currentPage * USERS_PER_PAGE
-                  )}
                   columns={columns}
                   itemsPerPage={USERS_PER_PAGE}
                   currentPage={currentPage}
                   onPageChange={handlePageChange}
-                  totalItems={users.length}
+                  loading={isLoading}
                   actions={(user) => (
                     <Button
                       onClick={() => {
