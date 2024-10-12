@@ -192,8 +192,9 @@ export const Result: FC<{
         stream: true,
         temperature: rag_temperature ?? undefined,
         top_p: rag_topP ?? undefined,
+        top_k: rag_topK ?? undefined,
         max_tokens_to_sample: rag_maxTokensToSample ?? undefined,
-        model: model !== 'null' && model !== null ? model : undefined,
+        model: model && model !== 'null' ? model : undefined,
       };
 
       const vectorSearchSettings: VectorSearchSettings = {

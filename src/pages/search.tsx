@@ -205,6 +205,7 @@ const SearchPage: React.FC = () => {
             showVectorSearch: true,
             showHybridSearch: true,
             showKGSearch: true,
+            showRagGeneration: false,
           }}
         />
 
