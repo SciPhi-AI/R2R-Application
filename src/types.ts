@@ -311,12 +311,23 @@ export interface SidebarProps {
   setMaxCommunityDescriptionLength: (value: number) => void;
   localSearchLimits?: Record<string, number>;
   setLocalSearchLimits: (limits: Record<string, number>) => void;
+
+  // RAG generation settings
+  temperature?: number;
+  setTemperature?: (temperature: number) => void;
+  topP?: number;
+  setTopP?: (topP: number) => void;
+  topK?: number;
+  setTopK?: (topK: number) => void;
+  maxTokensToSample?: number;
+  setMaxTokensToSample?: (maxTokens: number) => void;
 }
 
 export interface SidebarConfig {
   showVectorSearch: boolean;
   showKGSearch: boolean;
   showHybridSearch: boolean;
+  showRagGeneration: boolean;
 }
 
 export interface SingleSwitchProps {

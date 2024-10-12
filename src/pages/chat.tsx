@@ -239,10 +239,19 @@ const Index: React.FC = () => {
           setMaxCommunityDescriptionLength={setMaxCommunityDescriptionLength}
           localSearchLimits={localSearchLimits}
           setLocalSearchLimits={setLocalSearchLimits}
+          temperature={temperature}
+          setTemperature={setTemperature}
+          topP={topP}
+          setTopP={setTopP}
+          topK={top_k}
+          setTopK={setTop_k}
+          maxTokensToSample={max_tokens_to_sample}
+          setMaxTokensToSample={setMax_tokens_to_sample}
           config={{
             showVectorSearch: true,
             showHybridSearch: true,
             showKGSearch: true,
+            showRagGeneration: true,
           }}
         />
 

@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/accordion';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import ModelSelector from '@/components/ui/ModelSelector';
 import { MultiSelect } from '@/components/ui/multi-select';
 import {
   Select,
@@ -18,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useUserContext } from '@/context/UserContext';
 import { SidebarProps } from '@/types';
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -59,7 +61,16 @@ const Sidebar: React.FC<SidebarProps> = ({
   setMaxCommunityDescriptionLength,
   localSearchLimits,
   setLocalSearchLimits,
+  temperature,
+  setTemperature,
+  topP,
+  setTopP,
+  topK,
+  setTopK,
+  maxTokensToSample,
+  setMaxTokensToSample,
 }) => {
+  const { selectedModel, setSelectedModel } = useUserContext();
   return (
     <>
       <div
@@ -299,6 +310,65 @@ const Sidebar: React.FC<SidebarProps> = ({
                 </AccordionContent>
               </AccordionItem>
             )}
+
+            {/* RAG Generation Settings */}
+            {config.showRagGeneration &&
+              temperature !== undefined &&
+              setTemperature !== undefined &&
+              topP !== undefined &&
+              setTopP !== undefined &&
+              topK !== undefined &&
+              setTopK !== undefined &&
+              maxTokensToSample !== undefined &&
+              setMaxTokensToSample !== undefined && (
+                <AccordionItem value="ragGenerationSettings">
+                  <AccordionTrigger className="text-lg font-semibold text-indigo-400 pt-4">
+                    RAG Generation Settings
+                  </AccordionTrigger>
+                  <AccordionContent className="mx-1">
+                    <div className="flex flex-col gap-2">
+                      <Label htmlFor="model">Model</Label>
+                      <ModelSelector id="sidebar-model-selector" />
+                      <Label htmlFor="temperature">Temperature</Label>
+                      <Input
+                        id="temperature"
+                        type="number"
+                        value={temperature}
+                        onChange={(e) => setTemperature(Number(e.target.value))}
+                        min={0}
+                        max={1}
+                        step={0.1}
+                      />
+                      <Label htmlFor="topP">Top P</Label>
+                      <Input
+                        id="topP"
+                        type="number"
+                        value={topP}
+                        onChange={(e) => setTopP(Number(e.target.value))}
+                        min={0}
+                        max={1}
+                        step={0.1}
+                      />
+                      <Label htmlFor="topK">Top K</Label>f
+                      <Input
+                        id="topK"
+                        type="number"
+                        value={topK}
+                        onChange={(e) => setTopK(Number(e.target.value))}
+                      />
+                      <Label htmlFor="maxTokens">Max Tokens to Sample</Label>
+                      <Input
+                        id="maxTokens"
+                        type="number"
+                        value={maxTokensToSample}
+                        onChange={(e) =>
+                          setMaxTokensToSample(Number(e.target.value))
+                        }
+                      />
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              )}
           </Accordion>
 
           <br />
