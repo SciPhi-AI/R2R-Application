@@ -26,7 +26,7 @@ const predefinedModels = [
 const ModelSelector: React.FC<ModelSelectorProps> = ({ id }) => {
   const { selectedModel, setSelectedModel } = useUserContext();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [customModelValue, setCustomModelValue] = useState('');
+  const [customModelValue, setCustomModelValue] = useState<string | null>('');
   const [allModels, setAllModels] = useState(predefinedModels);
 
   useEffect(() => {}, [selectedModel, allModels]);
@@ -40,16 +40,16 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ id }) => {
   };
 
   const handleCustomModelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCustomModelValue(e.target.value);
+    setCustomModelValue(e.target.value || null);
   };
 
   const handleCustomModelSubmit = () => {
-    const trimmedValue = customModelValue.trim();
-    if (trimmedValue !== '') {
+    if (customModelValue !== null && customModelValue.trim() !== '') {
+      const trimmedValue = customModelValue.trim();
       const newModel = { value: trimmedValue, label: trimmedValue };
       setAllModels((prevModels) => [...prevModels, newModel]);
       setSelectedModel(trimmedValue);
-      setCustomModelValue('');
+      setCustomModelValue(null);
       setIsDialogOpen(false);
     } else {
       console.warn('Attempted to submit empty custom model name');
@@ -83,7 +83,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ id }) => {
           <div>
             <input
               type="text"
-              value={customModelValue}
+              value={customModelValue ?? ''}
               onChange={handleCustomModelChange}
               className="mt-2 block w-full py-2 px-3 border border-gray-300 bg-white rounded-2xl shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-black"
               placeholder="Enter custom model name"
