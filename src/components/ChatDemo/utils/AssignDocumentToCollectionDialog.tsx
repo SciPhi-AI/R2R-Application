@@ -32,6 +32,16 @@ const AssignDocumentToCollectionDialog: React.FC<
   const [pendingDocuments, setPendingDocuments] = useState<string[]>([]);
   const [selectedDocumentIds, setSelectedDocumentIds] = useState<string[]>([]);
   const [assigning, setAssigning] = useState(false);
+  const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>(
+    {}
+  );
+
+  const handleToggleColumn = useCallback(
+    (columnKey: string, isVisible: boolean) => {
+      setVisibleColumns((prev) => ({ ...prev, [columnKey]: isVisible }));
+    },
+    []
+  );
 
   const fetchAllDocuments = useCallback(async () => {
     setLoading(true);
@@ -75,6 +85,14 @@ const AssignDocumentToCollectionDialog: React.FC<
     if (open) {
       fetchAllDocuments();
       setSelectedDocumentIds([]);
+      const initialVisibility: Record<string, boolean> = {
+        title: true,
+        id: true,
+        user_id: true,
+        ingestion_status: true,
+        created_at: true,
+      };
+      setVisibleColumns(initialVisibility);
     }
   }, [open, fetchAllDocuments]);
 
@@ -166,6 +184,8 @@ const AssignDocumentToCollectionDialog: React.FC<
               selectedItems={selectedDocumentIds}
               showPagination={false}
               hideActions={true}
+              visibleColumns={visibleColumns}
+              onToggleColumn={handleToggleColumn}
             />
             <DialogFooter className="mt-4 flex justify-end space-x-2">
               <Button

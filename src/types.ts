@@ -97,7 +97,7 @@ export enum IngestionStatus {
   CHUNKING = 'chunking',
   EMBEDDING = 'embedding',
   STORING = 'storing',
-  FAILURE = 'failure',
+  FAILED = 'failed',
   SUCCESS = 'success',
 }
 

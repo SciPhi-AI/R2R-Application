@@ -78,9 +78,6 @@ function Table<T extends { [key: string]: any }>({
     initialSort || { key: '', order: 'asc' as const }
   );
   const [filters, setFilters] = useState(initialFilters || {});
-  const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>(
-    Object.fromEntries(columns.map((col) => [col.key, col.selected !== false]))
-  );
 
   const filteredAndSortedData = useMemo(() => {
     let result = [...data];
@@ -155,7 +152,6 @@ function Table<T extends { [key: string]: any }>({
     if (onFilter) {
       onFilter(newFilters);
     }
-    onPageChange(1);
   };
 
   const isAllSelected = currentPageData.every((item) =>
@@ -198,54 +194,7 @@ function Table<T extends { [key: string]: any }>({
 
   return (
     <div className="flex flex-col h-full">
-      {enableColumnToggle && (
-        <div className="flex justify-between items-center mb-4">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button color="light">
-                <SlidersHorizontal className="h-4 w-4" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent align="start">
-              <div className="grid gap-4 p-4">
-                <div className="space-y-2">
-                  <h4 className="font-medium leading-none">Toggle Columns</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Select which columns to display in the table.
-                  </p>
-                </div>
-                <div className="grid gap-2">
-                  {columns.map((col) => (
-                    <div key={col.key} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`column-toggle-${col.key}`}
-                        checked={visibleColumns[col.key]}
-                        onCheckedChange={(
-                          checked: boolean | 'indeterminate'
-                        ) => {
-                          if (typeof checked === 'boolean') {
-                            setVisibleColumns((prev) => ({
-                              ...prev,
-                              [col.key]: checked,
-                            }));
-                          }
-                        }}
-                      />
-                      <label
-                        htmlFor={`column-toggle-${col.key}`}
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                      >
-                        {col.label}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </PopoverContent>
-          </Popover>
-        </div>
-      )}
-
+      {/* Remove the column toggle popover as it's now handled in DocumentsTable */}
       <div
         className="overflow-x-auto"
         style={{ height: tableHeight, maxWidth: '100%' }}
@@ -262,122 +211,119 @@ function Table<T extends { [key: string]: any }>({
                   />
                 </th>
               )}
-              {columns.map((col) =>
-                visibleColumns[col.key] ? (
-                  <th
-                    key={col.key}
-                    className="px-4 py-2 text-white text-center overflow-hidden"
-                  >
-                    <div className="flex items-center justify-center">
-                      <span className="mr-2 truncate">{col.label}</span>
-                      {col.sortable && (
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger>
-                              <button
-                                onClick={() => handleSort(col.key)}
-                                className="p-1"
-                              >
-                                {sort.key === col.key &&
-                                sort.order === 'asc' ? (
-                                  <ChevronUpSquare className="h-4 w-4 hover:bg-zinc-500 cursor-pointer" />
-                                ) : (
-                                  <ChevronDownSquare className="h-4 w-4 hover:bg-zinc-500 cursor-pointer" />
-                                )}
-                              </button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>
-                                Sort by {col.label}{' '}
-                                {sort.order === 'asc'
-                                  ? 'Descending'
-                                  : 'Ascending'}
-                              </p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      )}
-                      {col.filterable && (
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Filter className="h-4 w-4 hover:bg-zinc-500 cursor-pointer ml-2" />
-                          </PopoverTrigger>
-                          <PopoverContent className="w-80 z-50">
-                            <div className="grid gap-4">
-                              <div className="space-y-2">
-                                <h4 className="font-medium leading-none">
-                                  Filter by {col.label}
-                                </h4>
-                              </div>
-                              {col.filterType === 'multiselect' ? (
-                                <div className="space-y-2">
-                                  {col.filterOptions?.map((option) => (
-                                    <div
-                                      key={option}
-                                      className="flex items-center"
-                                    >
-                                      <Checkbox
-                                        id={`filter-${col.key}-${option}`}
-                                        checked={(
-                                          filters[col.key] || []
-                                        ).includes(option)}
-                                        onCheckedChange={(
-                                          checked: boolean | 'indeterminate'
-                                        ) => {
-                                          const currentFilters =
-                                            filters[col.key] || [];
-                                          const newFilters =
-                                            checked === true
-                                              ? [...currentFilters, option]
-                                              : currentFilters.filter(
-                                                  (f: string) => f !== option
-                                                );
-                                          handleFilter(col.key, newFilters);
-                                        }}
-                                      />
-                                      <label
-                                        htmlFor={`filter-${col.key}-${option}`}
-                                        className="ml-2 text-sm"
-                                      >
-                                        {option}
-                                      </label>
-                                    </div>
-                                  ))}
-                                </div>
-                              ) : col.filterType === 'select' ? (
-                                <select
-                                  value={filters[col.key] || ''}
-                                  onChange={(e) =>
-                                    handleFilter(col.key, e.target.value)
-                                  }
-                                  className="w-full p-2 border rounded"
-                                >
-                                  <option value="">All</option>
-                                  {col.filterOptions?.map((option) => (
-                                    <option key={option} value={option}>
-                                      {option}
-                                    </option>
-                                  ))}
-                                </select>
+              {columns.map((col) => (
+                <th
+                  key={col.key}
+                  className="px-4 py-2 text-white text-center overflow-hidden"
+                >
+                  <div className="flex items-center justify-center">
+                    <span className="mr-2 truncate">{col.label}</span>
+                    {col.sortable && (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <button
+                              onClick={() => handleSort(col.key)}
+                              className="p-1"
+                            >
+                              {sort.key === col.key && sort.order === 'asc' ? (
+                                <ChevronUpSquare className="h-4 w-4 hover:bg-zinc-500 cursor-pointer" />
                               ) : (
-                                <input
-                                  type="text"
-                                  placeholder={`Filter ${col.label}...`}
-                                  value={filters[col.key] || ''}
-                                  onChange={(e) =>
-                                    handleFilter(col.key, e.target.value)
-                                  }
-                                  className="w-full p-2 border rounded"
-                                />
+                                <ChevronDownSquare className="h-4 w-4 hover:bg-zinc-500 cursor-pointer" />
                               )}
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>
+                              Sort by {col.label}{' '}
+                              {sort.order === 'asc'
+                                ? 'Descending'
+                                : 'Ascending'}
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
+                    {col.filterable && (
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Filter className="h-4 w-4 hover:bg-zinc-500 cursor-pointer ml-2" />
+                        </PopoverTrigger>
+                        <PopoverContent className="w-80 z-50">
+                          <div className="grid gap-4">
+                            <div className="space-y-2">
+                              <h4 className="font-medium leading-none">
+                                Filter by {col.label}
+                              </h4>
                             </div>
-                          </PopoverContent>
-                        </Popover>
-                      )}
-                    </div>
-                  </th>
-                ) : null
-              )}
+                            {col.filterType === 'multiselect' ? (
+                              <div className="space-y-2">
+                                {col.filterOptions?.map((option) => (
+                                  <div
+                                    key={option}
+                                    className="flex items-center"
+                                  >
+                                    <Checkbox
+                                      id={`filter-${col.key}-${option}`}
+                                      checked={(
+                                        filters[col.key] || []
+                                      ).includes(option)}
+                                      onCheckedChange={(
+                                        checked: boolean | 'indeterminate'
+                                      ) => {
+                                        const currentFilters =
+                                          filters[col.key] || [];
+                                        const newFilters =
+                                          checked === true
+                                            ? [...currentFilters, option]
+                                            : currentFilters.filter(
+                                                (f: string) => f !== option
+                                              );
+                                        handleFilter(col.key, newFilters);
+                                      }}
+                                    />
+                                    <label
+                                      htmlFor={`filter-${col.key}-${option}`}
+                                      className="ml-2 text-sm"
+                                    >
+                                      {option}
+                                    </label>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : col.filterType === 'select' ? (
+                              <select
+                                value={filters[col.key] || ''}
+                                onChange={(e) =>
+                                  handleFilter(col.key, e.target.value)
+                                }
+                                className="w-full p-2 border rounded"
+                              >
+                                <option value="">All</option>
+                                {col.filterOptions?.map((option) => (
+                                  <option key={option} value={option}>
+                                    {option}
+                                  </option>
+                                ))}
+                              </select>
+                            ) : (
+                              <input
+                                type="text"
+                                placeholder={`Filter ${col.label}...`}
+                                value={filters[col.key] || ''}
+                                onChange={(e) =>
+                                  handleFilter(col.key, e.target.value)
+                                }
+                                className="w-full p-2 border rounded"
+                              />
+                            )}
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+                    )}
+                  </div>
+                </th>
+              ))}
               {actions && (
                 <th className="w-[120px] px-4 py-2 text-white text-right">
                   Actions
@@ -398,18 +344,16 @@ function Table<T extends { [key: string]: any }>({
                     />
                   </td>
                 )}
-                {columns.map((col) =>
-                  visibleColumns[col.key] ? (
-                    <td
-                      key={col.key}
-                      className="px-4 py-2 text-white text-center overflow-hidden"
-                    >
-                      <div className="overflow-x-auto whitespace-nowrap">
-                        {renderCellContent(item, col)}
-                      </div>
-                    </td>
-                  ) : null
-                )}
+                {columns.map((col) => (
+                  <td
+                    key={col.key}
+                    className="px-4 py-2 text-white text-center overflow-hidden"
+                  >
+                    <div className="overflow-x-auto whitespace-nowrap">
+                      {renderCellContent(item, col)}
+                    </div>
+                  </td>
+                ))}
                 {actions && (
                   <td className="w-[110px] px-4 py-2 text-white text-right">
                     {actions(item)}
@@ -420,9 +364,12 @@ function Table<T extends { [key: string]: any }>({
             {Array.from({ length: emptyRowsCount }).map((_, index) => (
               <tr key={`empty-${index}`} style={{ height: '50px' }}>
                 {onSelectItem && <td></td>}
-                {columns.map((col) =>
-                  visibleColumns[col.key] ? <td key={col.key}></td> : null
-                )}
+                {columns.map((col) => (
+                  <td
+                    key={col.key}
+                    className="px-4 py-2 text-white text-center overflow-hidden"
+                  ></td>
+                ))}
                 {actions && <td></td>}
               </tr>
             ))}
