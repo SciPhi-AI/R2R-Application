@@ -7,14 +7,12 @@ export const setColor = (keyword: string): string => {
   switch (keyword) {
     case 'success':
       return 'bg-emerald-400';
-    case 'failure':
+    case 'failed':
       return 'bg-red-400';
     case 'Search':
       return 'bg-sky-500';
     case 'Embedding':
       return 'bg-orange-600';
-    case 'RAG':
-      return 'bg-indigo-400';
     case 'WARNING':
       return 'bg-amber-400';
     default:

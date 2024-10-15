@@ -30,6 +30,8 @@ interface DocumentsTableProps {
   onSelectItem: (itemId: string, selected: boolean) => void;
   selectedItems: string[];
   hideActions?: boolean; // Optional prop to hide actions if needed
+  visibleColumns: Record<string, boolean>;
+  onToggleColumn: (columnKey: string, isVisible: boolean) => void;
 }
 
 const DocumentsTable: React.FC<DocumentsTableProps> = ({
@@ -53,34 +55,35 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
     order: 'asc' | 'desc';
   }>({ key: 'title', order: 'asc' });
   const [filters, setFilters] = useState<Record<string, any>>({
-    ingestion_status: ['success', 'failure', 'pending'],
+    ingestion_status: ['success', 'failed', 'pending'],
   });
-
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
-
   const [searchQuery, setSearchQuery] = useState('');
-
   const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>(
     {}
   );
 
+  const itemsPerPage = 10;
+
   useEffect(() => {
-    // Initialize visibleColumns based on the columns definition
     const initialVisibility: Record<string, boolean> = {};
     columns.forEach((col) => {
       initialVisibility[col.key] = col.selected !== false;
     });
     setVisibleColumns(initialVisibility);
-  }, [documents]); // Adjust the dependency array as needed
+  }, []);
+
+  const handleToggleColumn = (columnKey: string, isVisible: boolean) => {
+    setVisibleColumns((prev) => ({ ...prev, [columnKey]: isVisible }));
+  };
 
   const mapIngestionStatus = (status: string): IngestionStatus => {
     const lowerStatus = status?.toLowerCase();
     if (lowerStatus === 'success') {
       return IngestionStatus.SUCCESS;
     }
-    if (lowerStatus === 'failure') {
-      return IngestionStatus.FAILURE;
+    if (lowerStatus === 'failed') {
+      return IngestionStatus.FAILED;
     }
     return IngestionStatus.PENDING;
   };
@@ -119,14 +122,14 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
       label: 'Ingestion',
       filterable: true,
       filterType: 'multiselect',
-      filterOptions: ['success', 'failure', 'pending'],
+      filterOptions: ['success', 'failed', 'pending'],
       renderCell: (doc) => {
         let variant: 'success' | 'destructive' | 'pending' = 'pending';
         switch (doc.ingestion_status) {
           case IngestionStatus.SUCCESS:
             variant = 'success';
             break;
-          case IngestionStatus.FAILURE:
+          case IngestionStatus.FAILED:
             variant = 'destructive';
             break;
           case IngestionStatus.PENDING:
@@ -141,14 +144,14 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
       label: 'KG Extraction',
       filterable: true,
       filterType: 'multiselect',
-      filterOptions: ['success', 'failure', 'pending'],
+      filterOptions: ['success', 'failed', 'pending'],
       renderCell: (doc) => {
         let variant: 'success' | 'destructive' | 'pending' = 'pending';
         switch (doc.kg_extraction_status) {
           case IngestionStatus.SUCCESS:
             variant = 'success';
             break;
-          case IngestionStatus.FAILURE:
+          case IngestionStatus.FAILED:
             variant = 'destructive';
             break;
           case IngestionStatus.PENDING:
@@ -223,14 +226,6 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
     );
   }, [searchQuery, mappedDocuments]);
 
-  // Handle column visibility changes
-  const handleToggleColumn = (columnKey: string, isVisible: boolean) => {
-    setVisibleColumns((prev) => ({
-      ...prev,
-      [columnKey]: isVisible,
-    }));
-  };
-
   return (
     <div>
       {loading ? (
@@ -240,7 +235,7 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
       ) : (
         <>
           <div className="flex justify-between items-center mb-4">
-            {/* Left side: Toggle columns button */}
+            {/* Column toggle popover */}
             <Popover>
               <PopoverTrigger asChild>
                 <Button color="light">
@@ -328,7 +323,7 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
 
           <Table
             data={filteredDocuments}
-            columns={columns.filter((col) => visibleColumns[col.key])}
+            columns={columns.filter((col) => visibleColumns[col.key] !== false)}
             onSelectAll={handleSelectAllInternal}
             onSelectItem={handleSelectItemInternal}
             selectedItems={selectedItems}

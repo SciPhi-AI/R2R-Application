@@ -78,7 +78,7 @@ const CollectionIdPage: React.FC = () => {
             .filter(
               (doc: DocumentInfoType) =>
                 doc.ingestion_status !== IngestionStatus.SUCCESS &&
-                doc.ingestion_status !== IngestionStatus.FAILURE
+                doc.ingestion_status !== IngestionStatus.FAILED
             )
             .map((doc: DocumentInfoType) => doc.id)
         );
@@ -128,7 +128,7 @@ const CollectionIdPage: React.FC = () => {
               (doc: DocumentInfoType) =>
                 doc.id === id &&
                 doc.ingestion_status !== IngestionStatus.SUCCESS &&
-                doc.ingestion_status !== IngestionStatus.FAILURE
+                doc.ingestion_status !== IngestionStatus.FAILED
             )
           )
         );
@@ -221,13 +221,13 @@ const CollectionIdPage: React.FC = () => {
       label: 'Ingestion',
       filterable: true,
       filterType: 'multiselect',
-      filterOptions: ['success', 'failure', 'pending'],
+      filterOptions: ['success', 'failed', 'pending'],
       renderCell: (doc) => (
         <Badge
           variant={
             doc.ingestion_status === IngestionStatus.SUCCESS
               ? 'success'
-              : doc.ingestion_status === IngestionStatus.FAILURE
+              : doc.ingestion_status === IngestionStatus.FAILED
                 ? 'destructive'
                 : 'pending'
           }
@@ -241,13 +241,13 @@ const CollectionIdPage: React.FC = () => {
       label: 'KG Extraction',
       filterable: true,
       filterType: 'multiselect',
-      filterOptions: ['success', 'failure', 'pending'],
+      filterOptions: ['success', 'failed', 'pending'],
       renderCell: (doc) => (
         <Badge
           variant={
             doc.kg_extraction_status === 'success'
               ? 'success'
-              : doc.kg_extraction_status === 'failure'
+              : doc.kg_extraction_status === 'failed'
                 ? 'destructive'
                 : 'pending'
           }

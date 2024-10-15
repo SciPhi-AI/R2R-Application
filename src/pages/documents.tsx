@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 
 import DocumentsTable from '@/components/ChatDemo/DocumentsTable';
 import Layout from '@/components/Layout';
@@ -11,6 +11,9 @@ const Index: React.FC = () => {
   const [documents, setDocuments] = useState<DocumentInfoType[]>([]);
   const [pendingDocuments, setPendingDocuments] = useState<string[]>([]);
   const [selectedDocumentIds, setSelectedDocumentIds] = useState<string[]>([]);
+  const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>(
+    {}
+  );
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchAllDocuments = useCallback(async () => {
@@ -31,7 +34,13 @@ const Index: React.FC = () => {
       let totalEntries = 0;
 
       do {
-        const data = await client.documentsOverview(undefined, offset, limit);
+        const data = await client.documentsOverview();
+        console.log(
+          'Fetched documents:',
+          data,
+          'Time:',
+          new Date().toLocaleTimeString()
+        );
         allDocuments = allDocuments.concat(data.results);
         totalEntries = data.total_entries;
         offset += limit;
@@ -61,7 +70,7 @@ const Index: React.FC = () => {
       .filter(
         (doc) =>
           doc.ingestion_status !== IngestionStatus.SUCCESS &&
-          doc.ingestion_status !== IngestionStatus.FAILURE
+          doc.ingestion_status !== IngestionStatus.FAILED
       )
       .map((doc) => doc.id);
     setPendingDocuments(pending);
@@ -79,26 +88,56 @@ const Index: React.FC = () => {
   );
 
   const handleSelectItem = useCallback((itemId: string, selected: boolean) => {
-    setSelectedDocumentIds((prev) =>
-      selected ? [...prev, itemId] : prev.filter((id) => id !== itemId)
-    );
+    setSelectedDocumentIds((prev) => {
+      if (selected) {
+        return [...prev, itemId];
+      } else {
+        return prev.filter((id) => id !== itemId);
+      }
+    });
   }, []);
+
+  const handleToggleColumn = useCallback(
+    (columnKey: string, isVisible: boolean) => {
+      setVisibleColumns((prev) => ({ ...prev, [columnKey]: isVisible }));
+    },
+    []
+  );
+
+  const memoizedDocumentsTable = useMemo(
+    () => (
+      <DocumentsTable
+        documents={documents}
+        loading={loading}
+        onRefresh={refetchDocuments}
+        pendingDocuments={pendingDocuments}
+        setPendingDocuments={setPendingDocuments}
+        onSelectAll={handleSelectAll}
+        onSelectItem={handleSelectItem}
+        selectedItems={selectedDocumentIds}
+        visibleColumns={visibleColumns}
+        onToggleColumn={handleToggleColumn}
+      />
+    ),
+    [
+      documents,
+      loading,
+      refetchDocuments,
+      pendingDocuments,
+      handleSelectAll,
+      handleSelectItem,
+      selectedDocumentIds,
+      visibleColumns,
+      handleToggleColumn,
+    ]
+  );
 
   return (
     <Layout pageTitle="Documents">
       <main className="w-full flex flex-col container h-screen-[calc(100%-4rem)]">
         <div className="relative flex-grow bg-zinc-900 mt-[4rem] sm:mt-[4rem]">
           <div className="mx-auto max-w-6xl mb-12 mt-4 p-4 h-full">
-            <DocumentsTable
-              documents={documents}
-              loading={loading}
-              onRefresh={refetchDocuments}
-              pendingDocuments={pendingDocuments}
-              setPendingDocuments={setPendingDocuments}
-              onSelectAll={handleSelectAll}
-              onSelectItem={handleSelectItem}
-              selectedItems={selectedDocumentIds}
-            />
+            {memoizedDocumentsTable}
           </div>
         </div>
       </main>
