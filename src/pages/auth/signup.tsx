@@ -22,10 +22,10 @@ const LoginPage: React.FC = () => {
   };
 
   useEffect(() => {
-    const url = process.env.NEXT_PUBLIC_R2R_DEPLOYMENT_URL || 'http://localhost:7272';
+    const url =
+      process.env.NEXT_PUBLIC_R2R_DEPLOYMENT_URL || 'http://localhost:7272';
     setDeploymentUrl(url);
   }, []);
-
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

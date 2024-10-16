@@ -26,7 +26,8 @@ const LoginPage: React.FC = () => {
   const [sanitizedDeploymentUrl, setSanitizedDeploymentUrl] = useState('');
 
   useEffect(() => {
-    const deploymentUrl = process.env.NEXT_PUBLIC_R2R_DEPLOYMENT_URL || 'http://localhost:7272';
+    const deploymentUrl =
+      process.env.NEXT_PUBLIC_R2R_DEPLOYMENT_URL || 'http://localhost:7272';
     setRawDeploymentUrl(deploymentUrl);
     setSanitizedDeploymentUrl(deploymentUrl);
   }, []);
@@ -124,21 +125,22 @@ const LoginPage: React.FC = () => {
   };
 
   const sanitizeUrl = (url: string): string => {
-    const defaultUrl = process.env.NEXT_PUBLIC_R2R_DEPLOYMENT_URL || 'http://localhost:7272';
+    const defaultUrl =
+      process.env.NEXT_PUBLIC_R2R_DEPLOYMENT_URL || 'http://localhost:7272';
     let sanitized = url.trim();
-  
+
     if (!sanitized || sanitized === 'http://' || sanitized === 'https://') {
       return defaultUrl;
     }
-  
+
     sanitized = sanitized.replace(/\/+$/, '');
-  
+
     if (!/^https?:\/\//i.test(sanitized)) {
       sanitized = 'http://' + sanitized;
     }
-  
+
     sanitized = sanitized.replace(/(https?:\/\/)|(\/)+/g, '$1$2');
-  
+
     return sanitized;
   };
 
