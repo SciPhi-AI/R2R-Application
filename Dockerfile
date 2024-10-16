@@ -14,6 +14,8 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 
 # Build the Next.js application
+ARG NEXT_PUBLIC_R2R_DEPLOYMENT_URL
+ENV NEXT_PUBLIC_R2R_DEPLOYMENT_URL=${NEXT_PUBLIC_R2R_DEPLOYMENT_URL}
 RUN pnpm build
 
 # Production stage

@@ -13,12 +13,6 @@ import { supabase } from '@/lib/supabase';
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('admin@example.com');
   const [password, setPassword] = useState('change_me_immediately');
-  const [rawDeploymentUrl, setRawDeploymentUrl] = useState(
-    'http://localhost:7272'
-  );
-  const [sanitizedDeploymentUrl, setSanitizedDeploymentUrl] = useState(
-    'http://localhost:7272'
-  );
   const [showPassword, setShowPassword] = useState(false);
   const [showDeploymentUrl, setShowDeploymentUrl] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,6 +21,15 @@ const LoginPage: React.FC = () => {
   const [loginSuccess, setLoginSuccess] = useState(false);
   const { login, loginWithToken, authState } = useUserContext();
   const router = useRouter();
+
+  const [rawDeploymentUrl, setRawDeploymentUrl] = useState('');
+  const [sanitizedDeploymentUrl, setSanitizedDeploymentUrl] = useState('');
+
+  useEffect(() => {
+    const deploymentUrl = process.env.NEXT_PUBLIC_R2R_DEPLOYMENT_URL || 'http://localhost:7272';
+    setRawDeploymentUrl(deploymentUrl);
+    setSanitizedDeploymentUrl(deploymentUrl);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -121,20 +124,21 @@ const LoginPage: React.FC = () => {
   };
 
   const sanitizeUrl = (url: string): string => {
+    const defaultUrl = process.env.NEXT_PUBLIC_R2R_DEPLOYMENT_URL || 'http://localhost:7272';
     let sanitized = url.trim();
-
+  
     if (!sanitized || sanitized === 'http://' || sanitized === 'https://') {
-      return 'http://localhost:7272';
+      return defaultUrl;
     }
-
+  
     sanitized = sanitized.replace(/\/+$/, '');
-
+  
     if (!/^https?:\/\//i.test(sanitized)) {
       sanitized = 'http://' + sanitized;
     }
-
+  
     sanitized = sanitized.replace(/(https?:\/\/)|(\/)+/g, '$1$2');
-
+  
     return sanitized;
   };
 

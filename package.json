@@ -2,7 +2,6 @@
   "name": "r2r-dashboard",
   "version": "1.0.0",
   "private": true,
-  "proxy": "http://localhost:7272",
   "scripts": {
     "dev": "NEXT_PUBLIC_CLOUD_MODE=false next dev -p 3005",
     "dev:cloud": "NEXT_PUBLIC_CLOUD_MODE=true next dev",

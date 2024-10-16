@@ -1,6 +1,6 @@
 import { Eye, EyeOff } from 'lucide-react';
 import { useRouter } from 'next/router';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/Button';
@@ -11,7 +11,7 @@ const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmedPassword, setConfirmedPassword] = useState('');
-  const [deploymentUrl, setDeploymentUrl] = useState('http://localhost:7272');
+  const [deploymentUrl, setDeploymentUrl] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [passwordsMatch, setPasswordsMatch] = useState(true);
   const { login, register } = useUserContext();
@@ -20,6 +20,12 @@ const LoginPage: React.FC = () => {
   const handleLoginClick = () => {
     router.push('/');
   };
+
+  useEffect(() => {
+    const url = process.env.NEXT_PUBLIC_R2R_DEPLOYMENT_URL || 'http://localhost:7272';
+    setDeploymentUrl(url);
+  }, []);
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
