@@ -35,12 +35,6 @@ const Index: React.FC = () => {
 
       do {
         const data = await client.documentsOverview();
-        console.log(
-          'Fetched documents:',
-          data,
-          'Time:',
-          new Date().toLocaleTimeString()
-        );
         allDocuments = allDocuments.concat(data.results);
         totalEntries = data.total_entries;
         offset += limit;

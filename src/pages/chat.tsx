@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
 import { useUserContext } from '@/context/UserContext';
+import { Message } from '@/types';
 
 interface Collection {
   collection_id: string;
@@ -30,11 +31,10 @@ const Index: React.FC = () => {
   const [selectedCollectionIds, setSelectedCollectionIds] = useState<string[]>(
     []
   );
-  const [kgSearchType, setKgSearchType] = useState<'local' | 'global'>('local');
-  const [
-    max_llm_queries_for_global_search,
-    setMax_llm_queries_for_global_search,
-  ] = useState(100);
+  const [selectedConversationId, setSelectedConversationId] = useState<
+    string | null
+  >(null);
+  const [messages, setMessages] = useState<Message[]>([]);
 
   const [searchLimit, setSearchLimit] = useState<number>(10);
   const [searchFilters, setSearchFilters] = useState('{}');
@@ -198,6 +198,26 @@ const Index: React.FC = () => {
     setMode(newMode);
   };
 
+  const handleConversationSelect = async (conversationId: string) => {
+    setSelectedConversationId(conversationId);
+    try {
+      const client = await getClient();
+      if (!client) {
+        throw new Error('Failed to get authenticated client');
+      }
+      const response = await client.getConversation(conversationId);
+      const fetchedMessages = response.results.map(
+        ([id, message]: [string, Message]) => ({
+          ...message,
+          id,
+        })
+      );
+      setMessages(fetchedMessages);
+    } catch (error) {
+      console.error('Error fetching conversation:', error);
+    }
+  };
+
   return (
     <Layout pageTitle="Chat" includeFooter={false}>
       <div className="flex flex-col h-screen-[calc(100%-4rem)] overflow-hidden">
@@ -210,10 +230,6 @@ const Index: React.FC = () => {
           setSearchLimit={setSearchLimit}
           searchFilters={searchFilters}
           setSearchFilters={setSearchFilters}
-          kgSearchType={kgSearchType}
-          setKgSearchType={setKgSearchType}
-          max_llm_queries_for_global_search={maxLlmQueries}
-          setMax_llm_queries_for_global_search={setMaxLlmQueries}
           collections={collections}
           selectedCollectionIds={selectedCollectionIds}
           setSelectedCollectionIds={setSelectedCollectionIds}
@@ -250,9 +266,11 @@ const Index: React.FC = () => {
           config={{
             showVectorSearch: true,
             showHybridSearch: true,
-            showKGSearch: true,
+            showKGSearch: false,
             showRagGeneration: true,
+            showConversations: true,
           }}
+          onConversationSelect={handleConversationSelect}
         />
 
         {/* top_k={top_k}
@@ -295,10 +313,6 @@ const Index: React.FC = () => {
                   pipelineUrl={pipeline?.deploymentUrl || ''}
                   search_limit={searchLimit}
                   search_filters={safeJsonParse(searchFilters)}
-                  kg_search_type={kgSearchType}
-                  max_llm_queries_for_global_search={
-                    max_llm_queries_for_global_search
-                  }
                   rag_temperature={temperature}
                   rag_topP={topP}
                   rag_topK={top_k}
@@ -310,6 +324,10 @@ const Index: React.FC = () => {
                   mode={mode}
                   selectedCollectionIds={selectedCollectionIds}
                   onAbortRequest={handleAbortRequest}
+                  messages={messages}
+                  setMessages={setMessages}
+                  selectedConversationId={selectedConversationId}
+                  setSelectedConversationId={setSelectedConversationId}
                 />
               </div>
 

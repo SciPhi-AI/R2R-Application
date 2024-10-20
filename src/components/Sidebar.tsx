@@ -1,5 +1,7 @@
+import { off } from 'process';
+
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import SingleSwitch from '@/components/ChatDemo/SingleSwitch';
 import {
@@ -21,6 +23,11 @@ import {
 } from '@/components/ui/select';
 import { useUserContext } from '@/context/UserContext';
 import { SidebarProps } from '@/types';
+
+interface Conversation {
+  conversation_id: string;
+  created_at: string;
+}
 
 const Sidebar: React.FC<SidebarProps> = ({
   isOpen,
@@ -51,10 +58,6 @@ const Sidebar: React.FC<SidebarProps> = ({
   setFullTextLimit,
   rrfK,
   setRrfK,
-  kgSearchType,
-  setKgSearchType,
-  max_llm_queries_for_global_search,
-  setMax_llm_queries_for_global_search,
   kgSearchLevel,
   setKgSearchLevel,
   maxCommunityDescriptionLength,
@@ -69,8 +72,30 @@ const Sidebar: React.FC<SidebarProps> = ({
   setTopK,
   maxTokensToSample,
   setMaxTokensToSample,
+  onConversationSelect,
 }) => {
   const { selectedModel, setSelectedModel } = useUserContext();
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const { getClient } = useUserContext();
+
+  useEffect(() => {
+    const fetchConversations = async () => {
+      try {
+        const client = await getClient();
+        if (!client) {
+          throw new Error('Failed to get authenticated client');
+        }
+        const response = await client.conversationsOverview(undefined, 0, 500);
+        console.log('Conversations:', response);
+        setConversations(response.results);
+      } catch (error) {
+        console.error('Error fetching collections:', error);
+      }
+    };
+
+    fetchConversations();
+  }, [getClient]);
+
   return (
     <>
       <div
@@ -80,6 +105,32 @@ const Sidebar: React.FC<SidebarProps> = ({
         }}
       >
         <div className="p-4 overflow-y-auto h-[calc(100%-var(--header-height))]">
+          {/* Conversation History */}
+          {config.showConversations && (
+            <div>
+              <div className="mt-4">
+                <h3 className="text-lg font-semibold text-indigo-400">
+                  Conversations
+                </h3>
+                <div className="max-h-60 overflow-y-auto">
+                  {conversations.map((conversation) => (
+                    <div
+                      key={conversation.conversation_id}
+                      className="p-2 hover:bg-zinc-700 cursor-pointer"
+                      onClick={() => {
+                        if (onConversationSelect) {
+                          onConversationSelect(conversation.conversation_id);
+                        }
+                      }}
+                    >
+                      {new Date(conversation.created_at).toLocaleString()}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
           <h3 className="text-lg font-semibold text-indigo-400 mt-2">
             Search Settings
           </h3>
@@ -237,38 +288,6 @@ const Sidebar: React.FC<SidebarProps> = ({
                 </AccordionTrigger>
                 <AccordionContent className="mx-1">
                   <div className="space-y-2">
-                    <div className="flex flex-col gap-2">
-                      <Label htmlFor="kg_search_type">KG Search Type</Label>
-                      <Select
-                        value={kgSearchType}
-                        onValueChange={setKgSearchType}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select KG search type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="local">Local</SelectItem>
-                          {/* <SelectItem value="global">Global</SelectItem> */}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {/* <div className="flex flex-col gap-2">
-                      <Label htmlFor="max_llm_queries_for_global_search">
-                        Max LLM Queries for Global Search
-                      </Label>
-                      <Input
-                        id="max_llm_queries_for_global_search"
-                        type="number"
-                        value={max_llm_queries_for_global_search}
-                        onChange={(e) =>
-                          setMax_llm_queries_for_global_search(
-                            Number(e.target.value)
-                          )
-                        }
-                      />
-                    </div> */}
-
                     {/* <div className="flex flex-col gap-2">
                       <Label htmlFor="kgSearchLevel">KG Search Level</Label>
                       <Input
