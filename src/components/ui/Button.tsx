@@ -76,7 +76,7 @@ type AnchorAttributes = Omit<
 >;
 
 interface ButtonWithTooltipProps extends ButtonProps {
-  tooltip?: string;
+  tooltip?: React.ReactNode;
 }
 
 const Button = React.forwardRef<

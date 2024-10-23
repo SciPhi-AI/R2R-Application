@@ -377,7 +377,7 @@ function Table<T extends { [key: string]: any }>({
         </table>
       </div>
       {showPagination && (
-        <div className="mt-4">
+        <div>
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}

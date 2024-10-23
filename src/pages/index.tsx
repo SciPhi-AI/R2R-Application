@@ -6,6 +6,7 @@ import {
   FileSearch,
   Users,
   Settings,
+  PanelsTopLeft,
 } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
@@ -129,7 +130,7 @@ const HomePage = () => {
                   <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
                     <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
                       Have a feature request or found a bug? Create a Github
-                      issue and help us improve the R2R dashboard!
+                      issue and help us improve R2R!
                     </p>
                     <div className="flex space-x-4">
                       <Button
@@ -265,6 +266,74 @@ const HomePage = () => {
                       </div>
                     </CardContent>
                   </Card>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Card className="w-full sm:w-1/2 flex flex-col">
+                    <CardHeader className="flex flex-row items-center space-x-2">
+                      <Image
+                        src="/images/hatchet-logo.svg"
+                        alt="Python Logo"
+                        width={30}
+                        height={30}
+                      />
+                      <CardTitle>Hatchet</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex flex-col justify-end flex-grow">
+                      <div className="flex flex-row space-x-2">
+                        <Button
+                          className="rounded-md py-1 px-3"
+                          color="light"
+                          disabled={
+                            !process.env.NEXT_PUBLIC_HATCHET_DASHBOARD_URL
+                          }
+                          tooltip={
+                            !process.env.NEXT_PUBLIC_HATCHET_DASHBOARD_URL ? (
+                              <div>
+                                Hatchet Dashboard Deployment URL unavailable.
+                                <br />
+                                <a
+                                  href="https://r2r-docs.sciphi.ai/cookbooks/orchestration"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-500 hover:text-blue-600 underline"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  Learn more about orchestration with R2R Full.
+                                </a>
+                              </div>
+                            ) : undefined
+                          }
+                        >
+                          <div className="flex items-center">
+                            <PanelsTopLeft size={20} className="mr-2" />
+                            <span>Dashboard</span>
+                          </div>
+                        </Button>
+                        <Button
+                          className="rounded-md py-1 px-3"
+                          color="light"
+                          onClick={() =>
+                            window.open(
+                              'https://github.com/hatchet-dev/hatchet',
+                              '_blank'
+                            )
+                          }
+                        >
+                          <div className="flex items-center">
+                            <Image
+                              src="/images/github-mark.svg"
+                              alt="GitHub Logo"
+                              width={20}
+                              height={20}
+                              className="mr-2"
+                            />
+                            <span>View on GitHub</span>
+                          </div>
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <div className="w-full sm:w-1/2"></div>
                 </div>
               </div>
             </div>
