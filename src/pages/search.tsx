@@ -4,6 +4,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import useSwitchManager from '@/components/ChatDemo/SwitchManager';
 import Layout from '@/components/Layout';
 import Sidebar from '@/components/Sidebar';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import { Button } from '@/components/ui/Button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useUserContext } from '@/context/UserContext';
@@ -45,8 +51,6 @@ const SearchPage: React.FC = () => {
   const [semanticWeight, setSemanticWeight] = useState<number>();
   const [fullTextLimit, setFullTextLimit] = useState<number>();
   const [rrfK, setRrfK] = useState<number>();
-  const [kgSearchType, setKgSearchType] = useState<'global' | 'local'>('local');
-  const [maxLlmQueries, setMaxLlmQueries] = useState<number>();
   const [kgSearchLevel, setKgSearchLevel] = useState<number | null>(null);
   const [maxCommunityDescriptionLength, setMaxCommunityDescriptionLength] =
     useState<number>(100);
@@ -69,7 +73,7 @@ const SearchPage: React.FC = () => {
     );
     initializeSwitch(
       'knowledge_graph_search',
-      false,
+      true,
       'Knowledge Graph Search',
       'Please construct a Knowledge Graph to use this feature.'
     );
@@ -136,8 +140,6 @@ const SearchPage: React.FC = () => {
 
       const kgSearchSettings = {
         use_kg_search: switches.knowledge_graph_search.checked,
-        kg_search_type: kgSearchType,
-        // max_llm_queries_for_global_search: maxLlmQueries,
         // kg_search_level: kgSearchLevel,
         // max_community_description_length: maxCommunityDescriptionLength,
         // local_search_limits: localSearchLimits,
@@ -172,10 +174,6 @@ const SearchPage: React.FC = () => {
           setSearchLimit={setSearchLimit}
           searchFilters={searchFilters}
           setSearchFilters={setSearchFilters}
-          kgSearchType={kgSearchType}
-          setKgSearchType={setKgSearchType}
-          max_llm_queries_for_global_search={maxLlmQueries}
-          setMax_llm_queries_for_global_search={setMaxLlmQueries}
           collections={collections}
           selectedCollectionIds={selectedCollectionIds}
           setSelectedCollectionIds={setSelectedCollectionIds}
@@ -204,7 +202,7 @@ const SearchPage: React.FC = () => {
           config={{
             showVectorSearch: true,
             showHybridSearch: true,
-            showKGSearch: true,
+            showKGSearch: false,
             showRagGeneration: false,
           }}
         />
@@ -258,14 +256,26 @@ const SearchPage: React.FC = () => {
                           className="mb-4 p-4 bg-zinc-800 rounded"
                         >
                           <h3 className="text-lg font-semibold mb-2">
-                            {result.text.substring(0, 50)}...
+                            {result.metadata?.title || `Result ${index + 1}`}
                           </h3>
-                          <p className="text-sm">
+                          <p className="text-sm mb-2">{result.text}</p>
+                          <p className="text-sm mb-2">
                             Score: {result.score.toFixed(4)}
                           </p>
-                          <pre className="mt-2 text-xs overflow-auto">
-                            {JSON.stringify(result, null, 2)}
-                          </pre>
+                          <Accordion
+                            type="single"
+                            collapsible
+                            className="w-full"
+                          >
+                            <AccordionItem value={`item-${index}`}>
+                              <AccordionTrigger>View Details</AccordionTrigger>
+                              <AccordionContent>
+                                <pre className="text-xs overflow-auto bg-zinc-900 p-4 rounded">
+                                  {JSON.stringify(result, null, 2)}
+                                </pre>
+                              </AccordionContent>
+                            </AccordionItem>
+                          </Accordion>
                         </div>
                       ))
                     ) : (
@@ -282,12 +292,26 @@ const SearchPage: React.FC = () => {
                           <h3 className="text-lg font-semibold mb-2">
                             {result.content.name}
                           </h3>
-                          <p className="text-sm">
+                          <p className="text-sm mb-2">
                             {result.content.description}
                           </p>
-                          <pre className="mt-2 text-xs overflow-auto">
-                            {JSON.stringify(result, null, 2)}
-                          </pre>
+                          <Accordion
+                            type="single"
+                            collapsible
+                            className="w-full"
+                          >
+                            <AccordionItem value={`item-${index}`}>
+                              <AccordionTrigger>View Details</AccordionTrigger>
+                              <AccordionContent>
+                                <pre
+                                  className="text-xs bg-zinc-900 p-4 rounded"
+                                  style={{ whiteSpace: 'pre-wrap' }}
+                                >
+                                  {JSON.stringify(result, null, 2)}
+                                </pre>
+                              </AccordionContent>
+                            </AccordionItem>
+                          </Accordion>
                         </div>
                       ))
                     ) : (

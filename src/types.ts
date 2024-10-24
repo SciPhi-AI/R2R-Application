@@ -277,6 +277,7 @@ export interface SidebarProps {
   setSelectedCollectionIds: React.Dispatch<React.SetStateAction<string[]>>;
   config: SidebarConfig;
   selectedModel?: string;
+  onConversationSelect?: (conversationId: string) => void;
 
   // Vector search settings
   searchFilters: string;
@@ -301,10 +302,6 @@ export interface SidebarProps {
   setRrfK: (value: number) => void;
 
   // KG search settings
-  kgSearchType?: 'local' | 'global';
-  setKgSearchType: (type: 'local' | 'global') => void;
-  max_llm_queries_for_global_search?: number;
-  setMax_llm_queries_for_global_search: (value: number) => void;
   kgSearchLevel?: number | null;
   setKgSearchLevel: (value: number | null) => void;
   maxCommunityDescriptionLength?: number;
@@ -328,6 +325,7 @@ export interface SidebarConfig {
   showKGSearch: boolean;
   showHybridSearch: boolean;
   showRagGeneration: boolean;
+  showConversations?: boolean;
 }
 
 export interface SingleSwitchProps {

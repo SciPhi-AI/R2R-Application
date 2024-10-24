@@ -29,8 +29,6 @@ export const Result: FC<{
   pipelineUrl: string | null;
   search_limit: number;
   search_filters: Record<string, unknown>;
-  kg_search_type: 'local' | 'global';
-  max_llm_queries_for_global_search: number;
   rag_temperature: number | null;
   rag_topP: number | null;
   rag_topK: number | null;
@@ -43,6 +41,12 @@ export const Result: FC<{
   mode: 'rag' | 'rag_agent';
   selectedCollectionIds: string[];
   onAbortRequest?: () => void;
+  messages: Message[];
+  setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
+  selectedConversationId: string | null;
+  setSelectedConversationId: React.Dispatch<
+    React.SetStateAction<string | null>
+  >;
 }> = ({
   query,
   setQuery,
@@ -50,8 +54,6 @@ export const Result: FC<{
   pipelineUrl,
   search_limit,
   search_filters,
-  kg_search_type,
-  max_llm_queries_for_global_search,
   rag_temperature,
   rag_topP,
   rag_topK,
@@ -64,8 +66,11 @@ export const Result: FC<{
   mode,
   selectedCollectionIds,
   onAbortRequest,
+  messages,
+  setMessages,
+  selectedConversationId,
+  setSelectedConversationId,
 }) => {
-  const [messages, setMessages] = useState<Message[]>([]);
   const abortControllerRef = useRef<AbortController | null>(null);
   const [isStreaming, setIsStreaming] = useState<boolean>(false);
   const [isSearching, setIsSearching] = useState<boolean>(false);
@@ -100,16 +105,10 @@ export const Result: FC<{
     searchPerformed?: boolean
   ) => {
     setMessages((prevMessages) => {
-      if (prevMessages.length === 0) {
-        console.warn('Attempted to update last message when no messages exist');
-        return prevMessages;
-      }
-
-      const updatedMessages = [...prevMessages];
-      const lastMessage = updatedMessages[updatedMessages.length - 1];
+      const lastMessage = prevMessages[prevMessages.length - 1];
       if (lastMessage.role === 'assistant') {
         return [
-          ...updatedMessages.slice(0, -1),
+          ...prevMessages.slice(0, -1),
           {
             ...lastMessage,
             ...(content !== undefined && { content }),
@@ -118,9 +117,20 @@ export const Result: FC<{
             ...(searchPerformed !== undefined && { searchPerformed }),
           },
         ];
+      } else {
+        return [
+          ...prevMessages,
+          {
+            role: 'assistant',
+            content: content || '',
+            id: Date.now().toString(),
+            timestamp: Date.now(),
+            isStreaming: isStreaming || false,
+            sources: sources || {},
+            searchPerformed: searchPerformed || false,
+          },
+        ];
       }
-
-      return prevMessages;
     });
   };
 
@@ -169,11 +179,7 @@ export const Result: FC<{
       searchPerformed: false,
     };
 
-    setMessages((prevMessages) => [
-      ...prevMessages,
-      newUserMessage,
-      newAssistantMessage,
-    ]);
+    setMessages((prevMessages) => [...prevMessages, newUserMessage]);
 
     let buffer = '';
     let inLLMResponse = false;
@@ -187,6 +193,39 @@ export const Result: FC<{
       if (!client) {
         throw new Error('Failed to get authenticated client');
       }
+
+      let currentConversationId = selectedConversationId;
+
+      if (!currentConversationId) {
+        try {
+          const newConversation = await client.createConversation();
+          console.log('newConversation:', newConversation);
+
+          if (!newConversation || !newConversation.results) {
+            throw new Error('Failed to create a new conversation');
+          }
+
+          currentConversationId = newConversation.results;
+
+          if (typeof currentConversationId !== 'string') {
+            throw new Error('Invalid conversation ID received');
+          }
+
+          console.log('New conversation ID:', currentConversationId);
+          setSelectedConversationId(currentConversationId);
+        } catch (error) {
+          console.error('Error creating new conversation:', error);
+          setError('Failed to create a new conversation. Please try again.');
+          return;
+        }
+      }
+
+      if (!currentConversationId) {
+        setError('No valid conversation ID. Please try again.');
+        return;
+      }
+
+      console.log('Using conversation ID:', currentConversationId);
 
       const ragGenerationConfig: GenerationConfig = {
         stream: true,
@@ -210,17 +249,18 @@ export const Result: FC<{
 
       const kgSearchSettings: KGSearchSettings = {
         use_kg_search: switches.knowledge_graph_search?.checked ?? false,
-        kg_search_type: kg_search_type,
-        max_llm_queries_for_global_search: max_llm_queries_for_global_search,
       };
 
       const streamResponse =
         mode === 'rag_agent'
           ? await client.agent(
               [...messages, newUserMessage],
+              ragGenerationConfig,
               vectorSearchSettings,
               kgSearchSettings,
-              ragGenerationConfig
+              undefined,
+              undefined,
+              currentConversationId
             )
           : await client.rag(
               query,
@@ -231,6 +271,8 @@ export const Result: FC<{
 
       const reader = streamResponse.getReader();
       const decoder = new TextDecoder();
+
+      let assistantResponse = '';
 
       while (true) {
         if (signal.aborted) {
@@ -296,11 +338,34 @@ export const Result: FC<{
           }
 
           fullContent += chunk;
+          assistantResponse += chunk;
           updateLastMessage(
             fullContent,
             { vector: vectorSearchSources, kg: kgSearchResult },
             true,
             searchPerformed
+          );
+        }
+      }
+
+      if (assistantResponse) {
+        updateLastMessage(
+          assistantResponse,
+          { vector: vectorSearchSources, kg: kgSearchResult },
+          false,
+          searchPerformed
+        );
+
+        try {
+          await client.addMessage(currentConversationId, {
+            role: 'assistant',
+            content: assistantResponse,
+          });
+          console.log('Added assistant message to conversation');
+        } catch (error) {
+          console.error(
+            'Error adding assistant message to conversation:',
+            error
           );
         }
       }

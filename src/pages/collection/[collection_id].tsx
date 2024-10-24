@@ -384,7 +384,7 @@ const CollectionIdPage: React.FC = () => {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="documents" className="flex-grow flex flex-col">
-            <div className="flex justify-end items-center space-x-2 mt-6 -mb-6">
+            <div className="flex justify-end items-center space-x-2 mb-2">
               <Button
                 onClick={() => setIsAssignDocumentDialogOpen(true)}
                 type="button"
@@ -420,7 +420,7 @@ const CollectionIdPage: React.FC = () => {
             </div>
           </TabsContent>
           <TabsContent value="users" className="flex-grow flex flex-col">
-            <div className="flex justify-end items-center space-x-2 mt-6 -mb-6">
+            <div className="flex justify-end items-center space-x-2 mb-2">
               <Button
                 onClick={() => setIsAssignUserDialogOpen(true)}
                 type="button"
@@ -455,7 +455,7 @@ const CollectionIdPage: React.FC = () => {
             </div>
           </TabsContent>
         </Tabs>
-        <div className="mt-5 flex justify-end">
+        <div className="-mt-12 flex justify-end">
           <DeleteButton
             collectionId={currentCollectionId}
             isCollection={true}

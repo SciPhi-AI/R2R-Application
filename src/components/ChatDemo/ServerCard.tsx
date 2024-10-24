@@ -43,7 +43,7 @@ const R2RServerCard: React.FC<R2RServerCardProps> = ({
           <PipelineStatus onStatusChange={onStatusChange} />
         </div>
         <CardDescription className="text-sm">
-          Your deployment of an R2R server.
+          Your R2R server deployment.
         </CardDescription>
       </CardHeader>
       <CardContent className="pt-0">
