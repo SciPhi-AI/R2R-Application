@@ -259,8 +259,8 @@ export const Result: FC<{
               vectorSearchSettings,
               kgSearchSettings,
               undefined,
-              undefined
-              // currentConversationId
+              undefined,
+              currentConversationId
             )
           : await client.rag(
               query,
