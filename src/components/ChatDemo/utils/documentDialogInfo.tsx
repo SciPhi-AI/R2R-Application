@@ -1,9 +1,18 @@
 import { format, parseISO } from 'date-fns';
-import { Loader } from 'lucide-react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
-import React, { useEffect, useState, useCallback } from 'react';
+import { Edit, Loader, Trash, ChevronDown, ChevronUp } from 'lucide-react';
+import { useEffect, useState, useCallback } from 'react';
 
 import PdfPreviewDialog from '@/components/ChatDemo/utils/pdfPreviewDialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/Button';
 import {
   Dialog,
@@ -111,6 +120,12 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
     initialPrefetchPages: 5,
     prefetchThreshold: 2,
   });
+
+  const refreshChunks = useCallback(() => {
+    if (currentPage) {
+      goToPage(currentPage);
+    }
+  }, [currentPage, goToPage]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -230,9 +245,11 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
                       </Button>
                     </div>
                   )}
-                <ExpandableDocumentChunks chunks={currentChunks} />
+                <ExpandableDocumentChunks
+                  chunks={currentChunks}
+                  onChunkDeleted={refreshChunks}
+                />
 
-                {/* Display Loader only for active page loads */}
                 {chunksLoading && (
                   <Loader className="mx-auto mt-4 animate-spin" size={32} />
                 )}
@@ -262,8 +279,8 @@ const InfoRow: React.FC<{
   value?: any;
   values?: { label?: string; value: any }[];
 }> = ({ label, value, values }) => (
-  <div className="flex items-center justify-between py-2 border-b border-gray-700">
-    <span className="font-medium">{label}:</span>
+  <div className="flex items-center justify-between py-2 border-b border-gray-700/50">
+    <span className="font-medium text-gray-200">{label}:</span>
     <span className="text-gray-300 flex items-center space-x-4">
       {value !== undefined
         ? formatValue(value)
@@ -271,7 +288,7 @@ const InfoRow: React.FC<{
           ? values.map((item, index) => (
               <span key={index} className="flex items-center">
                 {item.label && (
-                  <span className="mr-1 text-gray-500">{item.label}:</span>
+                  <span className="mr-1 text-gray-400">{item.label}:</span>
                 )}
                 <span>{formatValue(item.value)}</span>
               </span>
@@ -312,7 +329,8 @@ const ExpandableInfoRow: React.FC<{
 
 const ExpandableDocumentChunks: React.FC<{
   chunks: DocumentChunk[] | undefined;
-}> = ({ chunks }) => {
+  onChunkDeleted?: () => void;
+}> = ({ chunks, onChunkDeleted }) => {
   const [allExpanded, setAllExpanded] = useState(false);
 
   const toggleAllExpanded = () => {
@@ -325,7 +343,7 @@ const ExpandableDocumentChunks: React.FC<{
 
   return (
     <div className="mt-4">
-      <div className="flex justify-between items-center mb-2">
+      <div className="flex justify-between items-center mb-4">
         <h3 className="text-xl font-bold">Document Chunks</h3>
         <button
           onClick={toggleAllExpanded}
@@ -334,13 +352,14 @@ const ExpandableDocumentChunks: React.FC<{
           {allExpanded ? 'Collapse All' : 'Expand All'}
         </button>
       </div>
-      <div className="space-y-2">
+      <div className="space-y-4">
         {chunks.map((chunk, index) => (
           <ExpandableChunk
-            key={chunk.fragment_id || index}
+            key={index}
             chunk={chunk}
             index={index}
             isExpanded={allExpanded}
+            onDelete={onChunkDeleted}
           />
         ))}
       </div>
@@ -352,54 +371,239 @@ const ExpandableChunk: React.FC<{
   chunk: DocumentChunk;
   index: number;
   isExpanded: boolean;
-}> = ({ chunk, index, isExpanded }) => {
+  onDelete?: () => void;
+}> = ({ chunk, index, isExpanded, onDelete }) => {
   const [localExpanded, setLocalExpanded] = useState(false);
+  const [metadataExpanded, setMetadataExpanded] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editText, setEditText] = useState(chunk.text);
+  const [updating, setUpdating] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [showDeleteAlert, setShowDeleteAlert] = useState(false);
+  const { getClient } = useUserContext();
 
   useEffect(() => {
     setLocalExpanded(isExpanded);
   }, [isExpanded]);
 
+  // Abort editing when collapsing the chunk
+  useEffect(() => {
+    if (!localExpanded && isEditing) {
+      // Abort the edit
+      setIsEditing(false);
+      setEditText(chunk.text);
+    }
+  }, [localExpanded, isEditing, chunk.text]);
+
   const toggleExpanded = () => {
     setLocalExpanded(!localExpanded);
   };
 
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsEditing(true);
+    setEditText(chunk.text);
+    setLocalExpanded(true); // Expand the chunk when editing
+  };
+
+  const handleCancel = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsEditing(false);
+    setEditText(chunk.text);
+  };
+
+  const handleUpdate = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setUpdating(true);
+    try {
+      const client = await getClient();
+      if (!client) {
+        throw new Error('Failed to get authenticated client');
+      }
+
+      await client.updateChunk(
+        chunk.document_id,
+        chunk.extraction_id,
+        editText,
+        chunk.metadata
+      );
+
+      chunk.text = editText;
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error updating chunk:', error);
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowDeleteAlert(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    setDeleting(true);
+    try {
+      const client = await getClient();
+      if (!client) {
+        throw new Error('Failed to get authenticated client');
+      }
+
+      await client.delete({
+        extraction_id: {
+          $eq: chunk.extraction_id,
+        },
+      });
+
+      onDelete?.();
+    } catch (error) {
+      console.error('Error deleting chunk:', error);
+    } finally {
+      setDeleting(false);
+      setShowDeleteAlert(false);
+    }
+  };
+
+  const toggleMetadata = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setMetadataExpanded(!metadataExpanded);
+  };
+
   return (
-    <div className="border-b border-gray-700">
+    <div className="border border-gray-700 rounded-lg mb-4 bg-zinc-800/50 transition-colors">
       <div
-        className="flex items-center justify-between py-2 cursor-pointer"
+        className="flex items-center justify-between p-4 cursor-pointer"
         onClick={toggleExpanded}
       >
-        <span className="font-medium">
+        <span className="font-medium text-lg">
           Chunk {chunk.metadata?.chunk_order ?? index + 1}
         </span>
-        <button className="text-gray-300 flex items-center space-x-2">
-          {localExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-        </button>
+        <div className="flex items-center space-x-2">
+          {!isEditing && !deleting && (
+            <>
+              <Button
+                onClick={handleEdit}
+                color="filled"
+                className="text-gray-300 hover:text-white"
+              >
+                <Edit className="h-5 w-5" />
+              </Button>
+              <Button
+                onClick={handleDeleteClick}
+                color="danger"
+                disabled={deleting}
+              >
+                <Trash className="h-5 w-5" />
+              </Button>
+            </>
+          )}
+          <button className="text-gray-300 hover:text-white transition-colors">
+            {localExpanded ? (
+              <ChevronUp size={20} />
+            ) : (
+              <ChevronDown size={20} />
+            )}
+          </button>
+        </div>
       </div>
       {localExpanded && (
-        <div className="py-2 pl-4 text-gray-300 space-y-4">
-          <InfoRow label="Fragment ID" value={chunk.fragment_id} />
-          <InfoRow label="Extraction ID" value={chunk.extraction_id} />
-          <InfoRow label="Document ID" value={chunk.document_id} />
-          <InfoRow label="User ID" value={chunk.user_id} />
-          <ExpandableInfoRow
-            label="Collection IDs"
-            values={chunk.collection_ids}
-          />
-          <div className="space-y-2">
-            <span className="font-medium">Text:</span>
-            <p className="pl-4 pr-2 py-2">{chunk.text}</p>
+        <div className="px-6 pb-4 text-gray-300 space-y-6">
+          <div className="grid grid-cols-2 gap-4">
+            <InfoRow label="Extraction ID" value={chunk.extraction_id} />
+            <InfoRow label="Document ID" value={chunk.document_id} />
           </div>
-          <div>
-            <span className="font-medium">Chunk Metadata:</span>
-            <div className="mt-2 pl-4 space-y-2">
-              {Object.entries(chunk.metadata || {}).map(([key, value]) => (
-                <InfoRow key={key} label={key} value={value} />
-              ))}
+          <div className="grid grid-cols-2 gap-4">
+            <InfoRow label="User ID" value={chunk.user_id} />
+            <ExpandableInfoRow
+              label="Collection IDs"
+              values={chunk.collection_ids}
+            />
+          </div>
+
+          <div className="space-y-2 bg-zinc-800 p-4 rounded-lg">
+            <div className="flex items-center justify-between mb-2">
+              <span className="font-medium text-white">Content:</span>
+              {isEditing && (
+                <div className="flex space-x-2">
+                  <Button
+                    onClick={handleUpdate}
+                    color="secondary"
+                    shape="slim"
+                    disabled={updating}
+                  >
+                    {updating ? (
+                      <Loader className="animate-spin mr-2" size={16} />
+                    ) : null}
+                    Save
+                  </Button>
+                  <Button
+                    onClick={handleCancel}
+                    color="secondary"
+                    shape="slim"
+                    disabled={updating}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              )}
             </div>
+            {isEditing ? (
+              <textarea
+                value={editText}
+                onChange={(e) => setEditText(e.target.value)}
+                className="w-full h-32 bg-zinc-900 text-gray-300 p-2 rounded-md border border-gray-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+              />
+            ) : (
+              <p className="pl-4 pr-2 py-2 text-gray-300 leading-relaxed">
+                {chunk.text}
+              </p>
+            )}
+          </div>
+
+          <div className="bg-zinc-800 rounded-lg">
+            <div
+              className="flex items-center justify-between p-4 cursor-pointer"
+              onClick={toggleMetadata}
+            >
+              <span className="font-medium text-white">Chunk Metadata</span>
+              <button className="text-gray-300 hover:text-white transition-colors">
+                {metadataExpanded ? (
+                  <ChevronUp size={16} />
+                ) : (
+                  <ChevronDown size={16} />
+                )}
+              </button>
+            </div>
+            {metadataExpanded && (
+              <div className="px-4 pb-4 space-y-2">
+                {Object.entries(chunk.metadata || {}).map(([key, value]) => (
+                  <InfoRow key={key} label={key} value={value} />
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
+      <AlertDialog open={showDeleteAlert} onOpenChange={setShowDeleteAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Are you sure you want to delete this chunk?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. The chunk will be permanently
+              deleted.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

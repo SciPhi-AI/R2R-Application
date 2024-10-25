@@ -289,13 +289,14 @@ const Index: React.FC = () => {
                     className="flex-grow"
                   />
                   <Button
+                    className="pl-2 pr-2 py-2 px-4"
                     onClick={handleAddCollection}
                     color="filled"
-                    shape="outline"
-                    className="flex items-center space-x-2 whitespace-nowrap min-w-fit"
+                    shape="rounded"
+                    style={{ zIndex: 20, minWidth: '100px' }}
                   >
                     <Plus className="w-5 h-5" />
-                    <span>Create New Collection</span>
+                    <span>New</span>
                   </Button>
                 </div>
               </div>

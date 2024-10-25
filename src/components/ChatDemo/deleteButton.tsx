@@ -96,10 +96,10 @@ export const DeleteButton: React.FC<ExtendedDeleteButtonProps> = ({
           color="danger"
           shape="rounded"
           disabled={isDisabled}
-          style={{ zIndex: 20 }}
+          style={{ zIndex: 20, minWidth: '100px' }}
         >
           <Trash2 className="mr-2 h-4 w-4 mt-1" />
-          Delete {isCollection ? 'Collection' : 'File(s)'}
+          Delete
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>

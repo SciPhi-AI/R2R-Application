@@ -1,12 +1,6 @@
-import {
-  ChevronUpSquare,
-  ChevronDownSquare,
-  Filter,
-  SlidersHorizontal,
-} from 'lucide-react';
+import { ChevronUpSquare, ChevronDownSquare, Filter } from 'lucide-react';
 import React, { useState, useMemo } from 'react';
 
-import { Button } from '@/components/ui/Button';
 import { Checkbox } from '@/components/ui/checkbox';
 import CopyableContent from '@/components/ui/CopyableContent';
 import Pagination from '@/components/ui/pagination';
@@ -82,15 +76,21 @@ function Table<T extends { [key: string]: any }>({
   const filteredAndSortedData = useMemo(() => {
     let result = [...data];
 
-    // Apply filters
     Object.entries(filters).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
+      const column = columns.find((col) => col.key === key);
+      if (
+        column &&
+        value !== undefined &&
+        value !== null &&
+        value !== '' &&
+        ((Array.isArray(value) && value.length > 0) ||
+          typeof value === 'string')
+      ) {
         result = result.filter((item) => {
           const itemValue = (item as any)[key];
-          const column = columns.find((col) => col.key === key);
-          if (column?.filterType === 'multiselect') {
-            return (value as string[]).includes(itemValue);
-          } else if (column?.filterType === 'select') {
+          if (column.filterType === 'multiselect') {
+            return value.includes(itemValue?.toLowerCase());
+          } else if (column.filterType === 'select') {
             return itemValue === value;
           } else if (typeof value === 'string') {
             return itemValue
@@ -103,7 +103,6 @@ function Table<T extends { [key: string]: any }>({
       }
     });
 
-    // Apply sorting
     if (sort.key) {
       result.sort((a, b) => {
         const aValue = (a as any)[sort.key];

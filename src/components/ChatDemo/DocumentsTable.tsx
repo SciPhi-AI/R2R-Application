@@ -17,7 +17,7 @@ import {
   PopoverContent,
 } from '@/components/ui/popover';
 import { useToast } from '@/components/ui/use-toast';
-import { IngestionStatus, DocumentInfoType } from '@/types';
+import { IngestionStatus, KGExtractionStatus, DocumentInfoType } from '@/types';
 
 interface DocumentsTableProps {
   documents: DocumentInfoType[];
@@ -45,6 +45,8 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
   onSelectItem,
   selectedItems,
   hideActions = false,
+  visibleColumns,
+  onToggleColumn,
 }) => {
   const { toast } = useToast();
   const [selectedDocumentId, setSelectedDocumentId] = useState('');
@@ -56,26 +58,12 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
   }>({ key: 'title', order: 'asc' });
   const [filters, setFilters] = useState<Record<string, any>>({
     ingestion_status: ['success', 'failed', 'pending'],
+    kg_extraction_status: ['success', 'failed', 'pending'],
   });
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
-  const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>(
-    {}
-  );
 
   const itemsPerPage = 10;
-
-  useEffect(() => {
-    const initialVisibility: Record<string, boolean> = {};
-    columns.forEach((col) => {
-      initialVisibility[col.key] = col.selected !== false;
-    });
-    setVisibleColumns(initialVisibility);
-  }, []);
-
-  const handleToggleColumn = (columnKey: string, isVisible: boolean) => {
-    setVisibleColumns((prev) => ({ ...prev, [columnKey]: isVisible }));
-  };
 
   const mapIngestionStatus = (status: string): IngestionStatus => {
     const lowerStatus = status?.toLowerCase();
@@ -88,11 +76,22 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
     return IngestionStatus.PENDING;
   };
 
+  const mapKGExtractionStatus = (status: string): KGExtractionStatus => {
+    const lowerStatus = status?.toLowerCase();
+    if (lowerStatus === 'success') {
+      return KGExtractionStatus.SUCCESS;
+    }
+    if (lowerStatus === 'failed') {
+      return KGExtractionStatus.FAILED;
+    }
+    return KGExtractionStatus.PENDING;
+  };
+
   const mappedDocuments = useMemo(() => {
     return documents.map((doc) => ({
       ...doc,
       ingestion_status: mapIngestionStatus(doc.ingestion_status),
-      kg_extraction_status: mapIngestionStatus(doc.kg_extraction_status),
+      kg_extraction_status: mapKGExtractionStatus(doc.kg_extraction_status),
     }));
   }, [documents]);
 
@@ -148,13 +147,13 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
       renderCell: (doc) => {
         let variant: 'success' | 'destructive' | 'pending' = 'pending';
         switch (doc.kg_extraction_status) {
-          case IngestionStatus.SUCCESS:
+          case KGExtractionStatus.SUCCESS:
             variant = 'success';
             break;
-          case IngestionStatus.FAILED:
+          case KGExtractionStatus.FAILED:
             variant = 'destructive';
             break;
-          case IngestionStatus.PENDING:
+          case KGExtractionStatus.PENDING:
             variant = 'pending';
             break;
         }
@@ -263,7 +262,7 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
                             checked: boolean | 'indeterminate'
                           ) => {
                             if (typeof checked === 'boolean') {
-                              handleToggleColumn(col.key, checked);
+                              onToggleColumn(col.key, checked);
                             }
                           }}
                         />
@@ -323,7 +322,7 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
 
           <Table
             data={filteredDocuments}
-            columns={columns.filter((col) => visibleColumns[col.key] !== false)}
+            columns={columns.filter((col) => visibleColumns[col.key] === true)}
             onSelectAll={handleSelectAllInternal}
             onSelectItem={handleSelectItemInternal}
             selectedItems={selectedItems}
