@@ -101,6 +101,13 @@ export enum IngestionStatus {
   SUCCESS = 'success',
 }
 
+export enum KGExtractionStatus {
+  PENDING = 'pending',
+  PROCESSING = 'processing',
+  SUCCESS = 'success',
+  FAILED = 'failed',
+}
+
 export interface DocumentInfoType {
   id: string;
   user_id: string;
@@ -111,7 +118,7 @@ export interface DocumentInfoType {
   version: string;
   size_in_bytes: number;
   ingestion_status: IngestionStatus;
-  kg_extraction_status: string;
+  kg_extraction_status: KGExtractionStatus;
   created_at: string;
   updated_at: string;
 }
@@ -124,7 +131,6 @@ export interface DocumentInfoDialogProps {
 }
 
 export interface DocumentChunk {
-  fragment_id: string;
   extraction_id: string;
   document_id: string;
   user_id: string;
@@ -423,7 +429,6 @@ export type Collection = {
 };
 
 export interface VectorSearchResult {
-  fragment_id: string;
   extraction_id: string;
   document_id: string;
   user_id: string;
@@ -461,7 +466,6 @@ export interface KGSearchResult {
   method: 'local' | 'global';
   content: any;
   result_type: 'entity' | 'relationship' | 'community' | 'global';
-  fragment_ids: string[];
   document_ids: string[];
   metadata: Record<string, any>;
 }

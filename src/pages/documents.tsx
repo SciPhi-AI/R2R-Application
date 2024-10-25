@@ -16,6 +16,22 @@ const Index: React.FC = () => {
   );
   const [loading, setLoading] = useState<boolean>(true);
 
+  useEffect(() => {
+    setVisibleColumns({
+      title: true,
+      id: true,
+      user_id: true,
+      collection_ids: false,
+      ingestion_status: true,
+      kg_extraction_status: false,
+      type: false,
+      metadata: false,
+      version: false,
+      created_at: true,
+      updated_at: false,
+    });
+  }, []);
+
   const fetchAllDocuments = useCallback(async () => {
     if (!pipeline?.deploymentUrl) {
       console.error('No pipeline deployment URL available');

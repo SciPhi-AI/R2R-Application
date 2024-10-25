@@ -14,7 +14,12 @@ import { Button } from '@/components/ui/Button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/use-toast';
 import { useUserContext } from '@/context/UserContext';
-import { DocumentInfoType, IngestionStatus, User } from '@/types';
+import {
+  DocumentInfoType,
+  IngestionStatus,
+  KGExtractionStatus,
+  User,
+} from '@/types';
 
 const MAX_RETRIES = 5;
 const RETRY_DELAY = 2000;
@@ -245,9 +250,9 @@ const CollectionIdPage: React.FC = () => {
       renderCell: (doc) => (
         <Badge
           variant={
-            doc.kg_extraction_status === 'success'
+            doc.kg_extraction_status === KGExtractionStatus.SUCCESS
               ? 'success'
-              : doc.kg_extraction_status === 'failed'
+              : doc.kg_extraction_status === KGExtractionStatus.FAILED
                 ? 'destructive'
                 : 'pending'
           }
