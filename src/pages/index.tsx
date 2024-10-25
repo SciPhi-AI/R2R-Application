@@ -285,18 +285,30 @@ const HomePage = () => {
                           color="light"
                           disabled={
                             !window.__RUNTIME_CONFIG__
-                              ?.NEXT_PUBLIC_HATCHET_DASHBOARD_URL
-                          }
-                          onClick={() =>
-                            window.open(
-                              window.__RUNTIME_CONFIG__
-                                .NEXT_PUBLIC_HATCHET_DASHBOARD_URL,
-                              '_blank'
+                              ?.NEXT_PUBLIC_HATCHET_DASHBOARD_URL ||
+                            window.__RUNTIME_CONFIG__.NEXT_PUBLIC_HATCHET_DASHBOARD_URL.includes(
+                              '__NEXT_PUBLIC_HATCHET_DASHBOARD_URL__'
                             )
                           }
+                          onClick={() => {
+                            const url =
+                              window.__RUNTIME_CONFIG__
+                                ?.NEXT_PUBLIC_HATCHET_DASHBOARD_URL;
+                            if (
+                              url &&
+                              !url.includes(
+                                '__NEXT_PUBLIC_HATCHET_DASHBOARD_URL__'
+                              )
+                            ) {
+                              window.open(url, '_blank');
+                            }
+                          }}
                           tooltip={
                             !window.__RUNTIME_CONFIG__
-                              ?.NEXT_PUBLIC_HATCHET_DASHBOARD_URL ? (
+                              ?.NEXT_PUBLIC_HATCHET_DASHBOARD_URL ||
+                            window.__RUNTIME_CONFIG__.NEXT_PUBLIC_HATCHET_DASHBOARD_URL.includes(
+                              '__NEXT_PUBLIC_HATCHET_DASHBOARD_URL__'
+                            ) ? (
                               <div>
                                 Hatchet Dashboard Deployment URL unavailable.
                                 <br />
