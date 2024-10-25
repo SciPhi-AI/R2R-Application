@@ -35,12 +35,10 @@ function MyAppContent({ Component, pageProps }: AppProps) {
     }
 
     if (isSuperUser()) {
-      // Superusers can access all routes
       return;
     }
 
     if (!isUserRoute(currentPath)) {
-      // Non-superusers are redirected to /documents if they try to access any other page
       router.replace('/documents');
     }
   }, [isAuthenticated, isSuperUser, authState.userRole, router]);
@@ -53,6 +51,21 @@ function MyAppContent({ Component, pageProps }: AppProps) {
 }
 
 function MyApp(props: AppProps) {
+  // Move the runtime config check into useEffect
+  useEffect(() => {
+    // Load the env-config.js script dynamically
+    const script = document.createElement('script');
+    script.src = '/env-config.js';
+    script.onload = () => {
+      if (typeof window !== 'undefined' && window.__RUNTIME_CONFIG__) {
+        console.log('Runtime Config:', window.__RUNTIME_CONFIG__);
+      } else {
+        console.warn('Runtime Config not found!');
+      }
+    };
+    document.body.appendChild(script);
+  }, []);
+
   return (
     <ThemeProvider
       attribute="class"

@@ -15,7 +15,7 @@ function initializePostHog() {
     autocapture: true,
   });
 
-  if (process.env.R2R_DASHBOARD_DISABLE_TELEMETRY === 'true') {
+  if (window.__RUNTIME_CONFIG__?.R2R_DASHBOARD_DISABLE_TELEMETRY === 'true') {
     posthog.opt_out_capturing();
   }
 }

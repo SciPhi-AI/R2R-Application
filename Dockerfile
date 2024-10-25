@@ -1,3 +1,4 @@
+# Builder Stage
 FROM node:22-alpine AS builder
 WORKDIR /app
 
@@ -16,7 +17,7 @@ COPY . .
 # Build the Next.js application
 RUN pnpm build
 
-# Production stage
+# Production Stage
 FROM node:22-alpine AS runner
 WORKDIR /app
 
@@ -32,8 +33,14 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 
+# Copy the startup script
+COPY startup.sh /app/startup.sh
+
+# Ensure the startup script is executable
+RUN chmod +x /app/startup.sh
+
 # Expose the port the app runs on
 EXPOSE 3000
 
-# Define the command to run the app
-CMD ["node", "server.js"]
+# Define the command to run the startup script
+CMD ["/app/startup.sh"]
