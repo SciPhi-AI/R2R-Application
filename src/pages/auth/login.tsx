@@ -27,14 +27,24 @@ const LoginPage: React.FC = () => {
   const [rawDeploymentUrl, setRawDeploymentUrl] = useState('');
   const [sanitizedDeploymentUrl, setSanitizedDeploymentUrl] = useState('');
 
+  const getDeploymentUrl = () => {
+    if (
+      typeof window !== 'undefined' &&
+      window.__RUNTIME_CONFIG__?.NEXT_PUBLIC_R2R_DEPLOYMENT_URL &&
+      !window.__RUNTIME_CONFIG__.NEXT_PUBLIC_R2R_DEPLOYMENT_URL.includes(
+        '__NEXT_PUBLIC_R2R_DEPLOYMENT_URL__'
+      )
+    ) {
+      return window.__RUNTIME_CONFIG__.NEXT_PUBLIC_R2R_DEPLOYMENT_URL;
+    }
+    return DEFAULT_DEPLOYMENT_URL;
+  };
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const deploymentUrl =
-        window.__RUNTIME_CONFIG__?.NEXT_PUBLIC_R2R_DEPLOYMENT_URL;
-      if (deploymentUrl) {
-        setRawDeploymentUrl(deploymentUrl);
-        setSanitizedDeploymentUrl(deploymentUrl);
-      }
+      const url = getDeploymentUrl();
+      setRawDeploymentUrl(url);
+      setSanitizedDeploymentUrl(url);
     }
   }, []);
 
