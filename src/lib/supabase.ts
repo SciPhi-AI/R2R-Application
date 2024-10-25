@@ -1,12 +1,23 @@
-import { createClient } from '@supabase/supabase-js';
+// lib/supabase.ts
 
-let supabase: ReturnType<typeof createClient> | null = null;
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-if (process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY) {
-  supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_ANON_KEY
-  );
-}
+let supabase: SupabaseClient | null = null;
+
+export const getSupabase = (): SupabaseClient | null => {
+  if (typeof window !== 'undefined' && window.__RUNTIME_CONFIG__) {
+    if (!supabase) {
+      const supabaseUrl = window.__RUNTIME_CONFIG__.SUPABASE_URL;
+      const supabaseAnonKey = window.__RUNTIME_CONFIG__.SUPABASE_ANON_KEY;
+      if (supabaseUrl && supabaseAnonKey) {
+        supabase = createClient(supabaseUrl, supabaseAnonKey);
+      } else {
+        console.warn('Supabase URL or Anon Key is missing in runtime config.');
+      }
+    }
+    return supabase;
+  }
+  return null;
+};
 
 export { supabase };

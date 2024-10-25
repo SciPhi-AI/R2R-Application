@@ -284,10 +284,19 @@ const HomePage = () => {
                           className="rounded-md py-1 px-3"
                           color="light"
                           disabled={
-                            !process.env.NEXT_PUBLIC_HATCHET_DASHBOARD_URL
+                            !window.__RUNTIME_CONFIG__
+                              ?.NEXT_PUBLIC_HATCHET_DASHBOARD_URL
+                          }
+                          onClick={() =>
+                            window.open(
+                              window.__RUNTIME_CONFIG__
+                                .NEXT_PUBLIC_HATCHET_DASHBOARD_URL,
+                              '_blank'
+                            )
                           }
                           tooltip={
-                            !process.env.NEXT_PUBLIC_HATCHET_DASHBOARD_URL ? (
+                            !window.__RUNTIME_CONFIG__
+                              ?.NEXT_PUBLIC_HATCHET_DASHBOARD_URL ? (
                               <div>
                                 Hatchet Dashboard Deployment URL unavailable.
                                 <br />

@@ -10,6 +10,8 @@ import { useUserContext } from '@/context/UserContext';
 import debounce from '@/lib/debounce';
 import { supabase } from '@/lib/supabase';
 
+const DEFAULT_DEPLOYMENT_URL = 'http://localhost:7272';
+
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('admin@example.com');
   const [password, setPassword] = useState('change_me_immediately');
@@ -26,10 +28,14 @@ const LoginPage: React.FC = () => {
   const [sanitizedDeploymentUrl, setSanitizedDeploymentUrl] = useState('');
 
   useEffect(() => {
-    const deploymentUrl =
-      process.env.NEXT_PUBLIC_R2R_DEPLOYMENT_URL || 'http://localhost:7272';
-    setRawDeploymentUrl(deploymentUrl);
-    setSanitizedDeploymentUrl(deploymentUrl);
+    if (typeof window !== 'undefined') {
+      const deploymentUrl =
+        window.__RUNTIME_CONFIG__?.NEXT_PUBLIC_R2R_DEPLOYMENT_URL;
+      if (deploymentUrl) {
+        setRawDeploymentUrl(deploymentUrl);
+        setSanitizedDeploymentUrl(deploymentUrl);
+      }
+    }
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -125,14 +131,25 @@ const LoginPage: React.FC = () => {
   };
 
   const sanitizeUrl = (url: string): string => {
-    const defaultUrl =
-      process.env.NEXT_PUBLIC_R2R_DEPLOYMENT_URL || 'http://localhost:7272';
-    let sanitized = url.trim();
+    if (
+      typeof window !== 'undefined' &&
+      window.__RUNTIME_CONFIG__?.NEXT_PUBLIC_R2R_DEPLOYMENT_URL
+    ) {
+      const configUrl =
+        window.__RUNTIME_CONFIG__.NEXT_PUBLIC_R2R_DEPLOYMENT_URL;
 
-    if (!sanitized || sanitized === 'http://' || sanitized === 'https://') {
-      return defaultUrl;
+      // If the URL is empty or just a protocol, return the config URL
+      if (!url || url === 'http://' || url === 'https://') {
+        return configUrl;
+      }
     }
 
+    // If no config URL is available, use the default
+    if (!url || url === 'http://' || url === 'https://') {
+      return DEFAULT_DEPLOYMENT_URL;
+    }
+
+    let sanitized = url.trim();
     sanitized = sanitized.replace(/\/+$/, '');
 
     if (!/^https?:\/\//i.test(sanitized)) {
