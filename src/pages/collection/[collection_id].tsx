@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import React, { useState, useEffect, useCallback } from 'react';
 
 import { DeleteButton } from '@/components/ChatDemo/deleteButton';
+import KGDescriptionDialog from '@/components/ChatDemo/KGDescriptionDialog';
 import { KnowledgeGraphButton } from '@/components/ChatDemo/knowledgeGraphButton';
 import { RemoveButton } from '@/components/ChatDemo/remove';
 import Table, { Column } from '@/components/ChatDemo/Table';
@@ -50,6 +51,12 @@ const CollectionIdPage: React.FC = () => {
   const [isAssignUserDialogOpen, setIsAssignUserDialogOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [activeTab, setActiveTab] = useState('documents');
+  const [selectedKGItem, setSelectedKGItem] = useState<any>(null);
+  const [isKGDescriptionDialogOpen, setIsKGDescriptionDialogOpen] =
+    useState(false);
+  const [selectedKGType, setSelectedKGType] = useState<
+    'entity' | 'community' | 'triple'
+  >('entity');
   const itemsPerPage = ITEMS_PER_PAGE;
 
   const currentData = documents.slice(
@@ -303,7 +310,7 @@ const CollectionIdPage: React.FC = () => {
     },
   ];
 
-  const renderActions = (doc: DocumentInfoType) => (
+  const renderDocumentActions = (doc: DocumentInfoType) => (
     <div className="flex space-x-1 justify-end">
       <RemoveButton
         itemId={doc.id}
@@ -330,6 +337,54 @@ const CollectionIdPage: React.FC = () => {
     </div>
   );
 
+  const renderEntityActions = (entity: Entity) => (
+    <div className="flex space-x-1 justify-end">
+      <Button
+        onClick={() => {
+          setSelectedKGItem(entity);
+          setSelectedKGType('entity');
+          setIsKGDescriptionDialogOpen(true);
+        }}
+        color="filled"
+        shape="slim"
+      >
+        <FileSearch2 className="h-6 w-6" />
+      </Button>
+    </div>
+  );
+
+  const renderCommunityActions = (community: Community) => (
+    <div className="flex space-x-1 justify-end">
+      <Button
+        onClick={() => {
+          setSelectedKGItem(community);
+          setSelectedKGType('community');
+          setIsKGDescriptionDialogOpen(true);
+        }}
+        color="filled"
+        shape="slim"
+      >
+        <FileSearch2 className="h-6 w-6" />
+      </Button>
+    </div>
+  );
+
+  const renderTripleActions = (triple: Triple) => (
+    <div className="flex space-x-1 justify-end">
+      <Button
+        onClick={() => {
+          setSelectedKGItem(triple);
+          setSelectedKGType('triple');
+          setIsKGDescriptionDialogOpen(true);
+        }}
+        color="filled"
+        shape="slim"
+      >
+        <FileSearch2 className="h-6 w-6" />
+      </Button>
+    </div>
+  );
+
   const userColumns: Column<User>[] = [
     { key: 'id', label: 'User ID', truncate: true, copyable: true },
     { key: 'email', label: 'Email', truncate: true, copyable: true },
@@ -349,15 +404,9 @@ const CollectionIdPage: React.FC = () => {
   ];
 
   const communityColumns: Column<Community>[] = [
-    { key: 'community_number', label: 'Community Number', sortable: true },
-    { key: 'collection_id', label: 'Collection ID', truncate: true },
-    { key: 'level', label: 'Level', sortable: true },
     { key: 'name', label: 'Name', sortable: true },
-    { key: 'summary', label: 'Summary', truncate: true },
-    { key: 'findings', label: 'Findings', truncate: true },
+    { key: 'community_number', label: 'Community Number', sortable: true },
     { key: 'rating', label: 'Rating', sortable: true },
-    { key: 'rating_explanation', label: 'Rating Explanation', truncate: true },
-    { key: 'attributes', label: 'Attributes', truncate: true },
   ];
 
   const tripleColumns: Column<Triple>[] = [
@@ -461,7 +510,7 @@ const CollectionIdPage: React.FC = () => {
                 }
               }}
               selectedItems={selectedDocumentIds}
-              actions={renderActions}
+              actions={renderDocumentActions}
               initialSort={{ key: 'title', order: 'asc' }}
               initialFilters={{}}
               currentPage={currentPage}
@@ -496,6 +545,7 @@ const CollectionIdPage: React.FC = () => {
               data={entities}
               columns={entityColumns}
               itemsPerPage={itemsPerPage}
+              actions={renderEntityActions}
               onSelectAll={(selected) => {
                 // Implement select all if needed
               }}
@@ -516,6 +566,7 @@ const CollectionIdPage: React.FC = () => {
               data={communities}
               columns={communityColumns}
               itemsPerPage={itemsPerPage}
+              actions={renderCommunityActions}
               onSelectAll={(selected) => {
                 // Implement select all if needed
               }}
@@ -536,6 +587,7 @@ const CollectionIdPage: React.FC = () => {
               data={triples}
               columns={tripleColumns}
               itemsPerPage={itemsPerPage}
+              actions={renderTripleActions}
               onSelectAll={(selected) => {
                 // Implement select all if needed
               }}
@@ -579,6 +631,12 @@ const CollectionIdPage: React.FC = () => {
         onClose={() => setIsAssignUserDialogOpen(false)}
         collection_id={currentCollectionId}
         onAssignSuccess={handleAssignSuccess}
+      />
+      <KGDescriptionDialog
+        open={isKGDescriptionDialogOpen}
+        onClose={() => setIsKGDescriptionDialogOpen(false)}
+        item={selectedKGItem}
+        type={selectedKGType}
       />
     </Layout>
   );

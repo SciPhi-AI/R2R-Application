@@ -33,7 +33,7 @@ interface DocumentOverview {
   metadata?: { title?: string; version?: string };
   kg_extraction_status?: string;
   title?: string;
-  type?: string;
+  document_type?: string;
   updated_at?: string;
   user_id?: string;
   version?: string;
@@ -183,7 +183,10 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
                   <div className="grid grid-cols-1 gap-2 mb-4">
                     <InfoRow label="Document ID" value={documentOverview.id} />
                     <InfoRow label="Title" value={documentOverview.title} />
-                    <InfoRow label="Type" value={documentOverview.type} />
+                    <InfoRow
+                      label="Type"
+                      value={documentOverview.document_type}
+                    />
                     <InfoRow
                       label="Dates"
                       values={[
@@ -232,9 +235,9 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
                   </div>
                 )}
                 {documentOverview &&
-                  documentOverview.type &&
+                  documentOverview.document_type &&
                   ['pdf', 'application/pdf'].includes(
-                    documentOverview.type.toLowerCase()
+                    documentOverview.document_type.toLowerCase()
                   ) && (
                     <div className="flex justify-end">
                       <Button
