@@ -8,8 +8,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input'; // Assuming you have this
-import { Textarea } from '@/components/ui/textarea'; // Assuming you have this
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 
 interface CreateDialogProps {
   isOpen: boolean;
@@ -63,13 +63,13 @@ export const CreateDialog: React.FC<CreateDialogProps> = ({
   };
 
   const handleMetadataChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const value = e.target.value;
+    const { value } = e.target;
     setMetadata(value);
     validateMetadata(value);
   };
 
   const handleDocumentIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
+    const { value } = e.target;
     setDocumentId(value);
     validateDocumentId(value);
   };
@@ -127,9 +127,9 @@ export const CreateDialog: React.FC<CreateDialogProps> = ({
               onChange={handleDocumentIdChange}
               placeholder="Optional UUID"
               className={`${
-                !isDocumentIdValid
-                  ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
-                  : ''
+                isDocumentIdValid
+                  ? ''
+                  : 'border-red-500 focus:ring-red-500 focus:border-red-500'
               }`}
             />
             {!isDocumentIdValid && (
@@ -181,9 +181,9 @@ export const CreateDialog: React.FC<CreateDialogProps> = ({
               placeholder='Optional JSON: {"key": "value"}'
               rows={4}
               className={`${
-                !isMetadataValid
-                  ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
-                  : ''
+                isMetadataValid
+                  ? ''
+                  : 'border-red-500 focus:ring-red-500 focus:border-red-500'
               }`}
             />
             {!isMetadataValid && (

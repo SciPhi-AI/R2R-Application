@@ -165,7 +165,8 @@ const AppSidebar: React.FC<SidebarProps> = ({
   return (
     <Sidebar
       collapsible="offcanvas"
-      className="fixed left-0 top-16 h-[calc(100vh-4rem)] border-r border-zinc-800 bg-zinc-900 transition-all duration-200"
+      className="fixed left-0 h-[calc(100vh-var(--header-height))] border-r border-zinc-800 bg-zinc-900 transition-all duration-200"
+      style={{ top: 'var(--header-height)' }}
     >
       <SidebarHeader className="border-b p-4">
         {config.showConversations && (

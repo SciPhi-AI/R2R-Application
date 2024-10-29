@@ -201,8 +201,8 @@ importers:
         specifier: ^1.148.0
         version: 1.161.5
       r2r-js:
-        specifier: ^0.3.11
-        version: 0.3.11
+        specifier: file:/Users/nolantremelling/R2R/js/sdk/r2r-js-0.3.11.tgz
+        version: file:../R2R/js/sdk/r2r-js-0.3.11.tgz
       radix-ui:
         specifier: ^1.0.1
         version: 1.0.1(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -382,8 +382,8 @@ packages:
     resolution: {integrity: sha512-tbhNuIxNcVb21pInl3ZSjksLCvgdZy9KwJ8brv993QtIVKJBBkYXz4q4ZbAv31GdnC+R90np23L5FbEBlthAEw==}
     engines: {node: '>=6.9.0'}
 
-  '@babel/parser@7.26.0':
-    resolution: {integrity: sha512-aP8x5pIw3xvYr/sXT+SEUwyhrXT8rUJRZltK/qN3Db80dcKpTett8cJxHyjk+xYSVXvNnl2SfcJVjbwxpOSscA==}
+  '@babel/parser@7.26.1':
+    resolution: {integrity: sha512-reoQYNiAJreZNsJzyrDNzFQ+IQ5JFiIzAHJg9bn94S3l+4++J7RsIhNMoB+lgP/9tpmiAQqspv+xfdxTSzREOw==}
     engines: {node: '>=6.0.0'}
     hasBin: true
 
@@ -3643,11 +3643,6 @@ packages:
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
     hasBin: true
 
-  browserslist@4.24.0:
-    resolution: {integrity: sha512-Rmb62sR1Zpjql25eSanFGEhAxcFwfA1K0GuQcLoaJBAcENegrQut3hYdhXFF1obQfiDyqIW/cLM5HSJ/9k884A==}
-    engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
-    hasBin: true
-
   browserslist@4.24.2:
     resolution: {integrity: sha512-ZIc+Q62revdMcqC6aChtW4jz3My3klmCO1fEmINZY/8J3EpBg5/A/D0AKmBveUh6pgoeycoMkVMko84tuYS+Gg==}
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
@@ -3684,9 +3679,6 @@ packages:
 
   caniuse-lite@1.0.30001660:
     resolution: {integrity: sha512-GacvNTTuATm26qC74pt+ad1fW15mlQ/zuTzzY1ZoIzECTP8HURDfF43kNxPgf7H1jmelCBQTTbBNxdSXOA7Bqg==}
-
-  caniuse-lite@1.0.30001664:
-    resolution: {integrity: sha512-AmE7k4dXiNKQipgn7a2xg558IRqPN3jMQY/rOsbxDhrd0tyChwbITBfiwtnqz8bi2M5mIWbxAYBvk7W7QBUS2g==}
 
   caniuse-lite@1.0.30001673:
     resolution: {integrity: sha512-WTrjUCSMp3LYX0nE12ECkV0a+e6LC85E0Auz75555/qr78Oc8YWhEPNfDd6SHdtlCMSzqtuXY0uyEMNRcsKpKw==}
@@ -4169,9 +4161,6 @@ packages:
 
   electron-to-chromium@1.5.24:
     resolution: {integrity: sha512-0x0wLCmpdKFCi9ulhvYZebgcPmHTkFVUfU2wzDykadkslKwT4oAmDTHEKLnlrDsMGZe4B+ksn8quZfZjYsBetA==}
-
-  electron-to-chromium@1.5.30:
-    resolution: {integrity: sha512-sXI35EBN4lYxzc/pIGorlymYNzDBOqkSlVRe6MkgBsW/hW1tpC/HDJ2fjG7XnjakzfLEuvdmux0Mjs6jHq4UOA==}
 
   electron-to-chromium@1.5.48:
     resolution: {integrity: sha512-FXULnNK7ACNI9MTMOVAzUGiz/YrK9Kcb0s/JT4aJgsam7Eh6XYe7Y6q95lPq+VdBe1DpT2eTnfXFtnuPGCks4w==}
@@ -6003,8 +5992,8 @@ packages:
   posthog-js@1.161.5:
     resolution: {integrity: sha512-KGkb12grSQvGRauH6z+AUB83c4dgWqzmJFDjyMXarWRafaLN80HzjN1jk806x27HvdDXi21jtwiXekioWzEQ9g==}
 
-  posthog-js@1.176.0:
-    resolution: {integrity: sha512-T5XKNtRzp7q6CGb7Vc7wAI76rWap9fiuDUPxPsyPBPDkreKya91x9RIsSapAVFafwD1AEin1QMczCmt9Le9BWw==}
+  posthog-js@1.177.0:
+    resolution: {integrity: sha512-0Qt3qTkyfsFW89bveqEzYhhX8YRNFAES9OqhzuxbvbHId/PSyxx/Pzgmgp+N5k45lon3ibwYRAbTlQ4yQacODQ==}
 
   posthog-node@4.2.1:
     resolution: {integrity: sha512-l+fsjYEkTik3m/G0pE7gMr4qBJP84LhK779oQm6MBzhBGpd4By4qieTW+4FUAlNCyzQTynn3Nhsa50c0IELSxQ==}
@@ -6052,8 +6041,9 @@ packages:
   queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
 
-  r2r-js@0.3.11:
-    resolution: {integrity: sha512-TuJ2DRYHIrh6ISqLkCJQ/ezbOzLcjThHe4wXY655S14ZhSSuVQm84J4ZFuaJ6oLOeunU0zV2Hcmkm3Ke9jnfbQ==}
+  r2r-js@file:../R2R/js/sdk/r2r-js-0.3.11.tgz:
+    resolution: {integrity: sha512-76Eb2KDsNuib8xhW5RFmvVyzVR6cEO00uP6Y5vaigKFTaHWSvCINAiBL9fqTvq+0dakVbzR5R/eiBG5oqKC0Tw==, tarball: file:../R2R/js/sdk/r2r-js-0.3.11.tgz}
+    version: 0.3.11
 
   radix-ui@1.0.1:
     resolution: {integrity: sha512-qfGibbqtbOlxP3b+1JjbLUc8Q7+e9DL8gFycLtkBkoAQyUkKuHAEBfFUcyG5MaQHjqRuML+YLtt/R1/dUYQafQ==}
@@ -7090,7 +7080,7 @@ snapshots:
       '@babel/helper-compilation-targets': 7.25.9
       '@babel/helper-module-transforms': 7.26.0(@babel/core@7.26.0)
       '@babel/helpers': 7.26.0
-      '@babel/parser': 7.26.0
+      '@babel/parser': 7.26.1
       '@babel/template': 7.25.9
       '@babel/traverse': 7.25.9
       '@babel/types': 7.26.0
@@ -7104,7 +7094,7 @@ snapshots:
 
   '@babel/generator@7.26.0':
     dependencies:
-      '@babel/parser': 7.26.0
+      '@babel/parser': 7.26.1
       '@babel/types': 7.26.0
       '@jridgewell/gen-mapping': 0.3.5
       '@jridgewell/trace-mapping': 0.3.25
@@ -7114,7 +7104,7 @@ snapshots:
     dependencies:
       '@babel/compat-data': 7.26.0
       '@babel/helper-validator-option': 7.25.9
-      browserslist: 4.24.0
+      browserslist: 4.24.2
       lru-cache: 5.1.1
       semver: 6.3.1
 
@@ -7147,7 +7137,7 @@ snapshots:
       '@babel/template': 7.25.9
       '@babel/types': 7.26.0
 
-  '@babel/parser@7.26.0':
+  '@babel/parser@7.26.1':
     dependencies:
       '@babel/types': 7.26.0
 
@@ -7243,14 +7233,14 @@ snapshots:
   '@babel/template@7.25.9':
     dependencies:
       '@babel/code-frame': 7.26.0
-      '@babel/parser': 7.26.0
+      '@babel/parser': 7.26.1
       '@babel/types': 7.26.0
 
   '@babel/traverse@7.25.9':
     dependencies:
       '@babel/code-frame': 7.26.0
       '@babel/generator': 7.26.0
-      '@babel/parser': 7.26.0
+      '@babel/parser': 7.26.1
       '@babel/template': 7.25.9
       '@babel/types': 7.26.0
       debug: 4.3.7
@@ -11646,13 +11636,6 @@ snapshots:
       node-releases: 2.0.18
       update-browserslist-db: 1.1.0(browserslist@4.23.3)
 
-  browserslist@4.24.0:
-    dependencies:
-      caniuse-lite: 1.0.30001664
-      electron-to-chromium: 1.5.30
-      node-releases: 2.0.18
-      update-browserslist-db: 1.1.1(browserslist@4.24.0)
-
   browserslist@4.24.2:
     dependencies:
       caniuse-lite: 1.0.30001673
@@ -11690,8 +11673,6 @@ snapshots:
   camelcase@5.3.1: {}
 
   caniuse-lite@1.0.30001660: {}
-
-  caniuse-lite@1.0.30001664: {}
 
   caniuse-lite@1.0.30001673: {}
 
@@ -12188,8 +12169,6 @@ snapshots:
   eastasianwidth@0.2.0: {}
 
   electron-to-chromium@1.5.24: {}
-
-  electron-to-chromium@1.5.30: {}
 
   electron-to-chromium@1.5.48: {}
 
@@ -13320,7 +13299,7 @@ snapshots:
   istanbul-lib-instrument@5.2.1:
     dependencies:
       '@babel/core': 7.26.0
-      '@babel/parser': 7.26.0
+      '@babel/parser': 7.26.1
       '@istanbuljs/schema': 0.1.3
       istanbul-lib-coverage: 3.2.2
       semver: 6.3.1
@@ -14772,7 +14751,7 @@ snapshots:
       preact: 10.24.0
       web-vitals: 4.2.3
 
-  posthog-js@1.176.0:
+  posthog-js@1.177.0:
     dependencies:
       core-js: 3.38.1
       fflate: 0.4.8
@@ -14820,13 +14799,13 @@ snapshots:
 
   queue-microtask@1.2.3: {}
 
-  r2r-js@0.3.11:
+  r2r-js@file:../R2R/js/sdk/r2r-js-0.3.11.tgz:
     dependencies:
       '@jest/globals': 29.7.0
       '@rrweb/types': 2.0.0-alpha.17
       axios: 1.7.7
       form-data: 4.0.1
-      posthog-js: 1.176.0
+      posthog-js: 1.177.0
       posthog-node: 4.2.1
       rrweb-snapshot: 2.0.0-alpha.4
       uuid: 10.0.0
@@ -15829,12 +15808,6 @@ snapshots:
   update-browserslist-db@1.1.0(browserslist@4.23.3):
     dependencies:
       browserslist: 4.23.3
-      escalade: 3.2.0
-      picocolors: 1.1.0
-
-  update-browserslist-db@1.1.1(browserslist@4.24.0):
-    dependencies:
-      browserslist: 4.24.0
       escalade: 3.2.0
       picocolors: 1.1.0
 
