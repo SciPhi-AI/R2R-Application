@@ -1,8 +1,16 @@
-import { Loader, FileSearch2, Users, FileText } from 'lucide-react';
+import {
+  Loader,
+  FileSearch2,
+  Users,
+  FileText,
+  Contact,
+  Link2,
+} from 'lucide-react';
 import { useRouter } from 'next/router';
 import React, { useState, useEffect, useCallback } from 'react';
 
 import { DeleteButton } from '@/components/ChatDemo/deleteButton';
+import { KnowledgeGraphButton } from '@/components/ChatDemo/knowledgeGraphButton';
 import { RemoveButton } from '@/components/ChatDemo/remove';
 import Table, { Column } from '@/components/ChatDemo/Table';
 import AssignDocumentToCollectionDialog from '@/components/ChatDemo/utils/AssignDocumentToCollectionDialog';
@@ -378,7 +386,7 @@ const CollectionIdPage: React.FC = () => {
           onValueChange={setActiveTab}
           className="w-full h-full flex flex-col mt-4"
         >
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="documents" className="flex items-center">
               <FileText className="w-4 h-4 mr-2" />
               Documents
@@ -387,9 +395,22 @@ const CollectionIdPage: React.FC = () => {
               <Users className="w-4 h-4 mr-2" />
               Users
             </TabsTrigger>
+            <TabsTrigger value="users" className="flex items-center">
+              <Contact className="w-4 h-4 mr-2" />
+              Entities
+            </TabsTrigger>
+            <TabsTrigger value="users" className="flex items-center">
+              <Users className="w-4 h-4 mr-2" />
+              Communties
+            </TabsTrigger>
+            <TabsTrigger value="users" className="flex items-center">
+              <Users className="w-4 h-4 mr-2" />
+              Triples
+            </TabsTrigger>
           </TabsList>
           <TabsContent value="documents" className="flex-grow flex flex-col">
             <div className="flex justify-end items-center space-x-2 mb-2">
+              <KnowledgeGraphButton />
               <Button
                 onClick={() => setIsAssignDocumentDialogOpen(true)}
                 type="button"
