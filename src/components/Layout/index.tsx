@@ -22,7 +22,7 @@ const Layout: React.FC<Props> = ({
         <title>{pageTitle ? `${pageTitle} | R2R` : 'R2R'}</title>
       </Head>
       <Navbar />
-      <main className="flex-grow">{children}</main>
+      <main className="flex-1 flex flex-col overflow-hidden">{children}</main>
       <Toaster />
       {includeFooter && <Footer />}
     </div>

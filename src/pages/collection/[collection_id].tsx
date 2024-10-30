@@ -1,8 +1,10 @@
-import { Loader, FileSearch2, Users, FileText } from 'lucide-react';
+import { Loader, FileSearch2, Users, FileText, Contact } from 'lucide-react';
 import { useRouter } from 'next/router';
 import React, { useState, useEffect, useCallback } from 'react';
 
 import { DeleteButton } from '@/components/ChatDemo/deleteButton';
+import KGDescriptionDialog from '@/components/ChatDemo/KGDescriptionDialog';
+import { KnowledgeGraphButton } from '@/components/ChatDemo/knowledgeGraphButton';
 import { RemoveButton } from '@/components/ChatDemo/remove';
 import Table, { Column } from '@/components/ChatDemo/Table';
 import AssignDocumentToCollectionDialog from '@/components/ChatDemo/utils/AssignDocumentToCollectionDialog';
@@ -19,6 +21,9 @@ import {
   IngestionStatus,
   KGExtractionStatus,
   User,
+  Entity,
+  Community,
+  Triple,
 } from '@/types';
 
 const MAX_RETRIES = 5;
@@ -30,6 +35,9 @@ const CollectionIdPage: React.FC = () => {
   const { getClient, pipeline } = useUserContext();
   const [documents, setDocuments] = useState<DocumentInfoType[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [entities, setEntities] = useState<Entity[]>([]);
+  const [communities, setCommunities] = useState<Community[]>([]);
+  const [triples, setTriples] = useState<Triple[]>([]);
   const [selectedDocumentIds, setSelectedDocumentIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [pendingDocuments, setPendingDocuments] = useState<string[]>([]);
@@ -43,12 +51,53 @@ const CollectionIdPage: React.FC = () => {
   const [isAssignUserDialogOpen, setIsAssignUserDialogOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [activeTab, setActiveTab] = useState('documents');
+  const [selectedKGItem, setSelectedKGItem] = useState<any>(null);
+  const [isKGDescriptionDialogOpen, setIsKGDescriptionDialogOpen] =
+    useState(false);
+  const [selectedKGType, setSelectedKGType] = useState<
+    'entity' | 'community' | 'triple'
+  >('entity');
   const itemsPerPage = ITEMS_PER_PAGE;
 
   const currentData = documents.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  const renderActionButtons = () => {
+    return (
+      <div className="flex justify-end items-center space-x-2 mb-2">
+        <KnowledgeGraphButton
+          collectionId={currentCollectionId}
+          showToast={toast}
+        />
+        {activeTab === 'documents' && (
+          <Button
+            onClick={() => setIsAssignDocumentDialogOpen(true)}
+            type="button"
+            color="filled"
+            shape="rounded"
+            className="pl-2 pr-2 text-white py-2 px-4"
+            style={{ zIndex: 20 }}
+          >
+            Manage Files
+          </Button>
+        )}
+        {activeTab === 'users' && (
+          <Button
+            onClick={() => setIsAssignUserDialogOpen(true)}
+            type="button"
+            color="filled"
+            shape="rounded"
+            className="pl-2 pr-2 text-white py-2 px-4"
+            style={{ zIndex: 20 }}
+          >
+            Manage Users
+          </Button>
+        )}
+      </div>
+    );
+  };
 
   const fetchData = useCallback(
     async (
@@ -68,16 +117,26 @@ const CollectionIdPage: React.FC = () => {
           throw new Error('Failed to get authenticated client');
         }
 
-        const [documentsData, usersData] = await Promise.all([
+        const [
+          documentsData,
+          usersData,
+          entitiesData,
+          communitiesData,
+          triplesData,
+        ] = await Promise.all([
           client.getDocumentsInCollection(currentCollectionId),
           client.getUsersInCollection(currentCollectionId),
+          client.getEntities(currentCollectionId),
+          client.getCommunities(currentCollectionId),
+          client.getTriples(currentCollectionId),
         ]);
-
-        console.log('rawDocuments', documentsData.results);
-        console.log('rawUsers', usersData.results);
 
         setDocuments(documentsData.results);
         setUsers(usersData.results);
+        setEntities(entitiesData.results?.entities);
+        setCommunities(communitiesData.results?.communities);
+        setTriples(triplesData.results?.triples);
+
         setPendingDocuments(
           documentsData.results
             .filter(
@@ -169,7 +228,7 @@ const CollectionIdPage: React.FC = () => {
     if (pendingDocuments.length > 0 && currentCollectionId) {
       intervalId = setInterval(() => {
         fetchPendingDocuments(currentCollectionId);
-      }, 2500); // 2.5 seconds interval
+      }, 2500);
     }
 
     return () => {
@@ -208,19 +267,6 @@ const CollectionIdPage: React.FC = () => {
   const columns: Column<DocumentInfoType>[] = [
     { key: 'title', label: 'Title', sortable: true },
     { key: 'id', label: 'Document ID', truncate: true, copyable: true },
-    {
-      key: 'user_id',
-      label: 'User ID',
-      truncate: true,
-      copyable: true,
-      selected: false,
-    },
-    {
-      key: 'collection_ids',
-      label: 'Collection IDs',
-      renderCell: (doc) => doc.collection_ids.join(', ') || 'N/A',
-      selected: false,
-    },
     {
       key: 'ingestion_status',
       label: 'Ingestion',
@@ -262,31 +308,9 @@ const CollectionIdPage: React.FC = () => {
       ),
       selected: false,
     },
-    { key: 'type', label: 'Type', selected: false },
-    {
-      key: 'metadata',
-      label: 'Metadata',
-      renderCell: (doc) => JSON.stringify(doc.metadata),
-      selected: false,
-    },
-    { key: 'version', label: 'Version', selected: false },
-    {
-      key: 'created_at',
-      label: 'Created At',
-      sortable: true,
-      renderCell: (doc) => new Date(doc.created_at).toLocaleString(),
-      selected: false,
-    },
-    {
-      key: 'updated_at',
-      label: 'Updated At',
-      sortable: true,
-      renderCell: (doc) => new Date(doc.updated_at).toLocaleString(),
-      selected: false,
-    },
   ];
 
-  const renderActions = (doc: DocumentInfoType) => (
+  const renderDocumentActions = (doc: DocumentInfoType) => (
     <div className="flex space-x-1 justify-end">
       <RemoveButton
         itemId={doc.id}
@@ -313,10 +337,82 @@ const CollectionIdPage: React.FC = () => {
     </div>
   );
 
+  const renderEntityActions = (entity: Entity) => (
+    <div className="flex space-x-1 justify-end">
+      <Button
+        onClick={() => {
+          setSelectedKGItem(entity);
+          setSelectedKGType('entity');
+          setIsKGDescriptionDialogOpen(true);
+        }}
+        color="filled"
+        shape="slim"
+      >
+        <FileSearch2 className="h-6 w-6" />
+      </Button>
+    </div>
+  );
+
+  const renderCommunityActions = (community: Community) => (
+    <div className="flex space-x-1 justify-end">
+      <Button
+        onClick={() => {
+          setSelectedKGItem(community);
+          setSelectedKGType('community');
+          setIsKGDescriptionDialogOpen(true);
+        }}
+        color="filled"
+        shape="slim"
+      >
+        <FileSearch2 className="h-6 w-6" />
+      </Button>
+    </div>
+  );
+
+  const renderTripleActions = (triple: Triple) => (
+    <div className="flex space-x-1 justify-end">
+      <Button
+        onClick={() => {
+          setSelectedKGItem(triple);
+          setSelectedKGType('triple');
+          setIsKGDescriptionDialogOpen(true);
+        }}
+        color="filled"
+        shape="slim"
+      >
+        <FileSearch2 className="h-6 w-6" />
+      </Button>
+    </div>
+  );
+
   const userColumns: Column<User>[] = [
-    { key: 'name', label: 'Name', sortable: true },
     { key: 'id', label: 'User ID', truncate: true, copyable: true },
     { key: 'email', label: 'Email', truncate: true, copyable: true },
+  ];
+
+  const entityColumns: Column<Entity>[] = [
+    { key: 'name', label: 'Name', sortable: true },
+    { key: 'description', label: 'Description', truncate: true },
+    { key: 'extraction_ids', label: 'Extraction IDs', truncate: true },
+    {
+      key: 'document_id',
+      label: 'Document ID',
+      truncate: true,
+      copyable: true,
+    },
+    { key: 'attributes', label: 'Attributes', truncate: true },
+  ];
+
+  const communityColumns: Column<Community>[] = [
+    { key: 'name', label: 'Name', sortable: true },
+    { key: 'community_number', label: 'Community Number', sortable: true },
+    { key: 'rating', label: 'Rating', sortable: true },
+  ];
+
+  const tripleColumns: Column<Triple>[] = [
+    { key: 'subject', label: 'Subject', sortable: true },
+    { key: 'predicate', label: 'Predicate', sortable: true },
+    { key: 'object', label: 'Object', sortable: true },
   ];
 
   const renderUserActions = (user: User) => (
@@ -372,13 +468,14 @@ const CollectionIdPage: React.FC = () => {
       pageTitle={`Collection ${currentCollectionId} Overview`}
       includeFooter={false}
     >
-      <main className="w-full flex flex-col container h-screen-[calc(100%-4rem)] mt-5">
+      <main className="flex flex-col container h-screen-[calc(100%-4rem)] mt-5 pb-4">
+        {renderActionButtons()}
         <Tabs
           value={activeTab}
           onValueChange={setActiveTab}
-          className="w-full h-full flex flex-col mt-4"
+          className="flex flex-col flex-1 mt-4 overflow-hidden"
         >
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="documents" className="flex items-center">
               <FileText className="w-4 h-4 mr-2" />
               Documents
@@ -387,77 +484,124 @@ const CollectionIdPage: React.FC = () => {
               <Users className="w-4 h-4 mr-2" />
               Users
             </TabsTrigger>
+            <TabsTrigger value="entities" className="flex items-center">
+              <Contact className="w-4 h-4 mr-2" />
+              Entities
+            </TabsTrigger>
+            <TabsTrigger value="communities" className="flex items-center">
+              <Users className="w-4 h-4 mr-2" />
+              Communities
+            </TabsTrigger>
+            <TabsTrigger value="triples" className="flex items-center">
+              <Users className="w-4 h-4 mr-2" />
+              Triples
+            </TabsTrigger>
           </TabsList>
-          <TabsContent value="documents" className="flex-grow flex flex-col">
-            <div className="flex justify-end items-center space-x-2 mb-2">
-              <Button
-                onClick={() => setIsAssignDocumentDialogOpen(true)}
-                type="button"
-                color="filled"
-                shape="rounded"
-                className="pl-2 pr-2 text-white py-2 px-4"
-                style={{ zIndex: 20 }}
-              >
-                Manage Files
-              </Button>
-            </div>
-            <div className="flex-grow overflow-auto">
-              <Table
-                data={documents}
-                columns={columns}
-                itemsPerPage={itemsPerPage}
-                onSelectAll={handleSelectAll}
-                onSelectItem={(itemId: string, selected: boolean) => {
-                  const item = documents.find((doc) => doc.id === itemId);
-                  if (item) {
-                    handleSelectItem(item, selected);
-                  }
-                }}
-                selectedItems={selectedDocumentIds}
-                actions={renderActions}
-                initialSort={{ key: 'title', order: 'asc' }}
-                initialFilters={{}}
-                currentPage={currentPage}
-                onPageChange={handlePageChange}
-                loading={isLoading}
-                showPagination={true}
-              />
-            </div>
+          <TabsContent value="documents" className="flex-1 overflow-auto">
+            <Table
+              data={documents}
+              columns={columns}
+              itemsPerPage={itemsPerPage}
+              onSelectAll={handleSelectAll}
+              onSelectItem={(itemId: string, selected: boolean) => {
+                const item = documents.find((doc) => doc.id === itemId);
+                if (item) {
+                  handleSelectItem(item, selected);
+                }
+              }}
+              selectedItems={selectedDocumentIds}
+              actions={renderDocumentActions}
+              initialSort={{ key: 'title', order: 'asc' }}
+              initialFilters={{}}
+              currentPage={currentPage}
+              onPageChange={handlePageChange}
+              loading={isLoading}
+              showPagination={true}
+            />
           </TabsContent>
-          <TabsContent value="users" className="flex-grow flex flex-col">
-            <div className="flex justify-end items-center space-x-2 mb-2">
-              <Button
-                onClick={() => setIsAssignUserDialogOpen(true)}
-                type="button"
-                color="filled"
-                shape="rounded"
-                className="pl-2 pr-2 text-white py-2 px-4"
-                style={{ zIndex: 20 }}
-              >
-                Manage Users
-              </Button>
-            </div>
-            <div className="flex-grow overflow-auto">
-              <Table
-                data={users}
-                columns={userColumns}
-                itemsPerPage={itemsPerPage}
-                onSelectAll={(selected) => {
-                  // Implement select all for users if needed
-                }}
-                onSelectItem={(itemId: string, selected: boolean) => {
-                  // Implement select item for users if needed
-                }}
-                selectedItems={[]} // Manage selected users if necessary
-                actions={renderUserActions}
-                initialSort={{ key: 'name', order: 'asc' }}
-                initialFilters={{}}
-                currentPage={currentPage}
-                onPageChange={handlePageChange}
-                loading={isLoading}
-                showPagination={true}
-              />
-            </div>
+          <TabsContent value="users" className="flex-1 overflow-auto">
+            <Table
+              data={users}
+              columns={userColumns}
+              itemsPerPage={itemsPerPage}
+              onSelectAll={(selected) => {
+                // Implement select all if needed
+              }}
+              onSelectItem={(itemId: string, selected: boolean) => {
+                // Implement select item if needed
+              }}
+              selectedItems={[]}
+              actions={renderUserActions}
+              initialSort={{ key: 'id', order: 'asc' }}
+              initialFilters={{}}
+              currentPage={currentPage}
+              onPageChange={handlePageChange}
+              loading={isLoading}
+              showPagination={true}
+            />
+          </TabsContent>
+          <TabsContent value="entities" className="flex-1 overflow-auto">
+            <Table
+              data={entities}
+              columns={entityColumns}
+              itemsPerPage={itemsPerPage}
+              actions={renderEntityActions}
+              onSelectAll={(selected) => {
+                // Implement select all if needed
+              }}
+              onSelectItem={(itemId: string, selected: boolean) => {
+                // Implement select item if needed
+              }}
+              selectedItems={[]}
+              initialSort={{ key: 'userId', order: 'asc' }}
+              initialFilters={{}}
+              currentPage={currentPage}
+              onPageChange={handlePageChange}
+              loading={isLoading}
+              showPagination={true}
+            />
+          </TabsContent>
+          <TabsContent value="communities" className="flex-1 overflow-auto">
+            <Table
+              data={communities}
+              columns={communityColumns}
+              itemsPerPage={itemsPerPage}
+              actions={renderCommunityActions}
+              onSelectAll={(selected) => {
+                // Implement select all if needed
+              }}
+              onSelectItem={(itemId: string, selected: boolean) => {
+                // Implement select item if needed
+              }}
+              selectedItems={[]}
+              initialSort={{ key: 'name', order: 'asc' }}
+              initialFilters={{}}
+              currentPage={currentPage}
+              onPageChange={handlePageChange}
+              loading={isLoading}
+              showPagination={true}
+            />
+          </TabsContent>
+          <TabsContent value="triples" className="flex-1 overflow-auto">
+            <Table
+              data={triples}
+              columns={tripleColumns}
+              itemsPerPage={itemsPerPage}
+              actions={renderTripleActions}
+              onSelectAll={(selected) => {
+                // Implement select all if needed
+              }}
+              onSelectItem={(itemId: string, selected: boolean) => {
+                // Implement select item if needed
+              }}
+              selectedItems={[]}
+              initialSort={{ key: 'name', order: 'asc' }}
+              initialFilters={{}}
+              currentPage={currentPage}
+              onPageChange={handlePageChange}
+              loading={isLoading}
+              showPagination={true}
+            />
           </TabsContent>
         </Tabs>
         <div className="-mt-12 flex justify-end">
@@ -487,6 +631,12 @@ const CollectionIdPage: React.FC = () => {
         onClose={() => setIsAssignUserDialogOpen(false)}
         collection_id={currentCollectionId}
         onAssignSuccess={handleAssignSuccess}
+      />
+      <KGDescriptionDialog
+        open={isKGDescriptionDialogOpen}
+        onClose={() => setIsKGDescriptionDialogOpen(false)}
+        item={selectedKGItem}
+        type={selectedKGType}
       />
     </Layout>
   );

@@ -1,7 +1,9 @@
 import {
   BookOpenText,
   FileText,
+  Boxes,
   MessageCircle,
+  ScanSearch,
   BarChart2,
   FileSearch,
   Users,
@@ -43,9 +45,9 @@ const HomePage = () => {
   }
 
   return (
-    <Layout>
+    <Layout includeFooter>
       <main className="w-full flex flex-col container h-screen-[calc(100%-4rem)]">
-        <div className="absolute inset-0 bg-zinc-900 mt-[5rem] sm:mt-[5rem] mr-[5rem] ml-[5rem]">
+        <div className="relative bg-zinc-900 p-5">
           <div className="flex flex-col lg:flex-row gap-4">
             {/* Left column - Alert */}
             <div className="w-full lg:w-2/3 flex flex-col gap-4">
@@ -77,12 +79,32 @@ const HomePage = () => {
                       </div>
                     </div>
                     <div className="flex items-start space-x-3">
+                      <Boxes className="w-5 h-5 text-primary" />
+                      <div>
+                        <h3 className="text-sm font-semibold mb-1">
+                          Collections
+                        </h3>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          Manage and share groups of documents and create
+                          knowledge graphs.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start space-x-3">
                       <MessageCircle className="w-5 h-5 text-primary" />
                       <div>
                         <h3 className="text-sm font-semibold mb-1">Chat</h3>
                         <p className="text-xs text-gray-500 dark:text-gray-400">
-                          Stream RAG and knowledge graph responses with
-                          different models and configurable settings.
+                          Generate RAG responses.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start space-x-3">
+                      <ScanSearch className="w-5 h-5 text-primary" />
+                      <div>
+                        <h3 className="text-sm font-semibold mb-1">Search</h3>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          Conduct search over your documents and collections.
                         </p>
                       </div>
                     </div>
@@ -128,14 +150,10 @@ const HomePage = () => {
                     </div>
                   </div>
                   <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                      Have a feature request or found a bug? Create a Github
-                      issue and help us improve R2R!
-                    </p>
                     <div className="flex space-x-4">
                       <Button
                         className="flex items-center justify-center px-4 py-2 text-sm"
-                        color="light"
+                        color="transparent"
                         onClick={() =>
                           window.open(
                             'https://github.com/SciPhi-AI/R2R/issues/new?assignees=&labels=&projects=&template=feature_request.md&title=',
@@ -147,7 +165,7 @@ const HomePage = () => {
                       </Button>
                       <Button
                         className="flex items-center justify-center px-4 py-2 text-sm"
-                        color="light"
+                        color="transparent"
                         onClick={() =>
                           window.open(
                             'https://github.com/SciPhi-AI/R2R/issues/new?assignees=&labels=&projects=&template=bug_report.md&title=',

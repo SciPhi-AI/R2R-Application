@@ -86,6 +86,45 @@ export interface User {
   profile_picture?: string;
 }
 
+export interface Entity {
+  name: string;
+  category: string;
+  description: string;
+  description_embedding: number[];
+  community_numbers: number[];
+  extraction_ids: string[];
+  document_id: string;
+  document_ids: string[];
+  attributes: Record<string, any>;
+}
+
+export interface Community {
+  id: string;
+  community_number: number;
+  collection_id: string;
+  level: number;
+  name: string;
+  summary: string;
+  findings: string[];
+  rating: number;
+  rating_explanation: string;
+  embedding: number[];
+  attributes: Record<string, any>;
+}
+
+export interface Triple {
+  id?: number;
+  subject: string;
+  predicate: string;
+  object: string;
+  weight?: number;
+  description?: string;
+  predicate_embedding?: number[];
+  extraction_ids: string[];
+  document_ids: string[];
+  attributes: Record<string, any>;
+}
+
 export interface DocumentFilterCriteria {
   sort: 'title' | 'date';
   order: 'asc' | 'desc';

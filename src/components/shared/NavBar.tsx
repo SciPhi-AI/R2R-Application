@@ -98,7 +98,7 @@ export const Navbar = forwardRef<React.ElementRef<'nav'>, NavbarProps>(
     };
 
     return (
-      <nav ref={ref} className={`bg-zinc-900 shadow z-50`}>
+      <nav ref={ref} className="bg-zinc-900 shadow z-50 w-full">
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-14 items-center">
             <div className="flex items-center space-x-4">
