@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 
 import useSwitchManager from '@/components/ChatDemo/SwitchManager';
 import Layout from '@/components/Layout';
-import AppSidebar from '@/components/Sidebar';
+import Sidebar from '@/components/Sidebar';
 import {
   Accordion,
   AccordionContent,
@@ -11,7 +11,6 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/Button';
-import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useUserContext } from '@/context/UserContext';
 
@@ -25,6 +24,8 @@ const SearchPage: React.FC = () => {
   const { pipeline, getClient } = useUserContext();
   const [loading, setLoading] = useState<boolean>(false);
   const [query, setQuery] = useState<string>('');
+  const [sidebarIsOpen, setSidebarIsOpen] = useState(false);
+  const toggleSidebar = () => setSidebarIsOpen(!sidebarIsOpen);
 
   // Search results
   const [vectorSearchResults, setVectorSearchResults] = useState<any[]>([]);
@@ -163,90 +164,84 @@ const SearchPage: React.FC = () => {
 
   return (
     <Layout pageTitle="Search" includeFooter={false}>
-      <SidebarProvider defaultOpen={true}>
-        <div className="flex min-h-[calc(100vh-4rem)] w-full max-w-6xl">
-          <AppSidebar
-            switches={switches}
-            handleSwitchChange={handleSwitchChange}
-            searchLimit={searchLimit}
-            setSearchLimit={setSearchLimit}
-            searchFilters={searchFilters}
-            setSearchFilters={setSearchFilters}
-            collections={collections}
-            selectedCollectionIds={selectedCollectionIds}
-            setSelectedCollectionIds={setSelectedCollectionIds}
-            indexMeasure={indexMeasure}
-            setIndexMeasure={setIndexMeasure}
-            includeMetadatas={includeMetadatas}
-            setIncludeMetadatas={setIncludeMetadatas}
-            probes={probes}
-            setProbes={setProbes}
-            efSearch={efSearch}
-            setEfSearch={setEfSearch}
-            fullTextWeight={fullTextWeight}
-            setFullTextWeight={setFullTextWeight}
-            semanticWeight={semanticWeight}
-            setSemanticWeight={setSemanticWeight}
-            fullTextLimit={fullTextLimit}
-            setFullTextLimit={setFullTextLimit}
-            rrfK={rrfK}
-            setRrfK={setRrfK}
-            kgSearchLevel={kgSearchLevel}
-            setKgSearchLevel={setKgSearchLevel}
-            maxCommunityDescriptionLength={maxCommunityDescriptionLength}
-            setMaxCommunityDescriptionLength={setMaxCommunityDescriptionLength}
-            localSearchLimits={localSearchLimits}
-            setLocalSearchLimits={setLocalSearchLimits}
-            config={{
-              showVectorSearch: true,
-              showHybridSearch: true,
-              showKGSearch: false,
-              showRagGeneration: false,
-            }}
-          />
+      <div className="flex flex-col h-screen-[calc(100%-4rem)] overflow-hidden">
+        <Sidebar
+          isOpen={sidebarIsOpen}
+          onToggle={toggleSidebar}
+          switches={switches}
+          handleSwitchChange={handleSwitchChange}
+          searchLimit={searchLimit}
+          setSearchLimit={setSearchLimit}
+          searchFilters={searchFilters}
+          setSearchFilters={setSearchFilters}
+          collections={collections}
+          selectedCollectionIds={selectedCollectionIds}
+          setSelectedCollectionIds={setSelectedCollectionIds}
+          indexMeasure={indexMeasure}
+          setIndexMeasure={setIndexMeasure}
+          includeMetadatas={includeMetadatas}
+          setIncludeMetadatas={setIncludeMetadatas}
+          probes={probes}
+          setProbes={setProbes}
+          efSearch={efSearch}
+          setEfSearch={setEfSearch}
+          fullTextWeight={fullTextWeight}
+          setFullTextWeight={setFullTextWeight}
+          semanticWeight={semanticWeight}
+          setSemanticWeight={setSemanticWeight}
+          fullTextLimit={fullTextLimit}
+          setFullTextLimit={setFullTextLimit}
+          rrfK={rrfK}
+          setRrfK={setRrfK}
+          kgSearchLevel={kgSearchLevel}
+          setKgSearchLevel={setKgSearchLevel}
+          maxCommunityDescriptionLength={maxCommunityDescriptionLength}
+          setMaxCommunityDescriptionLength={setMaxCommunityDescriptionLength}
+          localSearchLimits={localSearchLimits}
+          setLocalSearchLimits={setLocalSearchLimits}
+          config={{
+            showVectorSearch: true,
+            showHybridSearch: true,
+            showKGSearch: false,
+            showRagGeneration: false,
+          }}
+        />
 
-          <main
-            className="flex-1 flex flex-col transition-all duration-200 w-full overflow-x-auto"
-            data-main
+        <div
+          className={`main-content-wrapper ${sidebarIsOpen ? '' : 'sidebar-closed'}`}
+        >
+          <div
+            className={`main-content ${sidebarIsOpen ? '' : 'sidebar-closed'}`}
+            ref={contentAreaRef}
           >
-            <div className="bg-zinc-900 shadow-md transition-all duration-200 w-full">
-              <div className="flex items-center px-8 w-full mx-auto">
-                <div className="flex-shrink-0">
-                  <SidebarTrigger className="h-9 w-9 p-2 hover:bg-zinc-800 rounded-md">
-                    <span>Toggle Sidebar</span>
-                  </SidebarTrigger>
+            <div className="sticky top-0 z-10 bg-zinc-900 shadow-md">
+              <form onSubmit={handleSearch} className="py-4">
+                <div className="relative flex items-center focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 focus-within:ring-offset-zinc-800 rounded-full">
+                  <input
+                    id="search-bar"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    autoFocus
+                    placeholder="Enter your search query..."
+                    className="w-full px-4 py-2 h-10 bg-zinc-700 text-zinc-200 rounded-l-full focus:outline-none"
+                  />
+                  <Button
+                    type="submit"
+                    color="filled"
+                    className="px-4 py-2 h-10 rounded-r-full"
+                    disabled={loading}
+                  >
+                    {loading ? 'Searching...' : <ArrowRight size={20} />}
+                  </Button>
                 </div>
-                <form
-                  onSubmit={handleSearch}
-                  className="flex-1 py-4 ml-4 w-full"
-                >
-                  <div className="relative flex items-center w-full">
-                    <div className="w-full flex focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 focus-within:ring-offset-zinc-800 rounded-full">
-                      <input
-                        id="search-bar"
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                        autoFocus
-                        placeholder="Enter your search query..."
-                        className="flex-1 px-4 py-2 h-10 bg-zinc-700 text-zinc-200 rounded-l-full focus:outline-none min-w-0 w-full"
-                      />
-                      <Button
-                        type="submit"
-                        color="filled"
-                        className="flex-shrink-0 px-4 py-2 h-10 rounded-r-full"
-                        disabled={loading}
-                      >
-                        {loading ? 'Searching...' : <ArrowRight size={20} />}
-                      </Button>
-                    </div>
-                  </div>
-                </form>
-              </div>
+              </form>
             </div>
 
-            {/* Adjusted margins and paddings to align content */}
-            <div className="flex-1 transition-all duration-200 px-8 mt-4 w-full">
-              <div className="mt-4">
+            <div
+              className={`main-content ${sidebarIsOpen ? '' : 'sidebar-closed'} p-4`}
+              ref={contentAreaRef}
+            >
+              <div className="mt-8">
                 <h2 className="text-xl font-semibold mb-4">Search Results</h2>
                 <Tabs defaultValue="vector" className="w-full">
                   <TabsList>
@@ -258,14 +253,12 @@ const SearchPage: React.FC = () => {
                       vectorSearchResults.map((result, index) => (
                         <div
                           key={index}
-                          className="mb-6 p-6 bg-zinc-800 rounded-lg"
-                          /* Increased padding and margin for larger results field */
+                          className="mb-4 p-4 bg-zinc-800 rounded"
                         >
                           <h3 className="text-lg font-semibold mb-2">
                             {result.metadata?.title || `Result ${index + 1}`}
                           </h3>
-                          <p className="text-base mb-2">{result.text}</p>
-                          {/* Increased text size */}
+                          <p className="text-sm mb-2">{result.text}</p>
                           <p className="text-sm mb-2">
                             Score: {result.score.toFixed(4)}
                           </p>
@@ -294,16 +287,14 @@ const SearchPage: React.FC = () => {
                       kgSearchResults.map((result, index) => (
                         <div
                           key={index}
-                          className="mb-6 p-6 bg-zinc-800 rounded-lg"
-                          /* Increased padding and margin for larger results field */
+                          className="mb-4 p-4 bg-zinc-800 rounded"
                         >
                           <h3 className="text-lg font-semibold mb-2">
                             {result.content.name}
                           </h3>
-                          <p className="text-base mb-2">
+                          <p className="text-sm mb-2">
                             {result.content.description}
                           </p>
-                          {/* Increased text size */}
                           <Accordion
                             type="single"
                             collapsible
@@ -330,9 +321,9 @@ const SearchPage: React.FC = () => {
                 </Tabs>
               </div>
             </div>
-          </main>
+          </div>
         </div>
-      </SidebarProvider>
+      </div>
     </Layout>
   );
 };

@@ -76,18 +76,6 @@
     --ring: #3d3935;
 
     --radius: 0.5rem;
-
-    --sidebar-background: 240 10% 3.9%;
-    --sidebar-foreground: 0 0% 98%;
-    --sidebar-width: 20rem;
-    --sidebar-width-mobile: 20rem;
-    --sidebar-width-icon: 4rem;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   .dark {
@@ -118,14 +106,6 @@
     --border: #282626;
     --input: #282626;
     --ring: #d6d5d5;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
   }
   [inert] ::-webkit-scrollbar {
     display: none;
@@ -179,19 +159,6 @@ a {
   }
 }
 
-#__next {
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-.layout {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
-}
-
 .searching-animation {
   background: linear-gradient(
     90deg,
@@ -205,31 +172,29 @@ a {
   -webkit-text-fill-color: transparent;
 }
 
-.main-content {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: hidden;
-}
-
-.scrollable-content {
-  flex: 1;
-  overflow-y: auto;
-  padding: 1rem;
-}
-
 .main-content-wrapper {
-  position: relative;
-  flex: 1;
+  position: fixed;
+  top: var(--header-height);
+  left: var(--sidebar-width);
+  right: 0;
+  bottom: 0;
+  transition: left 0.2s ease-in-out;
   display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: hidden;
-  margin: 0 auto;
+  justify-content: center;
+  overflow-x: hidden;
 }
 
 .main-content-wrapper.sidebar-closed {
   left: 0;
+}
+
+.main-content {
+  width: 100%;
+  max-width: 64rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
 }
 
 .centered-content {
