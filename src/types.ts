@@ -162,6 +162,19 @@ export interface DocumentInfoType {
   updated_at: string;
 }
 
+export interface DocumentInCollectionType {
+  id: string;
+  title: string;
+  user_id: string;
+  document_type?: string;
+  created_at: string;
+  updated_at: string;
+  ingestion_status: IngestionStatus;
+  kg_extraction_status: KGExtractionStatus;
+  collection_ids: string[];
+  metadata: Record<string, any>;
+}
+
 export interface DocumentInfoDialogProps {
   id: string;
   apiUrl?: string;
