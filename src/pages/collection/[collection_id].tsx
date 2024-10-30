@@ -24,6 +24,7 @@ import {
   Entity,
   Community,
   Triple,
+  DocumentInCollectionType,
 } from '@/types';
 
 const MAX_RETRIES = 5;
@@ -264,52 +265,6 @@ const CollectionIdPage: React.FC = () => {
     setCurrentPage(page);
   };
 
-  const columns: Column<DocumentInfoType>[] = [
-    { key: 'title', label: 'Title', sortable: true },
-    { key: 'id', label: 'Document ID', truncate: true, copyable: true },
-    {
-      key: 'ingestion_status',
-      label: 'Ingestion',
-      filterable: true,
-      filterType: 'multiselect',
-      filterOptions: ['success', 'failed', 'pending'],
-      renderCell: (doc) => (
-        <Badge
-          variant={
-            doc.ingestion_status === IngestionStatus.SUCCESS
-              ? 'success'
-              : doc.ingestion_status === IngestionStatus.FAILED
-                ? 'destructive'
-                : 'pending'
-          }
-        >
-          {doc.ingestion_status}
-        </Badge>
-      ),
-    },
-    {
-      key: 'kg_extraction_status',
-      label: 'KG Extraction',
-      filterable: true,
-      filterType: 'multiselect',
-      filterOptions: ['success', 'failed', 'pending'],
-      renderCell: (doc) => (
-        <Badge
-          variant={
-            doc.kg_extraction_status === KGExtractionStatus.SUCCESS
-              ? 'success'
-              : doc.kg_extraction_status === KGExtractionStatus.FAILED
-                ? 'destructive'
-                : 'pending'
-          }
-        >
-          {doc.kg_extraction_status}
-        </Badge>
-      ),
-      selected: false,
-    },
-  ];
-
   const renderDocumentActions = (doc: DocumentInfoType) => (
     <div className="flex space-x-1 justify-end">
       <RemoveButton
@@ -384,6 +339,52 @@ const CollectionIdPage: React.FC = () => {
       </Button>
     </div>
   );
+
+  const documentColumns: Column<DocumentInCollectionType>[] = [
+    { key: 'title', label: 'Title', sortable: true },
+    { key: 'id', label: 'Document ID', truncate: true, copyable: true },
+    {
+      key: 'ingestion_status',
+      label: 'Ingestion',
+      filterable: true,
+      filterType: 'multiselect',
+      filterOptions: ['success', 'failed', 'pending'],
+      renderCell: (doc) => (
+        <Badge
+          variant={
+            doc.ingestion_status === IngestionStatus.SUCCESS
+              ? 'success'
+              : doc.ingestion_status === IngestionStatus.FAILED
+                ? 'destructive'
+                : 'pending'
+          }
+        >
+          {doc.ingestion_status}
+        </Badge>
+      ),
+    },
+    {
+      key: 'kg_extraction_status',
+      label: 'KG Extraction',
+      filterable: true,
+      filterType: 'multiselect',
+      filterOptions: ['success', 'failed', 'pending'],
+      renderCell: (doc) => (
+        <Badge
+          variant={
+            doc.kg_extraction_status === KGExtractionStatus.SUCCESS
+              ? 'success'
+              : doc.kg_extraction_status === KGExtractionStatus.FAILED
+                ? 'destructive'
+                : 'pending'
+          }
+        >
+          {doc.kg_extraction_status}
+        </Badge>
+      ),
+      selected: false,
+    },
+  ];
 
   const userColumns: Column<User>[] = [
     { key: 'id', label: 'User ID', truncate: true, copyable: true },
@@ -500,7 +501,7 @@ const CollectionIdPage: React.FC = () => {
           <TabsContent value="documents" className="flex-1 overflow-auto">
             <Table
               data={documents}
-              columns={columns}
+              columns={documentColumns}
               itemsPerPage={itemsPerPage}
               onSelectAll={handleSelectAll}
               onSelectItem={(itemId: string, selected: boolean) => {
