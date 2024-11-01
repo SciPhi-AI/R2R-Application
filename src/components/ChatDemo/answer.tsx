@@ -1,4 +1,5 @@
 import { FileText } from 'lucide-react';
+import { ThumbsUp, ThumbsDown } from 'lucide-react';
 import { FC } from 'react';
 import React, { useState, useEffect } from 'react';
 import Markdown from 'react-markdown';
@@ -158,7 +159,8 @@ export const Answer: FC<{
   message: Message;
   isStreaming: boolean;
   isSearching: boolean;
-}> = ({ message, isStreaming, isSearching }) => {
+  onFeedback: (messageId: string, feedbackValue: number) => void;
+}> = ({ message, isStreaming, isSearching, onFeedback }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [parsedVectorSources, setParsedVectorSources] = useState<Source[]>([]);
   const [parsedEntities, setParsedEntities] = useState<KGSearchResult[]>([]);
@@ -380,6 +382,26 @@ export const Answer: FC<{
             <Skeleton className="max-w-xl h-4 bg-zinc-200" />
           </div>
         )}
+      </div>
+      <div className="flex space-x-2 mt-2">
+        <button
+          onClick={() => onFeedback(message.id, 1)}
+          className={`${
+            message.metadata?.feedback === 1 ? 'text-green-700' : 'text-green-500'
+          } hover:text-green-700`}
+          disabled={message.metadata?.feedback !== undefined}
+        >
+          <ThumbsUp size={20} />
+        </button>
+        <button
+          onClick={() => onFeedback(message.id, -1)}
+          className={`${
+            message.metadata?.feedback === -1 ? 'text-red-700' : 'text-red-500'
+          } hover:text-red-700`}
+          disabled={message.metadata?.feedback !== undefined}
+        >
+          <ThumbsDown size={20} />
+        </button>
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import { Loader, FileSearch2, SlidersHorizontal } from 'lucide-react';
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { DeleteButton } from '@/components/ChatDemo/deleteButton';
 import DownloadFileContainer from '@/components/ChatDemo/DownloadFileContainer';

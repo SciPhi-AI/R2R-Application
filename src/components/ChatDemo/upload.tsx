@@ -97,10 +97,11 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
       }
     } catch (error: any) {
       console.error('Error uploading files:', error);
+      const errorMessage = error.response?.data?.message || error.message || 'An unknown error occurred';
       showToast({
         variant: 'destructive',
         title: 'Upload Failed',
-        description: error.message,
+        description: errorMessage
       });
     } finally {
       setIsUploading(false);
@@ -134,7 +135,7 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
       showToast({
         variant: 'destructive',
         title: 'Creation Failed',
-        description: error.message,
+        description: error.message || 'An unknown error occurred.',
       });
     }
   };

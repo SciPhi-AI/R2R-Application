@@ -14,6 +14,7 @@ import { Answer } from './answer';
 import { DefaultQueries } from './DefaultQueries';
 import MessageBubble from './MessageBubble';
 import { UploadButton } from './upload';
+import { useToast } from '@/components/ui/use-toast';
 
 const SEARCH_START_TOKEN = '<search>';
 const SEARCH_END_TOKEN = '</search>';
@@ -83,6 +84,7 @@ export const Result: FC<{
     string | null
   >(null);
   const [initialPage, setInitialPage] = useState<number>(1);
+  const { toast } = useToast();
 
   useEffect(() => {
     abortCurrentRequest();
@@ -133,6 +135,38 @@ export const Result: FC<{
       }
     });
   };
+
+  const handleFeedback = async (messageId: string, feedbackValue: number) => {
+    try {
+      const client = await getClient();
+      if (!client) {
+        throw new Error('Failed to get authenticated client');
+      }
+      await client.updateMessageMetadata(messageId, { feedback: feedbackValue });
+
+      setMessages((prevMessages) =>
+        prevMessages.map((msg) =>
+          msg.id === messageId
+            ? { ...msg, metadata: { ...msg.metadata, feedback: feedbackValue } }
+            : msg
+        )
+      );
+
+      toast({
+        variant: 'success',
+        title: 'Feedback Recorded',
+        description: 'Your feedback has been recorded successfully.',
+      });
+    } catch (error: any) {
+      console.error('Error updating message metadata:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Feedback Failed',
+        description: error.message || 'An unknown error occurred.',
+      });
+    }
+  };
+
 
   const abortCurrentRequest = () => {
     if (abortControllerRef.current) {
@@ -429,16 +463,16 @@ export const Result: FC<{
         {messages.map((message, index) => (
           <React.Fragment key={message.id}>
             {message.role === 'user' ? (
-              <MessageBubble message={message} />
+              <MessageBubble
+                message={message}
+                onFeedback={handleFeedback}
+              />
             ) : (
               <Answer
                 message={message}
                 isStreaming={message.isStreaming || false}
-                isSearching={
-                  index === messages.length - 1 ? isSearching : false
-                }
-                // mode={mode}
-                // onOpenPdfPreview={handleOpenPdfPreview}
+                isSearching={index === messages.length - 1 ? isSearching : false}
+                onFeedback={handleFeedback}
               />
             )}
           </React.Fragment>

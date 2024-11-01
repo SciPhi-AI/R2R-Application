@@ -267,6 +267,7 @@ export interface Message {
   isStreaming?: boolean;
   sources?: Record<string, string | null>;
   searchPerformed?: boolean;
+  metadata?: Record<string, any>;
 }
 
 export interface ModelSelectorProps {
