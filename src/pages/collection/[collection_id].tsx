@@ -1,6 +1,6 @@
 import { Loader, FileSearch2, Users, FileText, Contact } from 'lucide-react';
 import { useRouter } from 'next/router';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 
 import { DeleteButton } from '@/components/ChatDemo/deleteButton';
 import KGDescriptionDialog from '@/components/ChatDemo/KGDescriptionDialog';
@@ -13,6 +13,7 @@ import DocumentInfoDialog from '@/components/ChatDemo/utils/documentDialogInfo';
 import Layout from '@/components/Layout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/use-toast';
 import { useUserContext } from '@/context/UserContext';
@@ -24,11 +25,9 @@ import {
   Entity,
   Community,
   Triple,
-  DocumentInCollectionType,
 } from '@/types';
 
-const MAX_RETRIES = 5;
-const RETRY_DELAY = 2000;
+const PAGE_SIZE = 100; // Fetch in batches of 100
 const ITEMS_PER_PAGE = 10;
 
 const CollectionIdPage: React.FC = () => {
@@ -50,7 +49,7 @@ const CollectionIdPage: React.FC = () => {
   const [isAssignDocumentDialogOpen, setIsAssignDocumentDialogOpen] =
     useState(false);
   const [isAssignUserDialogOpen, setIsAssignUserDialogOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const [activeTab, setActiveTab] = useState('documents');
   const [selectedKGItem, setSelectedKGItem] = useState<any>(null);
   const [isKGDescriptionDialogOpen, setIsKGDescriptionDialogOpen] =
@@ -60,10 +59,208 @@ const CollectionIdPage: React.FC = () => {
   >('entity');
   const itemsPerPage = ITEMS_PER_PAGE;
 
-  const currentData = documents.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filters, setFilters] = useState<Record<string, any>>({
+    ingestion_status: ['success', 'failed', 'pending', 'enriched'],
+    kg_extraction_status: ['success', 'failed', 'pending'],
+  });
+
+  const currentCollectionId =
+    typeof router.query.collection_id === 'string'
+      ? router.query.collection_id
+      : '';
+
+  /*** Fetching Documents in Batches ***/
+  const fetchAllDocuments = useCallback(async () => {
+    if (!pipeline?.deploymentUrl) {
+      console.error('No pipeline deployment URL available');
+      setError('No pipeline deployment URL available');
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const client = await getClient();
+      if (!client) {
+        throw new Error('Failed to get authenticated client');
+      }
+
+      let offset = 0;
+      let allDocs: DocumentInfoType[] = [];
+
+      // Fetch batches until all documents are fetched
+      while (true) {
+        const batch = await client.getDocumentsInCollection(
+          currentCollectionId,
+          offset,
+          PAGE_SIZE
+        );
+
+        if (batch.results.length === 0) {
+          break;
+        }
+
+        allDocs = allDocs.concat(batch.results);
+        offset += PAGE_SIZE;
+      }
+
+      // Sort documents by a consistent key (e.g., 'id') to maintain order
+      allDocs.sort((a, b) => a.id.localeCompare(b.id));
+
+      setDocuments(allDocs);
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Error fetching documents:', error);
+      setError('Failed to fetch documents. Please try again later.');
+      setIsLoading(false);
+    }
+  }, [getClient, pipeline?.deploymentUrl, currentCollectionId]);
+
+  /*** Fetching Users, Entities, Communities, and Triples ***/
+  const fetchOtherData = useCallback(async () => {
+    if (!pipeline?.deploymentUrl) {
+      console.error('No pipeline deployment URL available');
+      setError('No pipeline deployment URL available');
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const client = await getClient();
+      if (!client) {
+        throw new Error('Failed to get authenticated client');
+      }
+
+      const [usersData, entitiesData, communitiesData, triplesData] =
+        await Promise.all([
+          client.getUsersInCollection(currentCollectionId),
+          client.getEntities(currentCollectionId),
+          client.getCommunities(currentCollectionId),
+          client.getTriples(currentCollectionId),
+        ]);
+
+      setUsers(usersData.results);
+      setEntities(entitiesData.results?.entities || []);
+      setCommunities(communitiesData.results?.communities || []);
+      setTriples(triplesData.results?.triples || []);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      setError('Failed to fetch data. Please try again later.');
+    }
+  }, [getClient, pipeline?.deploymentUrl, currentCollectionId]);
+
+  const refetchData = useCallback(async () => {
+    setIsLoading(true);
+    await Promise.all([fetchAllDocuments(), fetchOtherData()]);
+    setSelectedDocumentIds([]);
+    setIsLoading(false);
+  }, [fetchAllDocuments, fetchOtherData]);
+
+  useEffect(() => {
+    if (router.isReady && currentCollectionId) {
+      refetchData();
+    }
+  }, [router.isReady, currentCollectionId, refetchData]);
+
+  /*** Handle Pending Documents ***/
+  useEffect(() => {
+    const pending = documents
+      .filter(
+        (doc) =>
+          doc.ingestion_status !== IngestionStatus.SUCCESS &&
+          doc.ingestion_status !== IngestionStatus.ENRICHED &&
+          doc.ingestion_status !== IngestionStatus.FAILED
+      )
+      .map((doc) => doc.id);
+    setPendingDocuments(pending);
+  }, [documents]);
+
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+
+    if (pendingDocuments.length > 0 && currentCollectionId) {
+      intervalId = setInterval(() => {
+        fetchAllDocuments();
+      }, 2500);
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [pendingDocuments, fetchAllDocuments, currentCollectionId]);
+
+  /*** Client-Side Filtering and Pagination ***/
+  const filteredDocuments = useMemo(() => {
+    let filtered = [...documents];
+
+    // Apply filters
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value && value.length > 0) {
+        if (Array.isArray(value)) {
+          filtered = filtered.filter((doc) => {
+            switch (key) {
+              case 'ingestion_status':
+                return value.includes(doc.ingestion_status);
+              case 'kg_extraction_status':
+                return value.includes(doc.kg_extraction_status);
+              default:
+                return true;
+            }
+          });
+        }
+      }
+    });
+
+    // Apply search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (doc) =>
+          doc.title?.toLowerCase().includes(query) ||
+          doc.id.toLowerCase().includes(query)
+      );
+    }
+
+    return filtered;
+  }, [documents, filters, searchQuery]);
+
+  const handleSelectAll = useCallback(
+    (selected: boolean) => {
+      if (selected) {
+        setSelectedDocumentIds(filteredDocuments.map((doc) => doc.id));
+      } else {
+        setSelectedDocumentIds([]);
+      }
+    },
+    [filteredDocuments]
   );
+
+  const handleSelectItem = useCallback((itemId: string, selected: boolean) => {
+    setSelectedDocumentIds((prev) => {
+      if (selected) {
+        return [...prev, itemId];
+      } else {
+        return prev.filter((id) => id !== itemId);
+      }
+    });
+  }, []);
+
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+  }, []);
+
+  const handleFiltersChange = (newFilters: Record<string, any>) => {
+    setFilters(newFilters);
+    setCurrentPage(1); // Reset to first page when filters change
+  };
+
+  const handleSearchQueryChange = (query: string) => {
+    setSearchQuery(query);
+    setCurrentPage(1); // Reset to first page when search query changes
+  };
 
   const renderActionButtons = () => {
     return (
@@ -100,180 +297,13 @@ const CollectionIdPage: React.FC = () => {
     );
   };
 
-  const fetchData = useCallback(
-    async (
-      currentCollectionId: string,
-      retryCount = 0
-    ): Promise<{ results: DocumentInfoType[]; total_entries: number }> => {
-      if (!pipeline?.deploymentUrl) {
-        console.error('No pipeline deployment URL available');
-        setError('No pipeline deployment URL available');
-        setIsLoading(false);
-        return { results: [], total_entries: 0 };
-      }
-
-      try {
-        const client = await getClient();
-        if (!client) {
-          throw new Error('Failed to get authenticated client');
-        }
-
-        const [
-          documentsData,
-          usersData,
-          entitiesData,
-          communitiesData,
-          triplesData,
-        ] = await Promise.all([
-          client.getDocumentsInCollection(currentCollectionId),
-          client.getUsersInCollection(currentCollectionId),
-          client.getEntities(currentCollectionId),
-          client.getCommunities(currentCollectionId),
-          client.getTriples(currentCollectionId),
-        ]);
-
-        setDocuments(documentsData.results);
-        setUsers(usersData.results);
-        setEntities(entitiesData.results?.entities);
-        setCommunities(communitiesData.results?.communities);
-        setTriples(triplesData.results?.triples);
-
-        setPendingDocuments(
-          documentsData.results
-            .filter(
-              (doc: DocumentInfoType) =>
-                doc.ingestion_status !== IngestionStatus.SUCCESS &&
-                doc.ingestion_status !== IngestionStatus.ENRICHED &&
-                doc.ingestion_status !== IngestionStatus.FAILED
-            )
-            .map((doc: DocumentInfoType) => doc.id)
-        );
-        setIsLoading(false);
-        setError(null);
-        setSelectedDocumentIds([]);
-
-        return {
-          results: documentsData.results,
-          total_entries: documentsData.results.length,
-        };
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        if (retryCount < MAX_RETRIES) {
-          return new Promise((resolve) =>
-            setTimeout(
-              () => resolve(fetchData(currentCollectionId, retryCount + 1)),
-              RETRY_DELAY
-            )
-          );
-        } else {
-          setError('Failed to fetch data. Please try again later.');
-          setIsLoading(false);
-          return { results: [], total_entries: 0 };
-        }
-      }
-    },
-    [getClient, pipeline?.deploymentUrl]
-  );
-
-  const fetchPendingDocuments = useCallback(
-    async (currentCollectionId: string) => {
-      try {
-        const client = await getClient();
-        if (!client) {
-          throw new Error('Failed to get authenticated client');
-        }
-
-        const updatedDocuments =
-          await client.getDocumentsInCollection(currentCollectionId);
-
-        setDocuments(updatedDocuments.results);
-
-        setPendingDocuments((prevPending) =>
-          prevPending.filter((id) =>
-            updatedDocuments.results.some(
-              (doc: DocumentInfoType) =>
-                doc.id === id &&
-                doc.ingestion_status !== IngestionStatus.SUCCESS &&
-                doc.ingestion_status !== IngestionStatus.ENRICHED &&
-                doc.ingestion_status !== IngestionStatus.FAILED
-            )
-          )
-        );
-      } catch (error) {
-        console.error('Error fetching pending documents:', error);
-      }
-    },
-    [getClient]
-  );
-
-  useEffect(() => {
-    console.log('Router query:', router.query);
-    if (router.isReady) {
-      const currentCollectionId = router.query.collection_id;
-      if (typeof currentCollectionId === 'string') {
-        fetchData(currentCollectionId).then(({ results }) => {
-          setDocuments(results);
-        });
-      } else {
-        setError('Invalid collection ID');
-        setIsLoading(false);
-      }
-    }
-  }, [router.isReady, router.query.collection_id, fetchData]);
-
-  useEffect(() => {
-    let intervalId: NodeJS.Timeout;
-    const currentCollectionId =
-      typeof router.query.collection_id === 'string'
-        ? router.query.collection_id
-        : '';
-
-    if (pendingDocuments.length > 0 && currentCollectionId) {
-      intervalId = setInterval(() => {
-        fetchPendingDocuments(currentCollectionId);
-      }, 2500);
-    }
-
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-    };
-  }, [pendingDocuments, fetchPendingDocuments, router.query.collection_id]);
-
-  const handleSelectAll = (selected: boolean) => {
-    if (selected) {
-      const currentPageIds = currentData.map((doc) => doc.id);
-      setSelectedDocumentIds((prev) => [
-        ...new Set([...prev, ...currentPageIds]),
-      ]);
-    } else {
-      const currentPageIds = currentData.map((doc) => doc.id);
-      setSelectedDocumentIds((prev) =>
-        prev.filter((id) => !currentPageIds.includes(id))
-      );
-    }
-  };
-
-  const handleSelectItem = (item: DocumentInfoType, selected: boolean) => {
-    if (selected) {
-      setSelectedDocumentIds((prev) => [...prev, item.id]);
-    } else {
-      setSelectedDocumentIds((prev) => prev.filter((id) => id !== item.id));
-    }
-  };
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
   const renderDocumentActions = (doc: DocumentInfoType) => (
     <div className="flex space-x-1 justify-end">
       <RemoveButton
         itemId={doc.id}
         collectionId={currentCollectionId}
         itemType="document"
-        onSuccess={() => fetchData(currentCollectionId)}
+        onSuccess={() => refetchData()}
         showToast={toast}
       />
       <Button
@@ -282,12 +312,16 @@ const CollectionIdPage: React.FC = () => {
           setIsDocumentInfoDialogOpen(true);
         }}
         color={
-          doc.ingestion_status === IngestionStatus.SUCCESS
+          doc.ingestion_status === IngestionStatus.SUCCESS ||
+          doc.ingestion_status === IngestionStatus.ENRICHED
             ? 'filled'
             : 'disabled'
         }
         shape="slim"
-        disabled={doc.ingestion_status !== IngestionStatus.SUCCESS}
+        disabled={
+          doc.ingestion_status !== IngestionStatus.SUCCESS &&
+          doc.ingestion_status !== IngestionStatus.ENRICHED
+        }
       >
         <FileSearch2 className="h-6 w-6" />
       </Button>
@@ -342,7 +376,7 @@ const CollectionIdPage: React.FC = () => {
     </div>
   );
 
-  const documentColumns: Column<DocumentInCollectionType>[] = [
+  const documentColumns: Column<DocumentInfoType>[] = [
     { key: 'title', label: 'Title', sortable: true },
     { key: 'id', label: 'Document ID', truncate: true, copyable: true },
     {
@@ -354,7 +388,8 @@ const CollectionIdPage: React.FC = () => {
       renderCell: (doc) => (
         <Badge
           variant={
-            doc.ingestion_status === IngestionStatus.SUCCESS || IngestionStatus.EMBEDDING
+            doc.ingestion_status === IngestionStatus.SUCCESS ||
+            doc.ingestion_status === IngestionStatus.ENRICHED
               ? 'success'
               : doc.ingestion_status === IngestionStatus.FAILED
                 ? 'destructive'
@@ -424,20 +459,22 @@ const CollectionIdPage: React.FC = () => {
         itemId={user.id?.toString() || ''}
         collectionId={currentCollectionId}
         itemType="user"
-        onSuccess={() => fetchData(currentCollectionId)}
+        onSuccess={() => refetchData()}
         showToast={toast}
       />
     </div>
   );
 
   const handleAssignSuccess = () => {
-    if (
-      router.query.collection_id &&
-      typeof router.query.collection_id === 'string'
-    ) {
-      fetchData(router.query.collection_id);
-    }
+    refetchData();
   };
+
+  // Add key getters for each type
+  const getEntityKey = (entity: Entity) => entity.extraction_ids[0] || '';
+  const getCommunityKey = (community: Community) =>
+    community.community_number.toString();
+  const getTripleKey = (triple: Triple) =>
+    `${triple.subject}-${triple.predicate}-${triple.object}`;
 
   if (isLoading) {
     return (
@@ -460,11 +497,6 @@ const CollectionIdPage: React.FC = () => {
       </Layout>
     );
   }
-
-  const currentCollectionId =
-    typeof router.query.collection_id === 'string'
-      ? router.query.collection_id
-      : '';
 
   return (
     <Layout
@@ -501,25 +533,34 @@ const CollectionIdPage: React.FC = () => {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="documents" className="flex-1 overflow-auto">
+            <div className="flex justify-between items-center mb-4">
+              {/* Search Input */}
+              <div className="flex-grow mx-4">
+                <Input
+                  placeholder="Search by Title or Document ID"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    handleSearchQueryChange(e.target.value);
+                  }}
+                />
+              </div>
+            </div>
             <Table
-              data={documents}
+              data={filteredDocuments}
               columns={documentColumns}
               itemsPerPage={itemsPerPage}
               onSelectAll={handleSelectAll}
-              onSelectItem={(itemId: string, selected: boolean) => {
-                const item = documents.find((doc) => doc.id === itemId);
-                if (item) {
-                  handleSelectItem(item, selected);
-                }
-              }}
+              onSelectItem={handleSelectItem}
               selectedItems={selectedDocumentIds}
               actions={renderDocumentActions}
               initialSort={{ key: 'title', order: 'asc' }}
-              initialFilters={{}}
+              initialFilters={filters}
               currentPage={currentPage}
               onPageChange={handlePageChange}
               loading={isLoading}
               showPagination={true}
+              filters={filters} // Add this line
+              onFilter={handleFiltersChange}
             />
           </TabsContent>
           <TabsContent value="users" className="flex-1 overflow-auto">
@@ -527,12 +568,8 @@ const CollectionIdPage: React.FC = () => {
               data={users}
               columns={userColumns}
               itemsPerPage={itemsPerPage}
-              onSelectAll={(selected) => {
-                // Implement select all if needed
-              }}
-              onSelectItem={(itemId: string, selected: boolean) => {
-                // Implement select item if needed
-              }}
+              onSelectAll={() => {}}
+              onSelectItem={() => {}}
               selectedItems={[]}
               actions={renderUserActions}
               initialSort={{ key: 'id', order: 'asc' }}
@@ -549,19 +586,16 @@ const CollectionIdPage: React.FC = () => {
               columns={entityColumns}
               itemsPerPage={itemsPerPage}
               actions={renderEntityActions}
-              onSelectAll={(selected) => {
-                // Implement select all if needed
-              }}
-              onSelectItem={(itemId: string, selected: boolean) => {
-                // Implement select item if needed
-              }}
+              onSelectAll={() => {}}
+              onSelectItem={() => {}}
               selectedItems={[]}
-              initialSort={{ key: 'userId', order: 'asc' }}
+              initialSort={{ key: 'name', order: 'asc' }}
               initialFilters={{}}
               currentPage={currentPage}
               onPageChange={handlePageChange}
               loading={isLoading}
               showPagination={true}
+              getRowKey={getEntityKey}
             />
           </TabsContent>
           <TabsContent value="communities" className="flex-1 overflow-auto">
@@ -570,12 +604,8 @@ const CollectionIdPage: React.FC = () => {
               columns={communityColumns}
               itemsPerPage={itemsPerPage}
               actions={renderCommunityActions}
-              onSelectAll={(selected) => {
-                // Implement select all if needed
-              }}
-              onSelectItem={(itemId: string, selected: boolean) => {
-                // Implement select item if needed
-              }}
+              onSelectAll={() => {}}
+              onSelectItem={() => {}}
               selectedItems={[]}
               initialSort={{ key: 'name', order: 'asc' }}
               initialFilters={{}}
@@ -583,6 +613,7 @@ const CollectionIdPage: React.FC = () => {
               onPageChange={handlePageChange}
               loading={isLoading}
               showPagination={true}
+              getRowKey={getCommunityKey}
             />
           </TabsContent>
           <TabsContent value="triples" className="flex-1 overflow-auto">
@@ -591,19 +622,16 @@ const CollectionIdPage: React.FC = () => {
               columns={tripleColumns}
               itemsPerPage={itemsPerPage}
               actions={renderTripleActions}
-              onSelectAll={(selected) => {
-                // Implement select all if needed
-              }}
-              onSelectItem={(itemId: string, selected: boolean) => {
-                // Implement select item if needed
-              }}
+              onSelectAll={() => {}}
+              onSelectItem={() => {}}
               selectedItems={[]}
-              initialSort={{ key: 'name', order: 'asc' }}
+              initialSort={{ key: 'subject', order: 'asc' }}
               initialFilters={{}}
               currentPage={currentPage}
               onPageChange={handlePageChange}
               loading={isLoading}
               showPagination={true}
+              getRowKey={getTripleKey}
             />
           </TabsContent>
         </Tabs>
@@ -621,7 +649,10 @@ const CollectionIdPage: React.FC = () => {
       <DocumentInfoDialog
         id={selectedDocumentId}
         open={isDocumentInfoDialogOpen}
-        onClose={() => setIsDocumentInfoDialogOpen(false)}
+        onClose={() => {
+          setIsDocumentInfoDialogOpen(false);
+          setSelectedDocumentId('');
+        }}
       />
       <AssignDocumentToCollectionDialog
         open={isAssignDocumentDialogOpen}

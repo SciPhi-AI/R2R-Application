@@ -29,7 +29,7 @@ export interface Column<T> {
   selected?: boolean;
 }
 
-interface TableProps<T> {
+interface TableProps<T extends object> {
   data: T[];
   columns: Column<T>[];
   itemsPerPage?: number;
@@ -39,6 +39,7 @@ interface TableProps<T> {
   actions?: (item: T) => React.ReactNode;
   initialSort?: { key: string; order: 'asc' | 'desc' };
   initialFilters?: Record<string, any>;
+  filters?: Record<string, any>;
   tableHeight?: string;
   currentPage: number;
   onPageChange: (page: number) => void;
@@ -47,9 +48,11 @@ interface TableProps<T> {
   showPagination?: boolean;
   loading: boolean;
   enableColumnToggle?: boolean;
+  totalEntries?: number;
+  getRowKey?: (item: T) => string | number;
 }
 
-function Table<T extends { [key: string]: any }>({
+function Table<T extends object>({
   data,
   columns,
   itemsPerPage = 10,
@@ -67,6 +70,12 @@ function Table<T extends { [key: string]: any }>({
   showPagination = true,
   loading,
   enableColumnToggle = true,
+  totalEntries,
+  getRowKey = (item: T) => {
+    const idKey = 'id' as keyof T;
+    const id = item[idKey];
+    return id ? id.toString() : Math.random().toString();
+  },
 }: TableProps<T>) {
   const [sort, setSort] = useState(
     initialSort || { key: '', order: 'asc' as const }
@@ -121,12 +130,40 @@ function Table<T extends { [key: string]: any }>({
   }, [data, filters, sort, columns]);
 
   const totalItems = filteredAndSortedData.length;
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const totalPages = totalEntries
+    ? Math.ceil(totalEntries / itemsPerPage)
+    : Math.ceil(filteredAndSortedData.length / itemsPerPage);
 
   const currentPageData = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
-    return filteredAndSortedData.slice(startIndex, startIndex + itemsPerPage);
-  }, [filteredAndSortedData, currentPage, itemsPerPage]);
+    const endIndex = startIndex + itemsPerPage;
+
+    // When using filtered data, apply pagination after filtering
+    if (Object.keys(filters).length > 0 || sort.key) {
+      return filteredAndSortedData.slice(startIndex, endIndex);
+    }
+
+    // For unfiltered data, use the entire dataset
+    const paginatedData = data.slice(startIndex, endIndex);
+
+    // Ensure uniqueness using getRowKey
+    const uniqueData = new Map<string | number, T>();
+    paginatedData.forEach((item) => {
+      const key = getRowKey(item);
+      if (!uniqueData.has(key)) {
+        uniqueData.set(key, item);
+      }
+    });
+    return Array.from(uniqueData.values());
+  }, [
+    data,
+    currentPage,
+    itemsPerPage,
+    filters,
+    sort.key,
+    filteredAndSortedData,
+    getRowKey,
+  ]);
 
   const handlePageChangeInternal = (page: number) => {
     if (page >= 1 && page <= totalPages && !loading) {
@@ -154,7 +191,7 @@ function Table<T extends { [key: string]: any }>({
   };
 
   const isAllSelected = currentPageData.every((item) =>
-    selectedItems.includes(item.id)
+    selectedItems.includes(getRowKey(item).toString())
   );
 
   const handleSelectAllInternal = (checked: boolean) => {
@@ -168,7 +205,7 @@ function Table<T extends { [key: string]: any }>({
     checked: boolean | 'indeterminate'
   ) => {
     if (onSelectItem && typeof checked === 'boolean') {
-      onSelectItem(item.id, checked);
+      onSelectItem(getRowKey(item).toString(), checked);
     }
   };
 
@@ -332,11 +369,13 @@ function Table<T extends { [key: string]: any }>({
           </thead>
           <tbody>
             {currentPageData.map((item) => (
-              <tr key={item.id}>
+              <tr key={getRowKey(item)}>
                 {onSelectItem && (
                   <td className="w-[50px] px-4 py-2 text-white text-center">
                     <Checkbox
-                      checked={selectedItems.includes(item.id)}
+                      checked={selectedItems.includes(
+                        getRowKey(item).toString()
+                      )}
                       onCheckedChange={(checked: boolean | 'indeterminate') =>
                         handleSelectItemInternal(item, checked as boolean)
                       }
