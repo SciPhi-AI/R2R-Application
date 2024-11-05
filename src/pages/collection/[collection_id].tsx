@@ -143,6 +143,7 @@ const CollectionIdPage: React.FC = () => {
             .filter(
               (doc: DocumentInfoType) =>
                 doc.ingestion_status !== IngestionStatus.SUCCESS &&
+                doc.ingestion_status !== IngestionStatus.ENRICHED &&
                 doc.ingestion_status !== IngestionStatus.FAILED
             )
             .map((doc: DocumentInfoType) => doc.id)
@@ -193,6 +194,7 @@ const CollectionIdPage: React.FC = () => {
               (doc: DocumentInfoType) =>
                 doc.id === id &&
                 doc.ingestion_status !== IngestionStatus.SUCCESS &&
+                doc.ingestion_status !== IngestionStatus.ENRICHED &&
                 doc.ingestion_status !== IngestionStatus.FAILED
             )
           )
@@ -348,11 +350,11 @@ const CollectionIdPage: React.FC = () => {
       label: 'Ingestion',
       filterable: true,
       filterType: 'multiselect',
-      filterOptions: ['success', 'failed', 'pending'],
+      filterOptions: ['success', 'failed', 'pending', 'enriched'],
       renderCell: (doc) => (
         <Badge
           variant={
-            doc.ingestion_status === IngestionStatus.SUCCESS
+            doc.ingestion_status === IngestionStatus.SUCCESS || IngestionStatus.EMBEDDING
               ? 'success'
               : doc.ingestion_status === IngestionStatus.FAILED
                 ? 'destructive'

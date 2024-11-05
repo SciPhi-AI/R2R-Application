@@ -80,6 +80,7 @@ const Index: React.FC = () => {
       .filter(
         (doc) =>
           doc.ingestion_status !== IngestionStatus.SUCCESS &&
+          doc.ingestion_status !== IngestionStatus.ENRICHED &&
           doc.ingestion_status !== IngestionStatus.FAILED
       )
       .map((doc) => doc.id);

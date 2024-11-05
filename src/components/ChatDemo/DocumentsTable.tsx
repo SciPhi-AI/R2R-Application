@@ -57,7 +57,7 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
     order: 'asc' | 'desc';
   }>({ key: 'title', order: 'asc' });
   const [filters, setFilters] = useState<Record<string, any>>({
-    ingestion_status: ['success', 'failed', 'pending'],
+    ingestion_status: ['success', 'failed', 'pending', 'enriched'],
     kg_extraction_status: ['success', 'failed', 'pending'],
   });
   const [currentPage, setCurrentPage] = useState(1);
@@ -72,6 +72,9 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
     }
     if (lowerStatus === 'failed') {
       return IngestionStatus.FAILED;
+    }
+    if (lowerStatus === 'enriched') {
+      return IngestionStatus.ENRICHED;
     }
     return IngestionStatus.PENDING;
   };
@@ -121,11 +124,14 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
       label: 'Ingestion',
       filterable: true,
       filterType: 'multiselect',
-      filterOptions: ['success', 'failed', 'pending'],
+      filterOptions: ['success', 'failed', 'pending', 'enriched'],
       renderCell: (doc) => {
-        let variant: 'success' | 'destructive' | 'pending' = 'pending';
+        let variant: 'success' | 'destructive' | 'pending' | 'enriched' = 'pending';
         switch (doc.ingestion_status) {
           case IngestionStatus.SUCCESS:
+            variant = 'success';
+            break;
+          case IngestionStatus.ENRICHED:
             variant = 'success';
             break;
           case IngestionStatus.FAILED:
@@ -203,7 +209,10 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
             setIsDocumentInfoDialogOpen(true);
           }}
           color="filled"
-          disabled={doc.ingestion_status !== IngestionStatus.SUCCESS}
+          disabled={
+            doc.ingestion_status !== IngestionStatus.SUCCESS &&
+            doc.ingestion_status !== IngestionStatus.ENRICHED
+          }
           shape="slim"
           tooltip="View Document Info"
         >
