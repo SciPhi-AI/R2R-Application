@@ -1,5 +1,5 @@
 import { Loader, FileSearch2, SlidersHorizontal } from 'lucide-react';
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 
 import { DeleteButton } from '@/components/ChatDemo/deleteButton';
 import DownloadFileContainer from '@/components/ChatDemo/DownloadFileContainer';
@@ -32,6 +32,14 @@ interface DocumentsTableProps {
   hideActions?: boolean; // Optional prop to hide actions if needed
   visibleColumns: Record<string, boolean>;
   onToggleColumn: (columnKey: string, isVisible: boolean) => void;
+  totalEntries?: number;
+  currentPage?: number;
+  onPageChange?: (page: number) => void;
+  itemsPerPage: number;
+  filters: Record<string, any>;
+  onFiltersChange: (filters: Record<string, any>) => void;
+  searchQuery: string;
+  onSearchQueryChange: (query: string) => void;
 }
 
 const DocumentsTable: React.FC<DocumentsTableProps> = ({
@@ -47,53 +55,15 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
   hideActions = false,
   visibleColumns,
   onToggleColumn,
+  totalEntries,
+  currentPage = 1,
+  onPageChange,
 }) => {
   const { toast } = useToast();
   const [selectedDocumentId, setSelectedDocumentId] = useState('');
   const [isDocumentInfoDialogOpen, setIsDocumentInfoDialogOpen] =
     useState(false);
-  const [sortConfig, setSortConfig] = useState<{
-    key: string;
-    order: 'asc' | 'desc';
-  }>({ key: 'title', order: 'asc' });
-  const [filters, setFilters] = useState<Record<string, any>>({
-    ingestion_status: ['success', 'failed', 'pending'],
-    kg_extraction_status: ['success', 'failed', 'pending'],
-  });
-  const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
-
-  const itemsPerPage = 10;
-
-  const mapIngestionStatus = (status: string): IngestionStatus => {
-    const lowerStatus = status?.toLowerCase();
-    if (lowerStatus === 'success') {
-      return IngestionStatus.SUCCESS;
-    }
-    if (lowerStatus === 'failed') {
-      return IngestionStatus.FAILED;
-    }
-    return IngestionStatus.PENDING;
-  };
-
-  const mapKGExtractionStatus = (status: string): KGExtractionStatus => {
-    const lowerStatus = status?.toLowerCase();
-    if (lowerStatus === 'success') {
-      return KGExtractionStatus.SUCCESS;
-    }
-    if (lowerStatus === 'failed') {
-      return KGExtractionStatus.FAILED;
-    }
-    return KGExtractionStatus.PENDING;
-  };
-
-  const mappedDocuments = useMemo(() => {
-    return documents.map((doc) => ({
-      ...doc,
-      ingestion_status: mapIngestionStatus(doc.ingestion_status),
-      kg_extraction_status: mapKGExtractionStatus(doc.kg_extraction_status),
-    }));
-  }, [documents]);
 
   const handleSelectAllInternal = (selected: boolean) => {
     onSelectAll(selected);
@@ -121,11 +91,15 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
       label: 'Ingestion',
       filterable: true,
       filterType: 'multiselect',
-      filterOptions: ['success', 'failed', 'pending'],
+      filterOptions: ['success', 'failed', 'pending', 'enriched'],
       renderCell: (doc) => {
-        let variant: 'success' | 'destructive' | 'pending' = 'pending';
+        let variant: 'success' | 'destructive' | 'pending' | 'enriched' =
+          'pending';
         switch (doc.ingestion_status) {
           case IngestionStatus.SUCCESS:
+            variant = 'success';
+            break;
+          case IngestionStatus.ENRICHED:
             variant = 'success';
             break;
           case IngestionStatus.FAILED:
@@ -203,7 +177,10 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
             setIsDocumentInfoDialogOpen(true);
           }}
           color="filled"
-          disabled={doc.ingestion_status !== IngestionStatus.SUCCESS}
+          disabled={
+            doc.ingestion_status !== IngestionStatus.SUCCESS &&
+            doc.ingestion_status !== IngestionStatus.ENRICHED
+          }
           shape="slim"
           tooltip="View Document Info"
         >
@@ -212,18 +189,18 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
       </div>
     );
 
-  // Filter documents based on search query
+  // Client-side search filtering
   const filteredDocuments = useMemo(() => {
-    if (searchQuery.trim() === '') {
-      return mappedDocuments;
+    if (!searchQuery.trim()) {
+      return documents;
     }
     const query = searchQuery.toLowerCase();
-    return mappedDocuments.filter(
+    return documents.filter(
       (doc) =>
-        doc.id.toLowerCase().includes(query) ||
-        (doc.title && doc.title.toLowerCase().includes(query))
+        doc.title?.toLowerCase().includes(query) ||
+        doc.id.toLowerCase().includes(query)
     );
-  }, [searchQuery, mappedDocuments]);
+  }, [searchQuery, documents]);
 
   return (
     <div>
@@ -286,7 +263,6 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
-                  setCurrentPage(1); // Reset to first page on search
                 }}
               />
             </div>
@@ -327,17 +303,20 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
             onSelectItem={handleSelectItemInternal}
             selectedItems={selectedItems}
             actions={renderActions}
-            initialSort={sortConfig}
-            initialFilters={filters}
+            initialSort={{ key: 'title', order: 'asc' }}
+            initialFilters={{}}
             tableHeight="600px"
             currentPage={currentPage}
-            onPageChange={setCurrentPage}
-            itemsPerPage={itemsPerPage}
-            onSort={(key, order) => setSortConfig({ key, order })}
-            onFilter={(newFilters) => setFilters(newFilters)}
+            onPageChange={(page) => {
+              if (onPageChange) {
+                onPageChange(page);
+              }
+            }}
+            itemsPerPage={10}
             showPagination={showPagination}
             loading={loading}
             enableColumnToggle={false}
+            totalEntries={totalEntries}
           />
         </>
       )}

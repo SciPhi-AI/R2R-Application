@@ -36,6 +36,9 @@ const AssignDocumentToCollectionDialog: React.FC<
     {}
   );
 
+  const [filters, setFilters] = useState<Record<string, any>>({});
+  const [searchQuery, setSearchQuery] = useState('');
+
   const handleToggleColumn = useCallback(
     (columnKey: string, isVisible: boolean) => {
       setVisibleColumns((prev) => ({ ...prev, [columnKey]: isVisible }));
@@ -186,6 +189,11 @@ const AssignDocumentToCollectionDialog: React.FC<
               hideActions={true}
               visibleColumns={visibleColumns}
               onToggleColumn={handleToggleColumn}
+              itemsPerPage={10}
+              filters={filters}
+              onFiltersChange={setFilters}
+              searchQuery={searchQuery}
+              onSearchQueryChange={setSearchQuery}
             />
             <DialogFooter className="mt-4 flex justify-end space-x-2">
               <Button

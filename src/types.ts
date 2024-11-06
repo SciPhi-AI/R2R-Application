@@ -138,6 +138,7 @@ export enum IngestionStatus {
   STORING = 'storing',
   FAILED = 'failed',
   SUCCESS = 'success',
+  ENRICHED = 'enriched',
 }
 
 export enum KGExtractionStatus {
