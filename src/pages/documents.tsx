@@ -23,7 +23,7 @@ const Index: React.FC = () => {
       user_id: true,
       collection_ids: false,
       ingestion_status: true,
-      kg_extraction_status: false,
+      extraction_status: false,
       type: false,
       metadata: false,
       version: false,
@@ -36,7 +36,7 @@ const Index: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<Record<string, any>>({
     ingestion_status: ['success', 'failed', 'pending', 'enriched'],
-    kg_extraction_status: ['success', 'failed', 'pending'],
+    extraction_status: ['success', 'failed', 'pending'],
   });
   const [currentPage, setCurrentPage] = useState<number>(1);
 

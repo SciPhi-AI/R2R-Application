@@ -1,5 +1,6 @@
 'use client';
 import { useSearchParams } from 'next/navigation';
+import { MessageResponse } from 'r2r-js';
 import React, { useState, useEffect, useRef } from 'react';
 
 import { Result } from '@/components/ChatDemo/result';
@@ -140,7 +141,7 @@ const Index: React.FC = () => {
           }
           setIsLoading(true);
           const documents = await client.documents.list();
-          setUploadedDocuments(documents['results']);
+          setUploadedDocuments(documents.results.map((doc) => doc.id));
         } catch (error) {
           console.error('Error fetching user documents:', error);
         } finally {
@@ -209,9 +210,11 @@ const Index: React.FC = () => {
         id: conversationId,
       });
       const fetchedMessages = response.results.map(
-        ([id, message]: [string, Message]) => ({
-          ...message,
-          id,
+        (message: MessageResponse) => ({
+          id: message.id,
+          role: message.metadata?.role || 'user',
+          content: message.metadata?.content || '',
+          timestamp: message.metadata?.timestamp || new Date().toISOString(),
         })
       );
       setMessages(fetchedMessages);

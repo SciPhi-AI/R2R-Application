@@ -120,7 +120,7 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
       },
     },
     {
-      key: 'kg_extraction_status',
+      key: 'extraction_status',
       label: 'KG Extraction',
       filterable: true,
       filterType: 'multiselect',
@@ -154,13 +154,13 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
       key: 'created_at',
       label: 'Created At',
       sortable: true,
-      renderCell: (doc) => new Date(doc.created_date).toLocaleString(),
+      renderCell: (doc) => new Date(doc.created_at).toLocaleString(),
     },
     {
       key: 'updated_at',
       label: 'Updated At',
       sortable: true,
-      renderCell: (doc) => new Date(doc.updated_date).toLocaleString(),
+      renderCell: (doc) => new Date(doc.updated_at).toLocaleString(),
       selected: false,
     },
   ];

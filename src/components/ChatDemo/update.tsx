@@ -33,7 +33,9 @@ export const UpdateButton: React.FC<UpdateButtonProps> = ({
 
         const metadata = { title: file.name };
 
-        await client.documents.update({
+        // Updating is currently not supported in the SDK
+
+        await client.documents.create({
           id: id,
           file: file,
           metadata: [metadata],

@@ -1,6 +1,6 @@
 import { Loader, FileSearch2 } from 'lucide-react';
 import { useRouter } from 'next/router';
-import { DocumentResponse, UserResponse } from 'r2r-js/dist/types';
+import { DocumentResponse, User } from 'r2r-js/dist/types';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 
 import { DeleteButton } from '@/components/ChatDemo/deleteButton';
@@ -28,7 +28,7 @@ const CollectionIdPage: React.FC = () => {
   const [documents, setDocuments] = useState<DocumentResponse[]>([]);
   const [totalDocumentEntries, setTotalDocumentEntries] = useState<number>(0);
 
-  const [users, setUsers] = useState<UserResponse[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [totalUserEntries, setTotalUserEntries] = useState<number>(0);
 
   const [loading, setLoading] = useState(true);
@@ -49,7 +49,7 @@ const CollectionIdPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<Record<string, any>>({
     ingestion_status: ['success', 'failed', 'pending', 'enriched'],
-    kg_extraction_status: ['success', 'failed', 'pending'],
+    extraction_status: ['success', 'failed', 'pending'],
   });
 
   const currentCollectionId =
@@ -143,7 +143,7 @@ const CollectionIdPage: React.FC = () => {
       }
 
       let offset = 0;
-      let allUsers: UserResponse[] = [];
+      let allUsers: User[] = [];
       let totalUserEntries = 0;
 
       // Fetch first batch
@@ -225,7 +225,7 @@ const CollectionIdPage: React.FC = () => {
             switch (key) {
               case 'ingestion_status':
                 return value.includes(doc.ingestion_status);
-              case 'kg_extraction_status':
+              case 'extraction_status':
                 return value.includes(doc.kg_extraction_status);
               default:
                 return true;
@@ -384,7 +384,7 @@ const CollectionIdPage: React.FC = () => {
       ),
     },
     {
-      key: 'kg_extraction_status',
+      key: 'extraction_status',
       label: 'KG Extraction',
       filterable: true,
       filterType: 'multiselect',
@@ -406,12 +406,12 @@ const CollectionIdPage: React.FC = () => {
     },
   ];
 
-  const userColumns: Column<UserResponse>[] = [
+  const userColumns: Column<User>[] = [
     { key: 'id', label: 'User ID', truncate: true, copyable: true },
     { key: 'email', label: 'Email', truncate: true, copyable: true },
   ];
 
-  const renderUserActions = (user: UserResponse) => (
+  const renderUserActions = (user: User) => (
     <div className="flex space-x-1 justify-end">
       <RemoveButton
         itemId={user.id?.toString() || ''}

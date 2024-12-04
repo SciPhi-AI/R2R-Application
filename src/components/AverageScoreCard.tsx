@@ -216,7 +216,6 @@ const AverageScoreCard: React.FC<AverageScoreCardProps> = ({
         }
         const logs = await client.system.logs({});
         // Use the prop data directly instead of processing it again
-        setScoreData(logs.results);
       } catch (error) {
         console.error('Error fetching score data:', error);
         setError('Failed to fetch score data. Please try again later.');

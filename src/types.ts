@@ -68,25 +68,6 @@ export interface Document {
   collection_ids?: string[];
 }
 
-export interface User {
-  id: string;
-  user_id?: string;
-  email: string;
-  is_active: boolean;
-  is_superuser: boolean;
-  created_at: string;
-  updated_at: string;
-  is_verified: boolean;
-  collection_ids: string[];
-  total_size_in_bytes: number;
-
-  // Optional fields
-  hashed_password?: string;
-  verification_code_expiry?: string;
-  name?: string;
-  profile_picture?: string;
-}
-
 export interface Entity {
   name: string;
   category: string;
@@ -159,7 +140,7 @@ export interface DocumentInfoType {
   version: string;
   size_in_bytes: number;
   ingestion_status: IngestionStatus;
-  kg_extraction_status: KGExtractionStatus;
+  extraction_status: KGExtractionStatus;
   created_at: string;
   updated_at: string;
 }
@@ -172,7 +153,7 @@ export interface DocumentInCollectionType {
   created_at: string;
   updated_at: string;
   ingestion_status: IngestionStatus;
-  kg_extraction_status: KGExtractionStatus;
+  extraction_status: KGExtractionStatus;
   collection_ids: string[];
   metadata: Record<string, any>;
 }
@@ -262,12 +243,15 @@ export interface LogoProps {
 }
 
 export interface Message {
-  role: 'system' | 'user' | 'assistant';
+  role: 'user' | 'assistant';
   content: string;
   id: string;
   timestamp: number;
+  sources?: {
+    vector?: string | null;
+    kg?: string | null;
+  };
   isStreaming?: boolean;
-  sources?: Record<string, string | null>;
   searchPerformed?: boolean;
 }
 

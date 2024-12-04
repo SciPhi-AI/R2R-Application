@@ -1,11 +1,10 @@
 // UserInfoDialog.tsx
 import { Loader, UserRound, ChevronDown, ChevronUp } from 'lucide-react';
+import { User } from 'r2r-js';
 import React, { useState, useEffect } from 'react';
 
-import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useUserContext } from '@/context/UserContext';
-import { UserResponse } from 'r2r-js';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import CopyableContent from '@/components/ui/CopyableContent';
 import {
   Dialog,
@@ -13,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { useUserContext } from '@/context/UserContext';
 
 interface UserInfoDialogProps {
   id: string;
@@ -103,7 +103,7 @@ export const UserInfoDialog: React.FC<UserInfoDialogProps> = ({
   onClose,
 }) => {
   const { getClient } = useUserContext();
-  const [userProfile, setUserProfile] = useState<UserResponse | null>(null);
+  const [userProfile, setUserProfile] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -117,8 +117,8 @@ export const UserInfoDialog: React.FC<UserInfoDialogProps> = ({
           throw new Error('Failed to get authenticated client');
         }
 
-        const userResponse = await client.users.retrieve({ id });
-        setUserProfile(userResponse.results);
+        const user = await client.users.retrieve({ id });
+        setUserProfile(user.results);
       } catch (error) {
         console.error('Error fetching user:', error);
       } finally {

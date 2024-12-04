@@ -265,8 +265,8 @@ const RequestsCard: React.FC = () => {
       }
 
       const logs = await client.system.logs({});
-      const processedData = processLogData(logs);
-      setLogData(processedData);
+      // const processedData = processLogData(logs);
+      // setLogData(processedData);
     } catch (error) {
       console.error('Error fetching log data:', error);
       setError('Failed to fetch log data. Please try again later.');

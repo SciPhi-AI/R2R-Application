@@ -1,5 +1,5 @@
 import { Loader, UserSearch } from 'lucide-react';
-import { UserResponse } from 'r2r-js';
+import { User } from 'r2r-js';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 
 import Table, { Column } from '@/components/ChatDemo/Table';
@@ -16,7 +16,7 @@ const ITEMS_PER_PAGE = 10;
 
 const Index: React.FC = () => {
   const { getClient, pipeline } = useUserContext();
-  const [users, setUsers] = useState<UserResponse[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [totalEntries, setTotalEntries] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState(1);
@@ -49,7 +49,7 @@ const Index: React.FC = () => {
       }
 
       let offset = 0;
-      let allUsers: UserResponse[] = [];
+      let allUsers: User[] = [];
       let totalEntries = 0;
 
       // Fetch first batch
@@ -106,7 +106,7 @@ const Index: React.FC = () => {
     setCurrentPage(pageNumber);
   };
 
-  const columns: Column<UserResponse>[] = [
+  const columns: Column<User>[] = [
     {
       key: 'id',
       label: 'User ID',
@@ -150,7 +150,7 @@ const Index: React.FC = () => {
                 </div>
               </div>
 
-              <Table<UserResponse>
+              <Table<User>
                 data={filteredUsers}
                 columns={columns}
                 itemsPerPage={ITEMS_PER_PAGE}

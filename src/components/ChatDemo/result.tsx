@@ -2,7 +2,7 @@ import {
   GenerationConfig,
   IndexMeasure,
   KGSearchSettings,
-  VectorSearchSettings,
+  ChunkSearchSettings,
 } from 'r2r-js';
 import React, { FC, useEffect, useState, useRef } from 'react';
 
@@ -235,7 +235,7 @@ export const Result: FC<{
         model: model && model !== 'null' ? model : undefined,
       };
 
-      const vectorSearchSettings: VectorSearchSettings = {
+      const vectorSearchSettings: ChunkSearchSettings = {
         useVectorSearch: switches.vectorSearch?.checked ?? true,
         useHybridSearch: switches.hybridSearch?.checked ?? false,
         filters: searchFilters,
@@ -254,7 +254,7 @@ export const Result: FC<{
       const streamResponse =
         mode === 'rag_agent'
           ? await client.retrieval.agent({
-              messages: [...messages, newUserMessage],
+              message: newUserMessage,
               ragGenerationConfig: ragGenerationConfig,
               vectorSearchSettings: vectorSearchSettings,
               kgSearchSettings: kgSearchSettings,

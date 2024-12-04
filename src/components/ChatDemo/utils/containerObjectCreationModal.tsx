@@ -63,7 +63,8 @@ const ContainerObjectCreationModal: React.FC<
       if (containerType === ContainerType.Collection) {
         await client.collections.create(createPayload);
       } else {
-        await client.graphs.create(createPayload);
+        console.log('Creating graph:', createPayload);
+        // await client.graphs.pull(createPayload);
       }
 
       toast({

@@ -36,7 +36,7 @@ const UpdateButtonContainer: React.FC<UpdateButtonContainerProps> = ({
 
         const metadata = { title: file.name };
 
-        await client.documents.update({
+        await client.documents.create({
           id: id,
           file: file,
           metadata: [metadata],

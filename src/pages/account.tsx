@@ -1,5 +1,5 @@
 import { Loader, UserRound, Pencil } from 'lucide-react';
-import { UserResponse } from 'r2r-js';
+import { User } from 'r2r-js';
 import React, { useState, useEffect, useCallback } from 'react';
 
 import { DeleteButton } from '@/components/ChatDemo/deleteButton';
@@ -14,7 +14,7 @@ interface UpdateUserModalProps {
   open: boolean;
   onClose: () => void;
   onUpdate: (data: UpdateUserData) => void;
-  currentData: UserResponse;
+  currentData: User;
 }
 
 interface UpdateUserData {
@@ -95,7 +95,7 @@ const UpdateUserModal: React.FC<UpdateUserModalProps> = ({
 const Index: React.FC = () => {
   const { getClient, authState, unsetCredentials } = useUserContext();
   const [loading, setLoading] = useState(true);
-  const [userProfile, setUserProfile] = useState<UserResponse | null>(null);
+  const [userProfile, setUserProfile] = useState<User | null>(null);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const { toast } = useToast();
 
@@ -107,8 +107,8 @@ const Index: React.FC = () => {
         throw new Error('Failed to get authenticated client');
       }
 
-      const userResponse = await client.users.me();
-      setUserProfile(userResponse.results);
+      const user = await client.users.me();
+      setUserProfile(user.results);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching user:', error);

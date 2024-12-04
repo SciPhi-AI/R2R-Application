@@ -181,9 +181,9 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
 
         const userInfo = await newClient.users.me();
 
-        localStorage.setItem('accessToken', result.access_token.token);
+        localStorage.setItem('accessToken', result.accessToken.token);
 
-        newClient.setTokens(result.access_token.token, '');
+        newClient.setTokens(result.accessToken.token, '');
         setClient(newClient);
 
         let userRole: 'admin' | 'user' = 'user';
@@ -293,17 +293,11 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
       }
       try {
         const newTokens = await client.users.refreshAccessToken();
-        localStorage.setItem(
-          'accessToken',
-          newTokens.results.access_token.token
-        );
-        localStorage.setItem(
-          'refreshToken',
-          newTokens.results.refresh_token.token
-        );
+        localStorage.setItem('accessToken', newTokens.results.access_token);
+        localStorage.setItem('refreshToken', newTokens.results.refresh_token);
         client.setTokens(
-          newTokens.results.access_token.token,
-          newTokens.results.refresh_token.token
+          newTokens.results.access_token,
+          newTokens.results.refresh_token
         );
         setLastLoginTime(Date.now());
       } catch (error) {
