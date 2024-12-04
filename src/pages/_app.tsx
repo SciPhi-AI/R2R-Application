@@ -20,7 +20,13 @@ function MyAppContent({ Component, pageProps }: AppProps) {
 
   const checkAccess = useCallback(async () => {
     const publicRoutes = ['/auth/login', '/auth/signup'];
-    const userRoutes = ['/documents', '/collections', '/collection', '/chat'];
+    const userRoutes = [
+      '/documents',
+      '/collections',
+      '/collection',
+      '/chat',
+      '/account',
+    ];
     const currentPath = router.pathname;
 
     const isUserRoute = (path: string) => {

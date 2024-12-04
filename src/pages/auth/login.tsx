@@ -184,10 +184,12 @@ const LoginPage: React.FC = () => {
 
   const checkDeploymentHealth = useCallback(async () => {
     try {
-      const response = await fetch(`${sanitizedDeploymentUrl}/v2/health`);
+      const response = await fetch(`${sanitizedDeploymentUrl}/v3/health`);
+      console.log('Health check response:', response);
       const data = await response.json();
+      console.log('Health check data:', data);
 
-      const isHealthy = data.results?.response?.trim().toLowerCase() === 'ok';
+      const isHealthy = data.results?.message?.trim().toLowerCase() === 'ok';
 
       setServerHealth(isHealthy);
       if (!isHealthy) {

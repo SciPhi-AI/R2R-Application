@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/input'; // Make sure you have this component
+import { Input } from '@/components/ui/input';
 import debounce from '@/lib/debounce';
 
 interface PaginationProps {

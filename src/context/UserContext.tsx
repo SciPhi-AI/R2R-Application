@@ -31,11 +31,13 @@ const UserContext = createContext<UserContextProps>({
   login: async () => ({ success: false, userRole: 'user' }),
   loginWithToken: async () => ({ success: false, userRole: 'user' }),
   logout: async () => {},
+  unsetCredentials: async () => {},
   register: async () => {},
   authState: {
     isAuthenticated: false,
     email: null,
     userRole: null,
+    userId: null,
   },
   getClient: () => null,
   client: null,
@@ -56,7 +58,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const [pipeline, setPipeline] = useState<Pipeline | null>(() => {
     if (typeof window !== 'undefined') {
-      const storedPipeline = sessionStorage.getItem('pipeline');
+      const storedPipeline = localStorage.getItem('pipeline');
       return storedPipeline ? JSON.parse(storedPipeline) : null;
     }
     return null;
@@ -64,21 +66,21 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const [selectedModel, setSelectedModel] = useState(() => {
     if (typeof window !== 'undefined') {
-      return sessionStorage.getItem('selectedModel') || '';
+      return localStorage.getItem('selectedModel') || '';
     }
     return 'null';
   });
 
   const [authState, setAuthState] = useState<AuthState>(() => {
     if (typeof window !== 'undefined') {
-      const storedAuthState = sessionStorage.getItem('authState');
+      const storedAuthState = localStorage.getItem('authState');
       if (storedAuthState) {
         const parsed = JSON.parse(storedAuthState);
         if (isAuthState(parsed)) {
           return parsed;
         } else {
           console.warn(
-            'Invalid authState found in sessionStorage. Resetting to default.'
+            'Invalid authState found in localStorage. Resetting to default.'
           );
         }
       }
@@ -87,8 +89,13 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
       isAuthenticated: false,
       email: null,
       userRole: null,
+      userId: null,
     };
   });
+
+  useEffect(() => {
+    setIsReady(true);
+  }, []);
 
   const isSuperUser = useCallback(() => {
     return authState.userRole === 'admin' && viewMode === 'admin';
@@ -104,21 +111,29 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
     ): Promise<{ success: boolean; userRole: 'admin' | 'user' }> => {
       const newClient = new r2rClient(instanceUrl);
       try {
-        const tokens = await newClient.login(email, password);
+        const tokens = await newClient.users.login({
+          email: email,
+          password: password,
+        });
 
-        sessionStorage.setItem('accessToken', tokens.access_token.token);
-        sessionStorage.setItem('refreshToken', tokens.refresh_token.token);
+        localStorage.setItem('accessToken', tokens.results.access_token.token);
+        localStorage.setItem(
+          'refreshToken',
+          tokens.results.refresh_token.token
+        );
 
         newClient.setTokens(
-          tokens.access_token.token,
-          tokens.refresh_token.token
+          tokens.results.access_token.token,
+          tokens.results.refresh_token.token
         );
 
         setClient(newClient);
 
+        const userInfo = await newClient.users.me();
+
         let userRole: 'admin' | 'user' = 'user';
         try {
-          await newClient.appSettings();
+          await newClient.system.settings();
           userRole = 'admin';
         } catch (error) {
           if (
@@ -135,15 +150,16 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
           isAuthenticated: true,
           email,
           userRole,
+          userId: userInfo.results.id,
         };
         setAuthState(newAuthState);
-        sessionStorage.setItem('authState', JSON.stringify(newAuthState));
+        localStorage.setItem('authState', JSON.stringify(newAuthState));
 
         setLastLoginTime(Date.now());
 
         const newPipeline: Pipeline = { deploymentUrl: instanceUrl };
         setPipeline(newPipeline);
-        sessionStorage.setItem('pipeline', JSON.stringify(newPipeline));
+        localStorage.setItem('pipeline', JSON.stringify(newPipeline));
 
         return { success: true, userRole };
       } catch (error) {
@@ -163,14 +179,16 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
       try {
         const result = await newClient.loginWithToken(token);
 
-        sessionStorage.setItem('accessToken', result.access_token.token);
+        const userInfo = await newClient.users.me();
+
+        localStorage.setItem('accessToken', result.access_token.token);
 
         newClient.setTokens(result.access_token.token, '');
         setClient(newClient);
 
         let userRole: 'admin' | 'user' = 'user';
         try {
-          await newClient.appSettings();
+          await newClient.system.settings();
           userRole = 'admin';
         } catch (error) {
           if (
@@ -187,15 +205,16 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
           isAuthenticated: true,
           email: '',
           userRole,
+          userId: userInfo.results.id,
         };
         setAuthState(newAuthState);
-        sessionStorage.setItem('authState', JSON.stringify(newAuthState));
+        localStorage.setItem('authState', JSON.stringify(newAuthState));
 
         setLastLoginTime(Date.now());
 
         const newPipeline: Pipeline = { deploymentUrl: instanceUrl };
         setPipeline(newPipeline);
-        sessionStorage.setItem('pipeline', JSON.stringify(newPipeline));
+        localStorage.setItem('pipeline', JSON.stringify(newPipeline));
 
         return { success: true, userRole };
       } catch (error) {
@@ -209,7 +228,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   const logout = useCallback(async () => {
     if (client && authState.isAuthenticated) {
       try {
-        await client.logout();
+        await client.users.logout();
       } catch (error) {
         console.error(`Logout failed:`, error);
       }
@@ -218,11 +237,27 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
       isAuthenticated: false,
       email: null,
       userRole: null,
+      userId: null,
     });
-    sessionStorage.removeItem('pipeline');
-    sessionStorage.removeItem('authState');
-    sessionStorage.removeItem('accessToken');
-    sessionStorage.removeItem('refreshToken');
+    localStorage.removeItem('pipeline');
+    localStorage.removeItem('authState');
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    setPipeline(null);
+    setClient(null);
+  }, [client, authState.isAuthenticated]);
+
+  const unsetCredentials = useCallback(async () => {
+    setAuthState({
+      isAuthenticated: false,
+      email: null,
+      userRole: null,
+      userId: null,
+    });
+    localStorage.removeItem('pipeline');
+    localStorage.removeItem('authState');
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
     setPipeline(null);
     setClient(null);
   }, [client, authState.isAuthenticated]);
@@ -232,7 +267,10 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
       const newClient = new r2rClient(instanceUrl);
       if (newClient) {
         try {
-          await newClient.register(email, password);
+          await newClient.users.register({
+            email: email,
+            password: password,
+          });
         } catch (error) {
           console.error('Failed to create user:', error);
           throw error;
@@ -254,12 +292,12 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
         return;
       }
       try {
-        const newTokens = await client.refreshAccessToken();
-        sessionStorage.setItem(
+        const newTokens = await client.users.refreshAccessToken();
+        localStorage.setItem(
           'accessToken',
           newTokens.results.access_token.token
         );
-        sessionStorage.setItem(
+        localStorage.setItem(
           'refreshToken',
           newTokens.results.refresh_token.token
         );
@@ -291,8 +329,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     if (authState.isAuthenticated && pipeline && !client) {
       const newClient = new r2rClient(pipeline.deploymentUrl);
-      const accessToken = sessionStorage.getItem('accessToken');
-      const refreshToken = sessionStorage.getItem('refreshToken');
+      const accessToken = localStorage.getItem('accessToken');
+      const refreshToken = localStorage.getItem('refreshToken');
       if (accessToken && refreshToken) {
         newClient.setTokens(accessToken, refreshToken);
       }
@@ -301,26 +339,22 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [authState.isAuthenticated, pipeline, client]);
 
   useEffect(() => {
-    const handleRouteChange = () => {
-      if (authState.isAuthenticated && !client && pipeline) {
-        const newClient = new r2rClient(pipeline.deploymentUrl);
-        const accessToken = sessionStorage.getItem('accessToken');
-        const refreshToken = sessionStorage.getItem('refreshToken');
-        if (accessToken && refreshToken) {
-          newClient.setTokens(accessToken, refreshToken);
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'authState') {
+        const newAuthState = e.newValue ? JSON.parse(e.newValue) : null;
+        if (newAuthState && isAuthState(newAuthState)) {
+          setAuthState(newAuthState);
         }
-        setClient(newClient);
+      }
+      if (e.key === 'pipeline') {
+        const newPipeline = e.newValue ? JSON.parse(e.newValue) : null;
+        setPipeline(newPipeline);
       }
     };
 
-    router.events.on('routeChangeComplete', handleRouteChange);
-
-    setIsReady(true);
-
-    return () => {
-      router.events.off('routeChangeComplete', handleRouteChange);
-    };
-  }, [router, authState.isAuthenticated, client, pipeline]);
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   useEffect(() => {
     let refreshInterval: NodeJS.Timeout;
@@ -348,7 +382,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      sessionStorage.setItem('selectedModel', selectedModel);
+      localStorage.setItem('selectedModel', selectedModel);
     }
   }, [selectedModel]);
 
@@ -363,6 +397,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
       login,
       loginWithToken,
       logout,
+      unsetCredentials,
       register,
       getClient,
       client,
@@ -380,6 +415,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
       login,
       loginWithToken,
       logout,
+      unsetCredentials,
       register,
       getClient,
     ]

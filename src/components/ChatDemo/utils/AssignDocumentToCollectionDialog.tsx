@@ -60,7 +60,10 @@ const AssignDocumentToCollectionDialog: React.FC<
       let totalEntries = 0;
 
       do {
-        const data = await client.documentsOverview(undefined, offset, limit);
+        const data = await client.documents.list({
+          offset: offset,
+          limit: limit,
+        });
         totalEntries = data.total_entries;
         allDocuments = allDocuments.concat(data.results);
         offset += limit;

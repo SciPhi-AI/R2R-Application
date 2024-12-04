@@ -25,6 +25,7 @@ export interface Column<T> {
   filterOptions?: string[];
   renderCell?: (item: T) => React.ReactNode;
   truncate?: boolean;
+  truncatedSubstring?: boolean;
   copyable?: boolean;
   selected?: boolean;
 }
@@ -216,6 +217,17 @@ function Table<T extends object>({
     const content = (item as any)[col.key];
     if (col.truncate && typeof content === 'string') {
       const truncated = `${content.substring(0, 8)}...${content.slice(-4)}`;
+      return col.copyable ? (
+        <CopyableContent content={content} truncated={truncated} />
+      ) : (
+        truncated
+      );
+    } else if (col.truncatedSubstring && typeof content === 'string') {
+      const maxLength = 20;
+      const truncated =
+        content.length > maxLength
+          ? `${content.substring(0, maxLength)}...`
+          : content;
       return col.copyable ? (
         <CopyableContent content={content} truncated={truncated} />
       ) : (

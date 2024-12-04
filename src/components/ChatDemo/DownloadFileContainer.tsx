@@ -24,7 +24,7 @@ const DownloadButtonContainer: React.FC<DownloadFileContainerProps> = ({
         throw new Error('Failed to get authenticated client');
       }
 
-      const blob = await client.downloadFile(id);
+      const blob = await client.documents.download({ id: id });
 
       const url = window.URL.createObjectURL(blob);
 

@@ -1,36 +1,23 @@
-import { Loader } from 'lucide-react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+// UserInfoDialog.tsx
+import { Loader, UserRound, ChevronDown, ChevronUp } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { useUserContext } from '@/context/UserContext';
+import { UserResponse } from 'r2r-js';
+import CopyableContent from '@/components/ui/CopyableContent';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { useUserContext } from '@/context/UserContext';
-import { formatFileSize } from '@/lib/utils';
 
 interface UserInfoDialogProps {
-  userID: string;
-  apiUrl?: string;
+  id: string;
   open: boolean;
   onClose: () => void;
-}
-
-interface UserOverview {
-  user_id: string;
-  email: string;
-  is_superuser: boolean;
-  is_active: boolean;
-  is_verified: boolean;
-  created_at: string;
-  updated_at: string;
-  collection_ids: string[];
-  num_files: number;
-  total_size_in_bytes: number;
-  document_ids: string[];
 }
 
 const formatValue = (value: any) => {
@@ -43,110 +30,10 @@ const formatValue = (value: any) => {
   if (Array.isArray(value)) {
     return value.length > 0 ? value.join(', ') : 'N/A';
   }
+  if (typeof value === 'object') {
+    return JSON.stringify(value);
+  }
   return value.toString();
-};
-
-const UserInfoDialog: React.FC<UserInfoDialogProps> = ({
-  userID,
-  open,
-  onClose,
-}) => {
-  const { getClient, pipeline } = useUserContext();
-  const [userOverview, setUserOverview] = useState<UserOverview | null>(null);
-
-  useEffect(() => {
-    const fetchUserOverview = async () => {
-      try {
-        const client = await getClient();
-        if (!client) {
-          throw new Error('Failed to get authenticated client');
-        }
-
-        const userData = await client.usersOverview([userID]);
-        setUserOverview(userData.results[0]);
-      } catch (error) {
-        console.error('Error fetching user overview:', error);
-        setUserOverview(null);
-      }
-    };
-
-    if (open && userID) {
-      fetchUserOverview();
-    }
-  }, [open, userID]);
-
-  return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="text-white max-w-4xl">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">
-            User Overview
-          </DialogTitle>
-        </DialogHeader>
-        <div className="mt-4 space-y-2 h-96 overflow-y-auto">
-          {userOverview ? (
-            <div className="grid grid-cols-1 gap-2">
-              <InfoRow
-                label="User ID"
-                values={[{ value: userOverview.user_id }]}
-              >
-                {userOverview.is_superuser && (
-                  <Badge variant="secondary">Superuser</Badge>
-                )}
-              </InfoRow>
-              <InfoRow label="Email" values={[{ value: userOverview.email }]} />
-              <InfoRow
-                label="Account Creation"
-                values={[
-                  {
-                    label: 'Created',
-                    value: formatValue(userOverview.created_at),
-                  },
-                  {
-                    label: 'Last Updated',
-                    value: formatValue(userOverview.updated_at),
-                  },
-                ]}
-              />
-              <InfoRow
-                label="Account Status"
-                values={[
-                  {
-                    label: 'Active',
-                    value: formatValue(userOverview.is_active),
-                  },
-                  {
-                    label: 'Verified',
-                    value: formatValue(userOverview.is_verified),
-                  },
-                ]}
-              />
-              <ExpandableInfoRow
-                label="Collections"
-                values={userOverview.collection_ids}
-              />
-              <InfoRow
-                label="File Statistics"
-                values={[
-                  { label: 'Total Files', value: userOverview.num_files },
-                  {
-                    label: 'Total Size',
-                    value: formatFileSize(userOverview.total_size_in_bytes),
-                  },
-                ]}
-              />
-              <ExpandableInfoRow
-                label="Associated Documents"
-                values={userOverview.document_ids}
-              />
-            </div>
-          ) : (
-            <Loader className="mx-auto mt-20 animate-spin" size={64} />
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
 };
 
 const InfoRow: React.FC<{
@@ -190,12 +77,147 @@ const ExpandableInfoRow: React.FC<{
       </div>
       {isExpanded && values && values.length > 0 && (
         <div className="mt-2 pl-4 text-gray-300">
-          {values.map((value, index) => (
-            <div key={index}>{value}</div>
-          ))}
+          <div className="grid grid-cols-2 gap-2">
+            {values.map((value, index) => (
+              <div key={index}>
+                <CopyableContent
+                  content={value}
+                  truncated={
+                    value.length > 20
+                      ? `${value.substring(0, 8)}...${value.slice(-4)}`
+                      : value
+                  }
+                />
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
+  );
+};
+
+export const UserInfoDialog: React.FC<UserInfoDialogProps> = ({
+  id,
+  open,
+  onClose,
+}) => {
+  const { getClient } = useUserContext();
+  const [userProfile, setUserProfile] = useState<UserResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (!id || !open) return;
+
+      try {
+        setLoading(true);
+        const client = await getClient();
+        if (!client) {
+          throw new Error('Failed to get authenticated client');
+        }
+
+        const userResponse = await client.users.retrieve({ id });
+        setUserProfile(userResponse.results);
+      } catch (error) {
+        console.error('Error fetching user:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
+  }, [id, open, getClient]);
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>User Details</DialogTitle>
+        </DialogHeader>
+
+        {loading ? (
+          <div className="flex justify-center items-center p-8">
+            <Loader className="animate-spin" size={32} />
+          </div>
+        ) : userProfile ? (
+          <Card className="bg-zinc-900">
+            <CardHeader>
+              <div className="flex items-center">
+                <div className="flex items-center space-x-4">
+                  <div className="bg-zinc-800 p-4 rounded-full">
+                    <UserRound size={40} />
+                  </div>
+                  <div>
+                    <div className="flex items-center space-x-2">
+                      <h2 className="text-xl font-semibold">
+                        {userProfile?.name || 'Unnamed User'}
+                      </h2>
+                      {userProfile?.is_superuser && (
+                        <Badge variant="secondary">Admin</Badge>
+                      )}
+                    </div>
+                    <p className="text-gray-400">{userProfile?.email}</p>
+                    <p className="text-gray-400">
+                      <CopyableContent
+                        content={userProfile?.id}
+                        truncated={userProfile?.id}
+                      />
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <InfoRow
+                  label="Account Status"
+                  values={[
+                    { label: 'Active', value: userProfile?.is_active },
+                    { label: 'Verified', value: userProfile?.is_verified },
+                    { label: 'Super User', value: userProfile?.is_superuser },
+                  ]}
+                />
+
+                <InfoRow
+                  label="Account Dates"
+                  values={[
+                    {
+                      label: 'Created',
+                      value: new Date(
+                        userProfile?.created_at || ''
+                      ).toLocaleDateString(),
+                    },
+                    {
+                      label: 'Updated',
+                      value: new Date(
+                        userProfile?.updated_at || ''
+                      ).toLocaleDateString(),
+                    },
+                  ]}
+                />
+
+                {userProfile?.bio && (
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-400 mb-2">
+                      Bio
+                    </h3>
+                    <p className="text-gray-300">{userProfile.bio}</p>
+                  </div>
+                )}
+
+                <ExpandableInfoRow
+                  label="Collections"
+                  values={userProfile?.collection_ids}
+                />
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <div>Failed to load user details</div>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 };
 

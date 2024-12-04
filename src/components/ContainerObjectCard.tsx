@@ -9,7 +9,7 @@ import {
 import { useRouter } from 'next/router';
 import React, { useId } from 'react';
 
-import { Collection } from '@/types';
+import { Collection, Graph } from '@/types';
 
 interface ResourcePatternProps {
   mouseX: MotionValue<number>;
@@ -57,23 +57,25 @@ function ResourcePattern({
   );
 }
 
-interface CollectionCardProps {
-  collection: Collection;
+interface ContainerObjectCardProps {
+  containerObject: Collection | Graph;
   className?: string;
   children?: React.ReactNode;
 }
 
-export function CollectionCard({
-  collection,
+export function ContainerObjectCard({
+  containerObject,
   className,
   children,
-}: CollectionCardProps) {
+}: ContainerObjectCardProps) {
   const router = useRouter();
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
   const handleClick = () => {
-    router.push(`/collection/${collection.collection_id}`);
+    const currentPath = router.pathname;
+    const route = currentPath.includes('/graphs') ? 'graphs' : 'collections';
+    router.push(`/${route}/${containerObject.id}`);
   };
 
   function onMouseMove({
@@ -105,13 +107,13 @@ export function CollectionCard({
       </div>
       <div className="relative flex flex-col rounded-2xl p-4 sm:p-6 w-full h-full -mt-4">
         <h2 className="text-xl font-medium truncate w-full text-white mb-2">
-          {collection.name}
+          {containerObject.name}
         </h2>
         <p className="text-white">
-          {collection.description
-            ? collection.description.length > 32
-              ? `${collection.description.substring(0, 32)}...`
-              : collection.description
+          {containerObject.description
+            ? containerObject.description.length > 32
+              ? `${containerObject.description.substring(0, 32)}...`
+              : containerObject.description
             : ''}
         </p>
         {children}

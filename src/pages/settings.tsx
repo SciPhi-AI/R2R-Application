@@ -1,4 +1,5 @@
 import { SquarePen, ChevronDown, ChevronUp } from 'lucide-react';
+import { SettingsResponse } from 'r2r-js';
 import React, { useState, useEffect, useCallback } from 'react';
 import toml from 'toml';
 
@@ -7,15 +8,9 @@ import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/Button';
 import { useUserContext } from '@/context/UserContext';
 
-type Prompt = {
-  name: string;
-  template: string;
-  input_types: Record<string, any>;
-};
-
 interface AppData {
   config: Record<string, any>;
-  prompts: Record<string, Prompt>;
+  prompts: Record<string, any>;
 }
 
 const renderNestedConfig = (
@@ -73,11 +68,11 @@ const renderNestedConfig = (
 
 interface PromptRowProps {
   name: string;
-  prompt: Prompt;
+  template: string;
   onEdit: (name: string, template: string) => void;
 }
 
-const PromptRow: React.FC<PromptRowProps> = ({ name, prompt, onEdit }) => {
+const PromptRow: React.FC<PromptRowProps> = ({ name, template, onEdit }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
@@ -86,9 +81,7 @@ const PromptRow: React.FC<PromptRowProps> = ({ name, prompt, onEdit }) => {
         <div className="w-1/4 px-4 py-2 text-white truncate">{name}</div>
         <div className="w-3/4 px-4 py-2 text-white relative flex items-center">
           <div className="flex-grow mr-16 overflow-hidden">
-            <div className={`${isExpanded ? '' : 'truncate'}`}>
-              {prompt.template}
-            </div>
+            <div className={`${isExpanded ? '' : 'truncate'}`}>{template}</div>
           </div>
           <button
             onClick={() => setIsExpanded(!isExpanded)}
@@ -97,7 +90,7 @@ const PromptRow: React.FC<PromptRowProps> = ({ name, prompt, onEdit }) => {
             {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
           </button>
           <button
-            onClick={() => onEdit(name, prompt.template)}
+            onClick={() => onEdit(name, template)}
             className="absolute right-2 text-gray-400 hover:text-indigo-500"
           >
             <SquarePen size={20} />
@@ -124,13 +117,17 @@ const Index: React.FC = () => {
         throw new Error('Failed to get authenticated client');
       }
 
-      const response = await client.appSettings();
+      const response = await client.system.settings();
       console.log(response);
+
       if (response && response.results) {
-        const { config, prompts } = response.results;
+        const configSettings = response.results.config;
+        const prompts = response.results.prompts;
+        const projectName = response.results.r2r_project_name;
+
         setAppData({
           config: typeof config === 'string' ? toml.parse(config) : config,
-          prompts: prompts || {},
+          prompts: prompts,
         });
       } else {
         throw new Error('Unexpected response structure');
@@ -230,12 +227,12 @@ const Index: React.FC = () => {
                           Template
                         </div>
                       </div>
-                      {Object.entries(prompts).length > 0 ? (
+                      {Object.entries(prompts.results.results).length > 0 ? (
                         Object.entries(prompts).map(([name, prompt]) => (
                           <PromptRow
                             key={name}
                             name={name}
-                            prompt={prompt}
+                            template={prompt}
                             onEdit={handleEditPrompt}
                           />
                         ))

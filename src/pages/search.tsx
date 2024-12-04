@@ -15,7 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useUserContext } from '@/context/UserContext';
 
 interface Collection {
-  collection_id: string;
+  id: string;
   name: string;
 }
 
@@ -60,19 +60,19 @@ const SearchPage: React.FC = () => {
 
   useEffect(() => {
     initializeSwitch(
-      'vector_search',
+      'vectorSearch',
       true,
       'Vector Search',
       'Vector search is a search method that uses vectors to represent documents and queries.'
     );
     initializeSwitch(
-      'hybrid_search',
+      'hybridSearch',
       false,
       'Hybrid Search',
       'Hybrid search combines multiple search methods to provide more accurate and relevant search results.'
     );
     initializeSwitch(
-      'knowledge_graph_search',
+      'knowledgeGraphSearch',
       true,
       'Knowledge Graph Search',
       'Please construct a Knowledge Graph to use this feature.'
@@ -91,10 +91,10 @@ const SearchPage: React.FC = () => {
           if (!client) {
             throw new Error('Failed to get authenticated client');
           }
-          const collectionsData = await client.collectionsOverview();
+          const collectionsData = await client.collections.list();
           setCollections(
             collectionsData.results.map((collection: Collection) => ({
-              collection_id: collection.collection_id,
+              id: collection.id,
               name: collection.name,
             }))
           );
@@ -121,25 +121,23 @@ const SearchPage: React.FC = () => {
       }
 
       const vectorSearchSettings = {
-        use_vector_search: switches.vector_search.checked,
-        use_hybrid_search: switches.hybrid_search.checked,
-        search_limit: searchLimit,
-        index_measure: indexMeasure,
+        useVectorSearch: switches.vectorSearch.checked,
+        useHybridSearch: switches.hybridSearch.checked,
+        searchLimit: searchLimit,
+        indexMeasure: indexMeasure,
         // include_metadatas: includeMetadatas,
         probes,
-        ef_search: efSearch,
-        selected_collection_ids: selectedCollectionIds,
+        efSearch: efSearch,
+        selectedCollectionIds: selectedCollectionIds,
         filters: JSON.parse(searchFilters),
-        hybrid_search_settings: {
-          full_text_weight: fullTextWeight,
-          semantic_weight: semanticWeight,
-          full_text_limit: fullTextLimit,
-          rrf_k: rrfK,
-        },
+        fullTextWeight: fullTextWeight,
+        semanticWeight: semanticWeight,
+        fullTextLimit: fullTextLimit,
+        rrfK: rrfK,
       };
 
       const kgSearchSettings = {
-        use_kg_search: switches.knowledge_graph_search.checked,
+        use_kg_search: switches.knowledgeGraphSearch.checked,
         // kg_search_level: kgSearchLevel,
         // max_community_description_length: maxCommunityDescriptionLength,
         // local_search_limits: localSearchLimits,
@@ -147,11 +145,11 @@ const SearchPage: React.FC = () => {
         filters: JSON.parse(searchFilters),
       };
 
-      const results = await client.search(
-        query,
-        vectorSearchSettings,
-        kgSearchSettings
-      );
+      const results = await client.retrieval.search({
+        query: query,
+        vectorSearchSettings: vectorSearchSettings,
+        kgSearchSettings: kgSearchSettings,
+      });
 
       setVectorSearchResults(results.results.vector_search_results || []);
       setKgSearchResults(results.results.kg_search_results || []);

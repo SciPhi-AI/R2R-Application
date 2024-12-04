@@ -33,6 +33,7 @@ export interface AuthState {
   isAuthenticated: boolean;
   email: string | null;
   userRole: 'admin' | 'user' | null;
+  userId: string | null;
 }
 
 export interface BarChartProps {
@@ -331,7 +332,7 @@ export interface SidebarProps {
   handleSwitchChange: (id: string, checked: boolean) => void;
   searchLimit: number;
   setSearchLimit: (limit: number) => void;
-  collections: Array<{ collection_id: string; name: string }>;
+  collections: Array<{ id: string; name: string }>;
   selectedCollectionIds: string[];
   setSelectedCollectionIds: React.Dispatch<React.SetStateAction<string[]>>;
   config: SidebarConfig;
@@ -460,6 +461,7 @@ export interface UserContextProps {
     instanceUrl: string
   ) => Promise<{ success: boolean; userRole: 'admin' | 'user' }>;
   logout: () => Promise<void>;
+  unsetCredentials: () => Promise<void>;
   register: (
     email: string,
     password: string,
@@ -475,7 +477,15 @@ export interface UserContextProps {
 
 export type Collection = {
   name: string;
-  collection_id: string;
+  id: string;
+  description?: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type Graph = {
+  name: string;
+  id: string;
   description?: string;
   created_at?: string;
   updated_at?: string;

@@ -1,5 +1,3 @@
-import { off } from 'process';
-
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 
@@ -25,7 +23,7 @@ import { useUserContext } from '@/context/UserContext';
 import { SidebarProps } from '@/types';
 
 interface Conversation {
-  conversation_id: string;
+  id: string;
   created_at: string;
 }
 
@@ -85,7 +83,10 @@ const Sidebar: React.FC<SidebarProps> = ({
         if (!client) {
           throw new Error('Failed to get authenticated client');
         }
-        const response = await client.conversationsOverview(undefined, 0, 500);
+        const response = await client.conversations.list({
+          offset: 0,
+          limit: 500,
+        });
         console.log('Conversations:', response);
         setConversations(response.results);
       } catch (error) {
@@ -115,11 +116,11 @@ const Sidebar: React.FC<SidebarProps> = ({
                 <div className="max-h-60 overflow-y-auto">
                   {conversations.map((conversation) => (
                     <div
-                      key={conversation.conversation_id}
+                      key={conversation.id}
                       className="p-2 hover:bg-zinc-700 cursor-pointer"
                       onClick={() => {
                         if (onConversationSelect) {
-                          onConversationSelect(conversation.conversation_id);
+                          onConversationSelect(conversation.id);
                         }
                       }}
                     >
@@ -154,7 +155,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             <MultiSelect
               id="selectedCollections"
               options={collections.map((collection) => ({
-                value: collection.collection_id,
+                value: collection.id,
                 label: collection.name,
               }))}
               value={selectedCollectionIds}

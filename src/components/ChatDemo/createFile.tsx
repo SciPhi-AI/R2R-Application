@@ -49,10 +49,11 @@ export const CreateFileButton: React.FC<CreateFileButton> = ({
         userIds.push(userId);
       }
 
-      await client.ingestFiles(files, {
-        metadatas: metadatas,
-        user_ids: userIds,
-      });
+      for (const file of files) {
+        await client.documents.create({
+          file: file,
+        });
+      }
 
       showToast({
         variant: 'success',

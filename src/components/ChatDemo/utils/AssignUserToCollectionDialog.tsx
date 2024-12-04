@@ -43,7 +43,7 @@ const AssignUserToCollectionDialog: React.FC<
         throw new Error('Failed to get authenticated client');
       }
 
-      const data = await client.usersOverview();
+      const data = await client.users.list();
       const usersWithId = data.results.map((user: Omit<User, 'id'>) => ({
         ...user,
         id: user.user_id,
@@ -121,7 +121,10 @@ const AssignUserToCollectionDialog: React.FC<
       }
 
       const assignPromises = selectedUserIds.map((id) =>
-        client.addUserToCollection(id, collection_id)
+        client.collections.addUser({
+          id: collection_id,
+          userId: id,
+        })
       );
 
       await Promise.all(assignPromises);
