@@ -59,6 +59,8 @@ const CollectionDialog: React.FC<CollectionDialogProps> = ({
   const [loading, setLoading] = useState(true);
   const { getClient } = useUserContext();
   const [collection, setCollection] = useState<CollectionResponse | null>(null);
+  const [isPullDocumentsDialogOpen, setIsPullDocumentsDialogOpen] =
+    useState(false);
   const [isAssignDocumentDialogOpen, setIsAssignDocumentDialogOpen] =
     useState(false);
   const [isAssignUserDialogOpen, setIsAssignUserDialogOpen] = useState(false);
@@ -88,6 +90,59 @@ const CollectionDialog: React.FC<CollectionDialogProps> = ({
   useEffect(() => {
     fetchCollection();
   }, [open, id, getClient, fetchCollection]);
+
+  const handlePull = async () => {
+    try {
+      const client = await getClient();
+      if (!client) {
+        throw new Error('Failed to get authenticated client');
+      }
+
+      client.graphs.pull({
+        collectionId: id,
+      });
+
+      toast({
+        variant: 'success',
+        title: 'Pull Triggered',
+        description: 'Extracted documents are being pulled into the graph',
+      });
+    } catch (err) {
+      toast({
+        variant: 'destructive',
+        title: 'Pull Failed',
+        description:
+          err instanceof Error ? err.message : 'An unexpected error occurred',
+      });
+    }
+  };
+
+  const handleExtract = async () => {
+    try {
+      const client = await getClient();
+      if (!client) {
+        throw new Error('Failed to get authenticated client');
+      }
+
+      client.graphs.buildCommunities({
+        collectionId: id,
+        runType: 'run',
+      });
+
+      toast({
+        variant: 'success',
+        title: 'Extraction Started',
+        description: 'The extraction process has been started successfully.',
+      });
+    } catch (err) {
+      toast({
+        variant: 'destructive',
+        title: 'Extraction Failed',
+        description:
+          err instanceof Error ? err.message : 'An unexpected error occurred',
+      });
+    }
+  };
 
   return (
     <>
@@ -163,28 +218,50 @@ const CollectionDialog: React.FC<CollectionDialogProps> = ({
               selectedDocumentIds={[]}
               onDelete={() => {}}
             />
-          </div>
-          <Button
-            onClick={() => setIsAssignDocumentDialogOpen(true)}
-            type="button"
-            color="filled"
-            shape="rounded"
-            className="pl-2 pr-2 text-white py-2 px-4"
-            style={{ zIndex: 20 }}
-          >
-            Manage Files
-          </Button>
+            <Button
+              onClick={handlePull}
+              type="button"
+              color="filled"
+              shape="rounded"
+              className="pl-2 pr-2 text-white py-2 px-4"
+              style={{ zIndex: 20 }}
+            >
+              Pull Document Extractions into Graph
+            </Button>
 
-          <Button
-            onClick={() => setIsAssignUserDialogOpen(true)}
-            type="button"
-            color="filled"
-            shape="rounded"
-            className="pl-2 pr-2 text-white py-2 px-4"
-            style={{ zIndex: 20 }}
-          >
-            Manage Users
-          </Button>
+            <Button
+              onClick={handleExtract}
+              type="button"
+              color="filled"
+              shape="rounded"
+              className="pl-2 pr-2 text-white py-2 px-4"
+              style={{ zIndex: 20 }}
+            >
+              Extract Communities in Graph
+            </Button>
+
+            <Button
+              onClick={() => setIsAssignDocumentDialogOpen(true)}
+              type="button"
+              color="filled"
+              shape="rounded"
+              className="pl-2 pr-2 text-white py-2 px-4"
+              style={{ zIndex: 20 }}
+            >
+              Manage Files
+            </Button>
+
+            <Button
+              onClick={() => setIsAssignUserDialogOpen(true)}
+              type="button"
+              color="filled"
+              shape="rounded"
+              className="pl-2 pr-2 text-white py-2 px-4"
+              style={{ zIndex: 20 }}
+            >
+              Manage Users
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
       <AssignDocumentToCollectionDialog

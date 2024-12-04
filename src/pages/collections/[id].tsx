@@ -1,6 +1,13 @@
 import { Loader, FileSearch2, Settings } from 'lucide-react';
 import { useRouter } from 'next/router';
-import { CollectionResponse, DocumentResponse, User } from 'r2r-js/dist/types';
+import {
+  CollectionResponse,
+  CommunityResponse,
+  DocumentResponse,
+  EntityResponse,
+  RelationshipResponse,
+  User,
+} from 'r2r-js/dist/types';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 
 import { RemoveButton } from '@/components/ChatDemo/remove';
@@ -24,11 +31,24 @@ const CollectionIdPage: React.FC = () => {
   const { getClient } = useUserContext();
 
   const [collection, setCollection] = useState<CollectionResponse | null>(null);
+
   const [documents, setDocuments] = useState<DocumentResponse[]>([]);
   const [totalDocumentEntries, setTotalDocumentEntries] = useState<number>(0);
 
   const [users, setUsers] = useState<User[]>([]);
   const [totalUserEntries, setTotalUserEntries] = useState<number>(0);
+
+  const [entities, setEntities] = useState<EntityResponse[]>([]);
+  const [totalEntityEntries, setTotalEntityEntries] = useState<number>(0);
+
+  const [relationships, setRelationships] = useState<RelationshipResponse[]>(
+    []
+  );
+  const [totalRelationshipEntries, setTotalRelationshipEntries] =
+    useState<number>(0);
+
+  const [communities, setCommunities] = useState<CommunityResponse[]>([]);
+  const [totalCommunityEntries, setTotalCommunityEntries] = useState<number>(0);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -76,7 +96,6 @@ const CollectionIdPage: React.FC = () => {
       setCollection(collection.results);
     } catch (error) {
       console.error('Error fetching collection:', error);
-      setError(error.message);
     }
   }, [currentCollectionId, getClient]);
 
@@ -225,6 +244,213 @@ const CollectionIdPage: React.FC = () => {
   useEffect(() => {
     fetchAllUsers();
   }, [fetchAllUsers]);
+
+  /*** Fetching Entities in Batches ***/
+  const fetchAllEntities = useCallback(async () => {
+    if (!currentCollectionId) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const client = await getClient();
+      if (!client) {
+        throw new Error('Failed to get authenticated client');
+      }
+
+      let offset = 0;
+      let allEntities: EntityResponse[] = [];
+      let totalEntityEntries = 0;
+
+      // Fetch first batch
+      const firstBatch = await client.graphs.listEntities({
+        collectionId: currentCollectionId,
+        offset: offset,
+        limit: PAGE_SIZE,
+      });
+
+      if (firstBatch.results.length > 0) {
+        totalEntityEntries = firstBatch.total_entries;
+        setTotalUserEntries(totalEntityEntries);
+
+        allEntities = firstBatch.results;
+        setEntities(allEntities);
+
+        // Set loading to false after the first batch is fetched
+        setLoading(false);
+      } else {
+        setLoading(false);
+        return;
+      }
+
+      offset += PAGE_SIZE;
+
+      // Continue fetching in the background
+      while (offset < totalUserEntries) {
+        const batch = await client.graphs.listEntities({
+          collectionId: currentCollectionId,
+          offset: offset,
+          limit: PAGE_SIZE,
+        });
+
+        if (batch.results.length === 0) {
+          break;
+        }
+
+        allEntities = allEntities.concat(batch.results);
+        setEntities([...allEntities]);
+
+        offset += PAGE_SIZE;
+      }
+
+      setEntities(allEntities);
+    } catch (error) {
+      console.error('Error fetching entities:', error);
+      setLoading(false);
+    }
+  }, [currentCollectionId, getClient]);
+
+  useEffect(() => {
+    fetchAllEntities();
+  }, [fetchAllEntities]);
+
+  /*** Fetching Entities in Batches ***/
+  const fetchAllRelationships = useCallback(async () => {
+    if (!currentCollectionId) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const client = await getClient();
+      if (!client) {
+        throw new Error('Failed to get authenticated client');
+      }
+
+      let offset = 0;
+      let allRelationships: RelationshipResponse[] = [];
+      let totalRelationshipEntries = 0;
+
+      // Fetch first batch
+      const firstBatch = await client.graphs.listRelationships({
+        collectionId: currentCollectionId,
+        offset: offset,
+        limit: PAGE_SIZE,
+      });
+
+      if (firstBatch.results.length > 0) {
+        totalRelationshipEntries = firstBatch.total_entries;
+        setTotalRelationshipEntries(totalRelationshipEntries);
+
+        allRelationships = firstBatch.results;
+        setRelationships(allRelationships);
+
+        // Set loading to false after the first batch is fetched
+        setLoading(false);
+      } else {
+        setLoading(false);
+        return;
+      }
+
+      offset += PAGE_SIZE;
+
+      // Continue fetching in the background
+      while (offset < totalUserEntries) {
+        const batch = await client.graphs.listRelationships({
+          collectionId: currentCollectionId,
+          offset: offset,
+          limit: PAGE_SIZE,
+        });
+
+        if (batch.results.length === 0) {
+          break;
+        }
+
+        allRelationships = allRelationships.concat(batch.results);
+        setRelationships([...allRelationships]);
+
+        offset += PAGE_SIZE;
+      }
+
+      setRelationships(allRelationships);
+    } catch (error) {
+      console.error('Error fetching entities:', error);
+      setLoading(false);
+    }
+  }, [currentCollectionId, getClient]);
+
+  useEffect(() => {
+    fetchAllRelationships();
+  }, [fetchAllRelationships]);
+
+  /*** Fetching Entities in Batches ***/
+  const fetchAllCommunities = useCallback(async () => {
+    if (!currentCollectionId) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const client = await getClient();
+      if (!client) {
+        throw new Error('Failed to get authenticated client');
+      }
+
+      let offset = 0;
+      let allCommunities: CommunityResponse[] = [];
+      let totalCommunityEntries = 0;
+
+      // Fetch first batch
+      const firstBatch = await client.graphs.listCommunities({
+        collectionId: currentCollectionId,
+        offset: offset,
+        limit: PAGE_SIZE,
+      });
+
+      if (firstBatch.results.length > 0) {
+        totalCommunityEntries = firstBatch.total_entries;
+        setTotalCommunityEntries(totalCommunityEntries);
+
+        allCommunities = firstBatch.results;
+        setCommunities(allCommunities);
+
+        // Set loading to false after the first batch is fetched
+        setLoading(false);
+      } else {
+        setLoading(false);
+        return;
+      }
+
+      offset += PAGE_SIZE;
+
+      // Continue fetching in the background
+      while (offset < totalUserEntries) {
+        const batch = await client.graphs.listCommunities({
+          collectionId: currentCollectionId,
+          offset: offset,
+          limit: PAGE_SIZE,
+        });
+
+        if (batch.results.length === 0) {
+          break;
+        }
+
+        allCommunities = allCommunities.concat(batch.results);
+        setCommunities([...allCommunities]);
+
+        offset += PAGE_SIZE;
+      }
+
+      setCommunities(allCommunities);
+    } catch (error) {
+      console.error('Error fetching entities:', error);
+      setLoading(false);
+    }
+  }, [currentCollectionId, getClient]);
+
+  useEffect(() => {
+    fetchAllCommunities();
+  }, [fetchAllCommunities]);
 
   const refetchData = useCallback(async () => {
     setLoading(true);
@@ -418,6 +644,28 @@ const CollectionIdPage: React.FC = () => {
     { key: 'email', label: 'Email', truncate: true, copyable: true },
   ];
 
+  const entityColumns: Column<EntityResponse>[] = [
+    { key: 'id', label: 'Entity ID', truncate: true, copyable: true },
+    { key: 'name', label: 'Name' },
+    { key: 'category', label: 'Type' },
+  ];
+
+  const relationshipColumns: Column<RelationshipResponse>[] = [
+    { key: 'id', label: 'Relationship ID', truncate: true, copyable: true },
+    { key: 'subject', label: 'Subject' },
+    { key: 'predicate', label: 'Predicate' },
+    { key: 'object', label: 'Object' },
+    { key: 'subject_id', label: 'Subject ID', truncate: true, copyable: true },
+    { key: 'object_id', label: 'Object ID', truncate: true, copyable: true },
+  ];
+
+  const communityColumns: Column<CommunityResponse>[] = [
+    { key: 'id', label: 'Community ID', truncate: true, copyable: true },
+    { key: 'name', label: 'Name' },
+    { key: 'summary', label: 'Summary' },
+    { key: 'findings', label: 'Findings' },
+  ];
+
   const renderUserActions = (user: User) => (
     <div className="flex space-x-1 justify-end">
       <RemoveButton
@@ -428,6 +676,18 @@ const CollectionIdPage: React.FC = () => {
         showToast={toast}
       />
     </div>
+  );
+
+  const renderEntityActions = (entity: EntityResponse) => (
+    <div className="flex space-x-1 justify-end"></div>
+  );
+
+  const renderRelationshipActions = (relationship: RelationshipResponse) => (
+    <div className="flex space-x-1 justify-end"></div>
+  );
+
+  const renderCommunityActions = (community: CommunityResponse) => (
+    <div className="flex space-x-1 justify-end"></div>
   );
 
   if (loading) {
@@ -464,12 +724,21 @@ const CollectionIdPage: React.FC = () => {
           onValueChange={setActiveTab}
           className="flex flex-col flex-1 mt-4 overflow-hidden"
         >
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="documents" className="flex items-center">
               Documents
             </TabsTrigger>
             <TabsTrigger value="users" className="flex items-center">
               Users
+            </TabsTrigger>
+            <TabsTrigger value="entities" className="flex items-center">
+              Entities
+            </TabsTrigger>
+            <TabsTrigger value="relationships" className="flex items-center">
+              Relationships
+            </TabsTrigger>
+            <TabsTrigger value="communities" className="flex items-center">
+              Communities
             </TabsTrigger>
           </TabsList>
           <TabsContent value="documents" className="flex-1 overflow-auto">
@@ -517,6 +786,60 @@ const CollectionIdPage: React.FC = () => {
               initialFilters={{}}
               currentPage={currentPage}
               totalEntries={totalUserEntries}
+              onPageChange={handlePageChange}
+              loading={loading}
+              showPagination={true}
+            />
+          </TabsContent>
+          <TabsContent value="entities" className="flex-1 overflow-auto">
+            <Table
+              data={entities}
+              columns={entityColumns}
+              itemsPerPage={itemsPerPage}
+              onSelectAll={() => {}}
+              onSelectItem={() => {}}
+              selectedItems={[]}
+              actions={renderEntityActions}
+              initialSort={{ key: 'id', order: 'asc' }}
+              initialFilters={{}}
+              currentPage={currentPage}
+              totalEntries={totalEntityEntries}
+              onPageChange={handlePageChange}
+              loading={loading}
+              showPagination={true}
+            />
+          </TabsContent>
+          <TabsContent value="relationships" className="flex-1 overflow-auto">
+            <Table
+              data={relationships}
+              columns={relationshipColumns}
+              itemsPerPage={itemsPerPage}
+              onSelectAll={() => {}}
+              onSelectItem={() => {}}
+              selectedItems={[]}
+              actions={renderRelationshipActions}
+              initialSort={{ key: 'id', order: 'asc' }}
+              initialFilters={{}}
+              currentPage={currentPage}
+              totalEntries={totalRelationshipEntries}
+              onPageChange={handlePageChange}
+              loading={loading}
+              showPagination={true}
+            />
+          </TabsContent>
+          <TabsContent value="communities" className="flex-1 overflow-auto">
+            <Table
+              data={communities}
+              columns={communityColumns}
+              itemsPerPage={itemsPerPage}
+              onSelectAll={() => {}}
+              onSelectItem={() => {}}
+              selectedItems={[]}
+              actions={renderCommunityActions}
+              initialSort={{ key: 'id', order: 'asc' }}
+              initialFilters={{}}
+              currentPage={currentPage}
+              totalEntries={totalCommunityEntries}
               onPageChange={handlePageChange}
               loading={loading}
               showPagination={true}

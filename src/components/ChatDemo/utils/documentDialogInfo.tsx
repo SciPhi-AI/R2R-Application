@@ -890,7 +890,7 @@ const ExpandableEntity: React.FC<{
                 )}
                 {metadataExpanded && (
                   <div className="px-4 pb-4 space-y-2">
-                    {Object.entries(entity.attributes || {}).map(
+                    {Object.entries(entity.metadata || {}).map(
                       ([key, value]) => (
                         <InfoRow key={key} label={key} value={value} />
                       )

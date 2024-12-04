@@ -1,4 +1,3 @@
-// UserInfoDialog.tsx
 import { Loader, UserRound, ChevronDown, ChevronUp } from 'lucide-react';
 import { User } from 'r2r-js';
 import React, { useState, useEffect } from 'react';
@@ -108,7 +107,9 @@ export const UserInfoDialog: React.FC<UserInfoDialogProps> = ({
 
   useEffect(() => {
     const fetchUser = async () => {
-      if (!id || !open) return;
+      if (!id || !open) {
+        return;
+      }
 
       try {
         setLoading(true);
