@@ -34,7 +34,10 @@ const EditPromptDialog: React.FC<EditPromptDialogProps> = ({
         throw new Error('Failed to get authenticated client');
       }
 
-      await client.updatePrompt(promptName, editedTemplate);
+      await client.prompts.update({
+        name: promptName,
+        template: editedTemplate,
+      });
       toast({
         title: 'Prompt updated',
         description: 'The prompt has been successfully updated.',

@@ -1,4 +1,5 @@
 import { Loader, FileSearch2, SlidersHorizontal } from 'lucide-react';
+import { DocumentResponse } from 'r2r-js';
 import React, { useState, useMemo } from 'react';
 
 import { DeleteButton } from '@/components/ChatDemo/deleteButton';
@@ -17,10 +18,10 @@ import {
   PopoverContent,
 } from '@/components/ui/popover';
 import { useToast } from '@/components/ui/use-toast';
-import { IngestionStatus, KGExtractionStatus, DocumentInfoType } from '@/types';
+import { IngestionStatus, KGExtractionStatus } from '@/types';
 
 interface DocumentsTableProps {
-  documents: DocumentInfoType[];
+  documents: DocumentResponse[];
   loading: boolean;
   onRefresh: () => void;
   pendingDocuments: string[];
@@ -29,7 +30,7 @@ interface DocumentsTableProps {
   onSelectAll: (selected: boolean) => void;
   onSelectItem: (itemId: string, selected: boolean) => void;
   selectedItems: string[];
-  hideActions?: boolean; // Optional prop to hide actions if needed
+  hideActions?: boolean;
   visibleColumns: Record<string, boolean>;
   onToggleColumn: (columnKey: string, isVisible: boolean) => void;
   totalEntries?: number;
@@ -73,8 +74,14 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
     onSelectItem(itemId, selected);
   };
 
-  const columns: Column<DocumentInfoType>[] = [
-    { key: 'title', label: 'Title', sortable: true },
+  const columns: Column<DocumentResponse>[] = [
+    {
+      key: 'title',
+      label: 'Title',
+      truncatedSubstring: true,
+      sortable: true,
+      copyable: true,
+    },
     { key: 'id', label: 'Document ID', truncate: true, copyable: true },
     { key: 'user_id', label: 'User ID', truncate: true, copyable: true },
     {
@@ -113,7 +120,7 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
       },
     },
     {
-      key: 'kg_extraction_status',
+      key: 'extraction_status',
       label: 'KG Extraction',
       filterable: true,
       filterType: 'multiselect',
@@ -158,7 +165,7 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
     },
   ];
 
-  const renderActions = (doc: DocumentInfoType) =>
+  const renderActions = (doc: DocumentResponse) =>
     hideActions ? null : (
       <div className="flex space-x-1 justify-end">
         <UpdateButtonContainer
@@ -168,7 +175,7 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
         />
         <DownloadFileContainer
           id={doc.id}
-          fileName={doc.title}
+          fileName={doc.title ? doc.title : ''}
           showToast={toast}
         />
         <Button
@@ -271,8 +278,6 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
             {!hideActions && (
               <div className="flex space-x-2">
                 <UploadButton
-                  userId={null}
-                  uploadedDocuments={documents}
                   setUploadedDocuments={() => {}}
                   onUploadSuccess={async () => {
                     await onRefresh();

@@ -1,4 +1,3 @@
-import { FileText } from 'lucide-react';
 import { FC } from 'react';
 import React, { useState, useEffect } from 'react';
 import Markdown from 'react-markdown';
@@ -17,93 +16,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { Button } from '@/components/ui/Button';
 import { Message } from '@/types';
-import {
-  VectorSearchResult,
-  KGEntity,
-  KGTriple,
-  KGSearchResult,
-  KGCommunity,
-  KGLocalSearchResult,
-} from '@/types';
-
-function parseKGLocalSources(payload: string): KGLocalSearchResult {
-  const data = JSON.parse(payload);
-
-  const entities: KGEntity[] = Object.entries(data.entities).map(
-    ([key, value]: [string, any]) => ({
-      id: key,
-      name: value.name,
-      description: value.description,
-    })
-  );
-
-  const relationships: KGTriple[] = data.relationships;
-
-  const communities: KGCommunity[] = Object.values(data.communities).map(
-    (community: any) => {
-      const parsedSummary = JSON.parse(community.summary);
-      return {
-        title: parsedSummary.title,
-        summary: parsedSummary.summary,
-        explanation: parsedSummary.explanation,
-      };
-    }
-  );
-  console.log('communities = ', communities);
-
-  return {
-    query: data.query,
-    entities,
-    relationships,
-    communities,
-  };
-}
-const SourceItem: FC<{
-  source: VectorSearchResult;
-  onOpenPdfPreview: (documentId: string, page?: number) => void;
-}> = ({ source, onOpenPdfPreview }) => {
-  const { document_id, score, metadata, text } = source;
-
-  const isPdf =
-    metadata.document_type === 'pdf' ||
-    metadata.unstructured_filetype === 'application/pdf';
-  const pageNumber = metadata.unstructured_page_number;
-
-  const handleOpenPdfPreview = () => {
-    if (source.document_id) {
-      onOpenPdfPreview(source.document_id, pageNumber);
-    }
-  };
-
-  return (
-    <div
-      className="bg-zinc-700 p-4 rounded-lg mb-2 flex items-center"
-      style={{ width: '100%' }}
-    >
-      <div className="flex-grow mr-4">
-        <h3 className="text-sm font-medium text-zinc-200 mb-1">
-          {metadata.title} (Similarity: {score.toFixed(3)})
-        </h3>
-        <p className="text-xs text-zinc-400">{text}</p>
-      </div>
-      {isPdf && (
-        <div className="flex-shrink-0">
-          <Button
-            onClick={handleOpenPdfPreview}
-            color="filled"
-            className="text-white font-bold flex items-center"
-            title={`Open PDF${pageNumber ? ` (Page ${pageNumber})` : ''}`}
-          >
-            <FileText size={16} className="mr-2" />
-            PDF
-          </Button>
-        </div>
-      )}
-    </div>
-  );
-};
+import { VectorSearchResult, KGSearchResult } from '@/types';
 
 function formatMarkdownNewLines(markdown: string) {
   return markdown
@@ -301,20 +215,22 @@ export const Answer: FC<{
                     align="start"
                     className="max-w-screen-md flex flex-col gap-2 bg-zinc-800 shadow-transparent ring-zinc-600 border-zinc-600 ring-4 text-xs"
                   >
+                    {!isKGElement && metadata?.documentid && (
+                      <div className="text-zinc-200 font-medium border-b border-zinc-600 pb-1">
+                        DocumentId: {metadata.documentid}
+                      </div>
+                    )}
                     <div className="text-zinc-200 text-ellipsis overflow-hidden whitespace-nowrap font-medium">
                       {title ? `Title: ${title}` : ''}
-                      {!isKGElement && metadata?.documentid
-                        ? `, DocumentId: ${metadata.documentid.slice(0, 8)}`
-                        : ''}
                     </div>
                     <div className="flex gap-4">
-                      <div className="flex-1">
+                      <div className="flex-1 max-h-[200px] overflow-y-auto pr-2">
                         {!isKGElement && (
-                          <div className="line-clamp-4 text-zinc-300 break-words">
+                          <div className="text-zinc-300 break-words mb-2">
                             {metadata?.snippet ?? ''}
                           </div>
                         )}
-                        <div className="line-clamp-4 text-zinc-300 break-words">
+                        <div className="text-zinc-300 break-words">
                           {description ?? ''}
                         </div>
                       </div>

@@ -97,7 +97,7 @@ const PdfPreviewDialog: React.FC<PdfPreviewDialogProps> = ({
           throw new Error('Failed to get authenticated client');
         }
 
-        const blob = await client.downloadFile(id);
+        const blob = await client.documents.download({ id: id });
         setPdfBlob(blob);
         setCurrentPage(initialPage);
         setZoom(1);

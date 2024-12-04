@@ -1,16 +1,17 @@
+import { DocumentResponse } from 'r2r-js';
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 
 import DocumentsTable from '@/components/ChatDemo/DocumentsTable';
 import Layout from '@/components/Layout';
 import { useUserContext } from '@/context/UserContext';
-import { DocumentInfoType, IngestionStatus } from '@/types';
+import { IngestionStatus } from '@/types';
 
 const PAGE_SIZE = 100;
 const ITEMS_PER_PAGE = 10;
 
 const Index: React.FC = () => {
   const { pipeline, getClient } = useUserContext();
-  const [documents, setDocuments] = useState<DocumentInfoType[]>([]);
+  const [documents, setDocuments] = useState<DocumentResponse[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [totalEntries, setTotalEntries] = useState<number>(0);
   const [pendingDocuments, setPendingDocuments] = useState<string[]>([]);
@@ -22,7 +23,7 @@ const Index: React.FC = () => {
       user_id: true,
       collection_ids: false,
       ingestion_status: true,
-      kg_extraction_status: false,
+      extraction_status: false,
       type: false,
       metadata: false,
       version: false,
@@ -35,18 +36,12 @@ const Index: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<Record<string, any>>({
     ingestion_status: ['success', 'failed', 'pending', 'enriched'],
-    kg_extraction_status: ['success', 'failed', 'pending'],
+    extraction_status: ['success', 'failed', 'pending'],
   });
   const [currentPage, setCurrentPage] = useState<number>(1);
 
   /*** Fetching Documents in Batches ***/
   const fetchAllDocuments = useCallback(async () => {
-    if (!pipeline?.deploymentUrl) {
-      console.error('No pipeline deployment URL available');
-      setLoading(false);
-      return;
-    }
-
     try {
       setLoading(true);
       const client = await getClient();
@@ -55,35 +50,51 @@ const Index: React.FC = () => {
       }
 
       let offset = 0;
-      let allDocs: DocumentInfoType[] = [];
+      let allDocs: DocumentResponse[] = [];
       let totalEntries = 0;
 
-      // Fetch batches until all documents are fetched
-      while (true) {
-        const batch = await client.documentsOverview(
-          undefined,
-          offset,
-          PAGE_SIZE
-        );
+      // Fetch first batch
+      const firstBatch = await client.documents.list({
+        offset: offset,
+        limit: PAGE_SIZE,
+      });
+
+      console.log('firstBatch:', firstBatch);
+
+      if (firstBatch.results.length > 0) {
+        totalEntries = firstBatch.total_entries;
+        setTotalEntries(totalEntries);
+
+        allDocs = firstBatch.results;
+        setDocuments(allDocs);
+
+        // Set loading to false after the first batch is fetched
+        setLoading(false);
+      } else {
+        setLoading(false);
+        return;
+      }
+
+      offset += PAGE_SIZE;
+
+      // Continue fetching in the background
+      while (offset < totalEntries) {
+        const batch = await client.documents.list({
+          offset: offset,
+          limit: PAGE_SIZE,
+        });
 
         if (batch.results.length === 0) {
           break;
         }
 
-        if (offset === 0) {
-          totalEntries = batch.total_entries;
-          setTotalEntries(totalEntries);
-        }
-
         allDocs = allDocs.concat(batch.results);
+        setDocuments([...allDocs]);
+
         offset += PAGE_SIZE;
       }
 
-      // Sort documents by a consistent key (e.g., 'id') to maintain order
-      allDocs.sort((a, b) => a.id.localeCompare(b.id));
-
       setDocuments(allDocs);
-      setLoading(false);
     } catch (error) {
       console.error('Error fetching documents:', error);
       setLoading(false);
@@ -200,7 +211,7 @@ const Index: React.FC = () => {
               selectedItems={selectedDocumentIds}
               visibleColumns={visibleColumns}
               onToggleColumn={handleToggleColumn}
-              totalEntries={filteredDocuments.length}
+              totalEntries={totalEntries}
               currentPage={currentPage}
               onPageChange={handlePageChange}
               itemsPerPage={ITEMS_PER_PAGE}

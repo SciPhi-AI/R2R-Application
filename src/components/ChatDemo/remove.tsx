@@ -44,9 +44,15 @@ export const RemoveButton: React.FC<RemoveButtonProps> = ({
       }
 
       if (itemType === 'document') {
-        await client.removeDocumentFromCollection(itemId, collectionId);
+        await client.collections.removeDocument({
+          id: collectionId,
+          documentId: itemId,
+        });
       } else if (itemType === 'user') {
-        await client.removeUserFromCollection(itemId, collectionId);
+        await client.collections.removeUser({
+          id: collectionId,
+          userId: itemId,
+        });
       }
 
       showToast({

@@ -33,9 +33,12 @@ export const UpdateButton: React.FC<UpdateButtonProps> = ({
 
         const metadata = { title: file.name };
 
-        await client.updateFiles([file], {
-          document_ids: [id],
-          metadatas: [metadata],
+        // Updating is currently not supported in the SDK
+
+        await client.documents.create({
+          id: id,
+          file: file,
+          metadata: [metadata],
         });
         showToast({
           variant: 'success',

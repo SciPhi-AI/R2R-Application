@@ -1,4 +1,5 @@
 import { Loader } from 'lucide-react';
+import { User } from 'r2r-js';
 import React, { useState, useEffect, useCallback } from 'react';
 
 import Table, { Column } from '@/components/ChatDemo/Table';
@@ -13,7 +14,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
 import { useUserContext } from '@/context/UserContext';
-import { User } from '@/types';
 
 interface AssignUserToCollectionDialogProps {
   open: boolean;
@@ -43,10 +43,10 @@ const AssignUserToCollectionDialog: React.FC<
         throw new Error('Failed to get authenticated client');
       }
 
-      const data = await client.usersOverview();
-      const usersWithId = data.results.map((user: Omit<User, 'id'>) => ({
+      const data = await client.users.list();
+      const usersWithId = data.results.map((user: User) => ({
         ...user,
-        id: user.user_id,
+        id: user.id,
       }));
       setAllUsers(usersWithId);
       setFilteredUsers(usersWithId);
@@ -121,7 +121,10 @@ const AssignUserToCollectionDialog: React.FC<
       }
 
       const assignPromises = selectedUserIds.map((id) =>
-        client.addUserToCollection(id, collection_id)
+        client.collections.addUser({
+          id: collection_id,
+          userId: id,
+        })
       );
 
       await Promise.all(assignPromises);

@@ -64,7 +64,7 @@ const Analytics: React.FC = () => {
         throw new Error('Failed to get authenticated client');
       }
 
-      const data = await client.logs();
+      const data = await client.system.logs({});
       const processedData = processLogData(data);
       setScoreData(processedData);
     } catch (error) {

@@ -4,7 +4,16 @@ import { useRouter } from 'next/router';
 import { forwardRef, useEffect, useState, ReactNode } from 'react';
 
 import { Logo } from '@/components/shared/Logo';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/Button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useUserContext } from '@/context/UserContext';
 import { NavbarProps, NavItemsProps } from '@/types';
 
@@ -87,6 +96,10 @@ export const Navbar = forwardRef<React.ElementRef<'nav'>, NavbarProps>(
     const [isSignedIn, setIsSignedIn] = useState(false);
 
     useEffect(() => {
+      const savedAuth = localStorage.getItem('authState');
+      if (savedAuth && !isAuthenticated) {
+        const authData = JSON.parse(savedAuth);
+      }
       setIsSignedIn(isAuthenticated);
     }, [isAuthenticated]);
 
@@ -132,14 +145,31 @@ export const Navbar = forwardRef<React.ElementRef<'nav'>, NavbarProps>(
               >
                 Docs
               </Button>
+
               {isSignedIn && (
-                <Button
-                  onClick={handleLogout}
-                  color="danger"
-                  className="rounded-md py-1 px-3 w-30"
-                >
-                  Logout
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Avatar className="cursor-pointer">
+                      <AvatarImage src="/images/default_profile.svg" />
+                      <AvatarFallback></AvatarFallback>
+                    </Avatar>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      onClick={() => router.push('/account')}
+                    >
+                      Account
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      onClick={handleLogout}
+                    >
+                      Logout
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               )}
             </div>
           </div>

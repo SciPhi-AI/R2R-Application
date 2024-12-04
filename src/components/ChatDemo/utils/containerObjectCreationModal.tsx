@@ -13,17 +13,21 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 import { useUserContext } from '@/context/UserContext';
 
-interface CollectionCreationModalProps {
+export enum ContainerType {
+  Collection = 'collection',
+  Graph = 'graph',
+}
+
+interface containerObjectCreationModalProps {
+  containerType: ContainerType;
   open: boolean;
   onClose: () => void;
   onCollectionCreated: () => void;
 }
 
-const CollectionCreationModal: React.FC<CollectionCreationModalProps> = ({
-  open,
-  onClose,
-  onCollectionCreated,
-}) => {
+const ContainerObjectCreationModal: React.FC<
+  containerObjectCreationModalProps
+> = ({ containerType, open, onClose, onCollectionCreated }) => {
   const { getClient } = useUserContext();
   const { toast } = useToast();
 
@@ -31,11 +35,14 @@ const CollectionCreationModal: React.FC<CollectionCreationModalProps> = ({
   const [description, setDescription] = useState('');
   const [isCreating, setIsCreating] = useState(false);
 
+  const capitalizedType =
+    containerType.charAt(0).toUpperCase() + containerType.slice(1);
+
   const handleCreate = async () => {
     if (!name.trim()) {
       toast({
         title: 'Validation Error',
-        description: 'Collection name is required.',
+        description: `${capitalizedType} name is required.`,
         variant: 'destructive',
       });
       return;
@@ -48,13 +55,21 @@ const CollectionCreationModal: React.FC<CollectionCreationModalProps> = ({
         throw new Error('Failed to get authenticated client');
       }
 
-      await client.collections.create({
+      const createPayload = {
         name: name.trim(),
         description: description.trim() || undefined,
-      });
+      };
+
+      if (containerType === ContainerType.Collection) {
+        await client.collections.create(createPayload);
+      } else {
+        console.log('Creating graph:', createPayload);
+        // await client.graphs.pull(createPayload);
+      }
+
       toast({
-        title: 'Collection Created',
-        description: `Collection "${name}" has been successfully created.`,
+        title: `${capitalizedType} Created`,
+        description: `${capitalizedType} "${name}" has been successfully created.`,
         variant: 'success',
       });
       setName('');
@@ -62,12 +77,12 @@ const CollectionCreationModal: React.FC<CollectionCreationModalProps> = ({
       onClose();
       onCollectionCreated();
     } catch (error: any) {
-      console.error('Error creating collection:', error);
+      console.error(`Error creating ${containerType}:`, error);
       toast({
         title: 'Error',
         description:
           error?.message ||
-          'An unexpected error occurred while creating the collection.',
+          `An unexpected error occurred while creating the ${containerType}.`,
         variant: 'destructive',
       });
     } finally {
@@ -87,16 +102,18 @@ const CollectionCreationModal: React.FC<CollectionCreationModalProps> = ({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-2xl">Create New Collection</DialogTitle>
+          <DialogTitle className="text-2xl">
+            Create a New {capitalizedType}
+          </DialogTitle>
         </DialogHeader>
         <div className="mt-4">
           <label className="block mb-2 font-medium">
-            Collection Name<span className="text-red-500">*</span>
+            {capitalizedType} Name<span className="text-red-500">*</span>
           </label>
           <Input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Enter collection name"
+            placeholder={`Enter ${containerType} name`}
             required
           />
         </div>
@@ -105,7 +122,7 @@ const CollectionCreationModal: React.FC<CollectionCreationModalProps> = ({
           <Textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Enter collection description (optional)"
+            placeholder={`Enter ${containerType} description (optional)`}
           />
         </div>
         <DialogFooter className="mt-6">
@@ -121,4 +138,4 @@ const CollectionCreationModal: React.FC<CollectionCreationModalProps> = ({
   );
 };
 
-export default CollectionCreationModal;
+export default ContainerObjectCreationModal;

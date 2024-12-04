@@ -36,9 +36,10 @@ const UpdateButtonContainer: React.FC<UpdateButtonContainerProps> = ({
 
         const metadata = { title: file.name };
 
-        await client.updateFiles([file], {
-          document_ids: [id],
-          metadatas: [metadata],
+        await client.documents.create({
+          id: id,
+          file: file,
+          metadata: [metadata],
         });
 
         showToast({

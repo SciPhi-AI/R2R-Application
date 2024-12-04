@@ -33,6 +33,7 @@ export interface AuthState {
   isAuthenticated: boolean;
   email: string | null;
   userRole: 'admin' | 'user' | null;
+  userId: string | null;
 }
 
 export interface BarChartProps {
@@ -65,25 +66,6 @@ export interface Document {
   text: string;
   metadata: any;
   collection_ids?: string[];
-}
-
-export interface User {
-  id: string;
-  user_id?: string;
-  email: string;
-  is_active: boolean;
-  is_superuser: boolean;
-  created_at: string;
-  updated_at: string;
-  is_verified: boolean;
-  collection_ids: string[];
-  total_size_in_bytes: number;
-
-  // Optional fields
-  hashed_password?: string;
-  verification_code_expiry?: string;
-  name?: string;
-  profile_picture?: string;
 }
 
 export interface Entity {
@@ -158,7 +140,7 @@ export interface DocumentInfoType {
   version: string;
   size_in_bytes: number;
   ingestion_status: IngestionStatus;
-  kg_extraction_status: KGExtractionStatus;
+  extraction_status: KGExtractionStatus;
   created_at: string;
   updated_at: string;
 }
@@ -171,7 +153,7 @@ export interface DocumentInCollectionType {
   created_at: string;
   updated_at: string;
   ingestion_status: IngestionStatus;
-  kg_extraction_status: KGExtractionStatus;
+  extraction_status: KGExtractionStatus;
   collection_ids: string[];
   metadata: Record<string, any>;
 }
@@ -261,12 +243,15 @@ export interface LogoProps {
 }
 
 export interface Message {
-  role: 'system' | 'user' | 'assistant';
+  role: 'user' | 'assistant';
   content: string;
   id: string;
   timestamp: number;
+  sources?: {
+    vector?: string | null;
+    kg?: string | null;
+  };
   isStreaming?: boolean;
-  sources?: Record<string, string | null>;
   searchPerformed?: boolean;
 }
 
@@ -331,7 +316,7 @@ export interface SidebarProps {
   handleSwitchChange: (id: string, checked: boolean) => void;
   searchLimit: number;
   setSearchLimit: (limit: number) => void;
-  collections: Array<{ collection_id: string; name: string }>;
+  collections: Array<{ id: string; name: string }>;
   selectedCollectionIds: string[];
   setSelectedCollectionIds: React.Dispatch<React.SetStateAction<string[]>>;
   config: SidebarConfig;
@@ -460,6 +445,7 @@ export interface UserContextProps {
     instanceUrl: string
   ) => Promise<{ success: boolean; userRole: 'admin' | 'user' }>;
   logout: () => Promise<void>;
+  unsetCredentials: () => Promise<void>;
   register: (
     email: string,
     password: string,
@@ -475,7 +461,15 @@ export interface UserContextProps {
 
 export type Collection = {
   name: string;
-  collection_id: string;
+  id: string;
+  description?: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type Graph = {
+  name: string;
+  id: string;
   description?: string;
   created_at?: string;
   updated_at?: string;

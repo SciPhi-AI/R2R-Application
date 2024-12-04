@@ -1,10 +1,9 @@
-import { Loader, FileSearch2, Users, FileText, Contact } from 'lucide-react';
+import { Loader, FileSearch2 } from 'lucide-react';
 import { useRouter } from 'next/router';
+import { DocumentResponse, User } from 'r2r-js/dist/types';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 
 import { DeleteButton } from '@/components/ChatDemo/deleteButton';
-import KGDescriptionDialog from '@/components/ChatDemo/KGDescriptionDialog';
-import { KnowledgeGraphButton } from '@/components/ChatDemo/knowledgeGraphButton';
 import { RemoveButton } from '@/components/ChatDemo/remove';
 import Table, { Column } from '@/components/ChatDemo/Table';
 import AssignDocumentToCollectionDialog from '@/components/ChatDemo/utils/AssignDocumentToCollectionDialog';
@@ -17,31 +16,25 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/use-toast';
 import { useUserContext } from '@/context/UserContext';
-import {
-  DocumentInfoType,
-  IngestionStatus,
-  KGExtractionStatus,
-  User,
-  Entity,
-  Community,
-  Triple,
-} from '@/types';
+import { IngestionStatus, KGExtractionStatus } from '@/types';
 
-const PAGE_SIZE = 100; // Fetch in batches of 100
+const PAGE_SIZE = 100;
 const ITEMS_PER_PAGE = 10;
 
 const CollectionIdPage: React.FC = () => {
   const router = useRouter();
   const { getClient, pipeline } = useUserContext();
-  const [documents, setDocuments] = useState<DocumentInfoType[]>([]);
+
+  const [documents, setDocuments] = useState<DocumentResponse[]>([]);
+  const [totalDocumentEntries, setTotalDocumentEntries] = useState<number>(0);
+
   const [users, setUsers] = useState<User[]>([]);
-  const [entities, setEntities] = useState<Entity[]>([]);
-  const [communities, setCommunities] = useState<Community[]>([]);
-  const [triples, setTriples] = useState<Triple[]>([]);
-  const [selectedDocumentIds, setSelectedDocumentIds] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [pendingDocuments, setPendingDocuments] = useState<string[]>([]);
+  const [totalUserEntries, setTotalUserEntries] = useState<number>(0);
+
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [selectedDocumentIds, setSelectedDocumentIds] = useState<string[]>([]);
   const { toast } = useToast();
   const [selectedDocumentId, setSelectedDocumentId] = useState('');
   const [isDocumentInfoDialogOpen, setIsDocumentInfoDialogOpen] =
@@ -51,146 +44,174 @@ const CollectionIdPage: React.FC = () => {
   const [isAssignUserDialogOpen, setIsAssignUserDialogOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [activeTab, setActiveTab] = useState('documents');
-  const [selectedKGItem, setSelectedKGItem] = useState<any>(null);
-  const [isKGDescriptionDialogOpen, setIsKGDescriptionDialogOpen] =
-    useState(false);
-  const [selectedKGType, setSelectedKGType] = useState<
-    'entity' | 'community' | 'triple'
-  >('entity');
   const itemsPerPage = ITEMS_PER_PAGE;
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<Record<string, any>>({
     ingestion_status: ['success', 'failed', 'pending', 'enriched'],
-    kg_extraction_status: ['success', 'failed', 'pending'],
+    extraction_status: ['success', 'failed', 'pending'],
   });
 
   const currentCollectionId =
-    typeof router.query.collection_id === 'string'
-      ? router.query.collection_id
-      : '';
+    typeof router.query.id === 'string' ? router.query.id : '';
+
+  console.log(
+    'currentCollectionId outside of fetchAllDocuments:',
+    currentCollectionId
+  );
 
   /*** Fetching Documents in Batches ***/
   const fetchAllDocuments = useCallback(async () => {
-    if (!pipeline?.deploymentUrl) {
-      console.error('No pipeline deployment URL available');
-      setError('No pipeline deployment URL available');
-      setIsLoading(false);
-      return;
-    }
+    if (!currentCollectionId) return;
 
     try {
-      setIsLoading(true);
+      setLoading(true);
       const client = await getClient();
       if (!client) {
         throw new Error('Failed to get authenticated client');
       }
 
       let offset = 0;
-      let allDocs: DocumentInfoType[] = [];
+      let allDocs: DocumentResponse[] = [];
+      let totalDocumentEntries = 0;
 
-      // Fetch batches until all documents are fetched
-      while (true) {
-        const batch = await client.getDocumentsInCollection(
-          currentCollectionId,
-          offset,
-          PAGE_SIZE
-        );
+      // Fetch first batch
+      console.log(
+        'currentCollectionId inside of fetchAllDocuments:',
+        currentCollectionId
+      );
+      const firstBatch = await client.collections.listDocuments({
+        id: currentCollectionId,
+        offset: offset,
+        limit: PAGE_SIZE,
+      });
+
+      if (firstBatch.results.length > 0) {
+        totalDocumentEntries = firstBatch.total_entries;
+        setTotalDocumentEntries(totalDocumentEntries);
+
+        allDocs = firstBatch.results;
+        setDocuments(allDocs);
+
+        // Set loading to false after the first batch is fetched
+        setLoading(false);
+      } else {
+        setLoading(false);
+        return;
+      }
+
+      offset += PAGE_SIZE;
+
+      // Continue fetching in the background
+      while (offset < totalDocumentEntries) {
+        const batch = await client.collections.listDocuments({
+          id: currentCollectionId,
+          offset: offset,
+          limit: PAGE_SIZE,
+        });
 
         if (batch.results.length === 0) {
           break;
         }
 
         allDocs = allDocs.concat(batch.results);
+        setDocuments([...allDocs]);
+
         offset += PAGE_SIZE;
       }
 
-      // Sort documents by a consistent key (e.g., 'id') to maintain order
-      allDocs.sort((a, b) => a.id.localeCompare(b.id));
-
       setDocuments(allDocs);
-      setIsLoading(false);
     } catch (error) {
       console.error('Error fetching documents:', error);
-      setError('Failed to fetch documents. Please try again later.');
-      setIsLoading(false);
+      setLoading(false);
     }
-  }, [getClient, pipeline?.deploymentUrl, currentCollectionId]);
+  }, [currentCollectionId, getClient]);
 
-  /*** Fetching Users, Entities, Communities, and Triples ***/
-  const fetchOtherData = useCallback(async () => {
-    if (!pipeline?.deploymentUrl) {
-      console.error('No pipeline deployment URL available');
-      setError('No pipeline deployment URL available');
-      setIsLoading(false);
-      return;
-    }
+  useEffect(() => {
+    fetchAllDocuments();
+  }, [fetchAllDocuments]);
+
+  /*** Fetching Users in Batches ***/
+  const fetchAllUsers = useCallback(async () => {
+    if (!currentCollectionId) return;
 
     try {
+      setLoading(true);
       const client = await getClient();
       if (!client) {
         throw new Error('Failed to get authenticated client');
       }
 
-      const [usersData, entitiesData, communitiesData, triplesData] =
-        await Promise.all([
-          client.getUsersInCollection(currentCollectionId),
-          client.getEntities(currentCollectionId),
-          client.getCommunities(currentCollectionId),
-          client.getTriples(currentCollectionId),
-        ]);
+      let offset = 0;
+      let allUsers: User[] = [];
+      let totalUserEntries = 0;
 
-      setUsers(usersData.results);
-      setEntities(entitiesData.results?.entities || []);
-      setCommunities(communitiesData.results?.communities || []);
-      setTriples(triplesData.results?.triples || []);
+      // Fetch first batch
+      const firstBatch = await client.collections.listUsers({
+        id: currentCollectionId,
+        offset: offset,
+        limit: PAGE_SIZE,
+      });
+
+      if (firstBatch.results.length > 0) {
+        totalUserEntries = firstBatch.total_entries;
+        setTotalUserEntries(totalUserEntries);
+
+        allUsers = firstBatch.results;
+        setUsers(allUsers);
+
+        // Set loading to false after the first batch is fetched
+        setLoading(false);
+      } else {
+        setLoading(false);
+        return;
+      }
+
+      offset += PAGE_SIZE;
+
+      // Continue fetching in the background
+      while (offset < totalUserEntries) {
+        const batch = await client.collections.listUsers({
+          id: currentCollectionId,
+          offset: offset,
+          limit: PAGE_SIZE,
+        });
+
+        if (batch.results.length === 0) {
+          break;
+        }
+
+        allUsers = allUsers.concat(batch.results);
+        setUsers([...allUsers]);
+
+        offset += PAGE_SIZE;
+      }
+
+      setUsers(allUsers);
     } catch (error) {
-      console.error('Error fetching data:', error);
-      setError('Failed to fetch data. Please try again later.');
+      console.error('Error fetching users:', error);
+      setLoading(false);
     }
-  }, [getClient, pipeline?.deploymentUrl, currentCollectionId]);
+  }, [currentCollectionId, getClient]);
+
+  useEffect(() => {
+    fetchAllUsers();
+  }, [fetchAllUsers]);
 
   const refetchData = useCallback(async () => {
-    setIsLoading(true);
-    await Promise.all([fetchAllDocuments(), fetchOtherData()]);
+    setLoading(true);
+    await Promise.all([fetchAllDocuments(), fetchAllUsers()]);
     setSelectedDocumentIds([]);
-    setIsLoading(false);
-  }, [fetchAllDocuments, fetchOtherData]);
+  }, [fetchAllDocuments, fetchAllUsers]);
 
   useEffect(() => {
-    if (router.isReady && currentCollectionId) {
+    if (!router.isReady) return;
+
+    const id = router.query.id;
+    if (typeof id === 'string') {
       refetchData();
     }
-  }, [router.isReady, currentCollectionId, refetchData]);
-
-  /*** Handle Pending Documents ***/
-  useEffect(() => {
-    const pending = documents
-      .filter(
-        (doc) =>
-          doc.ingestion_status !== IngestionStatus.SUCCESS &&
-          doc.ingestion_status !== IngestionStatus.ENRICHED &&
-          doc.ingestion_status !== IngestionStatus.FAILED
-      )
-      .map((doc) => doc.id);
-    setPendingDocuments(pending);
-  }, [documents]);
-
-  useEffect(() => {
-    let intervalId: NodeJS.Timeout;
-
-    if (pendingDocuments.length > 0 && currentCollectionId) {
-      intervalId = setInterval(() => {
-        fetchAllDocuments();
-      }, 2500);
-    }
-
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-    };
-  }, [pendingDocuments, fetchAllDocuments, currentCollectionId]);
+  }, [router.isReady, router.query.id, refetchData]);
 
   /*** Client-Side Filtering and Pagination ***/
   const filteredDocuments = useMemo(() => {
@@ -204,7 +225,7 @@ const CollectionIdPage: React.FC = () => {
             switch (key) {
               case 'ingestion_status':
                 return value.includes(doc.ingestion_status);
-              case 'kg_extraction_status':
+              case 'extraction_status':
                 return value.includes(doc.kg_extraction_status);
               default:
                 return true;
@@ -265,9 +286,13 @@ const CollectionIdPage: React.FC = () => {
   const renderActionButtons = () => {
     return (
       <div className="flex justify-end items-center space-x-2 mb-2">
-        <KnowledgeGraphButton
+        <DeleteButton
           collectionId={currentCollectionId}
+          isCollection={true}
+          onSuccess={() => router.push('/collections')}
           showToast={toast}
+          selectedDocumentIds={[]}
+          onDelete={() => {}}
         />
         {activeTab === 'documents' && (
           <Button
@@ -297,7 +322,7 @@ const CollectionIdPage: React.FC = () => {
     );
   };
 
-  const renderDocumentActions = (doc: DocumentInfoType) => (
+  const renderDocumentActions = (doc: DocumentResponse) => (
     <div className="flex space-x-1 justify-end">
       <RemoveButton
         itemId={doc.id}
@@ -328,56 +353,14 @@ const CollectionIdPage: React.FC = () => {
     </div>
   );
 
-  const renderEntityActions = (entity: Entity) => (
-    <div className="flex space-x-1 justify-end">
-      <Button
-        onClick={() => {
-          setSelectedKGItem(entity);
-          setSelectedKGType('entity');
-          setIsKGDescriptionDialogOpen(true);
-        }}
-        color="filled"
-        shape="slim"
-      >
-        <FileSearch2 className="h-6 w-6" />
-      </Button>
-    </div>
-  );
-
-  const renderCommunityActions = (community: Community) => (
-    <div className="flex space-x-1 justify-end">
-      <Button
-        onClick={() => {
-          setSelectedKGItem(community);
-          setSelectedKGType('community');
-          setIsKGDescriptionDialogOpen(true);
-        }}
-        color="filled"
-        shape="slim"
-      >
-        <FileSearch2 className="h-6 w-6" />
-      </Button>
-    </div>
-  );
-
-  const renderTripleActions = (triple: Triple) => (
-    <div className="flex space-x-1 justify-end">
-      <Button
-        onClick={() => {
-          setSelectedKGItem(triple);
-          setSelectedKGType('triple');
-          setIsKGDescriptionDialogOpen(true);
-        }}
-        color="filled"
-        shape="slim"
-      >
-        <FileSearch2 className="h-6 w-6" />
-      </Button>
-    </div>
-  );
-
-  const documentColumns: Column<DocumentInfoType>[] = [
-    { key: 'title', label: 'Title', sortable: true },
+  const documentColumns: Column<DocumentResponse>[] = [
+    {
+      key: 'title',
+      label: 'Title',
+      truncatedSubstring: true,
+      sortable: true,
+      copyable: true,
+    },
     { key: 'id', label: 'Document ID', truncate: true, copyable: true },
     {
       key: 'ingestion_status',
@@ -401,7 +384,7 @@ const CollectionIdPage: React.FC = () => {
       ),
     },
     {
-      key: 'kg_extraction_status',
+      key: 'extraction_status',
       label: 'KG Extraction',
       filterable: true,
       filterType: 'multiselect',
@@ -428,31 +411,6 @@ const CollectionIdPage: React.FC = () => {
     { key: 'email', label: 'Email', truncate: true, copyable: true },
   ];
 
-  const entityColumns: Column<Entity>[] = [
-    { key: 'name', label: 'Name', sortable: true },
-    { key: 'description', label: 'Description', truncate: true },
-    { key: 'extraction_ids', label: 'Extraction IDs', truncate: true },
-    {
-      key: 'document_id',
-      label: 'Document ID',
-      truncate: true,
-      copyable: true,
-    },
-    { key: 'attributes', label: 'Attributes', truncate: true },
-  ];
-
-  const communityColumns: Column<Community>[] = [
-    { key: 'name', label: 'Name', sortable: true },
-    { key: 'community_number', label: 'Community Number', sortable: true },
-    { key: 'rating', label: 'Rating', sortable: true },
-  ];
-
-  const tripleColumns: Column<Triple>[] = [
-    { key: 'subject', label: 'Subject', sortable: true },
-    { key: 'predicate', label: 'Predicate', sortable: true },
-    { key: 'object', label: 'Object', sortable: true },
-  ];
-
   const renderUserActions = (user: User) => (
     <div className="flex space-x-1 justify-end">
       <RemoveButton
@@ -469,14 +427,7 @@ const CollectionIdPage: React.FC = () => {
     refetchData();
   };
 
-  // Add key getters for each type
-  const getEntityKey = (entity: Entity) => entity.extraction_ids[0] || '';
-  const getCommunityKey = (community: Community) =>
-    community.community_number.toString();
-  const getTripleKey = (triple: Triple) =>
-    `${triple.subject}-${triple.predicate}-${triple.object}`;
-
-  if (isLoading) {
+  if (loading) {
     return (
       <Layout pageTitle="Loading..." includeFooter={false}>
         <main className="w-full flex flex-col container h-screen-[calc(100%-4rem)] justify-center items-center">
@@ -510,26 +461,12 @@ const CollectionIdPage: React.FC = () => {
           onValueChange={setActiveTab}
           className="flex flex-col flex-1 mt-4 overflow-hidden"
         >
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="documents" className="flex items-center">
-              <FileText className="w-4 h-4 mr-2" />
               Documents
             </TabsTrigger>
             <TabsTrigger value="users" className="flex items-center">
-              <Users className="w-4 h-4 mr-2" />
               Users
-            </TabsTrigger>
-            <TabsTrigger value="entities" className="flex items-center">
-              <Contact className="w-4 h-4 mr-2" />
-              Entities
-            </TabsTrigger>
-            <TabsTrigger value="communities" className="flex items-center">
-              <Users className="w-4 h-4 mr-2" />
-              Communities
-            </TabsTrigger>
-            <TabsTrigger value="triples" className="flex items-center">
-              <Users className="w-4 h-4 mr-2" />
-              Triples
             </TabsTrigger>
           </TabsList>
           <TabsContent value="documents" className="flex-1 overflow-auto">
@@ -556,8 +493,9 @@ const CollectionIdPage: React.FC = () => {
               initialSort={{ key: 'title', order: 'asc' }}
               initialFilters={filters}
               currentPage={currentPage}
+              totalEntries={totalDocumentEntries}
               onPageChange={handlePageChange}
-              loading={isLoading}
+              loading={loading}
               showPagination={true}
               filters={filters} // Add this line
               onFilter={handleFiltersChange}
@@ -575,67 +513,14 @@ const CollectionIdPage: React.FC = () => {
               initialSort={{ key: 'id', order: 'asc' }}
               initialFilters={{}}
               currentPage={currentPage}
+              totalEntries={totalUserEntries}
               onPageChange={handlePageChange}
-              loading={isLoading}
+              loading={loading}
               showPagination={true}
-            />
-          </TabsContent>
-          <TabsContent value="entities" className="flex-1 overflow-auto">
-            <Table
-              data={entities}
-              columns={entityColumns}
-              itemsPerPage={itemsPerPage}
-              actions={renderEntityActions}
-              onSelectAll={() => {}}
-              onSelectItem={() => {}}
-              selectedItems={[]}
-              initialSort={{ key: 'name', order: 'asc' }}
-              initialFilters={{}}
-              currentPage={currentPage}
-              onPageChange={handlePageChange}
-              loading={isLoading}
-              showPagination={true}
-              getRowKey={getEntityKey}
-            />
-          </TabsContent>
-          <TabsContent value="communities" className="flex-1 overflow-auto">
-            <Table
-              data={communities}
-              columns={communityColumns}
-              itemsPerPage={itemsPerPage}
-              actions={renderCommunityActions}
-              onSelectAll={() => {}}
-              onSelectItem={() => {}}
-              selectedItems={[]}
-              initialSort={{ key: 'name', order: 'asc' }}
-              initialFilters={{}}
-              currentPage={currentPage}
-              onPageChange={handlePageChange}
-              loading={isLoading}
-              showPagination={true}
-              getRowKey={getCommunityKey}
-            />
-          </TabsContent>
-          <TabsContent value="triples" className="flex-1 overflow-auto">
-            <Table
-              data={triples}
-              columns={tripleColumns}
-              itemsPerPage={itemsPerPage}
-              actions={renderTripleActions}
-              onSelectAll={() => {}}
-              onSelectItem={() => {}}
-              selectedItems={[]}
-              initialSort={{ key: 'subject', order: 'asc' }}
-              initialFilters={{}}
-              currentPage={currentPage}
-              onPageChange={handlePageChange}
-              loading={isLoading}
-              showPagination={true}
-              getRowKey={getTripleKey}
             />
           </TabsContent>
         </Tabs>
-        <div className="-mt-12 flex justify-end">
+        {/* <div className="-mt-12 flex justify-end">
           <DeleteButton
             collectionId={currentCollectionId}
             isCollection={true}
@@ -644,7 +529,7 @@ const CollectionIdPage: React.FC = () => {
             selectedDocumentIds={[]}
             onDelete={() => {}}
           />
-        </div>
+        </div> */}
       </main>
       <DocumentInfoDialog
         id={selectedDocumentId}
@@ -665,12 +550,6 @@ const CollectionIdPage: React.FC = () => {
         onClose={() => setIsAssignUserDialogOpen(false)}
         collection_id={currentCollectionId}
         onAssignSuccess={handleAssignSuccess}
-      />
-      <KGDescriptionDialog
-        open={isKGDescriptionDialogOpen}
-        onClose={() => setIsKGDescriptionDialogOpen(false)}
-        item={selectedKGItem}
-        type={selectedKGType}
       />
     </Layout>
   );

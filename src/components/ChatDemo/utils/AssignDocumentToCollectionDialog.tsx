@@ -1,4 +1,5 @@
 import { Loader } from 'lucide-react';
+import { DocumentResponse } from 'r2r-js';
 import React, { useState, useEffect, useCallback } from 'react';
 
 import DocumentsTable from '@/components/ChatDemo/DocumentsTable';
@@ -12,7 +13,6 @@ import {
 } from '@/components/ui/dialog';
 import { useToast } from '@/components/ui/use-toast';
 import { useUserContext } from '@/context/UserContext';
-import { DocumentInfoType } from '@/types';
 
 interface AssignDocumentToCollectionDialogProps {
   open: boolean;
@@ -27,7 +27,7 @@ const AssignDocumentToCollectionDialog: React.FC<
   const { getClient } = useUserContext();
   const { toast } = useToast();
 
-  const [documents, setDocuments] = useState<DocumentInfoType[]>([]);
+  const [documents, setDocuments] = useState<DocumentResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [pendingDocuments, setPendingDocuments] = useState<string[]>([]);
   const [selectedDocumentIds, setSelectedDocumentIds] = useState<string[]>([]);
@@ -54,13 +54,16 @@ const AssignDocumentToCollectionDialog: React.FC<
         throw new Error('Failed to get authenticated client');
       }
 
-      let allDocuments: DocumentInfoType[] = [];
+      let allDocuments: DocumentResponse[] = [];
       let offset = 0;
       const limit = 100;
       let totalEntries = 0;
 
       do {
-        const data = await client.documentsOverview(undefined, offset, limit);
+        const data = await client.documents.list({
+          offset: offset,
+          limit: limit,
+        });
         totalEntries = data.total_entries;
         allDocuments = allDocuments.concat(data.results);
         offset += limit;

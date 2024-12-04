@@ -1,4 +1,5 @@
 import { Plus, X } from 'lucide-react';
+import { UnprocessedChunk } from 'r2r-js/dist/types';
 import React, { useState } from 'react';
 
 import { Button } from '@/components/ui/Button';
@@ -15,7 +16,7 @@ interface CreateDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onCreateChunks: (
-    chunks: Array<{ text: string }>,
+    chunks: UnprocessedChunk[],
     documentId?: string,
     metadata?: Record<string, any>
   ) => Promise<void>;
@@ -95,9 +96,13 @@ export const CreateDialog: React.FC<CreateDialogProps> = ({
   const handleCreate = async () => {
     try {
       await onCreateChunks(
-        chunks.map((chunk) => ({ text: chunk.text })),
-        documentId || undefined,
-        metadata ? JSON.parse(metadata) : undefined
+        chunks.map((chunk) => ({
+          id: crypto.randomUUID(),
+          text: chunk.text,
+          collection_ids: [],
+          metadata: {},
+          document_id: documentId || undefined,
+        }))
       );
       // Reset form
       setChunks([{ id: 1, text: '' }]);

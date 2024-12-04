@@ -2,7 +2,7 @@ import {
   GenerationConfig,
   IndexMeasure,
   KGSearchSettings,
-  VectorSearchSettings,
+  ChunkSearchSettings,
 } from 'r2r-js';
 import React, { FC, useEffect, useState, useRef } from 'react';
 
@@ -27,12 +27,12 @@ export const Result: FC<{
   setQuery: (query: string) => void;
   userId: string | null;
   pipelineUrl: string | null;
-  search_limit: number;
-  search_filters: Record<string, unknown>;
-  rag_temperature: number | null;
-  rag_topP: number | null;
-  rag_topK: number | null;
-  rag_maxTokensToSample: number | null;
+  searchLimit: number;
+  searchFilters: Record<string, unknown>;
+  ragTemperature: number | null;
+  ragTopP: number | null;
+  ragTopK: number | null;
+  ragMaxTokensToSample: number | null;
   model: string | null;
   uploadedDocuments: string[];
   setUploadedDocuments: React.Dispatch<React.SetStateAction<string[]>>;
@@ -52,12 +52,12 @@ export const Result: FC<{
   setQuery,
   userId,
   pipelineUrl,
-  search_limit,
-  search_filters,
-  rag_temperature,
-  rag_topP,
-  rag_topK,
-  rag_maxTokensToSample,
+  searchLimit,
+  searchFilters,
+  ragTemperature,
+  ragTopP,
+  ragTopK,
+  ragMaxTokensToSample,
   model,
   uploadedDocuments,
   setUploadedDocuments,
@@ -198,14 +198,14 @@ export const Result: FC<{
 
       if (!currentConversationId) {
         try {
-          const newConversation = await client.createConversation();
+          const newConversation = await client.conversations.create();
           console.log('newConversation:', newConversation);
 
           if (!newConversation || !newConversation.results) {
             throw new Error('Failed to create a new conversation');
           }
 
-          currentConversationId = newConversation.results;
+          currentConversationId = newConversation.results.id;
 
           if (typeof currentConversationId !== 'string') {
             throw new Error('Invalid conversation ID received');
@@ -229,45 +229,43 @@ export const Result: FC<{
 
       const ragGenerationConfig: GenerationConfig = {
         stream: true,
-        temperature: rag_temperature ?? undefined,
-        top_p: rag_topP ?? undefined,
-        max_tokens_to_sample: rag_maxTokensToSample ?? undefined,
+        temperature: ragTemperature ?? undefined,
+        topP: ragTopP ?? undefined,
+        maxTokensToSample: ragMaxTokensToSample ?? undefined,
         model: model && model !== 'null' ? model : undefined,
       };
 
-      const vectorSearchSettings: VectorSearchSettings = {
-        use_vector_search: switches.vector_search?.checked ?? true,
-        use_hybrid_search: switches.hybrid_search?.checked ?? false,
-        filters: search_filters,
-        search_limit: search_limit,
-        index_measure: IndexMeasure.COSINE_DISTANCE,
-        selected_collection_ids:
+      const vectorSearchSettings: ChunkSearchSettings = {
+        useVectorSearch: switches.vectorSearch?.checked ?? true,
+        useHybridSearch: switches.hybridSearch?.checked ?? false,
+        filters: searchFilters,
+        searchLimit: searchLimit,
+        indexMeasure: IndexMeasure.COSINE_DISTANCE,
+        selectedCollectionIds:
           selectedCollectionIds.length > 0
             ? [selectedCollectionIds].flat()
             : undefined,
       };
 
       const kgSearchSettings: KGSearchSettings = {
-        use_kg_search: switches.knowledge_graph_search?.checked ?? false,
+        useKgSearch: switches.knowledgeGraphSearch?.checked ?? false,
       };
 
       const streamResponse =
         mode === 'rag_agent'
-          ? await client.agent(
-              [...messages, newUserMessage],
-              ragGenerationConfig,
-              vectorSearchSettings,
-              kgSearchSettings,
-              undefined,
-              undefined,
-              currentConversationId
-            )
-          : await client.rag(
-              query,
-              vectorSearchSettings,
-              kgSearchSettings,
-              ragGenerationConfig
-            );
+          ? await client.retrieval.agent({
+              message: newUserMessage,
+              ragGenerationConfig: ragGenerationConfig,
+              vectorSearchSettings: vectorSearchSettings,
+              kgSearchSettings: kgSearchSettings,
+              conversationId: currentConversationId,
+            })
+          : await client.retrieval.rag({
+              query: query,
+              ragGenerationConfig: ragGenerationConfig,
+              vectorSearchSettings: vectorSearchSettings,
+              kgSearchSettings: kgSearchSettings,
+            });
 
       const reader = streamResponse.getReader();
       const decoder = new TextDecoder();
@@ -357,7 +355,8 @@ export const Result: FC<{
         );
 
         try {
-          await client.addMessage(currentConversationId, {
+          await client.conversations.addMessage({
+            id: currentConversationId,
             role: 'assistant',
             content: assistantResponse,
           });
@@ -456,11 +455,7 @@ export const Result: FC<{
           <div className="absolute inset-4 flex items-center justify-center backdrop-blur-sm">
             <div className="flex items-center p-4 bg-white shadow-2xl rounded text-indigo-500 font-medium gap-4">
               Please upload at least one document to submit queries.{' '}
-              <UploadButton
-                userId={userId}
-                uploadedDocuments={uploadedDocuments}
-                setUploadedDocuments={setUploadedDocuments}
-              />
+              <UploadButton setUploadedDocuments={setUploadedDocuments} />
             </div>
           </div>
         )}

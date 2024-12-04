@@ -1,5 +1,6 @@
 'use client';
 import { useSearchParams } from 'next/navigation';
+import { MessageResponse } from 'r2r-js';
 import React, { useState, useEffect, useRef } from 'react';
 
 import { Result } from '@/components/ChatDemo/result';
@@ -19,7 +20,7 @@ import { useUserContext } from '@/context/UserContext';
 import { Message } from '@/types';
 
 interface Collection {
-  collection_id: string;
+  id: string;
   name: string;
 }
 
@@ -97,19 +98,19 @@ const Index: React.FC = () => {
 
   useEffect(() => {
     initializeSwitch(
-      'vector_search',
+      'vectorSearch',
       true,
       'Vector Search',
       'Vector search is a search method that uses vectors to represent documents and queries. It is used to find similar documents to a given query.'
     );
     initializeSwitch(
-      'hybrid_search',
+      'hybridSearch',
       false,
       'Hybrid Search',
       'Hybrid search is a search method that combines multiple search methods to provide more accurate and relevant search results.'
     );
     initializeSwitch(
-      'knowledge_graph_search',
+      'knowledgeGraphSearch',
       false,
       'Knowledge Graph Search',
       'Please construct a Knowledge Graph to use this feature.'
@@ -139,8 +140,8 @@ const Index: React.FC = () => {
             throw new Error('Failed to get authenticated client');
           }
           setIsLoading(true);
-          const documents = await client.documentsOverview();
-          setUploadedDocuments(documents['results']);
+          const documents = await client.documents.list();
+          setUploadedDocuments(documents.results.map((doc) => doc.id));
         } catch (error) {
           console.error('Error fetching user documents:', error);
         } finally {
@@ -161,10 +162,10 @@ const Index: React.FC = () => {
           if (!client) {
             throw new Error('Failed to get authenticated client');
           }
-          const collectionsData = await client.collectionsOverview();
+          const collectionsData = await client.collections.list();
           setCollections(
             collectionsData.results.map((collection: Collection) => ({
-              collection_id: collection.collection_id,
+              id: collection.id,
               name: collection.name,
             }))
           );
@@ -205,11 +206,15 @@ const Index: React.FC = () => {
       if (!client) {
         throw new Error('Failed to get authenticated client');
       }
-      const response = await client.getConversation(conversationId);
+      const response = await client.conversations.retrieve({
+        id: conversationId,
+      });
       const fetchedMessages = response.results.map(
-        ([id, message]: [string, Message]) => ({
-          ...message,
-          id,
+        (message: MessageResponse) => ({
+          id: message.id,
+          role: message.metadata?.role || 'user',
+          content: message.metadata?.content || '',
+          timestamp: message.metadata?.timestamp || new Date().toISOString(),
         })
       );
       setMessages(fetchedMessages);
@@ -311,12 +316,12 @@ const Index: React.FC = () => {
                   model={selectedModel}
                   userId={userId}
                   pipelineUrl={pipeline?.deploymentUrl || ''}
-                  search_limit={searchLimit}
-                  search_filters={safeJsonParse(searchFilters)}
-                  rag_temperature={temperature}
-                  rag_topP={topP}
-                  rag_topK={top_k}
-                  rag_maxTokensToSample={max_tokens_to_sample}
+                  searchLimit={searchLimit}
+                  searchFilters={safeJsonParse(searchFilters)}
+                  ragTemperature={temperature}
+                  ragTopP={topP}
+                  ragTopK={top_k}
+                  ragMaxTokensToSample={max_tokens_to_sample}
                   uploadedDocuments={uploadedDocuments}
                   setUploadedDocuments={setUploadedDocuments}
                   switches={switches}

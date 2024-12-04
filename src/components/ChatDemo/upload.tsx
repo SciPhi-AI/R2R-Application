@@ -1,4 +1,5 @@
 import { FileUp, PencilLine, Plus } from 'lucide-react';
+import { UnprocessedChunk } from 'r2r-js/dist/types';
 import React, { useState, Dispatch, SetStateAction } from 'react';
 
 import { Button } from '@/components/ui/Button';
@@ -14,8 +15,6 @@ import { CreateDialog } from './CreateDialog';
 import { UploadDialog } from './UploadDialog';
 
 export interface UploadButtonProps {
-  userId: string | null;
-  uploadedDocuments: any[];
   setUploadedDocuments: Dispatch<SetStateAction<any[]>>;
   onUploadSuccess?: () => Promise<any[]>;
   showToast?: (message: {
@@ -29,8 +28,6 @@ export interface UploadButtonProps {
 }
 
 export const UploadButton: React.FC<UploadButtonProps> = ({
-  userId,
-  uploadedDocuments,
   setUploadedDocuments,
   onUploadSuccess,
   showToast = () => {},
@@ -51,41 +48,46 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
       throw new Error('Failed to get authenticated client');
     }
 
-    try {
-      const uploadedFiles: any[] = [];
-      const metadatas: Record<string, any>[] = [];
-      const userIds: (string | null)[] = [];
+    const uploadedFiles: any[] = [];
 
-      for (const file of files) {
-        const fileId = generateIdFromLabel(file.name);
-        uploadedFiles.push({ document_id: fileId, title: file.name });
-        metadatas.push({ title: file.name });
-        userIds.push(userId);
-      }
+    for (const file of files) {
+      const fileId = generateIdFromLabel(file.name);
+      uploadedFiles.push({ document_id: fileId, title: file.name });
 
-      await client.ingestFiles(files, {
-        metadatas: metadatas,
-        user_ids: userIds,
-      });
+      client.documents
+        .create({
+          file: file,
+        })
+        .catch((err) => {
+          showToast({
+            variant: 'destructive',
+            title: 'Upload Failed',
+            description:
+              err instanceof Error
+                ? err.message
+                : 'An unexpected error occurred',
+          });
+        });
+    }
 
-      setUploadedDocuments((prevDocuments) => [
-        ...prevDocuments,
-        ...uploadedFiles,
-      ]);
+    setUploadedDocuments((prevDocuments) => [
+      ...prevDocuments,
+      ...uploadedFiles,
+    ]);
 
-      if (setPendingDocuments) {
-        const newUploadedFiles = uploadedFiles.map((file) => file.document_id);
-        setPendingDocuments((prev) => [...prev, ...newUploadedFiles]);
-      }
+    if (setPendingDocuments) {
+      const newUploadedFiles = uploadedFiles.map((file) => file.document_id);
+      setPendingDocuments((prev) => [...prev, ...newUploadedFiles]);
+    }
 
-      showToast({
-        variant: 'success',
-        title: 'Upload Successful',
-        description: 'All files have been uploaded successfully.',
-      });
+    showToast({
+      variant: 'success',
+      title: 'Upload Started',
+      description: 'Files are being uploaded in the background.',
+    });
 
-      if (onUploadSuccess) {
-        const updatedDocuments = await onUploadSuccess();
+    if (onUploadSuccess) {
+      onUploadSuccess().then((updatedDocuments) => {
         if (updatedDocuments.length > 0 && setCurrentPage && documentsPerPage) {
           const totalPages = Math.ceil(
             updatedDocuments.length / documentsPerPage
@@ -94,21 +96,14 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
         } else if (setCurrentPage) {
           setCurrentPage(1);
         }
-      }
-    } catch (error: any) {
-      console.error('Error uploading files:', error);
-      showToast({
-        variant: 'destructive',
-        title: 'Upload Failed',
-        description: error.message,
       });
-    } finally {
-      setIsUploading(false);
     }
+
+    setIsUploading(false);
   };
 
   const handleCreateChunks = async (
-    chunks: Array<{ text: string }>,
+    chunks: UnprocessedChunk[],
     documentId?: string,
     metadata?: Record<string, any>
   ) => {
@@ -117,25 +112,35 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
       throw new Error('Failed to get authenticated client');
     }
 
-    try {
-      await client.ingestChunks(chunks, documentId, metadata);
+    const processedChunks = chunks.map((chunk) => ({
+      ...chunk,
+      document_id: documentId || chunk.document_id,
+      metadata: { ...chunk.metadata, ...metadata },
+    }));
 
-      showToast({
-        variant: 'success',
-        title: 'Chunks Created',
-        description: 'All chunks have been created successfully.',
+    client.chunks
+      .create({
+        chunks: processedChunks,
+      })
+      .catch((error) => {
+        showToast({
+          variant: 'destructive',
+          title: 'Creation Failed',
+          description:
+            error instanceof Error
+              ? error.message
+              : 'An unexpected error occurred',
+        });
       });
 
-      if (onUploadSuccess) {
-        await onUploadSuccess();
-      }
-    } catch (error: any) {
-      console.error('Error creating chunks:', error);
-      showToast({
-        variant: 'destructive',
-        title: 'Creation Failed',
-        description: error.message,
-      });
+    showToast({
+      variant: 'success',
+      title: 'Chunk Creation Started',
+      description: 'Chunks are being created in the background.',
+    });
+
+    if (onUploadSuccess) {
+      onUploadSuccess();
     }
   };
 

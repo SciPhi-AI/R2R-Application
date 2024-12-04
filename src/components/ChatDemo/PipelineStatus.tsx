@@ -27,11 +27,11 @@ export function useConnectionStatus(
     }
 
     try {
-      await client.health();
+      await client.system.health();
       setIsConnected(true);
       onStatusChange?.(true);
 
-      const stats = await client.serverStats();
+      const stats = await client.system.status();
       setServerStats(stats.results);
       setLocalUptime(stats.results.uptime_seconds);
     } catch (error) {
