@@ -20,11 +20,11 @@ const Index: React.FC = () => {
     {
       title: true,
       id: true,
-      user_id: true,
+      owner_id: true,
       collection_ids: false,
       ingestion_status: true,
-      extraction_status: false,
-      type: false,
+      extraction_status: true,
+      document_type: false,
       metadata: false,
       version: false,
       created_at: true,
@@ -129,13 +129,15 @@ const Index: React.FC = () => {
 
     // Apply filters
     Object.entries(filters).forEach(([key, value]) => {
-      if (value && value.length > 0) {
-        if (key === 'ingestion_status' || key === 'kg_extraction_status') {
-          filtered = filtered.filter((doc) => {
-            const status = doc[key];
-            return Array.isArray(value) && value.includes(status);
-          });
-        }
+      if (
+        value &&
+        value.length > 0 &&
+        (key === 'ingestion_status' || key === 'extraction_status')
+      ) {
+        filtered = filtered.filter((doc) => {
+          const status = doc[key];
+          return Array.isArray(value) && value.includes(status);
+        });
       }
     });
 

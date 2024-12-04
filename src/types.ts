@@ -401,17 +401,6 @@ export interface UpdateButtonContainerProps {
   }) => void;
 }
 
-export interface DownloadFileContainerProps {
-  apiUrl?: string;
-  id: string;
-  fileName: string;
-  showToast: (message: {
-    title: string;
-    description: string;
-    variant: 'default' | 'destructive' | 'success';
-  }) => void;
-}
-
 export interface UpdateButtonProps {
   userId: string;
   id: string;

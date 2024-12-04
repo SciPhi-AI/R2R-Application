@@ -136,7 +136,10 @@ const AssignDocumentToCollectionDialog: React.FC<
       }
 
       const assignPromises = selectedDocumentIds.map((docId) =>
-        client.assignDocumentToCollection(docId, collection_id)
+        client.collections.addDocument({
+          id: collection_id,
+          documentId: docId,
+        })
       );
 
       await Promise.all(assignPromises);

@@ -5,7 +5,16 @@ import React, { useState } from 'react';
 import { Spinner } from '@/components/Spinner';
 import { Button } from '@/components/ui/Button';
 import { useUserContext } from '@/context/UserContext';
-import { DownloadFileContainerProps } from '@/types';
+
+interface DownloadFileContainerProps {
+  id: string;
+  fileName: string;
+  showToast: (message: {
+    title: string;
+    description: string;
+    variant: 'default' | 'destructive' | 'success';
+  }) => void;
+}
 
 const DownloadButtonContainer: React.FC<DownloadFileContainerProps> = ({
   id,
@@ -61,7 +70,7 @@ const DownloadButtonContainer: React.FC<DownloadFileContainerProps> = ({
       <Button
         onClick={handleDocumentDownload}
         disabled={isDownloading}
-        color={isDownloading ? 'disabled' : 'filled'}
+        color={isDownloading ? 'disabled' : 'text_gray'}
         shape="slim"
         tooltip="Download Document"
       >

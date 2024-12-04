@@ -48,8 +48,14 @@ const AssignUserToCollectionDialog: React.FC<
         ...user,
         id: user.id,
       }));
+
+      // Filter usersWithId directly
+      const filteredUsers = usersWithId.filter(
+        (filteredUser) => !filteredUser.collection_ids.includes(collection_id)
+      );
+
       setAllUsers(usersWithId);
-      setFilteredUsers(usersWithId);
+      setFilteredUsers(filteredUsers);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast({
@@ -71,11 +77,15 @@ const AssignUserToCollectionDialog: React.FC<
   }, [open, fetchAllUsers]);
 
   useEffect(() => {
+    const usersNotInCollection = allUsers.filter(
+      (user) => !user.collection_ids.includes(collection_id)
+    );
+
     if (searchQuery.trim() === '') {
-      setFilteredUsers(allUsers);
+      setFilteredUsers(usersNotInCollection);
     } else {
       const query = searchQuery.toLowerCase();
-      const filtered = allUsers.filter(
+      const filtered = usersNotInCollection.filter(
         (user) =>
           user.id.toLowerCase().includes(query) ||
           (user.name && user.name.toLowerCase().includes(query)) ||
@@ -83,7 +93,7 @@ const AssignUserToCollectionDialog: React.FC<
       );
       setFilteredUsers(filtered);
     }
-  }, [searchQuery, allUsers]);
+  }, [searchQuery, allUsers, collection_id]);
 
   const handleSelectAll = (selected: boolean) => {
     if (selected) {
@@ -150,9 +160,9 @@ const AssignUserToCollectionDialog: React.FC<
   };
 
   const columns: Column<User>[] = [
-    { key: 'user_id', label: 'User ID', truncate: true, copyable: true },
-    { key: 'name', label: 'Name' },
+    { key: 'id', label: 'User ID', truncate: true, copyable: true },
     { key: 'email', label: 'Email' },
+    { key: 'name', label: 'Name' },
   ];
 
   return (
@@ -160,7 +170,7 @@ const AssignUserToCollectionDialog: React.FC<
       <DialogContent className="text-white max-w-4xl">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold mb-4">
-            Assign Users to Group
+            Assign Users to Collection
           </DialogTitle>
           <Input
             placeholder="Search by User ID, Name, or Email"
