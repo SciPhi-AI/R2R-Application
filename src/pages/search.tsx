@@ -1,4 +1,5 @@
 import { ArrowRight } from 'lucide-react';
+import { GraphSearchResult } from 'r2r-js';
 import React, { useState, useEffect, useRef } from 'react';
 
 import useSwitchManager from '@/components/ChatDemo/SwitchManager';
@@ -29,7 +30,13 @@ const SearchPage: React.FC = () => {
 
   // Search results
   const [vectorSearchResults, setVectorSearchResults] = useState<any[]>([]);
-  const [kgSearchResults, setKgSearchResults] = useState<any[]>([]);
+  const [entitySearchResults, setEntitySearchResults] = useState<any[]>([]);
+  const [relationshipSearchResults, setRelationshipSearchResults] = useState<
+    any[]
+  >([]);
+  const [communitySearchResults, setCommunitySearchResults] = useState<any[]>(
+    []
+  );
 
   // Collections
   const [collections, setCollections] = useState<Collection[]>([]);
@@ -120,39 +127,31 @@ const SearchPage: React.FC = () => {
         throw new Error('Failed to get authenticated client');
       }
 
-      const vectorSearchSettings = {
-        useVectorSearch: switches.vectorSearch.checked,
-        useHybridSearch: switches.hybridSearch.checked,
-        searchLimit: searchLimit,
-        indexMeasure: indexMeasure,
-        // include_metadatas: includeMetadatas,
-        probes,
-        efSearch: efSearch,
-        selectedCollectionIds: selectedCollectionIds,
-        filters: JSON.parse(searchFilters),
-        fullTextWeight: fullTextWeight,
-        semanticWeight: semanticWeight,
-        fullTextLimit: fullTextLimit,
-        rrfK: rrfK,
-      };
-
-      const kgSearchSettings = {
-        use_kg_search: switches.knowledgeGraphSearch.checked,
-        // kg_search_level: kgSearchLevel,
-        // max_community_description_length: maxCommunityDescriptionLength,
-        // local_search_limits: localSearchLimits,
-        selected_collection_ids: selectedCollectionIds,
-        filters: JSON.parse(searchFilters),
-      };
-
-      const results = await client.retrieval.search({
+      const searchResponse = await client.retrieval.search({
         query: query,
-        vectorSearchSettings: vectorSearchSettings,
-        kgSearchSettings: kgSearchSettings,
       });
 
-      setVectorSearchResults(results.results.vector_search_results || []);
-      setKgSearchResults(results.results.kg_search_results || []);
+      setVectorSearchResults(searchResponse.results.chunk_search_results || []);
+
+      const graphResults = searchResponse.results.graph_search_results || [];
+
+      setEntitySearchResults(
+        graphResults.filter(
+          (result: GraphSearchResult) => result.result_type === 'entity'
+        ) as any[]
+      );
+
+      setRelationshipSearchResults(
+        graphResults.filter(
+          (result: GraphSearchResult) => result.result_type === 'relationship'
+        ) as any[]
+      );
+
+      setCommunitySearchResults(
+        graphResults.filter(
+          (result: GraphSearchResult) => result.result_type === 'community'
+        ) as any[]
+      );
     } catch (error) {
       console.error('Error performing search:', error);
     } finally {
@@ -163,7 +162,7 @@ const SearchPage: React.FC = () => {
   return (
     <Layout pageTitle="Search" includeFooter={false}>
       <div className="flex flex-col h-screen-[calc(100%-4rem)] overflow-hidden">
-        <Sidebar
+        {/* <Sidebar
           isOpen={sidebarIsOpen}
           onToggle={toggleSidebar}
           switches={switches}
@@ -203,7 +202,7 @@ const SearchPage: React.FC = () => {
             showKGSearch: false,
             showRagGeneration: false,
           }}
-        />
+        /> */}
 
         <div
           className={`main-content-wrapper ${sidebarIsOpen ? '' : 'sidebar-closed'}`}
@@ -241,12 +240,16 @@ const SearchPage: React.FC = () => {
             >
               <div className="mt-8">
                 <h2 className="text-xl font-semibold mb-4">Search Results</h2>
-                <Tabs defaultValue="vector" className="w-full">
+                <Tabs defaultValue="chunk" className="w-full">
                   <TabsList>
-                    <TabsTrigger value="vector">Vector Search</TabsTrigger>
-                    <TabsTrigger value="kg">Knowledge Graph</TabsTrigger>
+                    <TabsTrigger value="chunk">Chunks</TabsTrigger>
+                    <TabsTrigger value="entity">Entities</TabsTrigger>
+                    <TabsTrigger value="relationship">
+                      Relationships
+                    </TabsTrigger>
+                    <TabsTrigger value="community">Communites</TabsTrigger>
                   </TabsList>
-                  <TabsContent value="vector">
+                  <TabsContent value="chunk">
                     {vectorSearchResults.length > 0 ? (
                       vectorSearchResults.map((result, index) => (
                         <div
@@ -277,12 +280,12 @@ const SearchPage: React.FC = () => {
                         </div>
                       ))
                     ) : (
-                      <p>No vector search results found.</p>
+                      <p>No chunk search results found.</p>
                     )}
                   </TabsContent>
-                  <TabsContent value="kg">
-                    {kgSearchResults.length > 0 ? (
-                      kgSearchResults.map((result, index) => (
+                  <TabsContent value="entity">
+                    {entitySearchResults.length > 0 ? (
+                      entitySearchResults.map((result, index) => (
                         <div
                           key={index}
                           className="mb-4 p-4 bg-zinc-800 rounded"
@@ -313,7 +316,77 @@ const SearchPage: React.FC = () => {
                         </div>
                       ))
                     ) : (
-                      <p>No knowledge graph results found.</p>
+                      <p>No entity results found.</p>
+                    )}
+                  </TabsContent>
+                  <TabsContent value="relationship">
+                    {relationshipSearchResults.length > 0 ? (
+                      relationshipSearchResults.map((result, index) => (
+                        <div
+                          key={index}
+                          className="mb-4 p-4 bg-zinc-800 rounded"
+                        >
+                          <h3 className="text-lg font-semibold mb-2">
+                            {result.content.subject} {result.content.predicate}{' '}
+                            {result.content.object}
+                          </h3>
+                          <Accordion
+                            type="single"
+                            collapsible
+                            className="w-full"
+                          >
+                            <AccordionItem value={`item-${index}`}>
+                              <AccordionTrigger>View Details</AccordionTrigger>
+                              <AccordionContent>
+                                <pre
+                                  className="text-xs bg-zinc-900 p-4 rounded"
+                                  style={{ whiteSpace: 'pre-wrap' }}
+                                >
+                                  {JSON.stringify(result, null, 2)}
+                                </pre>
+                              </AccordionContent>
+                            </AccordionItem>
+                          </Accordion>
+                        </div>
+                      ))
+                    ) : (
+                      <p>No relationship results found.</p>
+                    )}
+                  </TabsContent>
+                  <TabsContent value="community">
+                    {communitySearchResults.length > 0 ? (
+                      communitySearchResults.map((result, index) => (
+                        <div
+                          key={index}
+                          className="mb-4 p-4 bg-zinc-800 rounded"
+                        >
+                          <h3 className="text-lg font-semibold mb-2">
+                            {result.content.name}
+                          </h3>
+                          <p className="text-sm mb-2">
+                            {result.content.summary}
+                          </p>
+                          <Accordion
+                            type="single"
+                            collapsible
+                            className="w-full"
+                          >
+                            <AccordionItem value={`item-${index}`}>
+                              <AccordionTrigger>View Details</AccordionTrigger>
+                              <AccordionContent>
+                                <pre
+                                  className="text-xs bg-zinc-900 p-4 rounded"
+                                  style={{ whiteSpace: 'pre-wrap' }}
+                                >
+                                  {JSON.stringify(result, null, 2)}
+                                </pre>
+                              </AccordionContent>
+                            </AccordionItem>
+                          </Accordion>
+                        </div>
+                      ))
+                    ) : (
+                      <p>No community results found.</p>
                     )}
                   </TabsContent>
                 </Tabs>
