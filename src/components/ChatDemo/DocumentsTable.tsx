@@ -20,6 +20,8 @@ import {
 import { useToast } from '@/components/ui/use-toast';
 import { IngestionStatus, KGExtractionStatus } from '@/types';
 
+import ExtractButtonContainer from './ExtractContainer';
+
 interface DocumentsTableProps {
   documents: DocumentResponse[];
   loading: boolean;
@@ -83,7 +85,7 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
       copyable: true,
     },
     { key: 'id', label: 'Document ID', truncate: true, copyable: true },
-    { key: 'user_id', label: 'User ID', truncate: true, copyable: true },
+    { key: 'owner_id', label: 'Owner ID', truncate: true, copyable: true },
     {
       key: 'collection_ids',
       label: 'Collection IDs',
@@ -121,13 +123,13 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
     },
     {
       key: 'extraction_status',
-      label: 'KG Extraction',
+      label: 'Extraction',
       filterable: true,
       filterType: 'multiselect',
       filterOptions: ['success', 'failed', 'pending'],
       renderCell: (doc) => {
         let variant: 'success' | 'destructive' | 'pending' = 'pending';
-        switch (doc.kg_extraction_status) {
+        switch (doc.extraction_status) {
           case KGExtractionStatus.SUCCESS:
             variant = 'success';
             break;
@@ -138,11 +140,10 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
             variant = 'pending';
             break;
         }
-        return <Badge variant={variant}>{doc.kg_extraction_status}</Badge>;
+        return <Badge variant={variant}>{doc.extraction_status}</Badge>;
       },
-      selected: false,
     },
-    { key: 'type', label: 'Type', selected: false },
+    { key: 'document_type', label: 'Type', selected: false },
     {
       key: 'metadata',
       label: 'Metadata',
@@ -168,11 +169,13 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
   const renderActions = (doc: DocumentResponse) =>
     hideActions ? null : (
       <div className="flex space-x-1 justify-end">
+        {/* TODO: Add this back once the API supports it
         <UpdateButtonContainer
           id={doc.id}
           onUpdateSuccess={() => onRefresh()}
           showToast={toast}
-        />
+        /> */}
+        <ExtractButtonContainer id={doc.id} showToast={toast} />
         <DownloadFileContainer
           id={doc.id}
           fileName={doc.title ? doc.title : ''}
@@ -183,7 +186,7 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
             setSelectedDocumentId(doc.id);
             setIsDocumentInfoDialogOpen(true);
           }}
-          color="filled"
+          color="text_gray"
           disabled={
             doc.ingestion_status !== IngestionStatus.SUCCESS &&
             doc.ingestion_status !== IngestionStatus.ENRICHED

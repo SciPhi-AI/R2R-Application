@@ -1,13 +1,18 @@
-import { Loader, FileSearch2 } from 'lucide-react';
+import { Loader, FileSearch2, Settings } from 'lucide-react';
 import { useRouter } from 'next/router';
-import { DocumentResponse, User } from 'r2r-js/dist/types';
+import {
+  CollectionResponse,
+  CommunityResponse,
+  DocumentResponse,
+  EntityResponse,
+  RelationshipResponse,
+  User,
+} from 'r2r-js/dist/types';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 
-import { DeleteButton } from '@/components/ChatDemo/deleteButton';
 import { RemoveButton } from '@/components/ChatDemo/remove';
 import Table, { Column } from '@/components/ChatDemo/Table';
-import AssignDocumentToCollectionDialog from '@/components/ChatDemo/utils/AssignDocumentToCollectionDialog';
-import AssignUserToCollectionDialog from '@/components/ChatDemo/utils/AssignUserToCollectionDialog';
+import CollectionDialog from '@/components/ChatDemo/utils/collectionDialog';
 import DocumentInfoDialog from '@/components/ChatDemo/utils/documentDialogInfo';
 import Layout from '@/components/Layout';
 import { Badge } from '@/components/ui/badge';
@@ -23,13 +28,27 @@ const ITEMS_PER_PAGE = 10;
 
 const CollectionIdPage: React.FC = () => {
   const router = useRouter();
-  const { getClient, pipeline } = useUserContext();
+  const { getClient } = useUserContext();
+
+  const [collection, setCollection] = useState<CollectionResponse | null>(null);
 
   const [documents, setDocuments] = useState<DocumentResponse[]>([]);
   const [totalDocumentEntries, setTotalDocumentEntries] = useState<number>(0);
 
   const [users, setUsers] = useState<User[]>([]);
   const [totalUserEntries, setTotalUserEntries] = useState<number>(0);
+
+  const [entities, setEntities] = useState<EntityResponse[]>([]);
+  const [totalEntityEntries, setTotalEntityEntries] = useState<number>(0);
+
+  const [relationships, setRelationships] = useState<RelationshipResponse[]>(
+    []
+  );
+  const [totalRelationshipEntries, setTotalRelationshipEntries] =
+    useState<number>(0);
+
+  const [communities, setCommunities] = useState<CommunityResponse[]>([]);
+  const [totalCommunityEntries, setTotalCommunityEntries] = useState<number>(0);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -39,9 +58,7 @@ const CollectionIdPage: React.FC = () => {
   const [selectedDocumentId, setSelectedDocumentId] = useState('');
   const [isDocumentInfoDialogOpen, setIsDocumentInfoDialogOpen] =
     useState(false);
-  const [isAssignDocumentDialogOpen, setIsAssignDocumentDialogOpen] =
-    useState(false);
-  const [isAssignUserDialogOpen, setIsAssignUserDialogOpen] = useState(false);
+  const [isCollectionDialogOpen, setIsCollectionDialogOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [activeTab, setActiveTab] = useState('documents');
   const itemsPerPage = ITEMS_PER_PAGE;
@@ -60,9 +77,37 @@ const CollectionIdPage: React.FC = () => {
     currentCollectionId
   );
 
+  const fetchCollection = useCallback(async () => {
+    if (!currentCollectionId) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const client = await getClient();
+      if (!client) {
+        throw new Error('Failed to get authenticated client');
+      }
+
+      const collection = await client.collections.retrieve({
+        id: currentCollectionId,
+      });
+
+      setCollection(collection.results);
+    } catch (error) {
+      console.error('Error fetching collection:', error);
+    }
+  }, [currentCollectionId, getClient]);
+
+  useEffect(() => {
+    fetchCollection();
+  }, [fetchCollection]);
+
   /*** Fetching Documents in Batches ***/
   const fetchAllDocuments = useCallback(async () => {
-    if (!currentCollectionId) return;
+    if (!currentCollectionId) {
+      return;
+    }
 
     try {
       setLoading(true);
@@ -133,7 +178,9 @@ const CollectionIdPage: React.FC = () => {
 
   /*** Fetching Users in Batches ***/
   const fetchAllUsers = useCallback(async () => {
-    if (!currentCollectionId) return;
+    if (!currentCollectionId) {
+      return;
+    }
 
     try {
       setLoading(true);
@@ -198,6 +245,213 @@ const CollectionIdPage: React.FC = () => {
     fetchAllUsers();
   }, [fetchAllUsers]);
 
+  /*** Fetching Entities in Batches ***/
+  const fetchAllEntities = useCallback(async () => {
+    if (!currentCollectionId) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const client = await getClient();
+      if (!client) {
+        throw new Error('Failed to get authenticated client');
+      }
+
+      let offset = 0;
+      let allEntities: EntityResponse[] = [];
+      let totalEntityEntries = 0;
+
+      // Fetch first batch
+      const firstBatch = await client.graphs.listEntities({
+        collectionId: currentCollectionId,
+        offset: offset,
+        limit: PAGE_SIZE,
+      });
+
+      if (firstBatch.results.length > 0) {
+        totalEntityEntries = firstBatch.total_entries;
+        setTotalUserEntries(totalEntityEntries);
+
+        allEntities = firstBatch.results;
+        setEntities(allEntities);
+
+        // Set loading to false after the first batch is fetched
+        setLoading(false);
+      } else {
+        setLoading(false);
+        return;
+      }
+
+      offset += PAGE_SIZE;
+
+      // Continue fetching in the background
+      while (offset < totalUserEntries) {
+        const batch = await client.graphs.listEntities({
+          collectionId: currentCollectionId,
+          offset: offset,
+          limit: PAGE_SIZE,
+        });
+
+        if (batch.results.length === 0) {
+          break;
+        }
+
+        allEntities = allEntities.concat(batch.results);
+        setEntities([...allEntities]);
+
+        offset += PAGE_SIZE;
+      }
+
+      setEntities(allEntities);
+    } catch (error) {
+      console.error('Error fetching entities:', error);
+      setLoading(false);
+    }
+  }, [currentCollectionId, getClient]);
+
+  useEffect(() => {
+    fetchAllEntities();
+  }, [fetchAllEntities]);
+
+  /*** Fetching Entities in Batches ***/
+  const fetchAllRelationships = useCallback(async () => {
+    if (!currentCollectionId) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const client = await getClient();
+      if (!client) {
+        throw new Error('Failed to get authenticated client');
+      }
+
+      let offset = 0;
+      let allRelationships: RelationshipResponse[] = [];
+      let totalRelationshipEntries = 0;
+
+      // Fetch first batch
+      const firstBatch = await client.graphs.listRelationships({
+        collectionId: currentCollectionId,
+        offset: offset,
+        limit: PAGE_SIZE,
+      });
+
+      if (firstBatch.results.length > 0) {
+        totalRelationshipEntries = firstBatch.total_entries;
+        setTotalRelationshipEntries(totalRelationshipEntries);
+
+        allRelationships = firstBatch.results;
+        setRelationships(allRelationships);
+
+        // Set loading to false after the first batch is fetched
+        setLoading(false);
+      } else {
+        setLoading(false);
+        return;
+      }
+
+      offset += PAGE_SIZE;
+
+      // Continue fetching in the background
+      while (offset < totalUserEntries) {
+        const batch = await client.graphs.listRelationships({
+          collectionId: currentCollectionId,
+          offset: offset,
+          limit: PAGE_SIZE,
+        });
+
+        if (batch.results.length === 0) {
+          break;
+        }
+
+        allRelationships = allRelationships.concat(batch.results);
+        setRelationships([...allRelationships]);
+
+        offset += PAGE_SIZE;
+      }
+
+      setRelationships(allRelationships);
+    } catch (error) {
+      console.error('Error fetching entities:', error);
+      setLoading(false);
+    }
+  }, [currentCollectionId, getClient]);
+
+  useEffect(() => {
+    fetchAllRelationships();
+  }, [fetchAllRelationships]);
+
+  /*** Fetching Entities in Batches ***/
+  const fetchAllCommunities = useCallback(async () => {
+    if (!currentCollectionId) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const client = await getClient();
+      if (!client) {
+        throw new Error('Failed to get authenticated client');
+      }
+
+      let offset = 0;
+      let allCommunities: CommunityResponse[] = [];
+      let totalCommunityEntries = 0;
+
+      // Fetch first batch
+      const firstBatch = await client.graphs.listCommunities({
+        collectionId: currentCollectionId,
+        offset: offset,
+        limit: PAGE_SIZE,
+      });
+
+      if (firstBatch.results.length > 0) {
+        totalCommunityEntries = firstBatch.total_entries;
+        setTotalCommunityEntries(totalCommunityEntries);
+
+        allCommunities = firstBatch.results;
+        setCommunities(allCommunities);
+
+        // Set loading to false after the first batch is fetched
+        setLoading(false);
+      } else {
+        setLoading(false);
+        return;
+      }
+
+      offset += PAGE_SIZE;
+
+      // Continue fetching in the background
+      while (offset < totalUserEntries) {
+        const batch = await client.graphs.listCommunities({
+          collectionId: currentCollectionId,
+          offset: offset,
+          limit: PAGE_SIZE,
+        });
+
+        if (batch.results.length === 0) {
+          break;
+        }
+
+        allCommunities = allCommunities.concat(batch.results);
+        setCommunities([...allCommunities]);
+
+        offset += PAGE_SIZE;
+      }
+
+      setCommunities(allCommunities);
+    } catch (error) {
+      console.error('Error fetching entities:', error);
+      setLoading(false);
+    }
+  }, [currentCollectionId, getClient]);
+
+  useEffect(() => {
+    fetchAllCommunities();
+  }, [fetchAllCommunities]);
+
   const refetchData = useCallback(async () => {
     setLoading(true);
     await Promise.all([fetchAllDocuments(), fetchAllUsers()]);
@@ -205,9 +459,11 @@ const CollectionIdPage: React.FC = () => {
   }, [fetchAllDocuments, fetchAllUsers]);
 
   useEffect(() => {
-    if (!router.isReady) return;
+    if (!router.isReady) {
+      return;
+    }
 
-    const id = router.query.id;
+    const { id } = router.query;
     if (typeof id === 'string') {
       refetchData();
     }
@@ -219,19 +475,17 @@ const CollectionIdPage: React.FC = () => {
 
     // Apply filters
     Object.entries(filters).forEach(([key, value]) => {
-      if (value && value.length > 0) {
-        if (Array.isArray(value)) {
-          filtered = filtered.filter((doc) => {
-            switch (key) {
-              case 'ingestion_status':
-                return value.includes(doc.ingestion_status);
-              case 'extraction_status':
-                return value.includes(doc.kg_extraction_status);
-              default:
-                return true;
-            }
-          });
-        }
+      if (value && value.length > 0 && Array.isArray(value)) {
+        filtered = filtered.filter((doc) => {
+          switch (key) {
+            case 'ingestion_status':
+              return value.includes(doc.ingestion_status);
+            case 'extraction_status':
+              return value.includes(doc.extraction_status);
+            default:
+              return true;
+          }
+        });
       }
     });
 
@@ -285,39 +539,22 @@ const CollectionIdPage: React.FC = () => {
 
   const renderActionButtons = () => {
     return (
-      <div className="flex justify-end items-center space-x-2 mb-2">
-        <DeleteButton
-          collectionId={currentCollectionId}
-          isCollection={true}
-          onSuccess={() => router.push('/collections')}
-          showToast={toast}
-          selectedDocumentIds={[]}
-          onDelete={() => {}}
-        />
-        {activeTab === 'documents' && (
+      <div className="flex justify-between items-center mb-2">
+        <h1 className="text-2xl font-bold text-white">{collection?.name}</h1>
+        <div className="flex items-center space-x-2">
           <Button
-            onClick={() => setIsAssignDocumentDialogOpen(true)}
-            type="button"
+            onClick={() => {
+              setIsCollectionDialogOpen(true);
+            }}
+            className={`pl-4 pr-4 py-2 px-4`}
             color="filled"
             shape="rounded"
-            className="pl-2 pr-2 text-white py-2 px-4"
             style={{ zIndex: 20 }}
           >
-            Manage Files
+            <Settings className="mr-2 h-4 w-4 mt-1" />
+            Manage
           </Button>
-        )}
-        {activeTab === 'users' && (
-          <Button
-            onClick={() => setIsAssignUserDialogOpen(true)}
-            type="button"
-            color="filled"
-            shape="rounded"
-            className="pl-2 pr-2 text-white py-2 px-4"
-            style={{ zIndex: 20 }}
-          >
-            Manage Users
-          </Button>
-        )}
+        </div>
       </div>
     );
   };
@@ -336,17 +573,13 @@ const CollectionIdPage: React.FC = () => {
           setSelectedDocumentId(doc.id);
           setIsDocumentInfoDialogOpen(true);
         }}
-        color={
-          doc.ingestion_status === IngestionStatus.SUCCESS ||
-          doc.ingestion_status === IngestionStatus.ENRICHED
-            ? 'filled'
-            : 'disabled'
-        }
+        color="text_gray"
         shape="slim"
         disabled={
           doc.ingestion_status !== IngestionStatus.SUCCESS &&
           doc.ingestion_status !== IngestionStatus.ENRICHED
         }
+        tooltip="View Document Info"
       >
         <FileSearch2 className="h-6 w-6" />
       </Button>
@@ -385,21 +618,21 @@ const CollectionIdPage: React.FC = () => {
     },
     {
       key: 'extraction_status',
-      label: 'KG Extraction',
+      label: 'Extraction',
       filterable: true,
       filterType: 'multiselect',
       filterOptions: ['success', 'failed', 'pending'],
       renderCell: (doc) => (
         <Badge
           variant={
-            doc.kg_extraction_status === KGExtractionStatus.SUCCESS
+            doc.extraction_status === KGExtractionStatus.SUCCESS
               ? 'success'
-              : doc.kg_extraction_status === KGExtractionStatus.FAILED
+              : doc.extraction_status === KGExtractionStatus.FAILED
                 ? 'destructive'
                 : 'pending'
           }
         >
-          {doc.kg_extraction_status}
+          {doc.extraction_status}
         </Badge>
       ),
       selected: false,
@@ -409,6 +642,28 @@ const CollectionIdPage: React.FC = () => {
   const userColumns: Column<User>[] = [
     { key: 'id', label: 'User ID', truncate: true, copyable: true },
     { key: 'email', label: 'Email', truncate: true, copyable: true },
+  ];
+
+  const entityColumns: Column<EntityResponse>[] = [
+    { key: 'id', label: 'Entity ID', truncate: true, copyable: true },
+    { key: 'name', label: 'Name' },
+    { key: 'category', label: 'Type' },
+  ];
+
+  const relationshipColumns: Column<RelationshipResponse>[] = [
+    { key: 'id', label: 'Relationship ID', truncate: true, copyable: true },
+    { key: 'subject', label: 'Subject' },
+    { key: 'predicate', label: 'Predicate' },
+    { key: 'object', label: 'Object' },
+    { key: 'subject_id', label: 'Subject ID', truncate: true, copyable: true },
+    { key: 'object_id', label: 'Object ID', truncate: true, copyable: true },
+  ];
+
+  const communityColumns: Column<CommunityResponse>[] = [
+    { key: 'id', label: 'Community ID', truncate: true, copyable: true },
+    { key: 'name', label: 'Name' },
+    { key: 'summary', label: 'Summary' },
+    { key: 'findings', label: 'Findings' },
   ];
 
   const renderUserActions = (user: User) => (
@@ -423,9 +678,17 @@ const CollectionIdPage: React.FC = () => {
     </div>
   );
 
-  const handleAssignSuccess = () => {
-    refetchData();
-  };
+  const renderEntityActions = (entity: EntityResponse) => (
+    <div className="flex space-x-1 justify-end"></div>
+  );
+
+  const renderRelationshipActions = (relationship: RelationshipResponse) => (
+    <div className="flex space-x-1 justify-end"></div>
+  );
+
+  const renderCommunityActions = (community: CommunityResponse) => (
+    <div className="flex space-x-1 justify-end"></div>
+  );
 
   if (loading) {
     return (
@@ -461,12 +724,21 @@ const CollectionIdPage: React.FC = () => {
           onValueChange={setActiveTab}
           className="flex flex-col flex-1 mt-4 overflow-hidden"
         >
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="documents" className="flex items-center">
               Documents
             </TabsTrigger>
             <TabsTrigger value="users" className="flex items-center">
               Users
+            </TabsTrigger>
+            <TabsTrigger value="entities" className="flex items-center">
+              Entities
+            </TabsTrigger>
+            <TabsTrigger value="relationships" className="flex items-center">
+              Relationships
+            </TabsTrigger>
+            <TabsTrigger value="communities" className="flex items-center">
+              Communities
             </TabsTrigger>
           </TabsList>
           <TabsContent value="documents" className="flex-1 overflow-auto">
@@ -519,17 +791,61 @@ const CollectionIdPage: React.FC = () => {
               showPagination={true}
             />
           </TabsContent>
+          <TabsContent value="entities" className="flex-1 overflow-auto">
+            <Table
+              data={entities}
+              columns={entityColumns}
+              itemsPerPage={itemsPerPage}
+              onSelectAll={() => {}}
+              onSelectItem={() => {}}
+              selectedItems={[]}
+              actions={renderEntityActions}
+              initialSort={{ key: 'id', order: 'asc' }}
+              initialFilters={{}}
+              currentPage={currentPage}
+              totalEntries={totalEntityEntries}
+              onPageChange={handlePageChange}
+              loading={loading}
+              showPagination={true}
+            />
+          </TabsContent>
+          <TabsContent value="relationships" className="flex-1 overflow-auto">
+            <Table
+              data={relationships}
+              columns={relationshipColumns}
+              itemsPerPage={itemsPerPage}
+              onSelectAll={() => {}}
+              onSelectItem={() => {}}
+              selectedItems={[]}
+              actions={renderRelationshipActions}
+              initialSort={{ key: 'id', order: 'asc' }}
+              initialFilters={{}}
+              currentPage={currentPage}
+              totalEntries={totalRelationshipEntries}
+              onPageChange={handlePageChange}
+              loading={loading}
+              showPagination={true}
+            />
+          </TabsContent>
+          <TabsContent value="communities" className="flex-1 overflow-auto">
+            <Table
+              data={communities}
+              columns={communityColumns}
+              itemsPerPage={itemsPerPage}
+              onSelectAll={() => {}}
+              onSelectItem={() => {}}
+              selectedItems={[]}
+              actions={renderCommunityActions}
+              initialSort={{ key: 'id', order: 'asc' }}
+              initialFilters={{}}
+              currentPage={currentPage}
+              totalEntries={totalCommunityEntries}
+              onPageChange={handlePageChange}
+              loading={loading}
+              showPagination={true}
+            />
+          </TabsContent>
         </Tabs>
-        {/* <div className="-mt-12 flex justify-end">
-          <DeleteButton
-            collectionId={currentCollectionId}
-            isCollection={true}
-            onSuccess={() => router.push('/collections')}
-            showToast={toast}
-            selectedDocumentIds={[]}
-            onDelete={() => {}}
-          />
-        </div> */}
       </main>
       <DocumentInfoDialog
         id={selectedDocumentId}
@@ -539,17 +855,10 @@ const CollectionIdPage: React.FC = () => {
           setSelectedDocumentId('');
         }}
       />
-      <AssignDocumentToCollectionDialog
-        open={isAssignDocumentDialogOpen}
-        onClose={() => setIsAssignDocumentDialogOpen(false)}
-        collection_id={currentCollectionId}
-        onAssignSuccess={handleAssignSuccess}
-      />
-      <AssignUserToCollectionDialog
-        open={isAssignUserDialogOpen}
-        onClose={() => setIsAssignUserDialogOpen(false)}
-        collection_id={currentCollectionId}
-        onAssignSuccess={handleAssignSuccess}
+      <CollectionDialog
+        id={currentCollectionId}
+        open={isCollectionDialogOpen}
+        onClose={() => setIsCollectionDialogOpen(false)}
       />
     </Layout>
   );

@@ -27,6 +27,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import Pagination from '@/components/ui/pagination';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useUserContext } from '@/context/UserContext';
 import usePagination from '@/hooks/usePagination';
 import { DocumentInfoDialogProps } from '@/types';
@@ -68,6 +69,7 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
 
   const [pdfPreviewOpen, setPdfPreviewOpen] = useState(false);
   const [initialPage, setInitialPage] = useState<number>(1);
+  const [activeTab, setActiveTab] = useState('chunks');
 
   const fetchDocumentResponse = useCallback(
     async (client: any, documentId: string) => {
@@ -306,11 +308,14 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
                         },
                         {
                           label: 'KG Extraction',
-                          value: documentOverview.kg_extraction_status,
+                          value: documentOverview.extraction_status,
                         },
                       ]}
                     />
-                    <InfoRow label="User ID" value={documentOverview.user_id} />
+                    <InfoRow
+                      label="Owner ID"
+                      value={documentOverview.owner_id}
+                    />
                     <ExpandableInfoRow
                       label="Collection IDs"
                       values={documentOverview.collection_ids}
@@ -344,20 +349,74 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
                       </Button>
                     </div>
                   )}
+                <Tabs
+                  value={activeTab}
+                  onValueChange={setActiveTab}
+                  className="flex flex-col flex-1 mt-4 overflow-hidden"
+                >
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="chunks" className="flex items-center">
+                      Chunks
+                    </TabsTrigger>
+                    <TabsTrigger value="entities" className="flex items-center">
+                      Entities
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="relationships"
+                      className="flex items-center"
+                    >
+                      Relationships
+                    </TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="chunks" className="flex-1 overflow-auto">
+                    <ExpandableDocumentChunks
+                      chunks={currentChunks}
+                      onChunkDeleted={refreshChunks}
+                    />
+                    {chunksLoading && (
+                      <Loader className="mx-auto mt-4 animate-spin" size={32} />
+                    )}
+                    <div className="mb-4" />
+                    <Pagination
+                      currentPage={chunksCurrentPage}
+                      totalPages={chunksTotalPages}
+                      onPageChange={goToChunksPage}
+                    />
+                  </TabsContent>
+                  <TabsContent
+                    value="entities"
+                    className="flex-1 overflow-auto"
+                  >
+                    <ExpandableDocumentEntities entities={currentEntities} />
+                    {entitiesLoading && (
+                      <Loader className="mx-auto mt-4 animate-spin" size={32} />
+                    )}
+                    <div className="mb-4" />
+                    <Pagination
+                      currentPage={entitiesCurrentPage}
+                      totalPages={entitiesTotalPages}
+                      onPageChange={goToEntitiesPage}
+                    />
+                  </TabsContent>
 
-                {/* Document Chunks Section */}
-                <ExpandableDocumentChunks
-                  chunks={currentChunks}
-                  onChunkDeleted={refreshChunks}
-                />
-                {chunksLoading && (
-                  <Loader className="mx-auto mt-4 animate-spin" size={32} />
-                )}
-                <Pagination
-                  currentPage={chunksCurrentPage}
-                  totalPages={chunksTotalPages}
-                  onPageChange={goToChunksPage}
-                />
+                  <TabsContent
+                    value="relationships"
+                    className="flex-1 overflow-auto"
+                  >
+                    <ExpandableDocumentRelationships
+                      relationships={currentRelationships}
+                    />
+                    {relationshipsLoading && (
+                      <Loader className="mx-auto mt-4 animate-spin" size={32} />
+                    )}
+                    <div className="mb-4" />
+                    <Pagination
+                      currentPage={relationshipsCurrentPage}
+                      totalPages={relationshipsTotalPages}
+                      onPageChange={goToRelationshipsPage}
+                    />
+                  </TabsContent>
+                </Tabs>
               </>
             )}
           </div>
@@ -378,25 +437,38 @@ const InfoRow: React.FC<{
   label: string;
   value?: any;
   values?: { label?: string; value: any }[];
-}> = ({ label, value, values }) => (
-  <div className="flex items-center justify-between py-2 border-b border-gray-700/50">
-    <span className="font-medium text-gray-200">{label}:</span>
-    <span className="text-gray-300 flex items-center space-x-4">
-      {value !== undefined
-        ? formatValue(value)
-        : values
-          ? values.map((item, index) => (
-              <span key={index} className="flex items-center">
-                {item.label && (
-                  <span className="mr-1 text-gray-400">{item.label}:</span>
-                )}
-                <span>{formatValue(item.value)}</span>
-              </span>
-            ))
-          : 'N/A'}
-    </span>
-  </div>
-);
+}> = ({ label, value, values }) => {
+  const isLongContent =
+    value?.length > 100 || values?.some((v) => v.value?.length > 100);
+
+  return (
+    <div
+      className={`py-2 border-b border-gray-700/50 ${
+        isLongContent
+          ? 'flex flex-col space-y-2'
+          : 'flex items-center justify-between'
+      }`}
+    >
+      <span className="font-medium text-gray-200">{label}:</span>
+      <span
+        className={`text-gray-300 ${isLongContent ? 'mt-1' : 'flex items-center space-x-4'}`}
+      >
+        {value !== undefined
+          ? formatValue(value)
+          : values
+            ? values.map((item, index) => (
+                <span key={index} className="flex items-center">
+                  {item.label && (
+                    <span className="mr-1 text-gray-400">{item.label}:</span>
+                  )}
+                  <span>{formatValue(item.value)}</span>
+                </span>
+              ))
+            : 'N/A'}
+      </span>
+    </div>
+  );
+};
 
 // ExpandableInfoRow Component
 const ExpandableInfoRow: React.FC<{
@@ -445,8 +517,7 @@ const ExpandableDocumentChunks: React.FC<{
 
   return (
     <div className="mt-4">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-xl font-bold">Document Chunks</h3>
+      <div className="flex justify-end items-center mb-4">
         <button
           onClick={toggleAllExpanded}
           className="text-indigo-500 hover:text-indigo-600 transition-colors"
@@ -706,6 +777,263 @@ const ExpandableChunk: React.FC<{
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+    </div>
+  );
+};
+
+// ExpandableDocumentEntities Component
+const ExpandableDocumentEntities: React.FC<{
+  entities: EntityResponse[] | undefined;
+  onChunkDeleted?: () => void;
+}> = ({ entities }) => {
+  const [allExpanded, setAllExpanded] = useState(false);
+
+  const toggleAllExpanded = () => {
+    setAllExpanded(!allExpanded);
+  };
+
+  if (!entities || entities.length === 0) {
+    return <div>No entities available.</div>;
+  }
+
+  return (
+    <div className="mt-4">
+      <div className="flex justify-end items-center mb-4">
+        <button
+          onClick={toggleAllExpanded}
+          className="text-indigo-500 hover:text-indigo-600 transition-colors"
+        >
+          {allExpanded ? 'Collapse All' : 'Expand All'}
+        </button>
+      </div>
+      <div className="space-y-4">
+        {entities.map((entity, index) => (
+          <ExpandableEntity
+            key={index}
+            entity={entity}
+            index={index}
+            isExpanded={allExpanded}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// ExpandableEntity Component
+const ExpandableEntity: React.FC<{
+  entity: EntityResponse;
+  index: number;
+  isExpanded: boolean;
+}> = ({ entity, index, isExpanded }) => {
+  const [localExpanded, setLocalExpanded] = useState(false);
+  const [metadataExpanded, setMetadataExpanded] = useState(false);
+
+  useEffect(() => {
+    setLocalExpanded(isExpanded);
+  }, [isExpanded]);
+
+  const toggleExpanded = () => {
+    setLocalExpanded(!localExpanded);
+  };
+
+  const toggleMetadata = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setMetadataExpanded(!metadataExpanded);
+  };
+
+  return (
+    <div className="border border-gray-700 rounded-lg mb-4 bg-zinc-800/50 transition-colors">
+      <div
+        className="flex items-center justify-between p-4 cursor-pointer"
+        onClick={toggleExpanded}
+      >
+        <span className="font-medium text-lg">{entity.name}</span>
+        <div className="flex items-center space-x-2">
+          <button className="text-gray-300 hover:text-white transition-colors">
+            {localExpanded ? (
+              <ChevronUp size={20} />
+            ) : (
+              <ChevronDown size={20} />
+            )}
+          </button>
+        </div>
+      </div>
+      {localExpanded && (
+        <div className="px-6 pb-4 text-gray-300 space-y-6">
+          <div className="grid grid-cols-2 gap-4">
+            <InfoRow label="Entity ID" value={entity.id} />
+            <InfoRow label="Category" value={entity.category} />
+          </div>
+          <ExpandableInfoRow label="Chunk IDs" values={entity.chunk_ids} />
+
+          <div className="space-y-2 bg-zinc-800 p-4 rounded-lg">
+            <div className="flex items-center justify-between mb-2">
+              <span className="font-medium text-white">Content:</span>
+            </div>
+            <p className="pl-4 pr-2 py-2 text-gray-300 leading-relaxed">
+              {entity.description}
+            </p>
+          </div>
+
+          <div className="bg-zinc-800 rounded-lg">
+            <div
+              className="flex items-center justify-between p-4 cursor-pointer"
+              onClick={toggleMetadata}
+            >
+              <span className="font-medium text-white">Entity Metadata</span>
+              <button className="text-gray-300 hover:text-white transition-colors">
+                {metadataExpanded ? (
+                  <ChevronUp size={16} />
+                ) : (
+                  <ChevronDown size={16} />
+                )}
+                {metadataExpanded && (
+                  <div className="px-4 pb-4 space-y-2">
+                    {Object.entries(entity.metadata || {}).map(
+                      ([key, value]) => (
+                        <InfoRow key={key} label={key} value={value} />
+                      )
+                    )}
+                  </div>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ExpandableDocumentRelationships Component
+const ExpandableDocumentRelationships: React.FC<{
+  relationships: RelationshipResponse[] | undefined;
+  onChunkDeleted?: () => void;
+}> = ({ relationships }) => {
+  const [allExpanded, setAllExpanded] = useState(false);
+
+  const toggleAllExpanded = () => {
+    setAllExpanded(!allExpanded);
+  };
+
+  if (!relationships || relationships.length === 0) {
+    return <div>No relationships available.</div>;
+  }
+
+  return (
+    <div className="mt-4">
+      <div className="flex justify-end items-center mb-4">
+        <button
+          onClick={toggleAllExpanded}
+          className="text-indigo-500 hover:text-indigo-600 transition-colors"
+        >
+          {allExpanded ? 'Collapse All' : 'Expand All'}
+        </button>
+      </div>
+      <div className="space-y-4">
+        {relationships.map((relationship, index) => (
+          <ExpandableRelationship
+            key={index}
+            relationship={relationship}
+            index={index}
+            isExpanded={allExpanded}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// ExpandableEntity Component
+const ExpandableRelationship: React.FC<{
+  relationship: RelationshipResponse;
+  index: number;
+  isExpanded: boolean;
+}> = ({ relationship, index, isExpanded }) => {
+  const [localExpanded, setLocalExpanded] = useState(false);
+  const [metadataExpanded, setMetadataExpanded] = useState(false);
+
+  useEffect(() => {
+    setLocalExpanded(isExpanded);
+  }, [isExpanded]);
+
+  const toggleExpanded = () => {
+    setLocalExpanded(!localExpanded);
+  };
+
+  const toggleMetadata = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setMetadataExpanded(!metadataExpanded);
+  };
+
+  return (
+    <div className="border border-gray-700 rounded-lg mb-4 bg-zinc-800/50 transition-colors">
+      <div
+        className="flex items-center justify-between p-4 cursor-pointer"
+        onClick={toggleExpanded}
+      >
+        <span className="font-medium text-lg">
+          {relationship.subject} {relationship.predicate} {relationship.object}
+        </span>
+        <div className="flex items-center space-x-2">
+          <button className="text-gray-300 hover:text-white transition-colors">
+            {localExpanded ? (
+              <ChevronUp size={20} />
+            ) : (
+              <ChevronDown size={20} />
+            )}
+          </button>
+        </div>
+      </div>
+      {localExpanded && (
+        <div className="px-6 pb-4 text-gray-300 space-y-6">
+          <div className="grid grid-cols-2 gap-4">
+            <InfoRow label="Relationship ID" value={relationship.id} />
+            <InfoRow label="Relationship Weight" value={relationship.weight} />
+            <InfoRow label="Subject ID" value={relationship.subject_id} />
+            <InfoRow label="Object ID" value={relationship.object_id} />
+          </div>
+          <ExpandableInfoRow
+            label="Chunk IDs"
+            values={relationship.chunk_ids}
+          />
+
+          <div className="space-y-2 bg-zinc-800 p-4 rounded-lg">
+            <div className="flex items-center justify-between mb-2">
+              <span className="font-medium text-white">Content:</span>
+            </div>
+            <p className="pl-4 pr-2 py-2 text-gray-300 leading-relaxed">
+              {relationship.description}
+            </p>
+          </div>
+
+          <div className="bg-zinc-800 rounded-lg">
+            <div
+              className="flex items-center justify-between p-4 cursor-pointer"
+              onClick={toggleMetadata}
+            >
+              <span className="font-medium text-white">Entity Metadata</span>
+              <button className="text-gray-300 hover:text-white transition-colors">
+                {metadataExpanded ? (
+                  <ChevronUp size={16} />
+                ) : (
+                  <ChevronDown size={16} />
+                )}
+                {metadataExpanded && (
+                  <div className="px-4 pb-4 space-y-2">
+                    {Object.entries(relationship.metadata || {}).map(
+                      ([key, value]) => (
+                        <InfoRow key={key} label={key} value={value} />
+                      )
+                    )}
+                  </div>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

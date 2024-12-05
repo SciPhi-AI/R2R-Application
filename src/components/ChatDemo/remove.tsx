@@ -84,7 +84,11 @@ export const RemoveButton: React.FC<RemoveButtonProps> = ({
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button color="filled" shape="slim">
+        <Button
+          color="text_gray"
+          shape="slim"
+          tooltip={`Remove ${itemType} from collection`}
+        >
           <Icon className="h-6 w-6" />
         </Button>
       </AlertDialogTrigger>

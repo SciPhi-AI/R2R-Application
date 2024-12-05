@@ -75,9 +75,9 @@ export const DeleteButton: React.FC<ExtendedDeleteButtonProps> = ({
         onSuccess();
         router.push('/collections');
       } else if (isGraph && graphId) {
-        await client.graphs.reset({
-          collectionId: graphId,
-        });
+        // await client.graphs.reset({
+        //   collectionId: graphId,
+        // });
         showToast({
           variant: 'success',
           title: 'Graph deleted',

@@ -292,7 +292,16 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
         return;
       }
       try {
+        console.log('Refreshing token...');
         const newTokens = await client.users.refreshAccessToken();
+        console.log('Refreshed token:', newTokens);
+
+        console.log(
+          'Setting new tokens in localStorage with access token:',
+          newTokens.results.access_token,
+          ' and refresh token:',
+          newTokens.results.refresh_token
+        );
         localStorage.setItem('accessToken', newTokens.results.access_token);
         localStorage.setItem('refreshToken', newTokens.results.refresh_token);
         client.setTokens(
