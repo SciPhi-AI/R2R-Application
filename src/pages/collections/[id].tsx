@@ -59,7 +59,13 @@ const CollectionIdPage: React.FC = () => {
   const [isDocumentInfoDialogOpen, setIsDocumentInfoDialogOpen] =
     useState(false);
   const [isCollectionDialogOpen, setIsCollectionDialogOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pagination, setPagination] = useState({
+    documents: 1,
+    users: 1,
+    entities: 1,
+    relationships: 1,
+    communities: 1,
+  });
   const [activeTab, setActiveTab] = useState('documents');
   const itemsPerPage = ITEMS_PER_PAGE;
 
@@ -271,7 +277,7 @@ const CollectionIdPage: React.FC = () => {
 
       if (firstBatch.results.length > 0) {
         totalEntityEntries = firstBatch.total_entries;
-        setTotalUserEntries(totalEntityEntries);
+        setTotalEntityEntries(totalEntityEntries);
 
         allEntities = firstBatch.results;
         setEntities(allEntities);
@@ -286,7 +292,7 @@ const CollectionIdPage: React.FC = () => {
       offset += PAGE_SIZE;
 
       // Continue fetching in the background
-      while (offset < totalUserEntries) {
+      while (offset < totalEntityEntries) {
         const batch = await client.graphs.listEntities({
           collectionId: currentCollectionId,
           offset: offset,
@@ -355,7 +361,7 @@ const CollectionIdPage: React.FC = () => {
       offset += PAGE_SIZE;
 
       // Continue fetching in the background
-      while (offset < totalUserEntries) {
+      while (offset < totalRelationshipEntries) {
         const batch = await client.graphs.listRelationships({
           collectionId: currentCollectionId,
           offset: offset,
@@ -424,7 +430,7 @@ const CollectionIdPage: React.FC = () => {
       offset += PAGE_SIZE;
 
       // Continue fetching in the background
-      while (offset < totalUserEntries) {
+      while (offset < totalCommunityEntries) {
         const batch = await client.graphs.listCommunities({
           collectionId: currentCollectionId,
           offset: offset,
@@ -523,18 +529,18 @@ const CollectionIdPage: React.FC = () => {
     });
   }, []);
 
-  const handlePageChange = useCallback((page: number) => {
-    setCurrentPage(page);
-  }, []);
+  const handlePageChange = (page: number) => {
+    setPagination((prev) => ({ ...prev, [activeTab]: page }));
+  };
 
   const handleFiltersChange = (newFilters: Record<string, any>) => {
     setFilters(newFilters);
-    setCurrentPage(1); // Reset to first page when filters change
+    setPagination((prev) => ({ ...prev, [activeTab]: 1 }));
   };
 
   const handleSearchQueryChange = (query: string) => {
     setSearchQuery(query);
-    setCurrentPage(1); // Reset to first page when search query changes
+    setPagination((prev) => ({ ...prev, [activeTab]: 1 }));
   };
 
   const renderActionButtons = () => {
@@ -679,15 +685,39 @@ const CollectionIdPage: React.FC = () => {
   );
 
   const renderEntityActions = (entity: EntityResponse) => (
-    <div className="flex space-x-1 justify-end"></div>
+    <div className="flex space-x-1 justify-end">
+      <RemoveButton
+        itemId={entity.id?.toString() || ''}
+        collectionId={currentCollectionId}
+        itemType="entity"
+        onSuccess={() => refetchData()}
+        showToast={toast}
+      />
+    </div>
   );
 
   const renderRelationshipActions = (relationship: RelationshipResponse) => (
-    <div className="flex space-x-1 justify-end"></div>
+    <div className="flex space-x-1 justify-end">
+      <RemoveButton
+        itemId={relationship.id?.toString() || ''}
+        collectionId={currentCollectionId}
+        itemType="relationship"
+        onSuccess={() => refetchData()}
+        showToast={toast}
+      />
+    </div>
   );
 
   const renderCommunityActions = (community: CommunityResponse) => (
-    <div className="flex space-x-1 justify-end"></div>
+    <div className="flex space-x-1 justify-end">
+      <RemoveButton
+        itemId={community.id?.toString() || ''}
+        collectionId={currentCollectionId}
+        itemType="community"
+        onSuccess={() => refetchData()}
+        showToast={toast}
+      />
+    </div>
   );
 
   if (loading) {
@@ -764,7 +794,7 @@ const CollectionIdPage: React.FC = () => {
               actions={renderDocumentActions}
               initialSort={{ key: 'title', order: 'asc' }}
               initialFilters={filters}
-              currentPage={currentPage}
+              currentPage={pagination['documents']}
               totalEntries={totalDocumentEntries}
               onPageChange={handlePageChange}
               loading={loading}
@@ -784,7 +814,7 @@ const CollectionIdPage: React.FC = () => {
               actions={renderUserActions}
               initialSort={{ key: 'id', order: 'asc' }}
               initialFilters={{}}
-              currentPage={currentPage}
+              currentPage={pagination['users']}
               totalEntries={totalUserEntries}
               onPageChange={handlePageChange}
               loading={loading}
@@ -802,7 +832,7 @@ const CollectionIdPage: React.FC = () => {
               actions={renderEntityActions}
               initialSort={{ key: 'id', order: 'asc' }}
               initialFilters={{}}
-              currentPage={currentPage}
+              currentPage={pagination['entities']}
               totalEntries={totalEntityEntries}
               onPageChange={handlePageChange}
               loading={loading}
@@ -820,7 +850,7 @@ const CollectionIdPage: React.FC = () => {
               actions={renderRelationshipActions}
               initialSort={{ key: 'id', order: 'asc' }}
               initialFilters={{}}
-              currentPage={currentPage}
+              currentPage={pagination['relationships']}
               totalEntries={totalRelationshipEntries}
               onPageChange={handlePageChange}
               loading={loading}
@@ -838,7 +868,7 @@ const CollectionIdPage: React.FC = () => {
               actions={renderCommunityActions}
               initialSort={{ key: 'id', order: 'asc' }}
               initialFilters={{}}
-              currentPage={currentPage}
+              currentPage={pagination['communities']}
               totalEntries={totalCommunityEntries}
               onPageChange={handlePageChange}
               loading={loading}
