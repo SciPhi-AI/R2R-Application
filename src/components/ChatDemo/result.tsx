@@ -1,7 +1,8 @@
 import {
   GenerationConfig,
   IndexMeasure,
-  KGSearchSettings,
+  SearchSettings,
+  GraphSearchSettings,
   ChunkSearchSettings,
 } from 'r2r-js';
 import React, { FC, useEffect, useState, useRef } from 'react';
@@ -15,10 +16,10 @@ import { DefaultQueries } from './DefaultQueries';
 import MessageBubble from './MessageBubble';
 import { UploadButton } from './upload';
 
-const SEARCH_START_TOKEN = '<search>';
-const SEARCH_END_TOKEN = '</search>';
-const KG_SEARCH_START_TOKEN = '<kg_search>';
-const KG_SEARCH_END_TOKEN = '</kg_search>';
+const CHUNK_SEARCH_STREAM_MARKER = '<chunk_search>';
+const CHUNK_SEARCH_STREAM_END_MARKER = '</chunk_search>';
+const GRAPH_SEARCH_STREAM_MARKER = '<graph_search>';
+const GRAPH_SEARCH_STREAM_END_MARKER = '</graph_search>';
 const LLM_START_TOKEN = '<completion>';
 const LLM_END_TOKEN = '</completion>';
 
@@ -230,25 +231,31 @@ export const Result: FC<{
       const ragGenerationConfig: GenerationConfig = {
         stream: true,
         temperature: ragTemperature ?? undefined,
-        topP: ragTopP ?? undefined,
-        maxTokensToSample: ragMaxTokensToSample ?? undefined,
+        top_p: ragTopP ?? undefined,
+        max_tokens_to_sample: ragMaxTokensToSample ?? undefined,
         model: model && model !== 'null' ? model : undefined,
       };
 
       const vectorSearchSettings: ChunkSearchSettings = {
-        useVectorSearch: switches.vectorSearch?.checked ?? true,
-        useHybridSearch: switches.hybridSearch?.checked ?? false,
-        filters: searchFilters,
-        searchLimit: searchLimit,
-        indexMeasure: IndexMeasure.COSINE_DISTANCE,
-        selectedCollectionIds:
-          selectedCollectionIds.length > 0
-            ? [selectedCollectionIds].flat()
-            : undefined,
+        index_measure: IndexMeasure.COSINE_DISTANCE,
+        enabled: switches.vectorSearch?.checked ?? true,
+        // selectedCollectionIds:
+        //   selectedCollectionIds.length > 0
+        //     ? [selectedCollectionIds].flat()
+        //     : undefined,
       };
 
-      const kgSearchSettings: KGSearchSettings = {
-        useKgSearch: switches.knowledgeGraphSearch?.checked ?? false,
+      const graphSearchSettings: GraphSearchSettings = {
+        enabled: switches.knowledgeGraphSearch?.checked ?? true,
+      };
+
+      const searchSettings: SearchSettings = {
+        use_hybrid_search: switches.hybridSearch?.checked ?? false,
+        use_semantic_search: switches.vectorSearch?.checked ?? true,
+        filters: searchFilters,
+        limit: searchLimit,
+        chunk_settings: vectorSearchSettings,
+        graph_settings: graphSearchSettings,
       };
 
       const streamResponse =
@@ -256,15 +263,13 @@ export const Result: FC<{
           ? await client.retrieval.agent({
               message: newUserMessage,
               ragGenerationConfig: ragGenerationConfig,
-              vectorSearchSettings: vectorSearchSettings,
-              kgSearchSettings: kgSearchSettings,
+              searchSettings: searchSettings,
               conversationId: currentConversationId,
             })
           : await client.retrieval.rag({
               query: query,
               ragGenerationConfig: ragGenerationConfig,
-              vectorSearchSettings: vectorSearchSettings,
-              kgSearchSettings: kgSearchSettings,
+              searchSettings: searchSettings,
             });
 
       const reader = streamResponse.getReader();
@@ -287,22 +292,22 @@ export const Result: FC<{
 
         // Handle search results
         if (
-          buffer.includes(SEARCH_END_TOKEN) ||
-          buffer.includes(KG_SEARCH_END_TOKEN)
+          buffer.includes(CHUNK_SEARCH_STREAM_END_MARKER) ||
+          buffer.includes(GRAPH_SEARCH_STREAM_END_MARKER)
         ) {
           const [results, rest] = buffer.split(/<\/(?:search|kg_search)>/);
 
-          if (results.includes(SEARCH_START_TOKEN)) {
+          if (results.includes(CHUNK_SEARCH_STREAM_MARKER)) {
             vectorSearchSources = results
-              .split(SEARCH_START_TOKEN)[1]
-              .split(SEARCH_END_TOKEN)[0];
+              .split(CHUNK_SEARCH_STREAM_MARKER)[1]
+              .split(CHUNK_SEARCH_STREAM_END_MARKER)[0];
             searchPerformed = true;
           }
 
-          if (results.includes(KG_SEARCH_START_TOKEN)) {
+          if (results.includes(GRAPH_SEARCH_STREAM_MARKER)) {
             kgSearchResult = results
-              .split(KG_SEARCH_START_TOKEN)[1]
-              .split(KG_SEARCH_END_TOKEN)[0];
+              .split(GRAPH_SEARCH_STREAM_MARKER)[1]
+              .split(GRAPH_SEARCH_STREAM_END_MARKER)[0];
             searchPerformed = true;
           }
 

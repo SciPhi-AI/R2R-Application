@@ -134,6 +134,9 @@ importers:
       '@visx/vendor':
         specifier: ^3.12.0
         version: 3.12.0
+      ansi_up:
+        specifier: ^6.0.2
+        version: 6.0.2
       autoprefixer:
         specifier: ^10.4.20
         version: 10.4.20(postcss@8.4.49)
@@ -210,8 +213,8 @@ importers:
         specifier: 0.0.0-beta.0
         version: 0.0.0-beta.0
       r2r-js:
-        specifier: ^0.4.4
-        version: 0.4.4
+        specifier: ^0.4.5
+        version: 0.4.5
       radix-ui:
         specifier: ^1.0.1
         version: 1.0.1(@types/react-dom@18.3.1)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -495,8 +498,8 @@ packages:
     resolution: {integrity: sha512-9DGttpmPvIxBb/2uwpVo3dqJ+O6RooAFOS+lB+xDqoE2PVCE8nfoHMdZLpfCQRLwvohzXISPZcgxt80xLfsuwg==}
     engines: {node: '>=6.9.0'}
 
-  '@babel/traverse@7.26.3':
-    resolution: {integrity: sha512-yTmc8J+Sj8yLzwr4PD5Xb/WF3bOYu2C2OoSZPzbuqRm4n98XirsbzaX+GloeO376UnSYIYJ4NCanwV5/ugZkwA==}
+  '@babel/traverse@7.26.4':
+    resolution: {integrity: sha512-fH+b7Y4p3yqvApJALCPJcwb0/XaOSgtK4pzV6WVjPR5GLFQBRI7pfoX2V2iM48NXvX07NUxxm1Vw98YjqTcU5w==}
     engines: {node: '>=6.9.0'}
 
   '@babel/types@7.26.3':
@@ -3350,6 +3353,9 @@ packages:
     resolution: {integrity: sha512-bN798gFfQX+viw3R7yrGWRqnrN2oRkEkUjjl4JNn4E8GxxbjtG3FbrEIIY3l8/hrwUwIeCZvi4QuOTP4MErVug==}
     engines: {node: '>=12'}
 
+  ansi_up@6.0.2:
+    resolution: {integrity: sha512-3G3vKvl1ilEp7J1u6BmULpMA0xVoW/f4Ekqhl8RTrJrhEBkonKn5k3bUc5Xt+qDayA6iDX0jyUh3AbZjB/l0tw==}
+
   any-promise@1.3.0:
     resolution: {integrity: sha512-7UvmKalWRt1wgjL1RrGxoSJW/0QZFIegpeGvZG9kjp8vrRu55XTHbwnqq2GpXm9uLbcuhxm3IqX9OB4MZR1b2A==}
 
@@ -5972,8 +5978,8 @@ packages:
   queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
 
-  r2r-js@0.4.4:
-    resolution: {integrity: sha512-LfDvrWD+zhaXah0gyiKWC8w1Mk1U5xunmI8Jgxk9ApuW21uFexea9G1OhMlG4ZeTWsGQqv6HQItJEGfsG3udUw==}
+  r2r-js@0.4.5:
+    resolution: {integrity: sha512-9hq4zuBurrCYjPTQHIzOkZkynfkNh9yj+wt8i1yyqceL/ZmCjrpiQ1M/tloULW5SezHE9cDopRhO0ovUaN3GSA==}
 
   r2r@0.0.0-beta.0:
     resolution: {integrity: sha512-LwZXOYJexUffYHP+LcBP3zgF17Az9dTTM60J9q3WGBReF4qqgEvFDyzHxOukMqIR8zUz4E00rRnCW5Mdktoe6g==}
@@ -6213,8 +6219,8 @@ packages:
   robust-predicates@3.0.2:
     resolution: {integrity: sha512-IXgzBWvWQwE6PrDI05OvmXUIruQTcoMDzRsOd5CDvHCVLcLHMTSYvOK5Cm46kWqlV3yAbuSpBZdJ5oP5OUoStg==}
 
-  rrweb-snapshot@2.0.0-alpha.17:
-    resolution: {integrity: sha512-GBg5pV8LHOTbeVmH2VHLEFR0mc2QpQMzAvcoxEGfPNWgWHc8UvKCyq7pqN1vA+fDZ+yXXbixeO0kB2pzVvFCBw==}
+  rrweb-snapshot@2.0.0-alpha.18:
+    resolution: {integrity: sha512-hBHZL/NfgQX6wO1D9mpwqFu1NJPpim+moIcKhFEjVTZVRUfCln+LOugRc4teVTCISYHN8Cw5e2iNTWCSm+SkoA==}
 
   rrweb-snapshot@2.0.0-alpha.4:
     resolution: {integrity: sha512-KQ2OtPpXO5jLYqg1OnXS/Hf+EzqnZyP5A+XPqBCjYpj3XIje/Od4gdUwjbFo3cVuWq5Cw5Y1d3/xwgIS7/XpQQ==}
@@ -7021,7 +7027,7 @@ snapshots:
       '@babel/helpers': 7.26.0
       '@babel/parser': 7.26.3
       '@babel/template': 7.25.9
-      '@babel/traverse': 7.26.3
+      '@babel/traverse': 7.26.4
       '@babel/types': 7.26.3
       convert-source-map: 2.0.0
       debug: 4.3.7
@@ -7049,7 +7055,7 @@ snapshots:
 
   '@babel/helper-module-imports@7.25.9':
     dependencies:
-      '@babel/traverse': 7.26.3
+      '@babel/traverse': 7.26.4
       '@babel/types': 7.26.3
     transitivePeerDependencies:
       - supports-color
@@ -7059,7 +7065,7 @@ snapshots:
       '@babel/core': 7.26.0
       '@babel/helper-module-imports': 7.25.9
       '@babel/helper-validator-identifier': 7.25.9
-      '@babel/traverse': 7.26.3
+      '@babel/traverse': 7.26.4
     transitivePeerDependencies:
       - supports-color
 
@@ -7175,7 +7181,7 @@ snapshots:
       '@babel/parser': 7.26.3
       '@babel/types': 7.26.3
 
-  '@babel/traverse@7.26.3':
+  '@babel/traverse@7.26.4':
     dependencies:
       '@babel/code-frame': 7.26.2
       '@babel/generator': 7.26.3
@@ -10333,7 +10339,7 @@ snapshots:
 
   '@rrweb/types@2.0.0-alpha.17':
     dependencies:
-      rrweb-snapshot: 2.0.0-alpha.17
+      rrweb-snapshot: 2.0.0-alpha.18
 
   '@rtsao/scc@1.1.0': {}
 
@@ -11131,6 +11137,8 @@ snapshots:
   ansi-styles@5.2.0: {}
 
   ansi-styles@6.2.1: {}
+
+  ansi_up@6.0.2: {}
 
   any-promise@1.3.0: {}
 
@@ -14527,7 +14535,7 @@ snapshots:
 
   queue-microtask@1.2.3: {}
 
-  r2r-js@0.4.4:
+  r2r-js@0.4.5:
     dependencies:
       '@jest/globals': 29.7.0
       '@rrweb/types': 2.0.0-alpha.17
@@ -14897,7 +14905,7 @@ snapshots:
 
   robust-predicates@3.0.2: {}
 
-  rrweb-snapshot@2.0.0-alpha.17:
+  rrweb-snapshot@2.0.0-alpha.18:
     dependencies:
       postcss: 8.4.49
 
