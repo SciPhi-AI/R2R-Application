@@ -287,28 +287,22 @@ export const Result: FC<{
         if (done) {
           break;
         }
-        console.log('value = ', value)
-
         buffer += decoder.decode(value, { stream: true });
-        console.log('buffer = ', buffer)
-        console.log('buffer.includes(LLM_START_TOKEN) = ', buffer.includes(LLM_START_TOKEN))
-
         // Handle search results
         if (
           buffer.includes(CHUNK_SEARCH_STREAM_END_MARKER) ||
           buffer.includes(GRAPH_SEARCH_STREAM_END_MARKER)
         ) {
-          const [results, rest] = buffer.split(/<\/(?:search|kg_search)>/);
 
-          if (results.includes(CHUNK_SEARCH_STREAM_MARKER)) {
-            vectorSearchSources = results
+          if (buffer.includes(CHUNK_SEARCH_STREAM_MARKER)) {
+            vectorSearchSources = buffer
               .split(CHUNK_SEARCH_STREAM_MARKER)[1]
               .split(CHUNK_SEARCH_STREAM_END_MARKER)[0];
             searchPerformed = true;
           }
 
-          if (results.includes(GRAPH_SEARCH_STREAM_MARKER)) {
-            kgSearchResult = results
+          if (buffer.includes(GRAPH_SEARCH_STREAM_MARKER)) {
+            kgSearchResult = buffer
               .split(GRAPH_SEARCH_STREAM_MARKER)[1]
               .split(GRAPH_SEARCH_STREAM_END_MARKER)[0];
             searchPerformed = true;
@@ -325,9 +319,8 @@ export const Result: FC<{
         
         // Handle LLM response
         if (buffer.includes(LLM_START_TOKEN)) {
-          
           inLLMResponse = true;
-          buffer = buffer.split(LLM_START_TOKEN)[1] || '';
+          buffer = buffer.split(LLM_START_TOKEN)[1] || ''; // strip pre-stream content
         }
 
         if (inLLMResponse) {
