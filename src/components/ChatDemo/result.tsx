@@ -293,7 +293,6 @@ export const Result: FC<{
           buffer.includes(CHUNK_SEARCH_STREAM_END_MARKER) ||
           buffer.includes(GRAPH_SEARCH_STREAM_END_MARKER)
         ) {
-
           if (buffer.includes(CHUNK_SEARCH_STREAM_MARKER)) {
             vectorSearchSources = buffer
               .split(CHUNK_SEARCH_STREAM_MARKER)[1]
@@ -316,7 +315,7 @@ export const Result: FC<{
           );
           setIsSearching(false);
         }
-        
+
         // Handle LLM response
         if (buffer.includes(LLM_START_TOKEN)) {
           inLLMResponse = true;
