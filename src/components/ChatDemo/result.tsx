@@ -287,14 +287,18 @@ export const Result: FC<{
         if (done) {
           break;
         }
+        console.log('value = ', value)
 
         buffer += decoder.decode(value, { stream: true });
+        console.log('buffer = ', buffer)
+        console.log('buffer.includes(LLM_START_TOKEN) = ', buffer.includes(LLM_START_TOKEN))
 
         // Handle search results
         if (
           buffer.includes(CHUNK_SEARCH_STREAM_END_MARKER) ||
           buffer.includes(GRAPH_SEARCH_STREAM_END_MARKER)
         ) {
+          console.log('in inc CHUNK_SEARCH_STREAM_END_MARKER flow')
           const [results, rest] = buffer.split(/<\/(?:search|kg_search)>/);
 
           if (results.includes(CHUNK_SEARCH_STREAM_MARKER)) {
@@ -317,15 +321,19 @@ export const Result: FC<{
             true,
             searchPerformed
           );
-          buffer = rest || '';
           setIsSearching(false);
         }
-
+        
+        console.log('buffer.includes(LLM_START_TOKEN) = ', buffer.includes(LLM_START_TOKEN))
         // Handle LLM response
         if (buffer.includes(LLM_START_TOKEN)) {
+          
+          console.log('in inc LLM_START_TOKEN flow')
+
           inLLMResponse = true;
           buffer = buffer.split(LLM_START_TOKEN)[1] || '';
         }
+        console.log('inLLMResponse= ', inLLMResponse)
 
         if (inLLMResponse) {
           const endTokenIndex = buffer.indexOf(LLM_END_TOKEN);
@@ -339,6 +347,7 @@ export const Result: FC<{
             chunk = buffer;
             buffer = '';
           }
+          console.log('fullContent = ', fullContent)
 
           fullContent += chunk;
           assistantResponse += chunk;
