@@ -6,7 +6,7 @@ import Layout from '@/components/Layout';
 import { useUserContext } from '@/context/UserContext';
 import { IngestionStatus } from '@/types';
 
-const PAGE_SIZE = 100;
+const PAGE_SIZE = 1000;
 const ITEMS_PER_PAGE = 10;
 
 const Index: React.FC = () => {
@@ -56,7 +56,7 @@ const Index: React.FC = () => {
       // Fetch first batch
       const firstBatch = await client.documents.list({
         offset: offset,
-        limit: PAGE_SIZE,
+        limit: 100,
       });
 
       console.log('firstBatch:', firstBatch);
@@ -203,7 +203,7 @@ const Index: React.FC = () => {
         <div className="relative flex-grow bg-zinc-900 mt-[4rem] sm:mt-[4rem]">
           <div className="mx-auto max-w-6xl mb-12 mt-4 p-4 h-full">
             <DocumentsTable
-              documents={filteredDocuments}
+              documents={documents}
               loading={loading}
               onRefresh={refetchDocuments}
               pendingDocuments={pendingDocuments}

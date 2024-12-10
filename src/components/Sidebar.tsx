@@ -107,7 +107,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       >
         <div className="p-4 overflow-y-auto h-[calc(100%-var(--header-height))]">
           {/* Conversation History */}
-          {config.showConversations && (
+          {/* {config.showConversations && (
             <div>
               <div className="mt-4">
                 <h3 className="text-lg font-semibold text-indigo-400">
@@ -130,7 +130,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 </div>
               </div>
             </div>
-          )}
+          )} */}
 
           <h3 className="text-lg font-semibold text-indigo-400 mt-2">
             Search Settings

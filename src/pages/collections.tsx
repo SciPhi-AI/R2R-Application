@@ -16,155 +16,127 @@ const ITEMS_PER_PAGE = 8;
 const Index: React.FC = () => {
   const { getClient, authState } = useUserContext();
   const [loading, setLoading] = useState(true);
+
   const [personalCollections, setPersonalCollections] = useState<
     CollectionResponse[]
   >([]);
   const [sharedCollections, setSharedCollections] = useState<
     CollectionResponse[]
   >([]);
+
+  const [personalTotalEntries, setPersonalTotalEntries] = useState<number>(0);
+  const [accessibleTotalEntries, setAccessibleTotalEntries] =
+    useState<number>(0);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentPersonalPage, setCurrentPersonalPage] = useState(1);
   const [currentSharedPage, setCurrentSharedPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const fetchUserCollections = useCallback(async () => {
-    try {
-      setLoading(true);
-      const client = await getClient();
-      if (!client) {
-        throw new Error('Failed to get authenticated client');
-      }
+  const fetchInitialData = useCallback(async () => {
+    setLoading(true);
 
-      // Start both fetches in parallel
-      const [firstPersonalBatch, firstAccessibleBatch] = await Promise.all([
+    try {
+      const client = await getClient();
+      if (!client) throw new Error('No authenticated client');
+
+      const userId = authState.userId || '';
+
+      // Fetch first batch of personal and accessible collections in parallel
+      const [personalBatch, accessibleBatch] = await Promise.all([
         client.users.listCollections({
-          id: authState.userId || '',
+          id: userId,
           offset: 0,
           limit: PAGE_SIZE,
         }),
-        client.collections.list({
-          offset: 0,
-          limit: PAGE_SIZE,
-        }),
+        client.collections.list({ offset: 0, limit: PAGE_SIZE }),
       ]);
 
-      // Set initial data as soon as we have the first batches
-      const personalCollectionIds = new Set(
-        firstPersonalBatch.results.map((col) => col.id)
+      // Determine personal total
+      setPersonalTotalEntries(personalBatch.total_entries);
+      // Determine accessible total
+      setAccessibleTotalEntries(accessibleBatch.total_entries);
+
+      // Determine which accessible are actually shared (not personal)
+      const personalIds = new Set(personalBatch.results.map((col) => col.id));
+      const initialShared = accessibleBatch.results.filter(
+        (col) => !personalIds.has(col.id)
       );
 
-      const initialSharedCollections = firstAccessibleBatch.results.filter(
-        (col) => !personalCollectionIds.has(col.id)
-      );
-
-      setPersonalCollections(firstPersonalBatch.results);
-      setSharedCollections(initialSharedCollections);
+      // Set initial states so user sees first page right away
+      setPersonalCollections(personalBatch.results);
+      setSharedCollections(initialShared);
       setLoading(false);
 
-      // Continue fetching remaining data in the background
-      const fetchRemainingData = async () => {
-        let offset = PAGE_SIZE;
-        let allPersonalCollections = [...firstPersonalBatch.results];
-        let allAccessibleCollections = [...firstAccessibleBatch.results];
+      // Now fetch remaining in the background
+      void (async function fetchRemainder() {
+        let allPersonal = [...personalBatch.results];
+        let allAccessible = [...accessibleBatch.results];
 
         // Fetch remaining personal collections
-        if (offset < firstPersonalBatch.total_entries) {
-          while (true) {
-            const batch = await client.users.listCollections({
-              id: authState.userId || '',
-              offset,
-              limit: PAGE_SIZE,
-            });
-
-            if (batch.results.length === 0) {
-              break;
-            }
-
-            allPersonalCollections = allPersonalCollections.concat(
-              batch.results
-            );
-            setPersonalCollections(allPersonalCollections);
-            offset += PAGE_SIZE;
-
-            if (offset >= firstPersonalBatch.total_entries) {
-              break;
-            }
-          }
+        let offset = PAGE_SIZE;
+        while (offset < personalBatch.total_entries) {
+          const batch = await client.users.listCollections({
+            id: userId,
+            offset,
+            limit: PAGE_SIZE,
+          });
+          if (batch.results.length === 0) break;
+          allPersonal = allPersonal.concat(batch.results);
+          offset += PAGE_SIZE;
         }
-
-        // Reset offset for accessible collections
-        offset = PAGE_SIZE;
 
         // Fetch remaining accessible collections
-        if (offset < firstAccessibleBatch.total_entries) {
-          while (true) {
-            const batch = await client.collections.list({
-              offset,
-              limit: PAGE_SIZE,
-            });
-
-            if (batch.results.length === 0) {
-              break;
-            }
-
-            allAccessibleCollections = allAccessibleCollections.concat(
-              batch.results
-            );
-
-            // Update shared collections, filtering out personal ones
-            const updatedPersonalCollectionIds = new Set(
-              allPersonalCollections.map((col) => col.id)
-            );
-            const updatedSharedCollections = allAccessibleCollections.filter(
-              (col) => !updatedPersonalCollectionIds.has(col.id)
-            );
-            setSharedCollections(updatedSharedCollections); // Update UI as we get more
-
-            offset += PAGE_SIZE;
-
-            if (offset >= firstAccessibleBatch.total_entries) {
-              break;
-            }
-          }
+        offset = PAGE_SIZE;
+        while (offset < accessibleBatch.total_entries) {
+          const batch = await client.collections.list({
+            offset,
+            limit: PAGE_SIZE,
+          });
+          if (batch.results.length === 0) break;
+          allAccessible = allAccessible.concat(batch.results);
+          offset += PAGE_SIZE;
         }
-      };
 
-      // Start fetching remaining data in the background
-      fetchRemainingData().catch((error) => {
-        console.error('Error fetching remaining collections:', error);
-      });
+        // After all background fetching is done, recalculate shared
+        const updatedPersonalIds = new Set(allPersonal.map((col) => col.id));
+        const updatedShared = allAccessible.filter(
+          (col) => !updatedPersonalIds.has(col.id)
+        );
+
+        setPersonalCollections(allPersonal);
+        setSharedCollections(updatedShared);
+      })();
     } catch (error) {
       console.error('Error fetching collections:', error);
       setPersonalCollections([]);
       setSharedCollections([]);
       setLoading(false);
     }
-  }, [getClient]);
+  }, [getClient, authState.userId]);
+
+  useEffect(() => {
+    fetchInitialData();
+  }, [fetchInitialData]);
 
   const filteredPersonalCollections = useMemo(() => {
-    if (!searchQuery.trim()) {
-      return personalCollections;
-    }
-
+    if (!searchQuery.trim()) return personalCollections;
     const query = searchQuery.toLowerCase();
     return personalCollections.filter(
       (collection) =>
         collection.name?.toLowerCase().includes(query) ||
-        collection.id?.toLowerCase().includes(query) ||
+        collection.id.toLowerCase().includes(query) ||
         collection.description?.toLowerCase().includes(query)
     );
   }, [personalCollections, searchQuery]);
 
   const filteredSharedCollections = useMemo(() => {
-    if (!searchQuery.trim()) {
-      return sharedCollections;
-    }
-
+    if (!searchQuery.trim()) return sharedCollections;
     const query = searchQuery.toLowerCase();
     return sharedCollections.filter(
       (collection) =>
         collection.name?.toLowerCase().includes(query) ||
-        collection.id?.toLowerCase().includes(query) ||
+        collection.id.toLowerCase().includes(query) ||
         collection.description?.toLowerCase().includes(query)
     );
   }, [sharedCollections, searchQuery]);
@@ -183,16 +155,12 @@ const Index: React.FC = () => {
     </div>
   );
 
-  useEffect(() => {
-    fetchUserCollections();
-  }, [fetchUserCollections]);
-
   const handleAddCollection = () => {
     setIsModalOpen(true);
   };
 
   const handleCollectionCreated = () => {
-    fetchUserCollections();
+    fetchInitialData();
   };
 
   const getCurrentPagePersonalCollections = () => {
@@ -219,9 +187,37 @@ const Index: React.FC = () => {
     setCurrentSharedPage(pageNumber);
   };
 
+  // Compute total pages:
+  // If no search, use total_entries from initial fetches
+  // If search, use filtered arrays length
+  const personalTotalPages = useMemo(() => {
+    if (searchQuery.trim()) {
+      return Math.ceil(filteredPersonalCollections.length / ITEMS_PER_PAGE);
+    } else {
+      return Math.ceil(personalTotalEntries / ITEMS_PER_PAGE);
+    }
+  }, [searchQuery, filteredPersonalCollections.length, personalTotalEntries]);
+
+  const sharedTotalPages = useMemo(() => {
+    if (searchQuery.trim()) {
+      return Math.ceil(filteredSharedCollections.length / ITEMS_PER_PAGE);
+    } else {
+      // Shared total = accessibleTotalEntries - personalTotalEntries (inferred)
+      const sharedTotalCount = accessibleTotalEntries - personalTotalEntries;
+      return Math.ceil(sharedTotalCount / ITEMS_PER_PAGE);
+    }
+  }, [
+    searchQuery,
+    filteredSharedCollections.length,
+    accessibleTotalEntries,
+    personalTotalEntries,
+  ]);
+
   const renderCollections = () => {
-    const hasPersonalResults = getCurrentPagePersonalCollections().length > 0;
-    const hasSharedResults = getCurrentPageSharedCollections().length > 0;
+    const currentPersonal = getCurrentPagePersonalCollections();
+    const currentShared = getCurrentPageSharedCollections();
+    const hasPersonalResults = currentPersonal.length > 0;
+    const hasSharedResults = currentShared.length > 0;
 
     return (
       <>
@@ -233,7 +229,7 @@ const Index: React.FC = () => {
             <div className="min-h-[300px]">
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {hasPersonalResults
-                  ? getCurrentPagePersonalCollections().map((collection) => (
+                  ? currentPersonal.map((collection) => (
                       <div
                         key={collection.id}
                         className="w-full h-[120px] flex justify-center"
@@ -244,8 +240,7 @@ const Index: React.FC = () => {
                         />
                       </div>
                     ))
-                  : // Fill empty grid spaces to maintain layout
-                    Array.from({ length: 4 }).map((_, index) => (
+                  : Array.from({ length: 4 }).map((_, index) => (
                       <div
                         key={`empty-${index}`}
                         className="w-full h-[120px] flex justify-center"
@@ -257,13 +252,13 @@ const Index: React.FC = () => {
                     ))}
               </div>
             </div>
-            {filteredPersonalCollections.length > ITEMS_PER_PAGE && (
+            {(searchQuery.trim()
+              ? filteredPersonalCollections.length > ITEMS_PER_PAGE
+              : personalTotalEntries > ITEMS_PER_PAGE) && (
               <div className="mb-10">
                 <Pagination
                   currentPage={currentPersonalPage}
-                  totalPages={Math.ceil(
-                    filteredPersonalCollections.length / ITEMS_PER_PAGE
-                  )}
+                  totalPages={personalTotalPages}
                   onPageChange={handlePersonalPageChange}
                   isLoading={loading}
                 />
@@ -280,7 +275,7 @@ const Index: React.FC = () => {
             <div className="min-h-[300px]">
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-6">
                 {hasSharedResults
-                  ? getCurrentPageSharedCollections().map((collection) => (
+                  ? currentShared.map((collection) => (
                       <div
                         key={collection.id}
                         className="w-full h-[120px] flex justify-center"
@@ -288,8 +283,7 @@ const Index: React.FC = () => {
                         <SharedCollectionCard collection={collection} />
                       </div>
                     ))
-                  : // Fill empty grid spaces to maintain layout
-                    Array.from({ length: 4 }).map((_, index) => (
+                  : Array.from({ length: 4 }).map((_, index) => (
                       <div
                         key={`empty-shared-${index}`}
                         className="w-full h-[120px] flex justify-center"
@@ -301,13 +295,14 @@ const Index: React.FC = () => {
                     ))}
               </div>
             </div>
-            {filteredSharedCollections.length > ITEMS_PER_PAGE && (
+            {(searchQuery.trim()
+              ? filteredSharedCollections.length > ITEMS_PER_PAGE
+              : accessibleTotalEntries - personalTotalEntries >
+                ITEMS_PER_PAGE) && (
               <div className="mb-10">
                 <Pagination
                   currentPage={currentSharedPage}
-                  totalPages={Math.ceil(
-                    filteredSharedCollections.length / ITEMS_PER_PAGE
-                  )}
+                  totalPages={sharedTotalPages}
                   onPageChange={handleSharedPageChange}
                   isLoading={loading}
                 />
@@ -316,15 +311,17 @@ const Index: React.FC = () => {
           </div>
         )}
 
-        {personalCollections.length === 0 && sharedCollections.length === 0 && (
-          <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 min-h-[300px]">
-            <div className="w-full h-[120px] flex justify-center col-span-full">
-              <div className="w-64 h-full flex items-center justify-center text-gray-400">
-                No collections found
+        {personalCollections.length === 0 &&
+          sharedCollections.length === 0 &&
+          !loading && (
+            <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 min-h-[300px]">
+              <div className="w-full h-[120px] flex justify-center col-span-full">
+                <div className="w-64 h-full flex items-center justify-center text-gray-400">
+                  No collections found
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
       </>
     );
   };
@@ -333,8 +330,12 @@ const Index: React.FC = () => {
     <Layout pageTitle="Collections" includeFooter={false}>
       <main className="w-full flex flex-col container h-screen-[calc(100%-4rem)]">
         <div className="mx-auto max-w-6xl mb-12 mt-20">
-          {loading ? (
-            <Loader className="mx-auto mt-20 animate-spin" size={64} />
+          {loading &&
+          personalCollections.length === 0 &&
+          sharedCollections.length === 0 ? (
+            <div className="flex justify-center mt-20">
+              <Loader className="animate-spin" size={64} />
+            </div>
           ) : (
             <>
               <div className="mb-6">

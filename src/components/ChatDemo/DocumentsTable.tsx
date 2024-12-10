@@ -126,17 +126,23 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
       label: 'Extraction',
       filterable: true,
       filterType: 'multiselect',
-      filterOptions: ['success', 'failed', 'pending'],
+      filterOptions: ['success', 'failed', 'pending', 'processing', 'enriched'],
       renderCell: (doc) => {
         let variant: 'success' | 'destructive' | 'pending' = 'pending';
         switch (doc.extraction_status) {
           case KGExtractionStatus.SUCCESS:
             variant = 'success';
             break;
+          case KGExtractionStatus.ENRICHED:
+            variant = 'success';
+            break;
           case KGExtractionStatus.FAILED:
             variant = 'destructive';
             break;
           case KGExtractionStatus.PENDING:
+            variant = 'pending';
+            break;
+          case KGExtractionStatus.PROCESSING:
             variant = 'pending';
             break;
         }
@@ -175,7 +181,11 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
           onUpdateSuccess={() => onRefresh()}
           showToast={toast}
         /> */}
-        <ExtractButtonContainer id={doc.id} showToast={toast} />
+        <ExtractButtonContainer
+          id={doc.id}
+          ingestionStatus={doc.ingestion_status}
+          showToast={toast}
+        />
         <DownloadFileContainer
           id={doc.id}
           fileName={doc.title ? doc.title : ''}
@@ -200,17 +210,18 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
     );
 
   // Client-side search filtering
-  const filteredDocuments = useMemo(() => {
-    if (!searchQuery.trim()) {
-      return documents;
-    }
-    const query = searchQuery.toLowerCase();
-    return documents.filter(
-      (doc) =>
-        doc.title?.toLowerCase().includes(query) ||
-        doc.id.toLowerCase().includes(query)
-    );
-  }, [searchQuery, documents]);
+  // const filteredDocuments = useMemo(() => {
+  //   if (!searchQuery.trim()) {
+  //     return documents;
+  //   }
+  //   const query = searchQuery.toLowerCase();
+  //   return documents.filter(
+  //     (doc) =>
+  //       doc.title?.toLowerCase().includes(query) ||
+  //       doc.id.toLowerCase().includes(query)
+  //   );
+  // }, [searchQuery, documents]);
+  const displayedDocuments = documents; // no filtering
 
   return (
     <div>
@@ -305,13 +316,12 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
           </div>
 
           <Table
-            data={filteredDocuments}
+            data={displayedDocuments}
             columns={columns.filter((col) => visibleColumns[col.key] === true)}
             onSelectAll={handleSelectAllInternal}
             onSelectItem={handleSelectItemInternal}
             selectedItems={selectedItems}
             actions={renderActions}
-            initialSort={{ key: 'title', order: 'asc' }}
             initialFilters={{}}
             tableHeight="600px"
             currentPage={currentPage}

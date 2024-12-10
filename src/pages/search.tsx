@@ -81,7 +81,7 @@ const SearchPage: React.FC = () => {
     initializeSwitch(
       'knowledgeGraphSearch',
       true,
-      'Knowledge Graph Search',
+      'Graph Search',
       'Please construct a Knowledge Graph to use this feature.'
     );
   }, [initializeSwitch]);
@@ -162,7 +162,7 @@ const SearchPage: React.FC = () => {
   return (
     <Layout pageTitle="Search" includeFooter={false}>
       <div className="flex flex-col h-screen-[calc(100%-4rem)] overflow-hidden">
-        {/* <Sidebar
+        <Sidebar
           isOpen={sidebarIsOpen}
           onToggle={toggleSidebar}
           switches={switches}
@@ -202,7 +202,7 @@ const SearchPage: React.FC = () => {
             showKGSearch: false,
             showRagGeneration: false,
           }}
-        /> */}
+        />
 
         <div
           className={`main-content-wrapper ${sidebarIsOpen ? '' : 'sidebar-closed'}`}

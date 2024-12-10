@@ -1,4 +1,4 @@
-import { Eye, EyeOff, Settings } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import React, { useState, useEffect, useCallback } from 'react';
@@ -16,10 +16,9 @@ const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('admin@example.com');
   const [password, setPassword] = useState('change_me_immediately');
   const [showPassword, setShowPassword] = useState(false);
-  const [showDeploymentUrl, setShowDeploymentUrl] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [serverHealth, setServerHealth] = useState(false);
+  const [serverHealth, setServerHealth] = useState(true); // Default to true since we're not checking initially
   const [loginSuccess, setLoginSuccess] = useState(false);
   const { login, loginWithToken, authState } = useUserContext();
   const router = useRouter();
@@ -27,6 +26,7 @@ const LoginPage: React.FC = () => {
   const [rawDeploymentUrl, setRawDeploymentUrl] = useState('');
   const [sanitizedDeploymentUrl, setSanitizedDeploymentUrl] = useState('');
 
+  // Retrieve deployment URL from runtime config or use default
   const getDeploymentUrl = () => {
     if (
       typeof window !== 'undefined' &&
@@ -40,6 +40,7 @@ const LoginPage: React.FC = () => {
     return DEFAULT_DEPLOYMENT_URL;
   };
 
+  // Initialize deployment URL on component mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const url = getDeploymentUrl();
@@ -48,6 +49,22 @@ const LoginPage: React.FC = () => {
     }
   }, []);
 
+  // Health check function - only called after failed login attempts
+  const checkDeploymentHealth = useCallback(async () => {
+    try {
+      const response = await fetch(`${sanitizedDeploymentUrl}/v3/health`);
+      const data = await response.json();
+      const isHealthy = data.results?.message?.trim().toLowerCase() === 'ok';
+      setServerHealth(isHealthy);
+      return isHealthy;
+    } catch (error) {
+      console.error('Health check failed:', error);
+      setServerHealth(false);
+      return false;
+    }
+  }, [sanitizedDeploymentUrl]);
+
+  // Handle login submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -58,6 +75,9 @@ const LoginPage: React.FC = () => {
     } catch (error) {
       console.error('Login failed:', error);
 
+      // Only check server health after a failed login attempt
+      const isServerHealthy = await checkDeploymentHealth();
+
       let errorMessage = 'An unknown error occurred';
       if (error instanceof Error) {
         errorMessage = error.message;
@@ -65,14 +85,18 @@ const LoginPage: React.FC = () => {
         errorMessage = error;
       }
 
-      alert(
-        `Login failed. Ensure that your R2R server is running at the specified URL or check your credentials and try again. \n\nError: ${errorMessage}`
-      );
+      // Provide appropriate error message based on server health
+      const serverStatusMessage = isServerHealthy
+        ? 'The server appears to be running correctly. Please check your credentials and try again.'
+        : 'Unable to communicate with the server. Please verify the R2R server is running at the specified URL.';
+
+      alert(`Login failed. ${serverStatusMessage}\n\nError: ${errorMessage}`);
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Handle successful login redirect
   useEffect(() => {
     if (loginSuccess && authState.isAuthenticated) {
       router.push('/');
@@ -83,16 +107,7 @@ const LoginPage: React.FC = () => {
     setShowPassword(!showPassword);
   };
 
-  const redirectAfterLogin = useCallback(() => {
-    if (loginSuccess && authState.isAuthenticated) {
-      router.push('/');
-    }
-  }, [loginSuccess, authState.isAuthenticated, router]);
-
-  useEffect(() => {
-    redirectAfterLogin();
-  }, [redirectAfterLogin]);
-
+  // OAuth sign-in handler
   const handleOAuthSignIn = async (provider: 'google' | 'github') => {
     if (!supabase) {
       setError(
@@ -105,15 +120,13 @@ const LoginPage: React.FC = () => {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: provider,
       });
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
       const {
         data: { session },
       } = await supabase.auth.getSession();
 
-      if (session && session.access_token) {
+      if (session?.access_token) {
         await loginWithToken(session.access_token, sanitizedDeploymentUrl);
         setLoginSuccess(true);
       } else {
@@ -125,19 +138,7 @@ const LoginPage: React.FC = () => {
     }
   };
 
-  const toggleDeploymentUrlVisibility = (forceShow?: boolean) => {
-    setShowDeploymentUrl(
-      forceShow !== undefined ? forceShow : !showDeploymentUrl
-    );
-  };
-
-  const handleToggleDeploymentUrl = (
-    event: React.MouseEvent<HTMLButtonElement>
-  ) => {
-    event.preventDefault();
-    toggleDeploymentUrlVisibility();
-  };
-
+  // URL sanitization function
   const sanitizeUrl = (url: string): string => {
     if (
       typeof window !== 'undefined' &&
@@ -145,30 +146,25 @@ const LoginPage: React.FC = () => {
     ) {
       const configUrl =
         window.__RUNTIME_CONFIG__.NEXT_PUBLIC_R2R_DEPLOYMENT_URL;
-
-      // If the URL is empty or just a protocol, return the config URL
       if (!url || url === 'http://' || url === 'https://') {
         return configUrl;
       }
     }
 
-    // If no config URL is available, use the default
     if (!url || url === 'http://' || url === 'https://') {
       return DEFAULT_DEPLOYMENT_URL;
     }
 
     let sanitized = url.trim();
     sanitized = sanitized.replace(/\/+$/, '');
-
     if (!/^https?:\/\//i.test(sanitized)) {
       sanitized = 'http://' + sanitized;
     }
-
     sanitized = sanitized.replace(/(https?:\/\/)|(\/)+/g, '$1$2');
-
     return sanitized;
   };
 
+  // Debounced URL sanitization
   const debouncedSanitizeUrl = useCallback(
     debounce((url: string) => {
       setSanitizedDeploymentUrl(sanitizeUrl(url));
@@ -180,68 +176,34 @@ const LoginPage: React.FC = () => {
     debouncedSanitizeUrl(rawDeploymentUrl);
   }, [rawDeploymentUrl, debouncedSanitizeUrl]);
 
-  const checkDeploymentHealth = useCallback(async () => {
-    try {
-      const response = await fetch(`${sanitizedDeploymentUrl}/v3/health`);
-      const data = await response.json();
-
-      const isHealthy = data.results?.message?.trim().toLowerCase() === 'ok';
-
-      setServerHealth(isHealthy);
-      if (!isHealthy) {
-        setShowDeploymentUrl(true);
-      }
-
-      return isHealthy;
-    } catch (error) {
-      console.error('Health check failed:', error);
-      setServerHealth(false);
-      setShowDeploymentUrl(true);
-      return false;
-    }
-  }, [sanitizedDeploymentUrl]);
-
-  useEffect(() => {
-    checkDeploymentHealth();
-  }, [checkDeploymentHealth, sanitizedDeploymentUrl]);
-
   return (
     <Layout includeFooter={false}>
       <div className="flex flex-col items-center justify-center min-h-screen p-8 gap-16">
         <div className="bg-zinc-100 dark:bg-zinc-800 shadow-md rounded px-8 pt-6 pb-8 mb-4 w-full max-w-md flex flex-col">
           <div className="flex-grow">
-            {showDeploymentUrl && (
-              <div className="mb-4">
-                <label
-                  className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2"
-                  htmlFor="sanitizedDeploymentUrl"
-                >
-                  R2R Deployment URL
-                </label>
-                {serverHealth === false && (
-                  <span className="text-red-400 text-sm font-bold mb-2 block">
-                    Unable to connect to the deployment. Check its status or
-                    enter a custom URL.
-                  </span>
-                )}
-                {serverHealth === true && (
-                  <span className="text-green-500 text-sm font-bold mb-2 block">
-                    Successfully connected to the deployment. Only change this
-                    if you&apos;re using a different deployment.
-                  </span>
-                )}
-
-                <Input
-                  id="deploymentUrl"
-                  name="deploymentUrl"
-                  type="text"
-                  placeholder="R2R Deployment URL"
-                  value={rawDeploymentUrl}
-                  onChange={(e) => setRawDeploymentUrl(e.target.value)}
-                  autoComplete="url"
-                />
-              </div>
-            )}
+            <div className="mb-4">
+              <label
+                className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2"
+                htmlFor="sanitizedDeploymentUrl"
+              >
+                R2R Deployment URL
+              </label>
+              {serverHealth === false && (
+                <span className="text-red-400 text-sm font-bold mb-2 block">
+                  Unable to communicate to the specified deployment. Check its
+                  status or try again.
+                </span>
+              )}
+              <Input
+                id="deploymentUrl"
+                name="deploymentUrl"
+                type="text"
+                placeholder="R2R Deployment URL"
+                value={rawDeploymentUrl}
+                onChange={(e) => setRawDeploymentUrl(e.target.value)}
+                autoComplete="url"
+              />
+            </div>
 
             <form onSubmit={handleSubmit} className="mt-4">
               <div className="mb-4">
@@ -307,7 +269,7 @@ const LoginPage: React.FC = () => {
                 onClick={handleSubmit}
                 color="filled"
                 className="w-full my-2"
-                disabled={isLoading || !serverHealth}
+                disabled={isLoading}
               >
                 {isLoading ? 'Signing in...' : 'Sign in with Email'}
               </Button>
@@ -350,18 +312,6 @@ const LoginPage: React.FC = () => {
                 <span className="flex-grow text-center">
                   Sign in with GitHub
                 </span>
-              </Button>
-            </div>
-
-            <div className="mt-auto -mb-6 -ml-5">
-              <Button
-                onClick={handleToggleDeploymentUrl}
-                color="transparent"
-                className=""
-                shape="slim"
-                tooltip="Deployment Settings"
-              >
-                <Settings className="h-6 w-6" />
               </Button>
             </div>
           </div>

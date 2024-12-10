@@ -225,6 +225,12 @@ export const Answer: FC<{
                     </div>
                     <div className="flex gap-4">
                       <div className="flex-1 max-h-[200px] overflow-y-auto pr-2">
+                        {isKGElement && (metadata as any).summary && (
+                          <div className="text-zinc-300 break-words mb-2">
+                            <strong>Summary:</strong>{' '}
+                            {(metadata as any).summary}
+                          </div>
+                        )}
                         {!isKGElement && (
                           <div className="text-zinc-300 break-words mb-2">
                             {metadata?.snippet ?? ''}
@@ -233,6 +239,19 @@ export const Answer: FC<{
                         <div className="text-zinc-300 break-words">
                           {description ?? ''}
                         </div>
+                        {isKGElement && (metadata as any).impact_rating && (
+                          <div className="text-zinc-300 break-words mt-2">
+                            <strong>Impact Rating:</strong>{' '}
+                            {(metadata as any).impact_rating}
+                          </div>
+                        )}
+                        {isKGElement &&
+                          (metadata as any).rating_explanation && (
+                            <div className="text-zinc-300 break-words mt-2">
+                              <strong>Rating Explanation:</strong>{' '}
+                              {(metadata as any).rating_explanation}
+                            </div>
+                          )}
                       </div>
                     </div>
                   </PopoverContent>
