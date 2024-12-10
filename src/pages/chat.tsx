@@ -111,8 +111,8 @@ const Index: React.FC = () => {
     );
     initializeSwitch(
       'knowledgeGraphSearch',
-      false,
-      'Knowledge Graph Search',
+      true,
+      'Graph Search',
       'Please construct a Knowledge Graph to use this feature.'
     );
   }, [initializeSwitch]);

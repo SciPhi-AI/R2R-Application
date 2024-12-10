@@ -116,6 +116,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
           password: password,
         });
 
+        console.log('Setting tokens in localStorage:', tokens);
+
         localStorage.setItem('accessToken', tokens.results.access_token.token);
         localStorage.setItem(
           'refreshToken',

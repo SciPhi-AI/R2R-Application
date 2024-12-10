@@ -51,8 +51,8 @@ const NavItems: React.FC<NavItemsProps> = ({
   const adminItems = [
     { path: '/users', label: 'Users' },
     { path: '/logs', label: 'Logs' },
-    { path: '/analytics', label: 'Analytics' },
-    { path: '/settings', label: 'Settings' },
+    // { path: '/analytics', label: 'Analytics' },
+    // { path: '/settings', label: 'Settings' },
   ];
 
   const items =

@@ -19,19 +19,6 @@ const VectorSearchResultItem: FC<{
 }> = ({ source, index, onOpenPdfPreview }) => {
   const { document_id, metadata, text, score, extraction_id } = source;
 
-  const isPdf =
-    metadata.document_type === 'pdf' ||
-    metadata.unstructured_filetype === 'application/pdf';
-  const pageNumber = metadata.unstructured_page_number;
-
-  const handleOpenPdfPreview = () => {
-    console.log('handleOpenPdfPreview');
-    console.log('document_id = ', document_id);
-    if (document_id) {
-      onOpenPdfPreview(document_id, pageNumber);
-    }
-  };
-
   return (
     <div className="p-4 mb-2 flex items-center w-full">
       <div className="flex-grow mr-4">
@@ -154,21 +141,23 @@ const ResultCarousel: FC<{
   ItemComponent: FC<any>;
   offset: number;
 }> = ({ items, ItemComponent, offset = 0 }) => (
-  <Carousel>
-    <CarouselContent>
-      {items.map((item, index) => (
-        <CarouselItem key={index}>
-          <Card className="h-48 overflow-y-auto">
-            <CardContent>
-              <ItemComponent {...item} index={index + offset + 1} />
-            </CardContent>
-          </Card>
-        </CarouselItem>
-      ))}
-    </CarouselContent>
-    <CarouselPrevious />
-    <CarouselNext />
-  </Carousel>
+  <div className="relative w-full px-12">
+    <Carousel className="w-full">
+      <CarouselContent className="-ml-4">
+        {items.map((item, index) => (
+          <CarouselItem key={index} className="pl-4 basis-full">
+            <Card className="h-48 overflow-y-auto">
+              <CardContent>
+                <ItemComponent {...item} index={index + offset + 1} />
+              </CardContent>
+            </Card>
+          </CarouselItem>
+        ))}
+      </CarouselContent>
+      <CarouselPrevious className="absolute -left-4 hover:bg-zinc-800" />
+      <CarouselNext className="absolute -right-4 hover:bg-zinc-800" />
+    </Carousel>
+  </div>
 );
 
 export const SearchResults: React.FC<SearchResultsProps> = ({
@@ -201,7 +190,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
     <div className="flex justify-center text-zinc-200 bg-zinc-900">
       <Tabs
         defaultValue="vectorSearch"
-        className="text-zinc-900 w-full max-w-2xl"
+        className="text-zinc-900 w-[95%] max-w-2xl px-10"
       >
         <TabsList>
           <TabsTrigger
@@ -220,7 +209,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
             KG Communities
           </TabsTrigger>
         </TabsList>
-        <TabsContent value="vectorSearch">
+        <TabsContent value="vectorSearch" className="mt-4">
           <ResultCarousel
             items={vectorSearchResults.map((source) => ({
               source,
@@ -230,14 +219,14 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
             offset={0}
           />
         </TabsContent>
-        <TabsContent value="kgEntities">
+        <TabsContent value="kgEntities" className="mt-4">
           <ResultCarousel
             items={entities.map((entity) => ({ entity }))}
             ItemComponent={KGSearchResultItem}
             offset={vectorSearchResults.length}
           />
         </TabsContent>
-        <TabsContent value="kgCommunities">
+        <TabsContent value="kgCommunities" className="mt-4">
           <ResultCarousel
             items={communities.map((entity) => ({ entity }))}
             ItemComponent={KGCommunitiesSearchResultItem}

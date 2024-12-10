@@ -72,7 +72,13 @@ const CollectionIdPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<Record<string, any>>({
     ingestion_status: ['success', 'failed', 'pending', 'enriched'],
-    extraction_status: ['success', 'failed', 'pending'],
+    extraction_status: [
+      'success',
+      'failed',
+      'pending',
+      'processing',
+      'enriched',
+    ],
   });
 
   const currentCollectionId =
@@ -627,15 +633,17 @@ const CollectionIdPage: React.FC = () => {
       label: 'Extraction',
       filterable: true,
       filterType: 'multiselect',
-      filterOptions: ['success', 'failed', 'pending'],
+      filterOptions: ['success', 'failed', 'pending', 'processing', 'enriched'],
       renderCell: (doc) => (
         <Badge
           variant={
             doc.extraction_status === KGExtractionStatus.SUCCESS
               ? 'success'
-              : doc.extraction_status === KGExtractionStatus.FAILED
-                ? 'destructive'
-                : 'pending'
+              : doc.extraction_status === KGExtractionStatus.ENRICHED
+                ? 'success'
+                : doc.extraction_status === KGExtractionStatus.FAILED
+                  ? 'destructive'
+                  : 'pending'
           }
         >
           {doc.extraction_status}

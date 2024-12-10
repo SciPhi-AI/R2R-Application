@@ -8,6 +8,7 @@ import { useUserContext } from '@/context/UserContext';
 
 interface ExtractContainerProps {
   id: string;
+  ingestionStatus: string;
   showToast: (message: {
     title: string;
     description: string;
@@ -17,10 +18,15 @@ interface ExtractContainerProps {
 
 const ExtractButtonContainer: React.FC<ExtractContainerProps> = ({
   id,
+  ingestionStatus,
   showToast,
 }) => {
   const [isExtracting, setIsExtracting] = useState(false);
   const { getClient } = useUserContext();
+
+  const isIngestionValid = () => {
+    return ingestionStatus === 'SUCCESS' || ingestionStatus === 'ENRICHED';
+  };
 
   const handleDocumentExtraction = async () => {
     setIsExtracting(true);
@@ -55,7 +61,7 @@ const ExtractButtonContainer: React.FC<ExtractContainerProps> = ({
     <div>
       <Button
         onClick={handleDocumentExtraction}
-        disabled={isExtracting}
+        disabled={isExtracting || !isIngestionValid()}
         color={isExtracting ? 'disabled' : 'text_gray'}
         shape="slim"
         tooltip="Document Extraction"
