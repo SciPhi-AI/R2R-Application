@@ -147,23 +147,27 @@ const CollectionDialog: React.FC<CollectionDialogProps> = ({
   return (
     <>
       <Dialog open={open} onOpenChange={onClose}>
-        <DialogContent className="text-white max-w-4xl">
-          <div className="mt-4 space-y-2 h-[calc(90vh-120px)] overflow-y-auto pr-4 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-300 -mr-4">
+        <DialogContent className="text-white max-w-4xl border border-gray-800">
+          <div className="mt-4 space-y-4 h-[calc(90vh-120px)] overflow-y-auto pr-4 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-300 -mr-4">
             <DialogHeader>
-              <DialogTitle className="text-xl font-bold mb-2">
+              <DialogTitle className="text-2xl font-bold mb-4 text-gray-100">
                 Collection Overview
               </DialogTitle>
             </DialogHeader>
+
             {loading ? (
-              <Loader className="mx-auto mt-20 animate-spin" size={64} />
+              <div className="flex items-center justify-center h-64">
+                <Loader className="animate-spin text-blue-500" size={64} />
+              </div>
             ) : (
               <>
                 {collection && (
-                  <div className="grid grid-cols-1 gap-2 mb-4">
+                  <div className="grid grid-cols-1 gap-4 mb-6">
                     <InfoRow label="Name" value={collection.name} />
                     <InfoRow
                       label="Description"
                       value={collection.description}
+                      isDescription={true}
                     />
                     <InfoRow label="Collection ID" value={collection.id} />
                     <InfoRow
@@ -208,62 +212,60 @@ const CollectionDialog: React.FC<CollectionDialogProps> = ({
                     />
                   </div>
                 )}
+
+                <div className="flex flex-col gap-3 mt-6 pb-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    <Button
+                      onClick={handlePull}
+                      color="primary"
+                      className="font-medium py-2.5 px-4 rounded-lg"
+                    >
+                      Pull Document Extractions into Graph
+                    </Button>
+
+                    <Button
+                      onClick={handleExtract}
+                      color="primary"
+                      className="font-medium py-2.5 px-4 rounded-lg"
+                    >
+                      Extract Communities in Graph
+                    </Button>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <Button
+                      onClick={() => setIsAssignDocumentDialogOpen(true)}
+                      color="primary"
+                      className="font-medium py-2.5 px-4 rounded-lg"
+                    >
+                      Manage Files
+                    </Button>
+
+                    <Button
+                      onClick={() => setIsAssignUserDialogOpen(true)}
+                      color="primary"
+                      className="font-medium py-2.5 px-4 rounded-lg"
+                    >
+                      Manage Users
+                    </Button>
+                  </div>
+                  <div className="grid grid-cols-1 gap-3">
+                    <DeleteButton
+                      collectionId={id}
+                      isCollection={true}
+                      onSuccess={() => router.push('/collections')}
+                      showToast={toast}
+                      selectedDocumentIds={[]}
+                      onDelete={() => {}}
+                    />
+                  </div>
+                </div>
               </>
             )}
-            <DeleteButton
-              collectionId={id}
-              isCollection={true}
-              onSuccess={() => router.push('/collections')}
-              showToast={toast}
-              selectedDocumentIds={[]}
-              onDelete={() => {}}
-            />
-            <Button
-              onClick={handlePull}
-              type="button"
-              color="filled"
-              shape="rounded"
-              className="pl-2 pr-2 text-white py-2 px-4"
-              style={{ zIndex: 20 }}
-            >
-              Pull Document Extractions into Graph
-            </Button>
-
-            <Button
-              onClick={handleExtract}
-              type="button"
-              color="filled"
-              shape="rounded"
-              className="pl-2 pr-2 text-white py-2 px-4"
-              style={{ zIndex: 20 }}
-            >
-              Extract Communities in Graph
-            </Button>
-
-            <Button
-              onClick={() => setIsAssignDocumentDialogOpen(true)}
-              type="button"
-              color="filled"
-              shape="rounded"
-              className="pl-2 pr-2 text-white py-2 px-4"
-              style={{ zIndex: 20 }}
-            >
-              Manage Files
-            </Button>
-
-            <Button
-              onClick={() => setIsAssignUserDialogOpen(true)}
-              type="button"
-              color="filled"
-              shape="rounded"
-              className="pl-2 pr-2 text-white py-2 px-4"
-              style={{ zIndex: 20 }}
-            >
-              Manage Users
-            </Button>
           </div>
         </DialogContent>
       </Dialog>
+
       <AssignDocumentToCollectionDialog
         open={isAssignDocumentDialogOpen}
         onClose={() => setIsAssignDocumentDialogOpen(false)}
@@ -280,40 +282,48 @@ const CollectionDialog: React.FC<CollectionDialogProps> = ({
   );
 };
 
-// InfoRow Component
 const InfoRow: React.FC<{
   label: string;
   value?: any;
   values?: { label?: string; value: any }[];
-}> = ({ label, value, values }) => {
+  isDescription?: boolean;
+}> = ({ label, value, values, isDescription }) => {
   const isLongContent =
-    value?.length > 100 || values?.some((v) => v.value?.length > 100);
+    isDescription ||
+    value?.length > 100 ||
+    values?.some((v) => v.value?.length > 100);
 
   return (
     <div
-      className={`py-2 border-b border-gray-700/50 ${
+      className={`py-3 border-b border-gray-700/50 ${
         isLongContent
           ? 'flex flex-col space-y-2'
           : 'flex items-center justify-between'
       }`}
     >
-      <span className="font-medium text-gray-200">{label}:</span>
-      <span
-        className={`text-gray-300 ${isLongContent ? 'mt-1' : 'flex items-center space-x-4'}`}
+      <span className="font-medium text-gray-200">{label}</span>
+      <div
+        className={`text-gray-300 ${
+          isLongContent ? 'mt-2' : 'flex items-center space-x-4'
+        }`}
       >
-        {value !== undefined
-          ? formatValue(value)
-          : values
-            ? values.map((item, index) => (
-                <span key={index} className="flex items-center">
-                  {item.label && (
-                    <span className="mr-1 text-gray-400">{item.label}:</span>
-                  )}
-                  <span>{formatValue(item.value)}</span>
-                </span>
-              ))
-            : 'N/A'}
-      </span>
+        {value !== undefined ? (
+          <span className={isDescription ? 'text-sm leading-relaxed' : ''}>
+            {formatValue(value)}
+          </span>
+        ) : values ? (
+          values.map((item, index) => (
+            <span key={index} className="flex items-center">
+              {item.label && (
+                <span className="mr-2 text-gray-400">{item.label}:</span>
+              )}
+              <span>{formatValue(item.value)}</span>
+            </span>
+          ))
+        ) : (
+          'N/A'
+        )}
+      </div>
     </div>
   );
 };
