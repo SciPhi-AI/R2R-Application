@@ -286,6 +286,12 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 
   const refreshTokenPeriodically = useCallback(async () => {
+    type ActualTokenResponse = {
+      results: {
+        access_token: { token: string };
+        refresh_token: { token: string };
+      };
+    };
     if (authState.isAuthenticated && client) {
       if (
         lastLoginTime &&
@@ -295,20 +301,27 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
       }
       try {
         console.log('Refreshing token...');
-        const newTokens = await client.users.refreshAccessToken();
+        const newTokens =
+          (await client.users.refreshAccessToken()) as unknown as ActualTokenResponse;
         console.log('Refreshed token:', newTokens);
 
         console.log(
           'Setting new tokens in localStorage with access token:',
-          newTokens.results.access_token,
+          newTokens.results.access_token.token,
           ' and refresh token:',
-          newTokens.results.refresh_token
+          newTokens.results.refresh_token.token
         );
-        localStorage.setItem('accessToken', newTokens.results.access_token);
-        localStorage.setItem('refreshToken', newTokens.results.refresh_token);
+        localStorage.setItem(
+          'accessToken',
+          newTokens.results.access_token.token
+        );
+        localStorage.setItem(
+          'refreshToken',
+          newTokens.results.refresh_token.token
+        );
         client.setTokens(
-          newTokens.results.access_token,
-          newTokens.results.refresh_token
+          newTokens.results.access_token.token,
+          newTokens.results.refresh_token.token
         );
         setLastLoginTime(Date.now());
       } catch (error) {
