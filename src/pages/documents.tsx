@@ -56,7 +56,7 @@ const Index: React.FC = () => {
       // Fetch first batch
       const firstBatch = await client.documents.list({
         offset: offset,
-        limit: 100,
+        limit: 1000,
       });
 
       console.log('firstBatch:', firstBatch);

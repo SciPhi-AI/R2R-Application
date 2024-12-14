@@ -8,12 +8,19 @@ import {
   RelationshipResponse,
   User,
 } from 'r2r-js/dist/types';
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, {
+  useRef,
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+} from 'react';
 
 import { RemoveButton } from '@/components/ChatDemo/remove';
 import Table, { Column } from '@/components/ChatDemo/Table';
 import CollectionDialog from '@/components/ChatDemo/utils/collectionDialog';
 import DocumentInfoDialog from '@/components/ChatDemo/utils/documentDialogInfo';
+import KnowledgeGraph from '@/components/knowledgeGraph';
 import Layout from '@/components/Layout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/Button';
@@ -29,6 +36,12 @@ const ITEMS_PER_PAGE = 10;
 const CollectionIdPage: React.FC = () => {
   const router = useRouter();
   const { getClient } = useUserContext();
+
+  const [containerDimensions, setContainerDimensions] = useState({
+    width: 0,
+    height: 0,
+  });
+  const graphContainerRef = useRef<HTMLDivElement>(null);
 
   const [collection, setCollection] = useState<CollectionResponse | null>(null);
 
@@ -88,6 +101,31 @@ const CollectionIdPage: React.FC = () => {
     'currentCollectionId outside of fetchAllDocuments:',
     currentCollectionId
   );
+
+  useEffect(() => {
+    const updateDimensions = () => {
+      if (graphContainerRef.current && activeTab === 'viewEntities') {
+        const width = graphContainerRef.current.offsetWidth;
+        const height = graphContainerRef.current.offsetHeight;
+        setContainerDimensions({
+          width,
+          height,
+        });
+      }
+    };
+
+    updateDimensions();
+
+    // Small delay to ensure the tab content is rendered
+    const timeoutId = setTimeout(updateDimensions, 100);
+
+    window.addEventListener('resize', updateDimensions);
+
+    return () => {
+      window.removeEventListener('resize', updateDimensions);
+      clearTimeout(timeoutId);
+    };
+  }, [activeTab]); // Add activeTab as dependency
 
   const fetchCollection = useCallback(async () => {
     if (!currentCollectionId) {
@@ -762,7 +800,7 @@ const CollectionIdPage: React.FC = () => {
           onValueChange={setActiveTab}
           className="flex flex-col flex-1 mt-4 overflow-hidden"
         >
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="documents" className="flex items-center">
               Documents
             </TabsTrigger>
@@ -777,6 +815,9 @@ const CollectionIdPage: React.FC = () => {
             </TabsTrigger>
             <TabsTrigger value="communities" className="flex items-center">
               Communities
+            </TabsTrigger>
+            <TabsTrigger value="viewEntities" className="flex items-center">
+              Explore
             </TabsTrigger>
           </TabsList>
           <TabsContent value="documents" className="flex-1 overflow-auto">
@@ -882,6 +923,20 @@ const CollectionIdPage: React.FC = () => {
               loading={loading}
               showPagination={true}
             />
+          </TabsContent>
+          <TabsContent value="viewEntities" className="flex-1 overflow-auto">
+            <div
+              ref={graphContainerRef}
+              className="w-full h-[600px] flex items-center justify-center"
+            >
+              {containerDimensions.width > 0 && entities.length > 0 && (
+                <KnowledgeGraph
+                  entities={entities}
+                  width={containerDimensions.width}
+                  height={containerDimensions.height}
+                />
+              )}
+            </div>
           </TabsContent>
         </Tabs>
       </main>
