@@ -25,7 +25,8 @@ const ExtractButtonContainer: React.FC<ExtractContainerProps> = ({
   const { getClient } = useUserContext();
 
   const isIngestionValid = () => {
-    return ingestionStatus === 'SUCCESS' || ingestionStatus === 'ENRICHED';
+    const status = ingestionStatus.toUpperCase();
+    return status === 'SUCCESS';
   };
 
   const handleDocumentExtraction = async () => {
