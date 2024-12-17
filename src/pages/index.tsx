@@ -28,11 +28,11 @@ const HomePage = () => {
   const [copied, setCopied] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
 
-  useEffect(() => {
-    if (isAuthenticated && !isSuperUser()) {
-      router.replace('/documents');
-    }
-  }, [isAuthenticated, router]);
+  // useEffect(() => {
+  //   if (isAuthenticated && !isSuperUser()) {
+  //     router.replace('/documents');
+  //   }
+  // }, [isAuthenticated, router]);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -50,7 +50,7 @@ const HomePage = () => {
         <div className="relative bg-zinc-900 p-5">
           <div className="flex flex-col lg:flex-row gap-4">
             {/* Left column - Alert */}
-            <div className="w-full lg:w-2/3 flex flex-col gap-4">
+            <div className="w-full flex flex-col gap-4">
               <Alert variant="default" className="flex flex-col">
                 <AlertTitle className="text-lg ">
                   <div className="flex gap-2 text-xl">
@@ -286,7 +286,7 @@ const HomePage = () => {
                   </Card>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <Card className="w-full sm:w-1/2 flex flex-col">
+                  {/* <Card className="w-full sm:w-1/2 flex flex-col">
                     <CardHeader className="flex flex-row items-center space-x-2">
                       <Image
                         src="/images/hatchet-logo.svg"
@@ -371,28 +371,13 @@ const HomePage = () => {
                         </Button>
                       </div>
                     </CardContent>
-                  </Card>
+                  </Card> */}
                   <div className="w-full sm:w-1/2"></div>
                 </div>
               </div>
             </div>
 
             {/* Right column - Cards */}
-            <div className="w-full lg:w-1/3 flex flex-col gap-4">
-              {/* R2R Server Cards */}
-              <div className="flex flex-col gap-4 flex-grow">
-                {pipeline && (
-                  <R2RServerCard
-                    pipeline={pipeline}
-                    onStatusChange={setIsConnected}
-                  />
-                )}
-
-                <div className="flex-grow">
-                  <RequestsCard />
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </main>

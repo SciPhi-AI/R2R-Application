@@ -419,34 +419,52 @@ export interface UploadDialogProps {
   onUpload: (files: File[]) => void;
 }
 
+
 export interface UserContextProps {
+  // State
   pipeline: Pipeline | null;
-  setPipeline: (pipeline: Pipeline) => void;
+  setPipeline: (pipeline: Pipeline | null) => void;
   selectedModel: string;
   setSelectedModel: (model: string) => void;
   isAuthenticated: boolean;
+  authState: AuthState;
+  
+  // Client
+  client: r2rClient | null;
+  getClient: () => r2rClient | null;
+  
+  // View Mode
+  viewMode: 'admin' | 'user';
+  setViewMode: (mode: 'admin' | 'user') => void;
+  isSuperUser: () => boolean;
+
+  // Authentication Methods
   login: (
     email: string,
     password: string,
     instanceUrl: string
   ) => Promise<{ success: boolean; userRole: 'admin' | 'user' }>;
+  
   loginWithToken: (
     token: string,
     instanceUrl: string
   ) => Promise<{ success: boolean; userRole: 'admin' | 'user' }>;
+  
   logout: () => Promise<void>;
+  
   unsetCredentials: () => Promise<void>;
+  
   register: (
     email: string,
     password: string,
     instanceUrl: string
   ) => Promise<void>;
-  authState: AuthState;
-  getClient: () => r2rClient | null;
-  client: r2rClient | null;
-  viewMode: 'admin' | 'user';
-  setViewMode: React.Dispatch<React.SetStateAction<'admin' | 'user'>>;
-  isSuperUser: () => boolean;
+  
+  verifyEmail: (
+    email: string,
+    verificationCode: string,
+    instanceUrl: string
+  ) => Promise<void>;
 }
 
 export type Collection = {

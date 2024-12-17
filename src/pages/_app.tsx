@@ -19,17 +19,23 @@ function MyAppContent({ Component, pageProps }: AppProps) {
   }, []);
 
   const checkAccess = useCallback(async () => {
-    const publicRoutes = ['/auth/login', '/auth/signup'];
+    const publicRoutes = ['/auth/login', '/auth/signup', '/auth/verify-email'];
     const userRoutes = [
+      // '',
+      '/',
       '/documents',
       '/collections',
       '/collection',
       '/chat',
       '/account',
+      '/search'
     ];
     const currentPath = router.pathname;
 
     const isUserRoute = (path: string) => {
+      // console.log('route = ', route)
+      console.log('userRoutes.some((route) => path.startsWith(route)) = ', userRoutes.some((route) => path.startsWith(route)))
+      console.log('path = ', path)
       return userRoutes.some((route) => path.startsWith(route));
     };
 

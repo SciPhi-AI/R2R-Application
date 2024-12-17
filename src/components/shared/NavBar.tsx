@@ -58,7 +58,7 @@ const NavItems: React.FC<NavItemsProps> = ({
   const items =
     role === 'admin'
       ? [homeItem, ...commonItems, ...adminItems]
-      : [...commonItems];
+      : [homeItem, ...commonItems];
 
   if (!isAuthenticated) {
     return null;

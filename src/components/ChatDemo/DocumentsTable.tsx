@@ -334,7 +334,7 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
             showPagination={showPagination}
             loading={loading}
             enableColumnToggle={false}
-            totalEntries={totalEntries}
+            totalEntries={Math.max(10, totalEntries || 0)}
           />
         </>
       )}
