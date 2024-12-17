@@ -419,7 +419,6 @@ export interface UploadDialogProps {
   onUpload: (files: File[]) => void;
 }
 
-
 export interface UserContextProps {
   // State
   pipeline: Pipeline | null;
@@ -428,11 +427,11 @@ export interface UserContextProps {
   setSelectedModel: (model: string) => void;
   isAuthenticated: boolean;
   authState: AuthState;
-  
+
   // Client
   client: r2rClient | null;
   getClient: () => r2rClient | null;
-  
+
   // View Mode
   viewMode: 'admin' | 'user';
   setViewMode: (mode: 'admin' | 'user') => void;
@@ -444,22 +443,22 @@ export interface UserContextProps {
     password: string,
     instanceUrl: string
   ) => Promise<{ success: boolean; userRole: 'admin' | 'user' }>;
-  
+
   loginWithToken: (
     token: string,
     instanceUrl: string
   ) => Promise<{ success: boolean; userRole: 'admin' | 'user' }>;
-  
+
   logout: () => Promise<void>;
-  
+
   unsetCredentials: () => Promise<void>;
-  
+
   register: (
     email: string,
     password: string,
     instanceUrl: string
   ) => Promise<void>;
-  
+
   verifyEmail: (
     email: string,
     verificationCode: string,

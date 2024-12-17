@@ -28,14 +28,17 @@ function MyAppContent({ Component, pageProps }: AppProps) {
       '/collection',
       '/chat',
       '/account',
-      '/search'
+      '/search',
     ];
     const currentPath = router.pathname;
 
     const isUserRoute = (path: string) => {
       // console.log('route = ', route)
-      console.log('userRoutes.some((route) => path.startsWith(route)) = ', userRoutes.some((route) => path.startsWith(route)))
-      console.log('path = ', path)
+      console.log(
+        'userRoutes.some((route) => path.startsWith(route)) = ',
+        userRoutes.some((route) => path.startsWith(route))
+      );
+      console.log('path = ', path);
       return userRoutes.some((route) => path.startsWith(route));
     };
 

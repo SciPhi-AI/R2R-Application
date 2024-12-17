@@ -32,12 +32,18 @@ const SearchPage: React.FC = () => {
   // Search results
   const [vectorSearchResults, setVectorSearchResults] = useState<any[]>([]);
   const [entitySearchResults, setEntitySearchResults] = useState<any[]>([]);
-  const [relationshipSearchResults, setRelationshipSearchResults] = useState<any[]>([]);
-  const [communitySearchResults, setCommunitySearchResults] = useState<any[]>([]);
+  const [relationshipSearchResults, setRelationshipSearchResults] = useState<
+    any[]
+  >([]);
+  const [communitySearchResults, setCommunitySearchResults] = useState<any[]>(
+    []
+  );
 
   // Collections
   const [collections, setCollections] = useState<Collection[]>([]);
-  const [selectedCollectionIds, setSelectedCollectionIds] = useState<string[]>([]);
+  const [selectedCollectionIds, setSelectedCollectionIds] = useState<string[]>(
+    []
+  );
 
   // Switch manager
   const { switches, initializeSwitch, updateSwitch } = useSwitchManager();
@@ -54,8 +60,11 @@ const SearchPage: React.FC = () => {
   const [fullTextLimit, setFullTextLimit] = useState<number>();
   const [rrfK, setRrfK] = useState<number>();
   const [kgSearchLevel, setKgSearchLevel] = useState<number | null>(null);
-  const [maxCommunityDescriptionLength, setMaxCommunityDescriptionLength] = useState<number>(100);
-  const [localSearchLimits, setLocalSearchLimits] = useState<Record<string, number>>({});
+  const [maxCommunityDescriptionLength, setMaxCommunityDescriptionLength] =
+    useState<number>(100);
+  const [localSearchLimits, setLocalSearchLimits] = useState<
+    Record<string, number>
+  >({});
 
   useEffect(() => {
     initializeSwitch(
@@ -179,7 +188,9 @@ const SearchPage: React.FC = () => {
                     {result.metadata?.title || `Result ${index + 1}`}
                   </h3>
                   <p className="text-sm mb-2">{result.text}</p>
-                  <p className="text-sm mb-2">Score: {result.score.toFixed(4)}</p>
+                  <p className="text-sm mb-2">
+                    Score: {result.score.toFixed(4)}
+                  </p>
                   <Accordion type="single" collapsible className="w-full">
                     <AccordionItem value={`item-${index}`}>
                       <AccordionTrigger>View Details</AccordionTrigger>
@@ -208,7 +219,10 @@ const SearchPage: React.FC = () => {
                     <AccordionItem value={`item-${index}`}>
                       <AccordionTrigger>View Details</AccordionTrigger>
                       <AccordionContent>
-                        <pre className="text-xs bg-zinc-900 p-4 rounded" style={{ whiteSpace: 'pre-wrap' }}>
+                        <pre
+                          className="text-xs bg-zinc-900 p-4 rounded"
+                          style={{ whiteSpace: 'pre-wrap' }}
+                        >
                           {JSON.stringify(result, null, 2)}
                         </pre>
                       </AccordionContent>
@@ -232,7 +246,10 @@ const SearchPage: React.FC = () => {
                     <AccordionItem value={`item-${index}`}>
                       <AccordionTrigger>View Details</AccordionTrigger>
                       <AccordionContent>
-                        <pre className="text-xs bg-zinc-900 p-4 rounded" style={{ whiteSpace: 'pre-wrap' }}>
+                        <pre
+                          className="text-xs bg-zinc-900 p-4 rounded"
+                          style={{ whiteSpace: 'pre-wrap' }}
+                        >
                           {JSON.stringify(result, null, 2)}
                         </pre>
                       </AccordionContent>
@@ -256,7 +273,10 @@ const SearchPage: React.FC = () => {
                     <AccordionItem value={`item-${index}`}>
                       <AccordionTrigger>View Details</AccordionTrigger>
                       <AccordionContent>
-                        <pre className="text-xs bg-zinc-900 p-4 rounded" style={{ whiteSpace: 'pre-wrap' }}>
+                        <pre
+                          className="text-xs bg-zinc-900 p-4 rounded"
+                          style={{ whiteSpace: 'pre-wrap' }}
+                        >
                           {JSON.stringify(result, null, 2)}
                         </pre>
                       </AccordionContent>
@@ -318,8 +338,13 @@ const SearchPage: React.FC = () => {
           }}
         />
 
-        <div className={`main-content-wrapper ${sidebarIsOpen ? '' : 'sidebar-closed'}`}>
-          <div className={`main-content ${sidebarIsOpen ? '' : 'sidebar-closed'}`} ref={contentAreaRef}>
+        <div
+          className={`main-content-wrapper ${sidebarIsOpen ? '' : 'sidebar-closed'}`}
+        >
+          <div
+            className={`main-content ${sidebarIsOpen ? '' : 'sidebar-closed'}`}
+            ref={contentAreaRef}
+          >
             <div className="sticky top-0 z-10 bg-zinc-900 shadow-md">
               <form onSubmit={handleSearch} className="py-4">
                 <div className="relative flex items-center focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 focus-within:ring-offset-zinc-800 rounded-full">
@@ -343,7 +368,10 @@ const SearchPage: React.FC = () => {
               </form>
             </div>
 
-            <div className={`main-content ${sidebarIsOpen ? '' : 'sidebar-closed'} p-4`} ref={contentAreaRef}>
+            <div
+              className={`main-content ${sidebarIsOpen ? '' : 'sidebar-closed'} p-4`}
+              ref={contentAreaRef}
+            >
               {renderSearchResults()}
             </div>
           </div>
