@@ -6,7 +6,7 @@ import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/Button';
 import { useUserContext } from '@/context/UserContext';
 
-const DEFAULT_DEPLOYMENT_URL = 'http://localhost:7272';
+const DEFAULT_DEPLOYMENT_URL = 'https://api.cloud.sciphi.ai';
 
 const VerifyEmailPage: React.FC = () => {
   const router = useRouter();
