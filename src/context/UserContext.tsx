@@ -22,6 +22,7 @@ function isAuthState(obj: any): obj is AuthState {
   );
 }
 
+// Add proper UserContext initialization
 const UserContext = createContext<UserContextProps>({
   pipeline: null,
   setPipeline: () => {},
@@ -33,6 +34,7 @@ const UserContext = createContext<UserContextProps>({
   logout: async () => {},
   unsetCredentials: async () => {},
   register: async () => {},
+  verifyEmail: async () => {},
   authState: {
     isAuthenticated: false,
     email: null,
@@ -166,6 +168,22 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
         return { success: true, userRole };
       } catch (error) {
         console.error('Login failed:', error);
+        throw error;
+      }
+    },
+    []
+  );
+
+  const verifyEmail = useCallback(
+    async (email: string, verificationCode: string, instanceUrl: string) => {
+      const newClient = new r2rClient(instanceUrl);
+      try {
+        await newClient.users.verifyEmail({
+          email: email,
+          verification_code: verificationCode,
+        } as any);
+      } catch (error) {
+        console.error('Email verification failed:', error);
         throw error;
       }
     },
@@ -417,6 +435,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
       logout,
       unsetCredentials,
       register,
+      verifyEmail,
       getClient,
       client,
       viewMode,
@@ -436,6 +455,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
       unsetCredentials,
       register,
       getClient,
+      verifyEmail,
     ]
   );
 

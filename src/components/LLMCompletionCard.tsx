@@ -345,7 +345,7 @@ const LLMCompletionCard: React.FC = () => {
         if (!client) {
           throw new Error('Failed to get authenticated client');
         }
-        const logs = await client.system.logs({});
+        // const logs = await client.system.logs({});
         // const processedData = processLogData(null);
         // setCompletionData(processedData);
       } catch (error) {

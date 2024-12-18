@@ -25,6 +25,7 @@ const SearchPage: React.FC = () => {
   const { pipeline, getClient } = useUserContext();
   const [loading, setLoading] = useState<boolean>(false);
   const [query, setQuery] = useState<string>('');
+  const [hasSearched, setHasSearched] = useState<boolean>(false);
   const [sidebarIsOpen, setSidebarIsOpen] = useState(false);
   const toggleSidebar = () => setSidebarIsOpen(!sidebarIsOpen);
 
@@ -121,6 +122,7 @@ const SearchPage: React.FC = () => {
     }
 
     setLoading(true);
+    setHasSearched(true);
     try {
       const client = await getClient();
       if (!client) {
@@ -157,6 +159,138 @@ const SearchPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const renderSearchResults = () => {
+    if (!hasSearched) {
+      return (
+        <div className="mt-8 text-center text-zinc-400">
+          Enter a search query to see results
+        </div>
+      );
+    }
+
+    return (
+      <div className="mt-8">
+        <h2 className="text-xl font-semibold mb-4">Search Results</h2>
+        <Tabs defaultValue="chunk" className="w-full">
+          <TabsList>
+            <TabsTrigger value="chunk">Chunks</TabsTrigger>
+            <TabsTrigger value="entity">Entities</TabsTrigger>
+            <TabsTrigger value="relationship">Relationships</TabsTrigger>
+            <TabsTrigger value="community">Communities</TabsTrigger>
+          </TabsList>
+          <TabsContent value="chunk">
+            {vectorSearchResults.length > 0 ? (
+              vectorSearchResults.map((result, index) => (
+                <div key={index} className="mb-4 p-4 bg-zinc-800 rounded">
+                  <h3 className="text-lg font-semibold mb-2">
+                    {result.metadata?.title || `Result ${index + 1}`}
+                  </h3>
+                  <p className="text-sm mb-2">{result.text}</p>
+                  <p className="text-sm mb-2">
+                    Score: {result.score.toFixed(4)}
+                  </p>
+                  <Accordion type="single" collapsible className="w-full">
+                    <AccordionItem value={`item-${index}`}>
+                      <AccordionTrigger>View Details</AccordionTrigger>
+                      <AccordionContent>
+                        <pre className="text-xs overflow-auto bg-zinc-900 p-4 rounded">
+                          {JSON.stringify(result, null, 2)}
+                        </pre>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                </div>
+              ))
+            ) : (
+              <p>No chunk search results found.</p>
+            )}
+          </TabsContent>
+          <TabsContent value="entity">
+            {entitySearchResults.length > 0 ? (
+              entitySearchResults.map((result, index) => (
+                <div key={index} className="mb-4 p-4 bg-zinc-800 rounded">
+                  <h3 className="text-lg font-semibold mb-2">
+                    {result.content.name}
+                  </h3>
+                  <p className="text-sm mb-2">{result.content.description}</p>
+                  <Accordion type="single" collapsible className="w-full">
+                    <AccordionItem value={`item-${index}`}>
+                      <AccordionTrigger>View Details</AccordionTrigger>
+                      <AccordionContent>
+                        <pre
+                          className="text-xs bg-zinc-900 p-4 rounded"
+                          style={{ whiteSpace: 'pre-wrap' }}
+                        >
+                          {JSON.stringify(result, null, 2)}
+                        </pre>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                </div>
+              ))
+            ) : (
+              <p>No entity results found.</p>
+            )}
+          </TabsContent>
+          <TabsContent value="relationship">
+            {relationshipSearchResults.length > 0 ? (
+              relationshipSearchResults.map((result, index) => (
+                <div key={index} className="mb-4 p-4 bg-zinc-800 rounded">
+                  <h3 className="text-lg font-semibold mb-2">
+                    {result.content.subject} {result.content.predicate}{' '}
+                    {result.content.object}
+                  </h3>
+                  <Accordion type="single" collapsible className="w-full">
+                    <AccordionItem value={`item-${index}`}>
+                      <AccordionTrigger>View Details</AccordionTrigger>
+                      <AccordionContent>
+                        <pre
+                          className="text-xs bg-zinc-900 p-4 rounded"
+                          style={{ whiteSpace: 'pre-wrap' }}
+                        >
+                          {JSON.stringify(result, null, 2)}
+                        </pre>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                </div>
+              ))
+            ) : (
+              <p>No relationship results found.</p>
+            )}
+          </TabsContent>
+          <TabsContent value="community">
+            {communitySearchResults.length > 0 ? (
+              communitySearchResults.map((result, index) => (
+                <div key={index} className="mb-4 p-4 bg-zinc-800 rounded">
+                  <h3 className="text-lg font-semibold mb-2">
+                    {result.content.name}
+                  </h3>
+                  <p className="text-sm mb-2">{result.content.summary}</p>
+                  <Accordion type="single" collapsible className="w-full">
+                    <AccordionItem value={`item-${index}`}>
+                      <AccordionTrigger>View Details</AccordionTrigger>
+                      <AccordionContent>
+                        <pre
+                          className="text-xs bg-zinc-900 p-4 rounded"
+                          style={{ whiteSpace: 'pre-wrap' }}
+                        >
+                          {JSON.stringify(result, null, 2)}
+                        </pre>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                </div>
+              ))
+            ) : (
+              <p>No community results found.</p>
+            )}
+          </TabsContent>
+        </Tabs>
+      </div>
+    );
   };
 
   return (
@@ -238,159 +372,7 @@ const SearchPage: React.FC = () => {
               className={`main-content ${sidebarIsOpen ? '' : 'sidebar-closed'} p-4`}
               ref={contentAreaRef}
             >
-              <div className="mt-8">
-                <h2 className="text-xl font-semibold mb-4">Search Results</h2>
-                <Tabs defaultValue="chunk" className="w-full">
-                  <TabsList>
-                    <TabsTrigger value="chunk">Chunks</TabsTrigger>
-                    <TabsTrigger value="entity">Entities</TabsTrigger>
-                    <TabsTrigger value="relationship">
-                      Relationships
-                    </TabsTrigger>
-                    <TabsTrigger value="community">Communites</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="chunk">
-                    {vectorSearchResults.length > 0 ? (
-                      vectorSearchResults.map((result, index) => (
-                        <div
-                          key={index}
-                          className="mb-4 p-4 bg-zinc-800 rounded"
-                        >
-                          <h3 className="text-lg font-semibold mb-2">
-                            {result.metadata?.title || `Result ${index + 1}`}
-                          </h3>
-                          <p className="text-sm mb-2">{result.text}</p>
-                          <p className="text-sm mb-2">
-                            Score: {result.score.toFixed(4)}
-                          </p>
-                          <Accordion
-                            type="single"
-                            collapsible
-                            className="w-full"
-                          >
-                            <AccordionItem value={`item-${index}`}>
-                              <AccordionTrigger>View Details</AccordionTrigger>
-                              <AccordionContent>
-                                <pre className="text-xs overflow-auto bg-zinc-900 p-4 rounded">
-                                  {JSON.stringify(result, null, 2)}
-                                </pre>
-                              </AccordionContent>
-                            </AccordionItem>
-                          </Accordion>
-                        </div>
-                      ))
-                    ) : (
-                      <p>No chunk search results found.</p>
-                    )}
-                  </TabsContent>
-                  <TabsContent value="entity">
-                    {entitySearchResults.length > 0 ? (
-                      entitySearchResults.map((result, index) => (
-                        <div
-                          key={index}
-                          className="mb-4 p-4 bg-zinc-800 rounded"
-                        >
-                          <h3 className="text-lg font-semibold mb-2">
-                            {result.content.name}
-                          </h3>
-                          <p className="text-sm mb-2">
-                            {result.content.description}
-                          </p>
-                          <Accordion
-                            type="single"
-                            collapsible
-                            className="w-full"
-                          >
-                            <AccordionItem value={`item-${index}`}>
-                              <AccordionTrigger>View Details</AccordionTrigger>
-                              <AccordionContent>
-                                <pre
-                                  className="text-xs bg-zinc-900 p-4 rounded"
-                                  style={{ whiteSpace: 'pre-wrap' }}
-                                >
-                                  {JSON.stringify(result, null, 2)}
-                                </pre>
-                              </AccordionContent>
-                            </AccordionItem>
-                          </Accordion>
-                        </div>
-                      ))
-                    ) : (
-                      <p>No entity results found.</p>
-                    )}
-                  </TabsContent>
-                  <TabsContent value="relationship">
-                    {relationshipSearchResults.length > 0 ? (
-                      relationshipSearchResults.map((result, index) => (
-                        <div
-                          key={index}
-                          className="mb-4 p-4 bg-zinc-800 rounded"
-                        >
-                          <h3 className="text-lg font-semibold mb-2">
-                            {result.content.subject} {result.content.predicate}{' '}
-                            {result.content.object}
-                          </h3>
-                          <Accordion
-                            type="single"
-                            collapsible
-                            className="w-full"
-                          >
-                            <AccordionItem value={`item-${index}`}>
-                              <AccordionTrigger>View Details</AccordionTrigger>
-                              <AccordionContent>
-                                <pre
-                                  className="text-xs bg-zinc-900 p-4 rounded"
-                                  style={{ whiteSpace: 'pre-wrap' }}
-                                >
-                                  {JSON.stringify(result, null, 2)}
-                                </pre>
-                              </AccordionContent>
-                            </AccordionItem>
-                          </Accordion>
-                        </div>
-                      ))
-                    ) : (
-                      <p>No relationship results found.</p>
-                    )}
-                  </TabsContent>
-                  <TabsContent value="community">
-                    {communitySearchResults.length > 0 ? (
-                      communitySearchResults.map((result, index) => (
-                        <div
-                          key={index}
-                          className="mb-4 p-4 bg-zinc-800 rounded"
-                        >
-                          <h3 className="text-lg font-semibold mb-2">
-                            {result.content.name}
-                          </h3>
-                          <p className="text-sm mb-2">
-                            {result.content.summary}
-                          </p>
-                          <Accordion
-                            type="single"
-                            collapsible
-                            className="w-full"
-                          >
-                            <AccordionItem value={`item-${index}`}>
-                              <AccordionTrigger>View Details</AccordionTrigger>
-                              <AccordionContent>
-                                <pre
-                                  className="text-xs bg-zinc-900 p-4 rounded"
-                                  style={{ whiteSpace: 'pre-wrap' }}
-                                >
-                                  {JSON.stringify(result, null, 2)}
-                                </pre>
-                              </AccordionContent>
-                            </AccordionItem>
-                          </Accordion>
-                        </div>
-                      ))
-                    ) : (
-                      <p>No community results found.</p>
-                    )}
-                  </TabsContent>
-                </Tabs>
-              </div>
+              {renderSearchResults()}
             </div>
           </div>
         </div>

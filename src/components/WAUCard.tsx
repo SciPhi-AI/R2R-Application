@@ -202,7 +202,7 @@ const WAUCard: React.FC = () => {
         if (!client) {
           throw new Error('Failed to get authenticated client');
         }
-        const logs = await client.system.logs({});
+        // const logs = await client.system.logs({});
         // Process logs into suitable data format here
       } catch (error) {
         console.error('Error fetching log data:', error);
