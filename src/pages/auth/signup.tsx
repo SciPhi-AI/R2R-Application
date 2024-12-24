@@ -33,11 +33,8 @@ const LoginPage: React.FC = () => {
       return;
     }
     try {
-      console.log('Starting registration process');
       await register(email, password, deploymentUrl);
-      console.log('Registration successful, proceeding to login');
       await login(email, password, deploymentUrl);
-      console.log('Login successful, redirecting');
       router.push('/');
     } catch (error) {
       console.error('Registration or login failed:', error);

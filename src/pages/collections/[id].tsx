@@ -97,11 +97,6 @@ const CollectionIdPage: React.FC = () => {
   const currentCollectionId =
     typeof router.query.id === 'string' ? router.query.id : '';
 
-  console.log(
-    'currentCollectionId outside of fetchAllDocuments:',
-    currentCollectionId
-  );
-
   useEffect(() => {
     const updateDimensions = () => {
       if (graphContainerRef.current && activeTab === 'viewEntities') {
@@ -171,10 +166,6 @@ const CollectionIdPage: React.FC = () => {
       let totalDocumentEntries = 0;
 
       // Fetch first batch
-      console.log(
-        'currentCollectionId inside of fetchAllDocuments:',
-        currentCollectionId
-      );
       const firstBatch = await client.collections.listDocuments({
         id: currentCollectionId,
         offset: offset,

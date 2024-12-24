@@ -33,7 +33,6 @@ const Pagination: React.FC<PaginationProps> = ({
   );
 
   const handlePageChange = (newPage: number) => {
-    console.log(`Pagination handlePageChange called with page: ${newPage}`);
     if (newPage >= 1 && newPage <= totalPages && !isLoading) {
       onPageChange(newPage);
     }

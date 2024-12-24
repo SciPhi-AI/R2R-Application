@@ -87,7 +87,6 @@ const Sidebar: React.FC<SidebarProps> = ({
           offset: 0,
           limit: 500,
         });
-        console.log('Conversations:', response);
         setConversations(response.results);
       } catch (error) {
         console.error('Error fetching collections:', error);

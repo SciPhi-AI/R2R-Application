@@ -200,7 +200,6 @@ export const Result: FC<{
       if (!currentConversationId) {
         try {
           const newConversation = await client.conversations.create();
-          console.log('newConversation:', newConversation);
 
           if (!newConversation || !newConversation.results) {
             throw new Error('Failed to create a new conversation');
@@ -212,7 +211,6 @@ export const Result: FC<{
             throw new Error('Invalid conversation ID received');
           }
 
-          console.log('New conversation ID:', currentConversationId);
           setSelectedConversationId(currentConversationId);
         } catch (error) {
           console.error('Error creating new conversation:', error);
@@ -225,8 +223,6 @@ export const Result: FC<{
         setError('No valid conversation ID. Please try again.');
         return;
       }
-
-      console.log('Using conversation ID:', currentConversationId);
 
       const ragGenerationConfig: GenerationConfig = {
         stream: true,
@@ -360,7 +356,6 @@ export const Result: FC<{
             role: 'assistant',
             content: assistantResponse,
           });
-          console.log('Added assistant message to conversation');
         } catch (error) {
           console.error(
             'Error adding assistant message to conversation:',

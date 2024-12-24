@@ -1,16 +1,20 @@
 import { SquarePen, ChevronDown, ChevronUp } from 'lucide-react';
-import { SettingsResponse } from 'r2r-js';
+import { WrappedSettingsResponse } from 'r2r-js';
 import React, { useState, useEffect, useCallback } from 'react';
-import toml from 'toml';
 
 import EditPromptDialog from '@/components/ChatDemo/utils/editPromptDialog';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/Button';
 import { useUserContext } from '@/context/UserContext';
 
+interface Prompt {
+  name: string;
+  template: string;
+}
+
 interface AppData {
   config: Record<string, any>;
-  prompts: Record<string, any>;
+  prompts: Prompt[];
 }
 
 const renderNestedConfig = (
@@ -117,17 +121,12 @@ const Index: React.FC = () => {
         throw new Error('Failed to get authenticated client');
       }
 
-      const response = await client.system.settings();
-      console.log(response);
+      const response: WrappedSettingsResponse = await client.system.settings();
 
       if (response && response.results) {
-        const configSettings = response.results.config;
-        const { prompts } = response.results;
-        const projectName = response.results.r2rProjectName;
-
         setAppData({
-          config: typeof config === 'string' ? toml.parse(config) : config,
-          prompts: prompts,
+          config: response.results.config,
+          prompts: response.results.prompts.results,
         });
       } else {
         throw new Error('Unexpected response structure');
@@ -143,7 +142,7 @@ const Index: React.FC = () => {
     }
   }, [pipeline?.deploymentUrl, fetchAppData]);
 
-  const { config = {}, prompts = {} } = appData || {};
+  const { config = {}, prompts = [] } = appData || {};
 
   const handleEditPrompt = (name: string, template: string) => {
     setSelectedPromptName(name);
@@ -227,12 +226,12 @@ const Index: React.FC = () => {
                           Template
                         </div>
                       </div>
-                      {Object.entries(prompts.results.results).length > 0 ? (
-                        Object.entries(prompts).map(([name, prompt]) => (
+                      {appData?.prompts && appData.prompts.length > 0 ? (
+                        appData.prompts.map((prompt) => (
                           <PromptRow
-                            key={name}
-                            name={name}
-                            template={prompt}
+                            key={prompt.name}
+                            name={prompt.name}
+                            template={prompt.template}
                             onEdit={handleEditPrompt}
                           />
                         ))

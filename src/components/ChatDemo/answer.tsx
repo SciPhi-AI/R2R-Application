@@ -98,7 +98,6 @@ export const Answer: FC<{
         const communitiesArray = kgLocalResult.filter(
           (item: any) => item.result_type === 'community'
         );
-        console.log('communitiesArray = ', communitiesArray);
         setParsedEntities(entitiesArray);
         setParsedCommunities(communitiesArray);
         count += entitiesArray.length + communitiesArray.length;
