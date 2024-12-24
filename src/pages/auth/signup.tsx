@@ -33,11 +33,8 @@ const LoginPage: React.FC = () => {
       return;
     }
     try {
-      console.log('Starting registration process');
       await register(email, password, deploymentUrl);
-      console.log('Registration successful, proceeding to login');
       await login(email, password, deploymentUrl);
-      console.log('Login successful, redirecting');
       router.push('/');
     } catch (error) {
       console.error('Registration or login failed:', error);
@@ -154,7 +151,7 @@ const LoginPage: React.FC = () => {
             </div>
           </div>
           <div className="flex items-center justify-between">
-            <Button color="filled" className="w-full">
+            <Button color="primary" className="w-full">
               Sign up with Email
             </Button>
           </div>
@@ -165,7 +162,7 @@ const LoginPage: React.FC = () => {
             Already have an account?{' '}
             <span
               onClick={handleLoginClick}
-              className="text-indigo-400 cursor-pointer hover:underline"
+              className="text-accent-base cursor-pointer hover:underline"
             >
               Log in
             </span>

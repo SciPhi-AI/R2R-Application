@@ -17,6 +17,8 @@ import {
 import { useUserContext } from '@/context/UserContext';
 import { ModelSelectorProps } from '@/types';
 
+import { Button } from './Button';
+
 const predefinedModels = [
   { value: 'gpt-4o-mini', label: 'gpt-4o-mini' },
   { value: 'gpt-4o', label: 'gpt-4o' },
@@ -85,15 +87,16 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ id }) => {
               type="text"
               value={customModelValue ?? ''}
               onChange={handleCustomModelChange}
-              className="mt-2 block w-full py-2 px-3 border border-gray-300 bg-white rounded-2xl shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-black"
+              className="mt-2 block w-full py-2 px-3 border border-gray-300 bg-white rounded-2xl shadow-sm focus:outline-none focus:ring-accent-dark focus:border-accent-dark sm:text-sm text-black"
               placeholder="Enter custom model name"
             />
-            <button
+            <Button
               onClick={handleCustomModelSubmit}
-              className="mt-4 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              color="primary"
+              className="mt-4 inline-flex justify-center py-2 px-4 "
             >
               Submit
-            </button>
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

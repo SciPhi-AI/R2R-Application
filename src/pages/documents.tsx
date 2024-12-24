@@ -59,8 +59,6 @@ const Index: React.FC = () => {
         limit: 1000,
       });
 
-      console.log('firstBatch:', firstBatch);
-
       if (firstBatch.results.length > 0) {
         totalEntries = firstBatch.totalEntries;
         setTotalEntries(totalEntries);

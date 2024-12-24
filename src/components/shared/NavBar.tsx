@@ -27,7 +27,7 @@ const NavItem: React.FC<NavItemProps> = ({ href, children, isActive }) => (
   <Link
     href={href}
     className={`px-2 py-1 text-sm font-medium ${
-      isActive ? 'text-indigo-400' : 'text-zinc-400 hover:text-white'
+      isActive ? 'text-accent-base' : 'text-zinc-400 hover:text-white'
     }`}
   >
     {children}
@@ -52,7 +52,7 @@ const NavItems: React.FC<NavItemsProps> = ({
     { path: '/users', label: 'Users' },
     { path: '/logs', label: 'Logs' },
     // { path: '/analytics', label: 'Analytics' },
-    // { path: '/settings', label: 'Settings' },
+    { path: '/settings', label: 'Settings' },
   ];
 
   const items =

@@ -520,7 +520,7 @@ const ExpandableDocumentChunks: React.FC<{
       <div className="flex justify-end items-center mb-4">
         <button
           onClick={toggleAllExpanded}
-          className="text-indigo-500 hover:text-indigo-600 transition-colors"
+          className="text-accent-base hover:text-accent-dark transition-colors"
         >
           {allExpanded ? 'Collapse All' : 'Expand All'}
         </button>
@@ -725,7 +725,7 @@ const ExpandableChunk: React.FC<{
               <textarea
                 value={editText}
                 onChange={(e) => setEditText(e.target.value)}
-                className="w-full h-32 bg-zinc-900 text-gray-300 p-2 rounded-md border border-gray-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                className="w-full h-32 bg-zinc-900 text-gray-300 p-2 rounded-md border border-gray-700 focus:border-accent-dark focus:ring-1 focus:ring-accent-dark"
               />
             ) : (
               <p className="pl-4 pr-2 py-2 text-gray-300 leading-relaxed">
@@ -801,7 +801,7 @@ const ExpandableDocumentEntities: React.FC<{
       <div className="flex justify-end items-center mb-4">
         <button
           onClick={toggleAllExpanded}
-          className="text-indigo-500 hover:text-indigo-600 transition-colors"
+          className="text-accent-base hover:text-accent-dark transition-colors"
         >
           {allExpanded ? 'Collapse All' : 'Expand All'}
         </button>
@@ -926,7 +926,7 @@ const ExpandableDocumentRelationships: React.FC<{
       <div className="flex justify-end items-center mb-4">
         <button
           onClick={toggleAllExpanded}
-          className="text-indigo-500 hover:text-indigo-600 transition-colors"
+          className="text-accent-base hover:text-accent-dark transition-colors"
         >
           {allExpanded ? 'Collapse All' : 'Expand All'}
         </button>

@@ -33,7 +33,6 @@ const Logs: React.FC = () => {
     wsRef.current = new WebSocket(wsUrl);
 
     wsRef.current.onopen = () => {
-      console.log('WebSocket connection established.');
       setIsLoading(false);
     };
 

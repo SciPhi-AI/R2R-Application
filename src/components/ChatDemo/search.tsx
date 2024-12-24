@@ -51,7 +51,7 @@ export const Search: FC<SearchProps> = ({
 
   return (
     <form onSubmit={handleSubmit} className="w-full">
-      <div className="relative flex items-center focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 focus-within:ring-offset-zinc-800 rounded-full">
+      <div className="relative flex items-center focus-within:ring-2 focus-within:ring-accent-base focus-within:ring-offset-2 focus-within:ring-offset-zinc-800 rounded-full">
         <input
           id="search-bar"
           value={value}

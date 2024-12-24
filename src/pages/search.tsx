@@ -213,7 +213,7 @@ const SearchPage: React.FC = () => {
           >
             <div className="sticky top-0 z-10 bg-zinc-900 shadow-md">
               <form onSubmit={handleSearch} className="py-4">
-                <div className="relative flex items-center focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 focus-within:ring-offset-zinc-800 rounded-full">
+                <div className="relative flex items-center focus-within:ring-2 focus-within:ring-accent-dark focus-within:ring-offset-2 focus-within:ring-offset-zinc-800 rounded-full">
                   <input
                     id="search-bar"
                     value={query}

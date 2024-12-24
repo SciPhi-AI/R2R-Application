@@ -120,7 +120,9 @@ const LoginPage: React.FC = () => {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: provider,
       });
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
 
       const {
         data: { session },
@@ -216,7 +218,7 @@ const LoginPage: React.FC = () => {
                   </label>
                   <span
                     onClick={() => router.push('/auth/signup')}
-                    className="text-sm font-semibold text-indigo-400 cursor-pointer hover:underline"
+                    className="text-sm font-semibold text-accent-base cursor-pointer hover:underline"
                   >
                     Sign up with Email
                   </span>
@@ -267,7 +269,7 @@ const LoginPage: React.FC = () => {
             <div className="mb-4">
               <Button
                 onClick={handleSubmit}
-                color="filled"
+                color="primary"
                 className="w-full my-2"
                 disabled={isLoading}
               >
@@ -276,7 +278,7 @@ const LoginPage: React.FC = () => {
 
               <Button
                 onClick={() => handleOAuthSignIn('google')}
-                color="filled"
+                color="primary"
                 className="w-full my-2 relative"
                 disabled={true}
                 tooltip="OAuth sign-in requires using the Supabase auth provider."
@@ -296,7 +298,7 @@ const LoginPage: React.FC = () => {
 
               <Button
                 onClick={() => handleOAuthSignIn('github')}
-                color="filled"
+                color="primary"
                 className="w-full my-2 relative"
                 disabled={true}
                 tooltip="OAuth sign-in requires using the Supabase auth provider."

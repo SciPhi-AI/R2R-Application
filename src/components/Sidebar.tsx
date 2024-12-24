@@ -87,7 +87,6 @@ const Sidebar: React.FC<SidebarProps> = ({
           offset: 0,
           limit: 500,
         });
-        console.log('Conversations:', response);
         setConversations(response.results);
       } catch (error) {
         console.error('Error fetching collections:', error);
@@ -110,7 +109,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           {/* {config.showConversations && (
             <div>
               <div className="mt-4">
-                <h3 className="text-lg font-semibold text-indigo-400">
+                <h3 className="text-lg font-semibold text-accent-base">
                   Conversations
                 </h3>
                 <div className="max-h-60 overflow-y-auto">
@@ -132,7 +131,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             </div>
           )} */}
 
-          <h3 className="text-lg font-semibold text-indigo-400 mt-2">
+          <h3 className="text-lg font-semibold text-accent-base mt-2">
             Search Settings
           </h3>
 
@@ -167,7 +166,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             {/* Vector Search Settings */}
             {config.showVectorSearch && (
               <AccordionItem value="vectorSearchSettings">
-                <AccordionTrigger className="text-lg font-semibold text-indigo-400 pt-4">
+                <AccordionTrigger className="text-lg font-semibold text-accent-base pt-4">
                   Vector Search Settings
                 </AccordionTrigger>
                 <AccordionContent className="mx-1">
@@ -236,7 +235,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             {/* Hybrid Search Settings */}
             {config.showHybridSearch && (
               <AccordionItem value="hybridSearchSettings">
-                <AccordionTrigger className="text-lg font-semibold text-indigo-400 pt-4">
+                <AccordionTrigger className="text-lg font-semibold text-accent-base pt-4">
                   Hybrid Search Settings
                 </AccordionTrigger>
                 <AccordionContent className="mx-1">
@@ -284,7 +283,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             {/* Knowledge Graph Settings */}
             {config.showKGSearch && (
               <AccordionItem value="kgSearchSettings">
-                <AccordionTrigger className="text-lg font-semibold text-indigo-400 pt-4">
+                <AccordionTrigger className="text-lg font-semibold text-accent-base pt-4">
                   KG Search Settings
                 </AccordionTrigger>
                 <AccordionContent className="mx-1">
@@ -342,7 +341,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               maxTokensToSample !== undefined &&
               setMaxTokensToSample !== undefined && (
                 <AccordionItem value="ragGenerationSettings">
-                  <AccordionTrigger className="text-lg font-semibold text-indigo-400 pt-4">
+                  <AccordionTrigger className="text-lg font-semibold text-accent-base pt-4">
                     RAG Generation Settings
                   </AccordionTrigger>
                   <AccordionContent className="mx-1">
