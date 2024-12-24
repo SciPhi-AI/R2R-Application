@@ -126,8 +126,8 @@ const LoginPage: React.FC = () => {
         data: { session },
       } = await supabase.auth.getSession();
 
-      if (session?.accessToken) {
-        await loginWithToken(session.accessToken, sanitizedDeploymentUrl);
+      if (session?.access_token) {
+        await loginWithToken(session.access_token, sanitizedDeploymentUrl);
         setLoginSuccess(true);
       } else {
         throw new Error('No access token found after OAuth sign-in');
