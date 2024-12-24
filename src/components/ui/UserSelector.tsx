@@ -15,6 +15,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
+import { Button } from './Button';
+
 interface UserSelectorProps {
   id?: string;
   selectedUserId: string;
@@ -75,12 +77,12 @@ const UserSelector: React.FC<UserSelectorProps> = ({
               </DialogDescription>
             </DialogHeader>
             <div>
-              <button
+              <Button
                 onClick={handleAddUser}
-                className="mt-4 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className="mt-4 inline-flex justify-center py-2 px-4"
               >
                 Generate New User ID
-              </button>
+              </Button>
             </div>
           </DialogContent>
         </Dialog>

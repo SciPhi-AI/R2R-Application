@@ -453,7 +453,7 @@ export const Result: FC<{
         pipelineUrl &&
         mode === 'rag' && (
           <div className="absolute inset-4 flex items-center justify-center backdrop-blur-sm">
-            <div className="flex items-center p-4 bg-white shadow-2xl rounded text-indigo-500 font-medium gap-4">
+            <div className="flex items-center p-4 bg-white shadow-2xl rounded text-text-accent-base font-medium gap-4">
               Please upload at least one document to submit queries.{' '}
               <UploadButton setUploadedDocuments={setUploadedDocuments} />
             </div>

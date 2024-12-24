@@ -38,7 +38,9 @@ const Index: React.FC = () => {
 
     try {
       const client = await getClient();
-      if (!client) throw new Error('No authenticated client');
+      if (!client) {
+        throw new Error('No authenticated client');
+      }
 
       const userId = authState.userId || '';
 
@@ -81,7 +83,9 @@ const Index: React.FC = () => {
             offset,
             limit: PAGE_SIZE,
           });
-          if (batch.results.length === 0) break;
+          if (batch.results.length === 0) {
+            break;
+          }
           allPersonal = allPersonal.concat(batch.results);
           offset += PAGE_SIZE;
         }
@@ -93,7 +97,9 @@ const Index: React.FC = () => {
             offset,
             limit: PAGE_SIZE,
           });
-          if (batch.results.length === 0) break;
+          if (batch.results.length === 0) {
+            break;
+          }
           allAccessible = allAccessible.concat(batch.results);
           offset += PAGE_SIZE;
         }
@@ -120,7 +126,9 @@ const Index: React.FC = () => {
   }, [fetchInitialData]);
 
   const filteredPersonalCollections = useMemo(() => {
-    if (!searchQuery.trim()) return personalCollections;
+    if (!searchQuery.trim()) {
+      return personalCollections;
+    }
     const query = searchQuery.toLowerCase();
     return personalCollections.filter(
       (collection) =>
@@ -131,7 +139,9 @@ const Index: React.FC = () => {
   }, [personalCollections, searchQuery]);
 
   const filteredSharedCollections = useMemo(() => {
-    if (!searchQuery.trim()) return sharedCollections;
+    if (!searchQuery.trim()) {
+      return sharedCollections;
+    }
     const query = searchQuery.toLowerCase();
     return sharedCollections.filter(
       (collection) =>

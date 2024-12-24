@@ -85,13 +85,13 @@ const PromptRow: React.FC<PromptRowProps> = ({ name, template, onEdit }) => {
           </div>
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="absolute right-12 text-gray-400 hover:text-indigo-500"
+            className="absolute right-12 text-gray-400 hover:text-accent-base"
           >
             {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
           </button>
           <button
             onClick={() => onEdit(name, template)}
-            className="absolute right-2 text-gray-400 hover:text-indigo-500"
+            className="absolute right-2 text-gray-400 hover:text-accent-base"
           >
             <SquarePen size={20} />
           </button>

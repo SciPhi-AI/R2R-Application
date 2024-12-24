@@ -56,7 +56,7 @@ export const UploadDialog: React.FC<UploadDialogProps> = ({
         <div
           {...getRootProps()}
           className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer ${
-            isDragActive ? 'border-indigo-500 bg-indigo-50' : 'border-gray-300'
+            isDragActive ? 'border-accent-dark bg-indigo-50' : 'border-gray-300'
           }`}
         >
           <input {...getInputProps()} />
