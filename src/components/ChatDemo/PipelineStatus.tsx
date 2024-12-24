@@ -1,7 +1,8 @@
+import { ServerStats } from 'r2r-js';
 import React, { useState, useEffect, useCallback } from 'react';
 
 import { useUserContext } from '@/context/UserContext';
-import { PipelineStatusProps, ServerStats } from '@/types';
+import { PipelineStatusProps } from '@/types';
 
 export function useConnectionStatus(
   deploymentUrl?: string,
@@ -33,7 +34,7 @@ export function useConnectionStatus(
 
       const stats = await client.system.status();
       setServerStats(stats.results);
-      setLocalUptime(stats.results.uptime_seconds);
+      setLocalUptime(stats.results.uptimeSeconds);
     } catch (error) {
       console.error('Error checking status or fetching stats:', error);
       setIsConnected(false);

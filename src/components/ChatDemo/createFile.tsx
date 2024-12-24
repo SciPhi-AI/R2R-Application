@@ -44,7 +44,7 @@ export const CreateFileButton: React.FC<CreateFileButton> = ({
 
       for (const file of files) {
         const fileId = generateIdFromLabel(file.name);
-        uploadedFiles.push({ document_id: fileId, title: file.name });
+        uploadedFiles.push({ documentId: fileId, title: file.name });
         metadatas.push({ title: file.name });
         userIds.push(userId);
       }

@@ -24,7 +24,7 @@ import { SidebarProps } from '@/types';
 
 interface Conversation {
   id: string;
-  created_at: string;
+  createdAt: string;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -124,7 +124,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                         }
                       }}
                     >
-                      {new Date(conversation.created_at).toLocaleString()}
+                      {new Date(conversation.createdAt).toLocaleString()}
                     </div>
                   ))}
                 </div>

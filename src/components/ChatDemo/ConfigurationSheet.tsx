@@ -17,12 +17,12 @@ import { GenerationConfig } from '@/types';
 const ConfigurationSheet: React.FC<GenerationConfig> = ({
   temperature,
   setTemperature,
-  top_p,
+  topP,
   setTopP,
   top_k,
   setTop_k,
-  max_tokens_to_sample,
-  setMax_tokens_to_sample,
+  maxTokensToSample,
+  setmaxTokensToSample,
   model,
   setModel,
   stream,
@@ -45,12 +45,12 @@ const ConfigurationSheet: React.FC<GenerationConfig> = ({
   setApiBase,
   kg_temperature,
   setKgTemperature,
-  kg_top_p,
+  kg_topP,
   setKgTopP,
   kg_top_k,
   setKgTop_k,
-  kg_max_tokens_to_sample,
-  setKgMax_tokens_to_sample,
+  kg_maxTokensToSample,
+  setKgmaxTokensToSample,
 }) => {
   return (
     <Sheet>
@@ -82,20 +82,20 @@ const ConfigurationSheet: React.FC<GenerationConfig> = ({
               </div>
             </div>
           )}
-          {top_p !== undefined && setTopP && (
+          {topP !== undefined && setTopP && (
             <div className="flex items-center justify-between gap-4">
-              <Label htmlFor="top_p" className="text-right">
-                top_p
+              <Label htmlFor="topP" className="text-right">
+                topP
               </Label>
               <div className="flex items-center gap-2">
                 <Slider
-                  defaultValue={[top_p]}
+                  defaultValue={[topP]}
                   max={1}
                   step={0.01}
                   className="w-40"
                   onValueChange={(value) => setTopP(value[0])}
                 />
-                <span className="text-sm">{top_p.toFixed(2)}</span>
+                <span className="text-sm">{topP.toFixed(2)}</span>
               </div>
             </div>
           )}
@@ -112,18 +112,16 @@ const ConfigurationSheet: React.FC<GenerationConfig> = ({
               />
             </div>
           )}
-          {max_tokens_to_sample !== undefined && setMax_tokens_to_sample && (
+          {maxTokensToSample !== undefined && setmaxTokensToSample && (
             <div className="flex items-center justify-between gap-4">
-              <Label htmlFor="max_tokens_to_sample" className="text-right">
-                max_tokens_to_sample
+              <Label htmlFor="maxTokensToSample" className="text-right">
+                maxTokensToSample
               </Label>
               <Input
-                id="max_tokens_to_sample"
-                value={max_tokens_to_sample}
+                id="maxTokensToSample"
+                value={maxTokensToSample}
                 className="col-span-1 w-24"
-                onChange={(e) =>
-                  setMax_tokens_to_sample(Number(e.target.value))
-                }
+                onChange={(e) => setmaxTokensToSample(Number(e.target.value))}
               />
             </div>
           )}
@@ -153,20 +151,20 @@ const ConfigurationSheet: React.FC<GenerationConfig> = ({
               </div>
             </div>
           )}
-          {kg_top_p !== undefined && setKgTopP && (
+          {kg_topP !== undefined && setKgTopP && (
             <div className="flex items-center justify-between gap-4">
-              <Label htmlFor="top_p" className="text-right">
-                top_p
+              <Label htmlFor="topP" className="text-right">
+                topP
               </Label>
               <div className="flex items-center gap-2">
                 <Slider
-                  defaultValue={[kg_top_p]}
+                  defaultValue={[kg_topP]}
                   max={1}
                   step={0.01}
                   className="w-40"
                   onValueChange={(value) => setKgTopP(value[0])}
                 />
-                <span className="text-sm">{kg_top_p.toFixed(2)}</span>
+                <span className="text-sm">{kg_topP.toFixed(2)}</span>
               </div>
             </div>
           )}
@@ -183,22 +181,19 @@ const ConfigurationSheet: React.FC<GenerationConfig> = ({
               />
             </div>
           )}
-          {kg_max_tokens_to_sample !== undefined &&
-            setKgMax_tokens_to_sample && (
-              <div className="flex items-center justify-between gap-4">
-                <Label htmlFor="kg_max_tokens_to_sample" className="text-right">
-                  max_tokens_to_sample
-                </Label>
-                <Input
-                  id="kg_max_tokens_to_sample"
-                  value={kg_max_tokens_to_sample}
-                  className="col-span-1 w-24"
-                  onChange={(e) =>
-                    setKgMax_tokens_to_sample(Number(e.target.value))
-                  }
-                />
-              </div>
-            )}
+          {kg_maxTokensToSample !== undefined && setKgmaxTokensToSample && (
+            <div className="flex items-center justify-between gap-4">
+              <Label htmlFor="kg_maxTokensToSample" className="text-right">
+                maxTokensToSample
+              </Label>
+              <Input
+                id="kg_maxTokensToSample"
+                value={kg_maxTokensToSample}
+                className="col-span-1 w-24"
+                onChange={(e) => setKgmaxTokensToSample(Number(e.target.value))}
+              />
+            </div>
+          )}
         </div>
       </SheetContent>
     </Sheet>

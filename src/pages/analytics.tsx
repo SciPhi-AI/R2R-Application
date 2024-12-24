@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 import AverageScoreCard from '@/components/AverageScoreCard';
 import DAUCard from '@/components/DAUCard';
@@ -64,7 +64,7 @@ const Analytics: React.FC = () => {
         throw new Error('Failed to get authenticated client');
       }
 
-      const data = await client.system.logs({});
+      const data = {};
       const processedData = processLogData(data);
       setScoreData(processedData);
     } catch (error) {

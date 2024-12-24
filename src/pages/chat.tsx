@@ -76,11 +76,11 @@ const Index: React.FC = () => {
   const [temperature, setTemperature] = useState(0.1);
   const [topP, setTopP] = useState(1);
   const [top_k, setTop_k] = useState(100);
-  const [max_tokens_to_sample, setMax_tokens_to_sample] = useState(1024);
+  const [maxTokensToSample, setmaxTokensToSample] = useState(1024);
   const [kg_temperature, setKgTemperature] = useState(0.1);
-  const [kg_top_p, setKgTopP] = useState(1);
+  const [kg_topP, setKgTopP] = useState(1);
   const [kg_top_k, setKgTop_k] = useState(100);
-  const [kg_max_tokens_to_sample, setKgMax_tokens_to_sample] = useState(1024);
+  const [kg_maxTokensToSample, setKgmaxTokensToSample] = useState(1024);
 
   const [graphDimensions, setGraphDimensions] = useState({
     width: 0,
@@ -266,8 +266,8 @@ const Index: React.FC = () => {
           setTopP={setTopP}
           topK={top_k}
           setTopK={setTop_k}
-          maxTokensToSample={max_tokens_to_sample}
-          setMaxTokensToSample={setMax_tokens_to_sample}
+          maxTokensToSample={maxTokensToSample}
+          setMaxTokensToSample={setmaxTokensToSample}
           config={{
             showVectorSearch: true,
             showHybridSearch: true,
@@ -280,8 +280,8 @@ const Index: React.FC = () => {
 
         {/* top_k={top_k}
           setTop_k={setTop_k}
-          max_tokens_to_sample={max_tokens_to_sample}
-          setMax_tokens_to_sample={setMax_tokens_to_sample}
+          maxTokensToSample={maxTokensToSample}
+          setmaxTokensToSample={setmaxTokensToSample}
           temperature={temperature}
           setTemperature={setTemperature}
           topP={topP}
@@ -321,7 +321,7 @@ const Index: React.FC = () => {
                   ragTemperature={temperature}
                   ragTopP={topP}
                   ragTopK={top_k}
-                  ragMaxTokensToSample={max_tokens_to_sample}
+                  ragMaxTokensToSample={maxTokensToSample}
                   uploadedDocuments={uploadedDocuments}
                   setUploadedDocuments={setUploadedDocuments}
                   switches={switches}

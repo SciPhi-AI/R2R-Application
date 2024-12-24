@@ -122,8 +122,8 @@ const Index: React.FC = () => {
 
       if (response && response.results) {
         const configSettings = response.results.config;
-        const prompts = response.results.prompts;
-        const projectName = response.results.r2r_project_name;
+        const { prompts } = response.results;
+        const projectName = response.results.r2rProjectName;
 
         setAppData({
           config: typeof config === 'string' ? toml.parse(config) : config,

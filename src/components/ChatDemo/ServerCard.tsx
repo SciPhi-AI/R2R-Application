@@ -54,22 +54,20 @@ const R2RServerCard: React.FC<R2RServerCardProps> = ({
           </div>
           <div>
             <p className="font-medium">CPU Usage:</p>
-            <p>
-              {serverStats ? `${serverStats.cpu_usage.toFixed(1)}%` : 'N/A'}
-            </p>
+            <p>{serverStats ? `${serverStats.cpuUsage.toFixed(1)}%` : 'N/A'}</p>
           </div>
           <div>
             <p className="font-medium">Start Time:</p>
             <p>
               {serverStats
-                ? new Date(serverStats.start_time).toLocaleString()
+                ? new Date(serverStats.startTime).toLocaleString()
                 : 'N/A'}
             </p>
           </div>
           <div>
             <p className="font-medium">Memory Usage:</p>
             <p>
-              {serverStats ? `${serverStats.memory_usage.toFixed(1)}%` : 'N/A'}
+              {serverStats ? `${serverStats.memoryUsage.toFixed(1)}%` : 'N/A'}
             </p>
           </div>
         </div>

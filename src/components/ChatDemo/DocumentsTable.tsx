@@ -85,18 +85,18 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
       copyable: true,
     },
     { key: 'id', label: 'Document ID', truncate: true, copyable: true },
-    { key: 'owner_id', label: 'Owner ID', truncate: true, copyable: true },
+    { key: 'ownerId', label: 'Owner ID', truncate: true, copyable: true },
     {
-      key: 'collection_ids',
+      key: 'collectionIds',
       label: 'Collection IDs',
       renderCell: (doc) =>
-        doc.collection_ids && doc.collection_ids.length > 0
-          ? doc.collection_ids.join(', ')
+        doc.collectionIds && doc.collectionIds.length > 0
+          ? doc.collectionIds.join(', ')
           : 'N/A',
       selected: false,
     },
     {
-      key: 'ingestion_status',
+      key: 'ingestionStatus',
       label: 'Ingestion',
       filterable: true,
       filterType: 'multiselect',
@@ -104,7 +104,7 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
       renderCell: (doc) => {
         let variant: 'success' | 'destructive' | 'pending' | 'enriched' =
           'pending';
-        switch (doc.ingestion_status) {
+        switch (doc.ingestionStatus) {
           case IngestionStatus.SUCCESS:
             variant = 'success';
             break;
@@ -118,18 +118,18 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
             variant = 'pending';
             break;
         }
-        return <Badge variant={variant}>{doc.ingestion_status}</Badge>;
+        return <Badge variant={variant}>{doc.ingestionStatus}</Badge>;
       },
     },
     {
-      key: 'extraction_status',
+      key: 'extractionStatus',
       label: 'Extraction',
       filterable: true,
       filterType: 'multiselect',
       filterOptions: ['success', 'failed', 'pending', 'processing', 'enriched'],
       renderCell: (doc) => {
         let variant: 'success' | 'destructive' | 'pending' = 'pending';
-        switch (doc.extraction_status) {
+        switch (doc.extractionStatus) {
           case KGExtractionStatus.SUCCESS:
             variant = 'success';
             break;
@@ -146,10 +146,10 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
             variant = 'pending';
             break;
         }
-        return <Badge variant={variant}>{doc.extraction_status}</Badge>;
+        return <Badge variant={variant}>{doc.extractionStatus}</Badge>;
       },
     },
-    { key: 'document_type', label: 'Type', selected: false },
+    { key: 'documentType', label: 'Type', selected: false },
     {
       key: 'metadata',
       label: 'Metadata',
@@ -158,16 +158,16 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
     },
     { key: 'version', label: 'Version', selected: false },
     {
-      key: 'created_at',
+      key: 'createdAt',
       label: 'Created At',
       sortable: true,
-      renderCell: (doc) => new Date(doc.created_at).toLocaleString(),
+      renderCell: (doc) => new Date(doc.createdAt).toLocaleString(),
     },
     {
-      key: 'updated_at',
+      key: 'updatedAt',
       label: 'Updated At',
       sortable: true,
-      renderCell: (doc) => new Date(doc.updated_at).toLocaleString(),
+      renderCell: (doc) => new Date(doc.updatedAt).toLocaleString(),
       selected: false,
     },
   ];
@@ -183,7 +183,7 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
         /> */}
         <ExtractButtonContainer
           id={doc.id}
-          ingestionStatus={doc.ingestion_status}
+          ingestionStatus={doc.ingestionStatus}
           showToast={toast}
         />
         <DownloadFileContainer
@@ -198,8 +198,8 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
           }}
           color="text_gray"
           disabled={
-            doc.ingestion_status !== IngestionStatus.SUCCESS &&
-            doc.ingestion_status !== IngestionStatus.ENRICHED
+            doc.ingestionStatus !== IngestionStatus.SUCCESS &&
+            doc.ingestionStatus !== IngestionStatus.ENRICHED
           }
           shape="slim"
           tooltip="View Document Info"

@@ -24,7 +24,7 @@ interface Log {
   run_id: string;
   run_type: string;
   timestamp: string;
-  user_id: string;
+  userId: string;
   entries: any[];
   value?: any;
 }
@@ -126,8 +126,8 @@ const LogTable: React.FC<LogTableProps> = ({ logs }) => {
               <TableCell>{log.run_type}</TableCell>
               <TableCell>{log.timestamp}</TableCell>
               <TableCell>
-                {log.user_id
-                  ? `${log.user_id.substring(0, 8)}...${log.user_id.slice(-8)}`
+                {log.userId
+                  ? `${log.userId.substring(0, 8)}...${log.userId.slice(-8)}`
                   : 'N/A'}
               </TableCell>
               {log.entries && log.entries.length > 0 && (
