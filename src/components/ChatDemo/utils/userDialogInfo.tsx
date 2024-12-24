@@ -154,7 +154,7 @@ export const UserInfoDialog: React.FC<UserInfoDialogProps> = ({
                       <h2 className="text-xl font-semibold">
                         {userProfile?.name || 'Unnamed User'}
                       </h2>
-                      {userProfile?.is_superuser && (
+                      {userProfile?.isSuperuser && (
                         <Badge variant="secondary">Admin</Badge>
                       )}
                     </div>
@@ -174,9 +174,9 @@ export const UserInfoDialog: React.FC<UserInfoDialogProps> = ({
                 <InfoRow
                   label="Account Status"
                   values={[
-                    { label: 'Active', value: userProfile?.is_active },
-                    { label: 'Verified', value: userProfile?.is_verified },
-                    { label: 'Super User', value: userProfile?.is_superuser },
+                    { label: 'Active', value: userProfile?.isActive },
+                    { label: 'Verified', value: userProfile?.isVerified },
+                    { label: 'Super User', value: userProfile?.isSuperuser },
                   ]}
                 />
 
@@ -186,13 +186,13 @@ export const UserInfoDialog: React.FC<UserInfoDialogProps> = ({
                     {
                       label: 'Created',
                       value: new Date(
-                        userProfile?.created_at || ''
+                        userProfile?.createdAt || ''
                       ).toLocaleDateString(),
                     },
                     {
                       label: 'Updated',
                       value: new Date(
-                        userProfile?.updated_at || ''
+                        userProfile?.updatedAt || ''
                       ).toLocaleDateString(),
                     },
                   ]}
@@ -209,7 +209,7 @@ export const UserInfoDialog: React.FC<UserInfoDialogProps> = ({
 
                 <ExpandableInfoRow
                   label="Collections"
-                  values={userProfile?.collection_ids}
+                  values={userProfile?.collectionIds}
                 />
               </div>
             </CardContent>

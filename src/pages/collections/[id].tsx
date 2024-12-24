@@ -84,8 +84,8 @@ const CollectionIdPage: React.FC = () => {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<Record<string, any>>({
-    ingestion_status: ['success', 'failed', 'pending', 'enriched'],
-    extraction_status: [
+    ingestionStatus: ['success', 'failed', 'pending', 'enriched'],
+    extractionStatus: [
       'success',
       'failed',
       'pending',
@@ -182,7 +182,7 @@ const CollectionIdPage: React.FC = () => {
       });
 
       if (firstBatch.results.length > 0) {
-        totalDocumentEntries = firstBatch.total_entries;
+        totalDocumentEntries = firstBatch.totalEntries;
         setTotalDocumentEntries(totalDocumentEntries);
 
         allDocs = firstBatch.results;
@@ -251,7 +251,7 @@ const CollectionIdPage: React.FC = () => {
       });
 
       if (firstBatch.results.length > 0) {
-        totalUserEntries = firstBatch.total_entries;
+        totalUserEntries = firstBatch.totalEntries;
         setTotalUserEntries(totalUserEntries);
 
         allUsers = firstBatch.results;
@@ -320,7 +320,7 @@ const CollectionIdPage: React.FC = () => {
       });
 
       if (firstBatch.results.length > 0) {
-        totalEntityEntries = firstBatch.total_entries;
+        totalEntityEntries = firstBatch.totalEntries;
         setTotalEntityEntries(totalEntityEntries);
 
         allEntities = firstBatch.results;
@@ -389,7 +389,7 @@ const CollectionIdPage: React.FC = () => {
       });
 
       if (firstBatch.results.length > 0) {
-        totalRelationshipEntries = firstBatch.total_entries;
+        totalRelationshipEntries = firstBatch.totalEntries;
         setTotalRelationshipEntries(totalRelationshipEntries);
 
         allRelationships = firstBatch.results;
@@ -458,7 +458,7 @@ const CollectionIdPage: React.FC = () => {
       });
 
       if (firstBatch.results.length > 0) {
-        totalCommunityEntries = firstBatch.total_entries;
+        totalCommunityEntries = firstBatch.totalEntries;
         setTotalCommunityEntries(totalCommunityEntries);
 
         allCommunities = firstBatch.results;
@@ -528,10 +528,10 @@ const CollectionIdPage: React.FC = () => {
       if (value && value.length > 0 && Array.isArray(value)) {
         filtered = filtered.filter((doc) => {
           switch (key) {
-            case 'ingestion_status':
-              return value.includes(doc.ingestion_status);
-            case 'extraction_status':
-              return value.includes(doc.extraction_status);
+            case 'ingestionStatus':
+              return value.includes(doc.ingestionStatus);
+            case 'extractionStatus':
+              return value.includes(doc.extractionStatus);
             default:
               return true;
           }
@@ -626,8 +626,8 @@ const CollectionIdPage: React.FC = () => {
         color="text_gray"
         shape="slim"
         disabled={
-          doc.ingestion_status !== IngestionStatus.SUCCESS &&
-          doc.ingestion_status !== IngestionStatus.ENRICHED
+          doc.ingestionStatus !== IngestionStatus.SUCCESS &&
+          doc.ingestionStatus !== IngestionStatus.ENRICHED
         }
         tooltip="View Document Info"
       >
@@ -646,7 +646,7 @@ const CollectionIdPage: React.FC = () => {
     },
     { key: 'id', label: 'Document ID', truncate: true, copyable: true },
     {
-      key: 'ingestion_status',
+      key: 'ingestionStatus',
       label: 'Ingestion',
       filterable: true,
       filterType: 'multiselect',
@@ -654,20 +654,20 @@ const CollectionIdPage: React.FC = () => {
       renderCell: (doc) => (
         <Badge
           variant={
-            doc.ingestion_status === IngestionStatus.SUCCESS ||
-            doc.ingestion_status === IngestionStatus.ENRICHED
+            doc.ingestionStatus === IngestionStatus.SUCCESS ||
+            doc.ingestionStatus === IngestionStatus.ENRICHED
               ? 'success'
-              : doc.ingestion_status === IngestionStatus.FAILED
+              : doc.ingestionStatus === IngestionStatus.FAILED
                 ? 'destructive'
                 : 'pending'
           }
         >
-          {doc.ingestion_status}
+          {doc.ingestionStatus}
         </Badge>
       ),
     },
     {
-      key: 'extraction_status',
+      key: 'extractionStatus',
       label: 'Extraction',
       filterable: true,
       filterType: 'multiselect',
@@ -675,16 +675,16 @@ const CollectionIdPage: React.FC = () => {
       renderCell: (doc) => (
         <Badge
           variant={
-            doc.extraction_status === KGExtractionStatus.SUCCESS
+            doc.extractionStatus === KGExtractionStatus.SUCCESS
               ? 'success'
-              : doc.extraction_status === KGExtractionStatus.ENRICHED
+              : doc.extractionStatus === KGExtractionStatus.ENRICHED
                 ? 'success'
-                : doc.extraction_status === KGExtractionStatus.FAILED
+                : doc.extractionStatus === KGExtractionStatus.FAILED
                   ? 'destructive'
                   : 'pending'
           }
         >
-          {doc.extraction_status}
+          {doc.extractionStatus}
         </Badge>
       ),
       selected: false,
@@ -707,8 +707,8 @@ const CollectionIdPage: React.FC = () => {
     { key: 'subject', label: 'Subject' },
     { key: 'predicate', label: 'Predicate' },
     { key: 'object', label: 'Object' },
-    { key: 'subject_id', label: 'Subject ID', truncate: true, copyable: true },
-    { key: 'object_id', label: 'Object ID', truncate: true, copyable: true },
+    { key: 'subjectId', label: 'Subject ID', truncate: true, copyable: true },
+    { key: 'objectId', label: 'Object ID', truncate: true, copyable: true },
   ];
 
   const communityColumns: Column<CommunityResponse>[] = [

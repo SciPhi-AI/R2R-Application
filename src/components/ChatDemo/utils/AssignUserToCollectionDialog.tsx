@@ -51,7 +51,7 @@ const AssignUserToCollectionDialog: React.FC<
 
       // Filter usersWithId directly
       const filteredUsers = usersWithId.filter(
-        (filteredUser) => !filteredUser.collection_ids.includes(collection_id)
+        (filteredUser) => !filteredUser.collectionIds.includes(collection_id)
       );
 
       setAllUsers(usersWithId);
@@ -78,7 +78,7 @@ const AssignUserToCollectionDialog: React.FC<
 
   useEffect(() => {
     const usersNotInCollection = allUsers.filter(
-      (user) => !user.collection_ids.includes(collection_id)
+      (user) => !user.collectionIds.includes(collection_id)
     );
 
     if (searchQuery.trim() === '') {
@@ -191,7 +191,7 @@ const AssignUserToCollectionDialog: React.FC<
             onSelectAll={handleSelectAll}
             onSelectItem={handleSelectItem}
             selectedItems={selectedUserIds}
-            initialSort={{ key: 'user_id', order: 'asc' }}
+            initialSort={{ key: 'userId', order: 'asc' }}
             initialFilters={{}}
             tableHeight="400px"
             currentPage={1}

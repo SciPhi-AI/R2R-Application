@@ -231,13 +231,13 @@ export const Result: FC<{
       const ragGenerationConfig: GenerationConfig = {
         stream: true,
         temperature: ragTemperature ?? undefined,
-        top_p: ragTopP ?? undefined,
-        max_tokens_to_sample: ragMaxTokensToSample ?? undefined,
+        topP: ragTopP ?? undefined,
+        maxTokensToSample: ragMaxTokensToSample ?? undefined,
         model: model && model !== 'null' ? model : undefined,
       };
 
       const vectorSearchSettings: ChunkSearchSettings = {
-        index_measure: IndexMeasure.COSINE_DISTANCE,
+        indexMeasure: IndexMeasure.COSINE_DISTANCE,
         enabled: switches.vectorSearch?.checked ?? true,
         // selectedCollectionIds:
         //   selectedCollectionIds.length > 0
@@ -250,12 +250,12 @@ export const Result: FC<{
       };
 
       const searchSettings: SearchSettings = {
-        use_hybrid_search: switches.hybridSearch?.checked ?? false,
-        use_semantic_search: switches.vectorSearch?.checked ?? true,
+        useHybridSearch: switches.hybridSearch?.checked ?? false,
+        useSemanticSearch: switches.vectorSearch?.checked ?? true,
         filters: searchFilters,
         limit: searchLimit,
-        chunk_settings: vectorSearchSettings,
-        graph_settings: graphSearchSettings,
+        chunkSettings: vectorSearchSettings,
+        graphSettings: graphSearchSettings,
       };
 
       const streamResponse =

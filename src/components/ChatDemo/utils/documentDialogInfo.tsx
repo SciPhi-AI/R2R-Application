@@ -97,11 +97,11 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
 
         return {
           results: response.results,
-          total_entries: response.total_entries,
+          totalEntries: response.totalEntries,
         };
       } catch (error) {
         console.error('Error fetching document chunks:', error);
-        return { results: [], total_entries: 0 };
+        return { results: [], totalEntries: 0 };
       }
     },
     [getClient, id]
@@ -123,11 +123,11 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
 
         return {
           results: response.results,
-          total_entries: response.total_entries,
+          totalEntries: response.totalEntries,
         };
       } catch (error) {
         console.error('Error fetching document entities:', error);
-        return { results: [], total_entries: 0 };
+        return { results: [], totalEntries: 0 };
       }
     },
     [getClient, id]
@@ -149,11 +149,11 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
 
         return {
           results: response.results,
-          total_entries: response.total_entries,
+          totalEntries: response.totalEntries,
         };
       } catch (error) {
         console.error('Error fetching document relationships:', error);
-        return { results: [], total_entries: 0 };
+        return { results: [], totalEntries: 0 };
       }
     },
     [getClient, id]
@@ -284,18 +284,18 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
                     <InfoRow label="Title" value={documentOverview.title} />
                     <InfoRow
                       label="Type"
-                      value={documentOverview.document_type}
+                      value={documentOverview.documentType}
                     />
                     <InfoRow
                       label="Dates"
                       values={[
                         {
                           label: 'Created',
-                          value: formatDate(documentOverview.created_at),
+                          value: formatDate(documentOverview.createdAt),
                         },
                         {
                           label: 'Updated',
-                          value: formatDate(documentOverview.updated_at),
+                          value: formatDate(documentOverview.updatedAt),
                         },
                       ]}
                     />
@@ -304,21 +304,21 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
                       values={[
                         {
                           label: 'Ingestion',
-                          value: documentOverview.ingestion_status,
+                          value: documentOverview.ingestionStatus,
                         },
                         {
                           label: 'KG Extraction',
-                          value: documentOverview.extraction_status,
+                          value: documentOverview.extractionStatus,
                         },
                       ]}
                     />
                     <InfoRow
                       label="Owner ID"
-                      value={documentOverview.owner_id}
+                      value={documentOverview.ownerId}
                     />
                     <ExpandableInfoRow
                       label="Collection IDs"
-                      values={documentOverview.collection_ids}
+                      values={documentOverview.collectionIds}
                     />
                     <InfoRow
                       label="Metadata"
@@ -336,9 +336,9 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
                   </div>
                 )}
                 {documentOverview &&
-                  documentOverview.document_type &&
+                  documentOverview.documentType &&
                   ['pdf', 'application/pdf'].includes(
-                    documentOverview.document_type.toLowerCase()
+                    documentOverview.documentType.toLowerCase()
                   ) && (
                     <div className="flex justify-end">
                       <Button
@@ -684,13 +684,13 @@ const ExpandableChunk: React.FC<{
         <div className="px-6 pb-4 text-gray-300 space-y-6">
           <div className="grid grid-cols-2 gap-4">
             <InfoRow label="Extraction ID" value={chunk.id} />
-            <InfoRow label="Document ID" value={chunk.document_id} />
+            <InfoRow label="Document ID" value={chunk.documentId} />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <InfoRow label="User ID" value={chunk.user_id} />
+            <InfoRow label="User ID" value={chunk.userId} />
             <ExpandableInfoRow
               label="Collection IDs"
-              values={chunk.collection_ids}
+              values={chunk.collectionIds}
             />
           </div>
 
@@ -865,7 +865,7 @@ const ExpandableEntity: React.FC<{
             <InfoRow label="Entity ID" value={entity.id} />
             <InfoRow label="Category" value={entity.category} />
           </div>
-          <ExpandableInfoRow label="Chunk IDs" values={entity.chunk_ids} />
+          <ExpandableInfoRow label="Chunk IDs" values={entity.chunkIds} />
 
           <div className="space-y-2 bg-zinc-800 p-4 rounded-lg">
             <div className="flex items-center justify-between mb-2">
@@ -991,13 +991,10 @@ const ExpandableRelationship: React.FC<{
           <div className="grid grid-cols-2 gap-4">
             <InfoRow label="Relationship ID" value={relationship.id} />
             <InfoRow label="Relationship Weight" value={relationship.weight} />
-            <InfoRow label="Subject ID" value={relationship.subject_id} />
-            <InfoRow label="Object ID" value={relationship.object_id} />
+            <InfoRow label="Subject ID" value={relationship.subjectId} />
+            <InfoRow label="Object ID" value={relationship.objectId} />
           </div>
-          <ExpandableInfoRow
-            label="Chunk IDs"
-            values={relationship.chunk_ids}
-          />
+          <ExpandableInfoRow label="Chunk IDs" values={relationship.chunkIds} />
 
           <div className="space-y-2 bg-zinc-800 p-4 rounded-lg">
             <div className="flex items-center justify-between mb-2">

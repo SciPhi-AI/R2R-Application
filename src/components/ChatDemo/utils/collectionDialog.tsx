@@ -83,7 +83,7 @@ const CollectionDialog: React.FC<CollectionDialogProps> = ({
       setCollection(collection.results);
     } catch (error) {
       console.error('Error fetching document chunks:', error);
-      return { results: [], total_entries: 0 };
+      return { results: [], totalEntries: 0 };
     }
   }, [getClient, id]);
 
@@ -175,25 +175,25 @@ const CollectionDialog: React.FC<CollectionDialogProps> = ({
                       values={[
                         {
                           label: 'Created',
-                          value: formatDate(collection.created_at),
+                          value: formatDate(collection.createdAt),
                         },
                         {
                           label: 'Updated',
-                          value: formatDate(collection.updated_at),
+                          value: formatDate(collection.updatedAt),
                         },
                       ]}
                     />
-                    <InfoRow label="Owner ID" value={collection.owner_id} />
+                    <InfoRow label="Owner ID" value={collection.ownerId} />
                     <InfoRow
                       label="Access"
                       values={[
                         {
                           label: 'User Count',
-                          value: collection.user_count,
+                          value: collection.userCount,
                         },
                         {
                           label: 'Document Count',
-                          value: collection.document_count,
+                          value: collection.documentCount,
                         },
                       ]}
                     />
@@ -202,11 +202,11 @@ const CollectionDialog: React.FC<CollectionDialogProps> = ({
                       values={[
                         {
                           label: 'Graph Cluster Status',
-                          value: collection.graph_cluster_status,
+                          value: collection.graphClusterStatus,
                         },
                         {
                           label: 'Graph Sync Status',
-                          value: collection.graph_sync_status,
+                          value: collection.graphSyncStatus,
                         },
                       ]}
                     />

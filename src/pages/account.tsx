@@ -215,7 +215,7 @@ const Index: React.FC = () => {
                         </span>
                         <p>
                           {new Date(
-                            userProfile?.created_at || ''
+                            userProfile?.createdAt || ''
                           ).toLocaleDateString()}
                         </p>
                       </div>

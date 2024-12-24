@@ -64,14 +64,14 @@ const AssignDocumentToCollectionDialog: React.FC<
           offset: offset,
           limit: limit,
         });
-        totalEntries = data.total_entries;
+        totalEntries = data.totalEntries;
         allDocuments = allDocuments.concat(data.results);
         offset += limit;
       } while (allDocuments.length < totalEntries);
 
       // Filter out documents that are already in the collection
       const filteredDocs = allDocuments.filter(
-        (doc) => !doc.collection_ids.includes(collection_id)
+        (doc) => !doc.collectionIds.includes(collection_id)
       );
 
       setDocuments(filteredDocs);
@@ -94,9 +94,9 @@ const AssignDocumentToCollectionDialog: React.FC<
       const initialVisibility: Record<string, boolean> = {
         title: true,
         id: true,
-        user_id: true,
-        ingestion_status: true,
-        created_at: true,
+        userId: true,
+        ingestionStatus: true,
+        createdAt: true,
       };
       setVisibleColumns(initialVisibility);
     }

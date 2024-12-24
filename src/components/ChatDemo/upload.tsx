@@ -52,7 +52,7 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
 
     for (const file of files) {
       const fileId = generateIdFromLabel(file.name);
-      uploadedFiles.push({ document_id: fileId, title: file.name });
+      uploadedFiles.push({ documentId: fileId, title: file.name });
 
       client.documents
         .create({
@@ -76,7 +76,7 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
     ]);
 
     if (setPendingDocuments) {
-      const newUploadedFiles = uploadedFiles.map((file) => file.document_id);
+      const newUploadedFiles = uploadedFiles.map((file) => file.documentId);
       setPendingDocuments((prev) => [...prev, ...newUploadedFiles]);
     }
 
@@ -114,7 +114,7 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
 
     const processedChunks = chunks.map((chunk) => ({
       ...chunk,
-      document_id: documentId || chunk.document_id,
+      documentId: documentId || chunk.documentId,
       metadata: { ...chunk.metadata, ...metadata },
     }));
 

@@ -131,25 +131,25 @@ const SearchPage: React.FC = () => {
         query: query,
       });
 
-      setVectorSearchResults(searchResponse.results.chunk_search_results || []);
+      setVectorSearchResults(searchResponse.results.chunkSearchResults || []);
 
-      const graphResults = searchResponse.results.graph_search_results || [];
+      const graphResults = searchResponse.results.graphSearchResults || [];
 
       setEntitySearchResults(
         graphResults.filter(
-          (result: GraphSearchResult) => result.result_type === 'entity'
+          (result: GraphSearchResult) => result.resultType === 'entity'
         ) as any[]
       );
 
       setRelationshipSearchResults(
         graphResults.filter(
-          (result: GraphSearchResult) => result.result_type === 'relationship'
+          (result: GraphSearchResult) => result.resultType === 'relationship'
         ) as any[]
       );
 
       setCommunitySearchResults(
         graphResults.filter(
-          (result: GraphSearchResult) => result.result_type === 'community'
+          (result: GraphSearchResult) => result.resultType === 'community'
         ) as any[]
       );
     } catch (error) {

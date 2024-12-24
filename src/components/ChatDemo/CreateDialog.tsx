@@ -99,9 +99,9 @@ export const CreateDialog: React.FC<CreateDialogProps> = ({
         chunks.map((chunk) => ({
           id: crypto.randomUUID(),
           text: chunk.text,
-          collection_ids: [],
+          collectionIds: [],
           metadata: {},
-          document_id: documentId || undefined,
+          documentId: documentId || undefined,
         }))
       );
       // Reset form

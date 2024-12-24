@@ -26,7 +26,7 @@ interface LogEntry {
   run_id: string;
   run_type: string;
   timestamp: string;
-  user_id: string | null;
+  userId: string | null;
 }
 
 interface LogData {
@@ -261,7 +261,7 @@ const ErrorsCard: React.FC = () => {
         if (!client) {
           throw new Error('Failed to get authenticated client');
         }
-        const logs = await client.system.logs({});
+        const logs = {};
         const processedData = null;
         setLogData(processedData);
       } catch (error) {

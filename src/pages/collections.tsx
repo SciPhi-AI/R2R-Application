@@ -53,9 +53,9 @@ const Index: React.FC = () => {
       ]);
 
       // Determine personal total
-      setPersonalTotalEntries(personalBatch.total_entries);
+      setPersonalTotalEntries(personalBatch.totalEntries);
       // Determine accessible total
-      setAccessibleTotalEntries(accessibleBatch.total_entries);
+      setAccessibleTotalEntries(accessibleBatch.totalEntries);
 
       // Determine which accessible are actually shared (not personal)
       const personalIds = new Set(personalBatch.results.map((col) => col.id));
@@ -75,7 +75,7 @@ const Index: React.FC = () => {
 
         // Fetch remaining personal collections
         let offset = PAGE_SIZE;
-        while (offset < personalBatch.total_entries) {
+        while (offset < personalBatch.totalEntries) {
           const batch = await client.users.listCollections({
             id: userId,
             offset,
@@ -88,7 +88,7 @@ const Index: React.FC = () => {
 
         // Fetch remaining accessible collections
         offset = PAGE_SIZE;
-        while (offset < accessibleBatch.total_entries) {
+        while (offset < accessibleBatch.totalEntries) {
           const batch = await client.collections.list({
             offset,
             limit: PAGE_SIZE,
@@ -188,7 +188,7 @@ const Index: React.FC = () => {
   };
 
   // Compute total pages:
-  // If no search, use total_entries from initial fetches
+  // If no search, use totalEntries from initial fetches
   // If search, use filtered arrays length
   const personalTotalPages = useMemo(() => {
     if (searchQuery.trim()) {
