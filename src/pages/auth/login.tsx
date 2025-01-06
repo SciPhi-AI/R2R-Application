@@ -18,7 +18,7 @@ const LoginPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [loginSuccess, setLoginSuccess] = useState(false);
-  const { login, loginWithToken, authState } = useUserContext();
+  const { login, authState } = useUserContext();
   const router = useRouter();
 
   // Remove the dynamic URL logic and always use DEFAULT_DEPLOYMENT_URL
