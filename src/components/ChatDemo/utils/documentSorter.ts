@@ -11,8 +11,8 @@ export const getFilteredAndSortedDocuments = (
         : b.title.localeCompare(a.title);
     } else if (filterCriteria.sort === 'date') {
       return filterCriteria.order === 'asc'
-        ? new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime()
-        : new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+        ? new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()
+        : new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
     }
     return 0;
   });

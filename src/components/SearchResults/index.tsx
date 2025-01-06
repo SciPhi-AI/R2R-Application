@@ -17,7 +17,7 @@ const VectorSearchResultItem: FC<{
   index: number;
   onOpenPdfPreview: (documentId: string, page?: number) => void;
 }> = ({ source, index, onOpenPdfPreview }) => {
-  const { document_id, metadata, text, score, extraction_id } = source;
+  const { documentId, metadata, text, score, extraction_id } = source;
 
   return (
     <div className="p-4 mb-2 flex items-center w-full">
@@ -34,7 +34,7 @@ const VectorSearchResultItem: FC<{
 
         <p className="text-xs text-wrap break-words">{text}</p>
         <p className="text-xs pt-4 text-zinc-500">
-          Document ID: {document_id}
+          Document ID: {documentId}
           <br />
           Extraction ID: {extraction_id}
         </p>

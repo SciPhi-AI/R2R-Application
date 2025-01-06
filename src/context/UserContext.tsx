@@ -118,17 +118,12 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
           password: password,
         });
 
-        console.log('Setting tokens in localStorage:', tokens);
-
-        localStorage.setItem('accessToken', tokens.results.access_token.token);
-        localStorage.setItem(
-          'refreshToken',
-          tokens.results.refresh_token.token
-        );
+        localStorage.setItem('accessToken', tokens.results.accessToken.token);
+        localStorage.setItem('refreshToken', tokens.results.refreshToken.token);
 
         newClient.setTokens(
-          tokens.results.access_token.token,
-          tokens.results.refresh_token.token
+          tokens.results.accessToken.token,
+          tokens.results.refreshToken.token
         );
 
         setClient(newClient);
@@ -306,8 +301,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   const refreshTokenPeriodically = useCallback(async () => {
     type ActualTokenResponse = {
       results: {
-        access_token: { token: string };
-        refresh_token: { token: string };
+        accessToken: { token: string };
+        refreshToken: { token: string };
       };
     };
     if (authState.isAuthenticated && client) {
@@ -318,28 +313,20 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
         return;
       }
       try {
-        console.log('Refreshing token...');
         const newTokens =
           (await client.users.refreshAccessToken()) as unknown as ActualTokenResponse;
-        console.log('Refreshed token:', newTokens);
 
-        console.log(
-          'Setting new tokens in localStorage with access token:',
-          newTokens.results.access_token.token,
-          ' and refresh token:',
-          newTokens.results.refresh_token.token
-        );
         localStorage.setItem(
           'accessToken',
-          newTokens.results.access_token.token
+          newTokens.results.accessToken.token
         );
         localStorage.setItem(
           'refreshToken',
-          newTokens.results.refresh_token.token
+          newTokens.results.refreshToken.token
         );
         client.setTokens(
-          newTokens.results.access_token.token,
-          newTokens.results.refresh_token.token
+          newTokens.results.accessToken.token,
+          newTokens.results.refreshToken.token
         );
         setLastLoginTime(Date.now());
       } catch (error) {

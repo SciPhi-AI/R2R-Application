@@ -26,7 +26,7 @@ interface LogEntry {
   run_id: string;
   run_type: string;
   timestamp: string;
-  user_id: string | null;
+  userId: string | null;
 }
 
 interface LogData {

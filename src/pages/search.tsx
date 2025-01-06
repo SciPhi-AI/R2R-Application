@@ -133,25 +133,25 @@ const SearchPage: React.FC = () => {
         query: query,
       });
 
-      setVectorSearchResults(searchResponse.results.chunk_search_results || []);
+      setVectorSearchResults(searchResponse.results.chunkSearchResults || []);
 
-      const graphResults = searchResponse.results.graph_search_results || [];
+      const graphResults = searchResponse.results.graphSearchResults || [];
 
       setEntitySearchResults(
         graphResults.filter(
-          (result: GraphSearchResult) => result.result_type === 'entity'
+          (result: GraphSearchResult) => result.resultType === 'entity'
         ) as any[]
       );
 
       setRelationshipSearchResults(
         graphResults.filter(
-          (result: GraphSearchResult) => result.result_type === 'relationship'
+          (result: GraphSearchResult) => result.resultType === 'relationship'
         ) as any[]
       );
 
       setCommunitySearchResults(
         graphResults.filter(
-          (result: GraphSearchResult) => result.result_type === 'community'
+          (result: GraphSearchResult) => result.resultType === 'community'
         ) as any[]
       );
     } catch (error) {
@@ -347,7 +347,7 @@ const SearchPage: React.FC = () => {
           >
             <div className="sticky top-0 z-10 bg-zinc-900 shadow-md">
               <form onSubmit={handleSearch} className="py-4">
-                <div className="relative flex items-center focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 focus-within:ring-offset-zinc-800 rounded-full">
+                <div className="relative flex items-center focus-within:ring-2 focus-within:ring-accent-dark focus-within:ring-offset-2 focus-within:ring-offset-zinc-800 rounded-full">
                   <input
                     id="search-bar"
                     value={query}

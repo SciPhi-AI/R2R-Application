@@ -65,7 +65,7 @@ export interface Document {
   id: string;
   text: string;
   metadata: any;
-  collection_ids?: string[];
+  collectionIds?: string[];
 }
 
 export interface Entity {
@@ -75,8 +75,8 @@ export interface Entity {
   description_embedding: number[];
   community_numbers: number[];
   extraction_ids: string[];
-  document_id: string;
-  document_ids: string[];
+  documentId: string;
+  documentIds: string[];
   attributes: Record<string, any>;
 }
 
@@ -103,7 +103,7 @@ export interface Triple {
   description?: string;
   predicate_embedding?: number[];
   extraction_ids: string[];
-  document_ids: string[];
+  documentIds: string[];
   attributes: Record<string, any>;
 }
 
@@ -133,29 +133,29 @@ export enum KGExtractionStatus {
 
 export interface DocumentInfoType {
   id: string;
-  user_id: string;
-  collection_ids: string[];
+  userId: string;
+  collectionIds: string[];
   type: string;
   metadata: Record<string, any>;
   title: string;
   version: string;
   size_in_bytes: number;
-  ingestion_status: IngestionStatus;
-  extraction_status: KGExtractionStatus;
-  created_at: string;
-  updated_at: string;
+  ingestionStatus: IngestionStatus;
+  extractionStatus: KGExtractionStatus;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface DocumentInCollectionType {
   id: string;
   title: string;
-  user_id: string;
-  document_type?: string;
-  created_at: string;
-  updated_at: string;
-  ingestion_status: IngestionStatus;
-  extraction_status: KGExtractionStatus;
-  collection_ids: string[];
+  userId: string;
+  documentType?: string;
+  createdAt: string;
+  updatedAt: string;
+  ingestionStatus: IngestionStatus;
+  extractionStatus: KGExtractionStatus;
+  collectionIds: string[];
   metadata: Record<string, any>;
 }
 
@@ -168,9 +168,9 @@ export interface DocumentInfoDialogProps {
 
 export interface DocumentChunk {
   extraction_id: string;
-  document_id: string;
-  user_id: string;
-  collection_ids: string[];
+  documentId: string;
+  userId: string;
+  collectionIds: string[];
   text: string;
   metadata: { [key: string]: any };
 }
@@ -187,12 +187,12 @@ export interface GenerationConfig {
   // RAG Configuration
   temperature?: number;
   setTemperature?: (value: number) => void;
-  top_p?: number;
+  topP?: number;
   setTopP?: (value: number) => void;
   top_k?: number;
   setTop_k?: (value: number) => void;
-  max_tokens_to_sample?: number;
-  setMax_tokens_to_sample?: (value: number) => void;
+  maxTokensToSample?: number;
+  setmaxTokensToSample?: (value: number) => void;
   model?: string;
   setModel?: (value: string) => void;
   stream?: boolean;
@@ -217,12 +217,12 @@ export interface GenerationConfig {
   // Knowledge Graph Configuration
   kg_temperature?: number;
   setKgTemperature?: (value: number) => void;
-  kg_top_p?: number;
+  kg_topP?: number;
   setKgTopP?: (value: number) => void;
   kg_top_k?: number;
   setKgTop_k?: (value: number) => void;
-  kg_max_tokens_to_sample?: number;
-  setKgMax_tokens_to_sample?: (value: number) => void;
+  kg_maxTokensToSample?: number;
+  setKgmaxTokensToSample?: (value: number) => void;
 }
 
 export interface HighlightProps {
@@ -286,9 +286,9 @@ export interface R2RServerCardProps {
 
 export interface RagGenerationConfig {
   temperature?: number;
-  top_p?: number;
+  topP?: number;
   top_k?: number;
-  max_tokens_to_sample?: number;
+  maxTokensToSample?: number;
   model?: string;
   stream: boolean;
 }
@@ -298,13 +298,6 @@ export interface SearchProps {
   setQuery: (query: string) => void;
   placeholder?: string;
   disabled?: boolean;
-}
-
-export interface ServerStats {
-  start_time: string;
-  uptime_seconds: number;
-  cpu_usage: number;
-  memory_usage: number;
 }
 
 export interface SidebarProps {
@@ -470,23 +463,23 @@ export type Collection = {
   name: string;
   id: string;
   description?: string;
-  created_at?: string;
-  updated_at?: string;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export type Graph = {
   name: string;
   id: string;
   description?: string;
-  created_at?: string;
-  updated_at?: string;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export interface VectorSearchResult {
   extraction_id: string;
-  document_id: string;
-  user_id: string;
-  collection_ids: string[];
+  documentId: string;
+  userId: string;
+  collectionIds: string[];
   score: number;
   text: string;
   metadata: Record<string, any>;
@@ -520,6 +513,6 @@ export interface KGSearchResult {
   method: 'local' | 'global';
   content: any;
   result_type: 'entity' | 'relationship' | 'community' | 'global';
-  document_ids: string[];
+  documentIds: string[];
   metadata: Record<string, any>;
 }

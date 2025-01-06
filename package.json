@@ -98,7 +98,7 @@
     "postcss": "^8.4.49",
     "posthog-js": "^1.194.3",
     "r2r": "0.0.0-beta.0",
-    "r2r-js": "^0.4.5",
+    "r2r-js": "^0.4.7",
     "radix-ui": "^1.0.1",
     "react": "18.3.1",
     "react-chartjs-2": "^5.2.0",
@@ -114,7 +114,6 @@
     "sharp": "^0.33.5",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
-    "toml": "^3.0.0",
     "topojson-client": "^3.1.0",
     "uuid": "^10.0.0",
     "zustand": "^4.5.5"

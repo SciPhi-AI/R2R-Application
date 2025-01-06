@@ -5,7 +5,7 @@ interface UsePaginationProps<T> {
   fetchData: (
     offset: number,
     limit: number
-  ) => Promise<{ results: T[]; total_entries: number }>;
+  ) => Promise<{ results: T[]; totalEntries: number }>;
   pageSize: number;
   initialPage?: number;
   key?: string;
@@ -31,9 +31,9 @@ function usePagination<T>({
       setLoading(true);
       try {
         const offset = (page - 1) * pageSize;
-        const { results, total_entries } = await fetchData(offset, pageSize);
+        const { results, totalEntries } = await fetchData(offset, pageSize);
         setData(results);
-        setTotalItems(total_entries);
+        setTotalItems(totalEntries);
         setCurrentPage(page);
       } catch (error) {
         console.error(`Error fetching data for page ${page}:`, error);

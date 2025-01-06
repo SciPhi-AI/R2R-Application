@@ -20,23 +20,23 @@ const Index: React.FC = () => {
     {
       title: true,
       id: true,
-      owner_id: true,
-      collection_ids: false,
-      ingestion_status: true,
-      extraction_status: true,
-      document_type: false,
+      ownerId: true,
+      collectionIds: false,
+      ingestionStatus: true,
+      extractionStatus: true,
+      documentType: false,
       metadata: false,
       version: false,
-      created_at: true,
-      updated_at: false,
+      createdAt: true,
+      updatedAt: false,
     }
   );
 
   // New states for filters and search query
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<Record<string, any>>({
-    ingestion_status: ['success', 'failed', 'pending', 'enriched'],
-    extraction_status: ['success', 'failed', 'pending'],
+    ingestionStatus: ['success', 'failed', 'pending', 'enriched'],
+    extractionStatus: ['success', 'failed', 'pending'],
   });
   const [currentPage, setCurrentPage] = useState<number>(1);
 
@@ -59,10 +59,8 @@ const Index: React.FC = () => {
         limit: 1000,
       });
 
-      console.log('firstBatch:', firstBatch);
-
       if (firstBatch.results.length > 0) {
-        totalEntries = firstBatch.total_entries;
+        totalEntries = firstBatch.totalEntries;
         setTotalEntries(totalEntries);
 
         allDocs = firstBatch.results;
@@ -115,9 +113,9 @@ const Index: React.FC = () => {
     const pending = documents
       .filter(
         (doc) =>
-          doc.ingestion_status !== IngestionStatus.SUCCESS &&
-          doc.ingestion_status !== IngestionStatus.ENRICHED &&
-          doc.ingestion_status !== IngestionStatus.FAILED
+          doc.ingestionStatus !== IngestionStatus.SUCCESS &&
+          doc.ingestionStatus !== IngestionStatus.ENRICHED &&
+          doc.ingestionStatus !== IngestionStatus.FAILED
       )
       .map((doc) => doc.id);
     setPendingDocuments(pending);
@@ -132,7 +130,7 @@ const Index: React.FC = () => {
       if (
         value &&
         value.length > 0 &&
-        (key === 'ingestion_status' || key === 'extraction_status')
+        (key === 'ingestionStatus' || key === 'extractionStatus')
       ) {
         filtered = filtered.filter((doc) => {
           const status = doc[key];

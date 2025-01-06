@@ -33,7 +33,6 @@ const RegistrationPage: React.FC = () => {
     }
 
     try {
-      console.log('Starting registration process');
       await register(email, password, deploymentUrl);
       console.log('Registration successful');
       // Instead of logging the user in, show a success banner and disable further submission.

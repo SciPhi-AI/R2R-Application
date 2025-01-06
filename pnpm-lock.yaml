@@ -219,8 +219,8 @@ dependencies:
     specifier: 0.0.0-beta.0
     version: 0.0.0-beta.0
   r2r-js:
-    specifier: ^0.4.5
-    version: 0.4.6
+    specifier: ^0.4.7
+    version: 0.4.8
   radix-ui:
     specifier: ^1.0.1
     version: 1.0.1(@types/react@18.3.3)(react-dom@18.3.1)(react@18.3.1)
@@ -266,9 +266,6 @@ dependencies:
   tailwindcss-animate:
     specifier: ^1.0.7
     version: 1.0.7(tailwindcss@3.4.17)
-  toml:
-    specifier: ^3.0.0
-    version: 3.0.0
   topojson-client:
     specifier: ^3.1.0
     version: 3.1.0
@@ -11891,8 +11888,8 @@ packages:
   /queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
 
-  /r2r-js@0.4.6:
-    resolution: {integrity: sha512-ggntWsHGfUJXb+d3203aWNKi5qeMpNqvuaSIKHDy1InROGM4ekfjuiKQZRV/yVL8H1QCokxejnb7+Mg6CPxhOA==}
+  /r2r-js@0.4.8:
+    resolution: {integrity: sha512-DWrhvTkSZh9sH5CM7gnGJlLfAXAV1e8FBlsuISM4r/+Tz86h/0F90BRv84w4XykUmypVO52GI/KoGvzvr7jRRQ==}
     dependencies:
       '@jest/globals': 29.7.0
       '@rrweb/types': 2.0.0-alpha.17
@@ -13224,10 +13221,6 @@ packages:
     engines: {node: '>=8.0'}
     dependencies:
       is-number: 7.0.0
-
-  /toml@3.0.0:
-    resolution: {integrity: sha512-y/mWCZinnvxjTKYhJ+pYxwD0mRLVvOtdS2Awbgxln6iEnt4rk0yBxeSBHkGJcPucRiG0e55mwWp+g/05rsrd6w==}
-    dev: false
 
   /topojson-client@3.1.0:
     resolution: {integrity: sha512-605uxS6bcYxGXw9qi62XyrV6Q3xwbndjachmNxu8HWTtVPxZfEJN9fd/SZS1Q54Sn2y0TMyMxFj/cJINqGHrKw==}

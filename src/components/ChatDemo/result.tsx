@@ -200,7 +200,6 @@ export const Result: FC<{
       if (!currentConversationId) {
         try {
           const newConversation = await client.conversations.create();
-          console.log('newConversation:', newConversation);
 
           if (!newConversation || !newConversation.results) {
             throw new Error('Failed to create a new conversation');
@@ -212,7 +211,6 @@ export const Result: FC<{
             throw new Error('Invalid conversation ID received');
           }
 
-          console.log('New conversation ID:', currentConversationId);
           setSelectedConversationId(currentConversationId);
         } catch (error) {
           console.error('Error creating new conversation:', error);
@@ -226,18 +224,16 @@ export const Result: FC<{
         return;
       }
 
-      console.log('Using conversation ID:', currentConversationId);
-
       const ragGenerationConfig: GenerationConfig = {
         stream: true,
         temperature: ragTemperature ?? undefined,
-        top_p: ragTopP ?? undefined,
-        max_tokens_to_sample: ragMaxTokensToSample ?? undefined,
+        topP: ragTopP ?? undefined,
+        maxTokensToSample: ragMaxTokensToSample ?? undefined,
         model: model && model !== 'null' ? model : undefined,
       };
 
       const vectorSearchSettings: ChunkSearchSettings = {
-        index_measure: IndexMeasure.COSINE_DISTANCE,
+        indexMeasure: IndexMeasure.COSINE_DISTANCE,
         enabled: switches.vectorSearch?.checked ?? true,
         // selectedCollectionIds:
         //   selectedCollectionIds.length > 0
@@ -250,12 +246,12 @@ export const Result: FC<{
       };
 
       const searchSettings: SearchSettings = {
-        use_hybrid_search: switches.hybridSearch?.checked ?? false,
-        use_semantic_search: switches.vectorSearch?.checked ?? true,
+        useHybridSearch: switches.hybridSearch?.checked ?? false,
+        useSemanticSearch: switches.vectorSearch?.checked ?? true,
         filters: searchFilters,
         limit: searchLimit,
-        chunk_settings: vectorSearchSettings,
-        graph_settings: graphSearchSettings,
+        chunkSettings: vectorSearchSettings,
+        graphSettings: graphSearchSettings,
       };
 
       const streamResponse =
@@ -360,7 +356,6 @@ export const Result: FC<{
             role: 'assistant',
             content: assistantResponse,
           });
-          console.log('Added assistant message to conversation');
         } catch (error) {
           console.error(
             'Error adding assistant message to conversation:',
@@ -453,7 +448,7 @@ export const Result: FC<{
         pipelineUrl &&
         mode === 'rag' && (
           <div className="absolute inset-4 flex items-center justify-center backdrop-blur-sm">
-            <div className="flex items-center p-4 bg-white shadow-2xl rounded text-indigo-500 font-medium gap-4">
+            <div className="flex items-center p-4 bg-white shadow-2xl rounded text-text-accent-base font-medium gap-4">
               Please upload at least one document to submit queries.{' '}
               <UploadButton setUploadedDocuments={setUploadedDocuments} />
             </div>

@@ -59,7 +59,7 @@ const Index: React.FC = () => {
       });
 
       if (firstBatch.results.length > 0) {
-        totalEntries = firstBatch.total_entries;
+        totalEntries = firstBatch.totalEntries;
         setTotalEntries(totalEntries);
 
         allUsers = firstBatch.results;
@@ -114,10 +114,10 @@ const Index: React.FC = () => {
       copyable: true,
     },
     {
-      key: 'is_superuser',
+      key: 'isSuperuser',
       label: 'Role',
       renderCell: (user) =>
-        user.is_superuser ? <Badge variant="secondary">Superuser</Badge> : null,
+        user.isSuperuser ? <Badge variant="secondary">Superuser</Badge> : null,
     },
     { key: 'email', label: 'Email', copyable: true },
     { key: 'num_files', label: 'Number of Files' },

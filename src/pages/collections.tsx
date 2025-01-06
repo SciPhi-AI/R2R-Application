@@ -38,7 +38,9 @@ const Index: React.FC = () => {
 
     try {
       const client = await getClient();
-      if (!client) throw new Error('No authenticated client');
+      if (!client) {
+        throw new Error('No authenticated client');
+      }
 
       const userId = authState.userId || '';
 
@@ -53,9 +55,9 @@ const Index: React.FC = () => {
       ]);
 
       // Determine personal total
-      setPersonalTotalEntries(personalBatch.total_entries);
+      setPersonalTotalEntries(personalBatch.totalEntries);
       // Determine accessible total
-      setAccessibleTotalEntries(accessibleBatch.total_entries);
+      setAccessibleTotalEntries(accessibleBatch.totalEntries);
 
       // Determine which accessible are actually shared (not personal)
       const personalIds = new Set(personalBatch.results.map((col) => col.id));
@@ -75,25 +77,29 @@ const Index: React.FC = () => {
 
         // Fetch remaining personal collections
         let offset = PAGE_SIZE;
-        while (offset < personalBatch.total_entries) {
+        while (offset < personalBatch.totalEntries) {
           const batch = await client.users.listCollections({
             id: userId,
             offset,
             limit: PAGE_SIZE,
           });
-          if (batch.results.length === 0) break;
+          if (batch.results.length === 0) {
+            break;
+          }
           allPersonal = allPersonal.concat(batch.results);
           offset += PAGE_SIZE;
         }
 
         // Fetch remaining accessible collections
         offset = PAGE_SIZE;
-        while (offset < accessibleBatch.total_entries) {
+        while (offset < accessibleBatch.totalEntries) {
           const batch = await client.collections.list({
             offset,
             limit: PAGE_SIZE,
           });
-          if (batch.results.length === 0) break;
+          if (batch.results.length === 0) {
+            break;
+          }
           allAccessible = allAccessible.concat(batch.results);
           offset += PAGE_SIZE;
         }
@@ -120,7 +126,9 @@ const Index: React.FC = () => {
   }, [fetchInitialData]);
 
   const filteredPersonalCollections = useMemo(() => {
-    if (!searchQuery.trim()) return personalCollections;
+    if (!searchQuery.trim()) {
+      return personalCollections;
+    }
     const query = searchQuery.toLowerCase();
     return personalCollections.filter(
       (collection) =>
@@ -131,7 +139,9 @@ const Index: React.FC = () => {
   }, [personalCollections, searchQuery]);
 
   const filteredSharedCollections = useMemo(() => {
-    if (!searchQuery.trim()) return sharedCollections;
+    if (!searchQuery.trim()) {
+      return sharedCollections;
+    }
     const query = searchQuery.toLowerCase();
     return sharedCollections.filter(
       (collection) =>
@@ -188,7 +198,7 @@ const Index: React.FC = () => {
   };
 
   // Compute total pages:
-  // If no search, use total_entries from initial fetches
+  // If no search, use totalEntries from initial fetches
   // If search, use filtered arrays length
   const personalTotalPages = useMemo(() => {
     if (searchQuery.trim()) {

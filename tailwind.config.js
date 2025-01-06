@@ -19,6 +19,14 @@ module.exports = {
     },
     extend: {
       colors: {
+        accent: {
+          base: 'var(--accent-base)',
+          light: 'var(--accent-light)',
+          lighter: 'var(--accent-lighter)',
+          dark: 'var(--accent-dark)',
+          darker: 'var(--accent-darker)',
+          contrast: 'var(--accent-contrast)',
+        },
         color1: 'var(--color-1)',
         color2: 'var(--color-2)',
         color3: 'var(--color-3)',
@@ -48,10 +56,6 @@ module.exports = {
         muted: {
           DEFAULT: 'var(--muted)',
           foreground: 'var(--muted-foreground)',
-        },
-        accent: {
-          DEFAULT: 'var(--accent)',
-          foreground: 'var(--accent-foreground)',
         },
         popover: {
           DEFAULT: 'var(--popover)',

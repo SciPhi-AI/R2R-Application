@@ -11,11 +11,11 @@ import {
 
 const colorStyles = {
   primary:
-    'bg-zinc-900 text-white hover:bg-zinc-700 dark:bg-indigo-400/10 dark:text-indigo-400 dark:ring-1 dark:ring-inset dark:ring-indigo-400/20 dark:hover:bg-indigo-400/10 dark:hover:text-indigo-300 dark:hover:ring-indigo-300',
+    'bg-zinc-900 text-white hover:bg-zinc-700 dark:bg-accent-darker dark:text-accent-contrast dark:ring-1 dark:ring-inset dark:ring-accent-dark dark:hover:bg-accent-dark dark:hover:text-accent-contrast dark:hover:ring-accent-base',
   secondary:
     'text-zinc-900 hover:bg-zinc-200 dark:bg-zinc-800/40 dark:text-zinc-400 dark:ring-1 dark:ring-inset dark:ring-zinc-800 dark:hover:bg-zinc-800 dark:hover:text-zinc-300',
   filled:
-    'bg-zinc-900 text-white hover:bg-zinc-700 dark:bg-indigo-600 dark:text-white dark:hover:bg-opacity-90',
+    'bg-zinc-900 text-white hover:bg-zinc-700 dark:bg-accent-darker dark:text-white dark:hover:bg-accent-dark',
   danger:
     'bg-red-600 text-white hover:bg-red-500 dark:bg-red-600 dark:text-white dark:hover:bg-red-500',
   amber:
@@ -23,7 +23,7 @@ const colorStyles = {
   blue: 'bg-zinc-900 text-white hover:bg-zinc-700 dark:bg-blue-600/10 dark:text-blue-600 dark:ring-1 dark:ring-inset dark:ring-blue-600/20 dark:hover:bg-blue-600/10 dark:hover:text-blue-300',
   blue_filled:
     'bg-zinc-900 text-white hover:bg-zinc-700 dark:bg-blue-600 dark:text-white dark:hover:bg-opacity-90',
-  text: 'text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-500',
+  text: 'text-accent-base hover:text-accent-dark dark:text-accent-base dark:hover:text-accent-dark',
   text_gray:
     'text-gray-200 hover:text-gray-600 dark:text-gray-200 dark:hover:text-gray-500',
   disabled: 'bg-zinc-600 text-white cursor-not-allowed hover:bg-zinc-500',

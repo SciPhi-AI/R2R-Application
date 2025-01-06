@@ -7,25 +7,22 @@
     --header-height: 4.5rem;
     --sidebar-width: 20rem;
 
-    --shiki-color-text: theme('colors.white');
-    --shiki-token-constant: theme('colors.emerald.300');
-    --shiki-token-string: theme('colors.emerald.300');
-    --shiki-token-comment: theme('colors.zinc.500');
-    --shiki-token-keyword: theme('colors.sky.300');
-    --shiki-token-parameter: theme('colors.pink.300');
-    --shiki-token-function: theme('colors.violet.300');
-    --shiki-token-string-expression: theme('colors.emerald.300');
-    --shiki-token-punctuation: theme('colors.zinc.200');
+    --text-gray-700: #374151;
+    --text-gray-200: #e5e7eb;
+    --text-accent-base: #818cf8;
+    --text-gray-600: #4b5563;
+    --text-gray-400: #9ca3af;
+    --text-gray-800: #1f2937;
+    --text-red-500: #ef4444;
+    --bg-zinc-100: #f4f4f5;
+    --bg-zinc-800: #27272a;
 
-    --color-1: #111;
-    --color-2: #333;
-    --color-3: #444;
-    --color-4: #666;
-    --color-5: #888;
-    --color-6: #999;
-    --color-7: #eaeaead9;
-    --color-8: #fafafa;
-    --color-9: #ff5555;
+    --accent-lighter: #b3edd7;
+    --accent-light: #5fe1b2;
+    --accent-base: #03d78c;
+    --accent-dark: #019f69;
+    --accent-darker: #007948;
+    --accent-contrast: #ffffff;
 
     --sciphi-primary: #454eb5;
     --sciphi-secondary: #686fc5;
@@ -37,9 +34,6 @@
     --header-box-shadow: inset 0 -1px var(--color-2);
     --shadow: 0 0 0 1px var(--color-2);
     --shadow-hover: 0 0 0 1px var(--color-7);
-
-    --sciphi-top-bg: #262a2d;
-    --sciphi-bg: #171717;
 
     --background: #171717;
     --foreground: #3d3935;
