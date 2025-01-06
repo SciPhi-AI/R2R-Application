@@ -437,11 +437,6 @@ export interface UserContextProps {
     instanceUrl: string
   ) => Promise<{ success: boolean; userRole: 'admin' | 'user' }>;
 
-  loginWithToken: (
-    token: string,
-    instanceUrl: string
-  ) => Promise<{ success: boolean; userRole: 'admin' | 'user' }>;
-
   logout: () => Promise<void>;
 
   unsetCredentials: () => Promise<void>;
