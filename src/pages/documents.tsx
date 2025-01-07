@@ -1,4 +1,4 @@
-import { ExternalLink } from 'lucide-react'; 
+import { ExternalLink } from 'lucide-react';
 import { DocumentResponse } from 'r2r-js';
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 
@@ -17,19 +17,21 @@ const Index: React.FC = () => {
   const [totalEntries, setTotalEntries] = useState<number>(0);
   const [pendingDocuments, setPendingDocuments] = useState<string[]>([]);
   const [selectedDocumentIds, setSelectedDocumentIds] = useState<string[]>([]);
-  const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({
-    title: true,
-    id: true,
-    ownerId: true,
-    collectionIds: false,
-    ingestionStatus: true,
-    extractionStatus: true,
-    documentType: false,
-    metadata: false,
-    version: false,
-    createdAt: true,
-    updatedAt: false,
-  });
+  const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>(
+    {
+      title: true,
+      id: true,
+      ownerId: true,
+      collectionIds: false,
+      ingestionStatus: true,
+      extractionStatus: true,
+      documentType: false,
+      metadata: false,
+      version: false,
+      createdAt: true,
+      updatedAt: false,
+    }
+  );
 
   // New states for filters and search query
   const [searchQuery, setSearchQuery] = useState('');
@@ -196,9 +198,12 @@ const Index: React.FC = () => {
   };
 
   /*** Handle Column Visibility ***/
-  const handleToggleColumn = useCallback((columnKey: string, isVisible: boolean) => {
-    setVisibleColumns((prev) => ({ ...prev, [columnKey]: isVisible }));
-  }, []);
+  const handleToggleColumn = useCallback(
+    (columnKey: string, isVisible: boolean) => {
+      setVisibleColumns((prev) => ({ ...prev, [columnKey]: isVisible }));
+    },
+    []
+  );
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);

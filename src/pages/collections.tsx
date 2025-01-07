@@ -273,7 +273,7 @@ const Index: React.FC = () => {
                     <div
                       key={`empty-${index}`}
                       className="w-full h-[40px] flex justify-center"
-                      >
+                    >
                       <div className="w-64 h-full flex items-center justify-center text-gray-400">
                         {index === 0 && 'No matching collections found'}
                       </div>
@@ -298,46 +298,48 @@ const Index: React.FC = () => {
         {/* SHARED COLLECTIONS */}
         {sharedCollections.length > 0 && (
           <div className="w-full">
-          <h2 className="text-xl font-semibold text-white mb-4">
-            Shared With You
-          </h2>
-          <div className="min-h-[300px]">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-6">
-              {hasSharedResults
-                ? currentShared.map((collection) => (
-                    <div
-                      key={collection.id}
-                      className="w-full h-[120px] flex justify-center"
-                    >
-                      <SharedCollectionCard collection={collection} />
-                    </div>
-                  ))
-                : // If no results, show placeholders
-                  Array.from({ length: 4 }).map((_, index) => (
-                    <div
-                      key={`empty-shared-${index}`}
-                      className="w-full h-[120px] flex justify-center"
-                    >
-                      <div className="w-64 h-full flex items-center justify-center text-gray-400">
-                        {index === 0 && 'No matching collections found'}
+            <h2 className="text-xl font-semibold text-white mb-4">
+              Shared With You
+            </h2>
+            <div className="min-h-[300px]">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-6">
+                {hasSharedResults
+                  ? currentShared.map((collection) => (
+                      <div
+                        key={collection.id}
+                        className="w-full h-[120px] flex justify-center"
+                      >
+                        <SharedCollectionCard collection={collection} />
                       </div>
-                    </div>
-                  ))}
+                    ))
+                  : // If no results, show placeholders
+                    Array.from({ length: 4 }).map((_, index) => (
+                      <div
+                        key={`empty-shared-${index}`}
+                        className="w-full h-[120px] flex justify-center"
+                      >
+                        <div className="w-64 h-full flex items-center justify-center text-gray-400">
+                          {index === 0 && 'No matching collections found'}
+                        </div>
+                      </div>
+                    ))}
+              </div>
             </div>
+            {(searchQuery.trim()
+              ? filteredSharedCollections.length > ITEMS_PER_PAGE
+              : accessibleTotalEntries - personalTotalEntries >
+                ITEMS_PER_PAGE) && (
+              <div className="mb-10">
+                <Pagination
+                  currentPage={currentSharedPage}
+                  totalPages={sharedTotalPages}
+                  onPageChange={handleSharedPageChange}
+                  isLoading={loading}
+                />
+              </div>
+            )}
           </div>
-          {(searchQuery.trim()
-            ? filteredSharedCollections.length > ITEMS_PER_PAGE
-            : accessibleTotalEntries - personalTotalEntries > ITEMS_PER_PAGE) && (
-            <div className="mb-10">
-              <Pagination
-                currentPage={currentSharedPage}
-                totalPages={sharedTotalPages}
-                onPageChange={handleSharedPageChange}
-                isLoading={loading}
-              />
-            </div>
-          )}
-        </div> )}
+        )}
 
         {/* If truly nothing and not loading, show fallback */}
         {personalCollections.length === 0 &&
@@ -376,18 +378,18 @@ const Index: React.FC = () => {
 
               <div className="mb-6">
                 <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-                  Collections
-                  <a 
-                    href="https://r2r-docs.sciphi.ai/api-and-sdks/collections/collections"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center hover:text-blue-400 text-gray-400"
-                    title="View Collections Documentation"
-                  >
-                    <ExternalLink size={18} />
-                  </a>
-                </h1>
+                  <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+                    Collections
+                    <a
+                      href="https://r2r-docs.sciphi.ai/api-and-sdks/collections/collections"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center hover:text-blue-400 text-gray-400"
+                      title="View Collections Documentation"
+                    >
+                      <ExternalLink size={18} />
+                    </a>
+                  </h1>
                 </div>
 
                 <div className="flex items-center mt-6 gap-2">
