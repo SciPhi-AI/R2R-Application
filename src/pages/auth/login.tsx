@@ -9,8 +9,8 @@ import { Input } from '@/components/ui/input';
 import { useUserContext } from '@/context/UserContext';
 // import { supabase } from '@/lib/supabase'; // If not using OAuth, can be removed
 
-const DEFAULT_DEPLOYMENT_URL = 'https://api.cloud.sciphi.ai';
-
+// const DEFAULT_DEPLOYMENT_URL = 'https://api.cloud.sciphi.ai';
+const DEFAULT_DEPLOYMENT_URL = 'http://0.0.0.0:7275'; // For local development
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

@@ -1,3 +1,4 @@
+import { ExternalLink } from 'lucide-react'; // Add this to your existing imports at the top
 import { Loader, Plus, UserRound } from 'lucide-react';
 import { CollectionResponse } from 'r2r-js';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
@@ -33,8 +34,12 @@ const Index: React.FC = () => {
   const [currentSharedPage, setCurrentSharedPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
 
+  // For displaying / propagating errors (including 429)
+  const [errorMessage, setErrorMessage] = useState('');
+
   const fetchInitialData = useCallback(async () => {
     setLoading(true);
+    setErrorMessage(''); // reset any old errors
 
     try {
       const client = await getClient();
@@ -113,8 +118,18 @@ const Index: React.FC = () => {
         setPersonalCollections(allPersonal);
         setSharedCollections(updatedShared);
       })();
-    } catch (error) {
-      console.error('Error fetching collections:', error);
+    } catch (error: any) {
+      // Handle 429 'Too Many Requests' specifically
+      if (error?.response?.status === 429) {
+        console.error('429 Too Many Requests', error);
+        setErrorMessage(
+          'Too Many Requests: The server is throttling requests. Please try again later.'
+        );
+      } else {
+        console.error('Error fetching collections:', error);
+        setErrorMessage('Error fetching collections. Please try again later.');
+      }
+
       setPersonalCollections([]);
       setSharedCollections([]);
       setLoading(false);
@@ -223,108 +238,112 @@ const Index: React.FC = () => {
     personalTotalEntries,
   ]);
 
+  // Always render the two main sections so the layout doesn't collapse.
+  // Show placeholders or "No matching" text if we have no data.
   const renderCollections = () => {
     const currentPersonal = getCurrentPagePersonalCollections();
     const currentShared = getCurrentPageSharedCollections();
+
     const hasPersonalResults = currentPersonal.length > 0;
     const hasSharedResults = currentShared.length > 0;
 
     return (
       <>
-        {personalCollections.length > 0 && (
-          <div className="w-full mb-12">
-            <h2 className="text-xl font-semibold text-white mb-4">
-              Your Collections
-            </h2>
-            <div className="min-h-[300px]">
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {hasPersonalResults
-                  ? currentPersonal.map((collection) => (
-                      <div
-                        key={collection.id}
-                        className="w-full h-[120px] flex justify-center"
+        {/* YOUR COLLECTIONS */}
+        <div className="w-full mb-12">
+          <h2 className="text-xl font-semibold text-white mb-4">
+            Your Collections
+          </h2>
+          <div className="min-h-[300px]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {hasPersonalResults
+                ? currentPersonal.map((collection) => (
+                    <div
+                      key={collection.id}
+                      className="w-full h-[120px] flex justify-center"
+                    >
+                      <ContainerObjectCard
+                        containerObject={collection}
+                        className="w-64 h-full"
+                      />
+                    </div>
+                  ))
+                : // If no results, show placeholders
+                  Array.from({ length: 4 }).map((_, index) => (
+                    <div
+                      key={`empty-${index}`}
+                      className="w-full h-[40px] flex justify-center"
                       >
-                        <ContainerObjectCard
-                          containerObject={collection}
-                          className="w-64 h-full"
-                        />
+                      <div className="w-64 h-full flex items-center justify-center text-gray-400">
+                        {index === 0 && 'No matching collections found'}
                       </div>
-                    ))
-                  : Array.from({ length: 4 }).map((_, index) => (
-                      <div
-                        key={`empty-${index}`}
-                        className="w-full h-[120px] flex justify-center"
-                      >
-                        <div className="w-64 h-full flex items-center justify-center text-gray-400">
-                          {index === 0 && 'No matching collections found'}
-                        </div>
-                      </div>
-                    ))}
-              </div>
+                    </div>
+                  ))}
             </div>
-            {(searchQuery.trim()
-              ? filteredPersonalCollections.length > ITEMS_PER_PAGE
-              : personalTotalEntries > ITEMS_PER_PAGE) && (
-              <div className="mb-10">
-                <Pagination
-                  currentPage={currentPersonalPage}
-                  totalPages={personalTotalPages}
-                  onPageChange={handlePersonalPageChange}
-                  isLoading={loading}
-                />
-              </div>
-            )}
           </div>
-        )}
+          {(searchQuery.trim()
+            ? filteredPersonalCollections.length > ITEMS_PER_PAGE
+            : personalTotalEntries > ITEMS_PER_PAGE) && (
+            <div className="mb-10">
+              <Pagination
+                currentPage={currentPersonalPage}
+                totalPages={personalTotalPages}
+                onPageChange={handlePersonalPageChange}
+                isLoading={loading}
+              />
+            </div>
+          )}
+        </div>
 
+        {/* SHARED COLLECTIONS */}
         {sharedCollections.length > 0 && (
           <div className="w-full">
-            <h2 className="text-xl font-semibold text-white mb-4">
-              Shared With You
-            </h2>
-            <div className="min-h-[300px]">
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-6">
-                {hasSharedResults
-                  ? currentShared.map((collection) => (
-                      <div
-                        key={collection.id}
-                        className="w-full h-[120px] flex justify-center"
-                      >
-                        <SharedCollectionCard collection={collection} />
+          <h2 className="text-xl font-semibold text-white mb-4">
+            Shared With You
+          </h2>
+          <div className="min-h-[300px]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-6">
+              {hasSharedResults
+                ? currentShared.map((collection) => (
+                    <div
+                      key={collection.id}
+                      className="w-full h-[120px] flex justify-center"
+                    >
+                      <SharedCollectionCard collection={collection} />
+                    </div>
+                  ))
+                : // If no results, show placeholders
+                  Array.from({ length: 4 }).map((_, index) => (
+                    <div
+                      key={`empty-shared-${index}`}
+                      className="w-full h-[120px] flex justify-center"
+                    >
+                      <div className="w-64 h-full flex items-center justify-center text-gray-400">
+                        {index === 0 && 'No matching collections found'}
                       </div>
-                    ))
-                  : Array.from({ length: 4 }).map((_, index) => (
-                      <div
-                        key={`empty-shared-${index}`}
-                        className="w-full h-[120px] flex justify-center"
-                      >
-                        <div className="w-64 h-full flex items-center justify-center text-gray-400">
-                          {index === 0 && 'No matching collections found'}
-                        </div>
-                      </div>
-                    ))}
-              </div>
+                    </div>
+                  ))}
             </div>
-            {(searchQuery.trim()
-              ? filteredSharedCollections.length > ITEMS_PER_PAGE
-              : accessibleTotalEntries - personalTotalEntries >
-                ITEMS_PER_PAGE) && (
-              <div className="mb-10">
-                <Pagination
-                  currentPage={currentSharedPage}
-                  totalPages={sharedTotalPages}
-                  onPageChange={handleSharedPageChange}
-                  isLoading={loading}
-                />
-              </div>
-            )}
           </div>
-        )}
+          {(searchQuery.trim()
+            ? filteredSharedCollections.length > ITEMS_PER_PAGE
+            : accessibleTotalEntries - personalTotalEntries > ITEMS_PER_PAGE) && (
+            <div className="mb-10">
+              <Pagination
+                currentPage={currentSharedPage}
+                totalPages={sharedTotalPages}
+                onPageChange={handleSharedPageChange}
+                isLoading={loading}
+              />
+            </div>
+          )}
+        </div> )}
 
+        {/* If truly nothing and not loading, show fallback */}
         {personalCollections.length === 0 &&
           sharedCollections.length === 0 &&
           !loading && (
-            <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 min-h-[300px]">
+            <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 min-h-[300px] mt-4">
               <div className="w-full h-[120px] flex justify-center col-span-full">
                 <div className="w-64 h-full flex items-center justify-center text-gray-400">
                   No collections found
@@ -348,9 +367,27 @@ const Index: React.FC = () => {
             </div>
           ) : (
             <>
+              {/* Error Message (including 429) */}
+              {errorMessage && (
+                <div className="bg-red-500 text-white p-3 mb-4 rounded">
+                  {errorMessage}
+                </div>
+              )}
+
               <div className="mb-6">
                 <div className="flex items-center justify-between">
-                  <h1 className="text-2xl font-bold text-white">Collections</h1>
+                <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+                  Collections
+                  <a 
+                    href="https://r2r-docs.sciphi.ai/api-and-sdks/collections/collections"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center hover:text-blue-400 text-gray-400"
+                    title="View Collections Documentation"
+                  >
+                    <ExternalLink size={18} />
+                  </a>
+                </h1>
                 </div>
 
                 <div className="flex items-center mt-6 gap-2">

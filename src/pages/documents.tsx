@@ -1,3 +1,4 @@
+import { ExternalLink } from 'lucide-react'; 
 import { DocumentResponse } from 'r2r-js';
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 
@@ -16,21 +17,19 @@ const Index: React.FC = () => {
   const [totalEntries, setTotalEntries] = useState<number>(0);
   const [pendingDocuments, setPendingDocuments] = useState<string[]>([]);
   const [selectedDocumentIds, setSelectedDocumentIds] = useState<string[]>([]);
-  const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>(
-    {
-      title: true,
-      id: true,
-      ownerId: true,
-      collectionIds: false,
-      ingestionStatus: true,
-      extractionStatus: true,
-      documentType: false,
-      metadata: false,
-      version: false,
-      createdAt: true,
-      updatedAt: false,
-    }
-  );
+  const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({
+    title: true,
+    id: true,
+    ownerId: true,
+    collectionIds: false,
+    ingestionStatus: true,
+    extractionStatus: true,
+    documentType: false,
+    metadata: false,
+    version: false,
+    createdAt: true,
+    updatedAt: false,
+  });
 
   // New states for filters and search query
   const [searchQuery, setSearchQuery] = useState('');
@@ -51,22 +50,22 @@ const Index: React.FC = () => {
 
       let offset = 0;
       let allDocs: DocumentResponse[] = [];
-      let totalEntries = 0;
+      let totalCount = 0;
 
       // Fetch first batch
       const firstBatch = await client.documents.list({
-        offset: offset,
-        limit: 1000,
+        offset,
+        limit: PAGE_SIZE,
       });
 
       if (firstBatch.results.length > 0) {
-        totalEntries = firstBatch.totalEntries;
-        setTotalEntries(totalEntries);
+        totalCount = firstBatch.totalEntries;
+        setTotalEntries(totalCount);
 
         allDocs = firstBatch.results;
         setDocuments(allDocs);
 
-        // Set loading to false after the first batch is fetched
+        // End loading spinner after first batch
         setLoading(false);
       } else {
         setLoading(false);
@@ -75,10 +74,10 @@ const Index: React.FC = () => {
 
       offset += PAGE_SIZE;
 
-      // Continue fetching in the background
-      while (offset < totalEntries) {
+      // Continue fetching in the background (if needed)
+      while (offset < totalCount) {
         const batch = await client.documents.list({
-          offset: offset,
+          offset,
           limit: PAGE_SIZE,
         });
 
@@ -104,22 +103,35 @@ const Index: React.FC = () => {
     setSelectedDocumentIds([]);
   }, [fetchAllDocuments]);
 
+  // 1) Delay initial fetch by 1 second
   useEffect(() => {
-    fetchAllDocuments();
+    const timer = setTimeout(() => {
+      fetchAllDocuments();
+    }, 1000); // Wait 1s before the first fetch
+
+    return () => clearTimeout(timer);
   }, [fetchAllDocuments]);
 
-  /*** Handle Pending Documents ***/
+  /*** Monitor Documents for Pending Status ***/
   useEffect(() => {
-    const pending = documents
-      .filter(
-        (doc) =>
-          doc.ingestionStatus !== IngestionStatus.SUCCESS &&
-          doc.ingestionStatus !== IngestionStatus.ENRICHED &&
-          doc.ingestionStatus !== IngestionStatus.FAILED
-      )
-      .map((doc) => doc.id);
-    setPendingDocuments(pending);
-  }, [documents]);
+    // Identify documents that are not SUCCESS, ENRICHED, or FAILED
+    const pending = documents.filter(
+      (doc) =>
+        doc.ingestionStatus !== IngestionStatus.SUCCESS &&
+        doc.ingestionStatus !== IngestionStatus.ENRICHED &&
+        doc.ingestionStatus !== IngestionStatus.FAILED
+    );
+    setPendingDocuments(pending.map((doc) => doc.id));
+
+    // 2) Poll if we still have pending documents
+    if (pending.length > 0) {
+      const pollInterval = setInterval(() => {
+        fetchAllDocuments();
+      }, 5000);
+
+      return () => clearInterval(pollInterval);
+    }
+  }, [documents, fetchAllDocuments]);
 
   /*** Client-Side Filtering ***/
   const filteredDocuments = useMemo(() => {
@@ -184,12 +196,9 @@ const Index: React.FC = () => {
   };
 
   /*** Handle Column Visibility ***/
-  const handleToggleColumn = useCallback(
-    (columnKey: string, isVisible: boolean) => {
-      setVisibleColumns((prev) => ({ ...prev, [columnKey]: isVisible }));
-    },
-    []
-  );
+  const handleToggleColumn = useCallback((columnKey: string, isVisible: boolean) => {
+    setVisibleColumns((prev) => ({ ...prev, [columnKey]: isVisible }));
+  }, []);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -199,7 +208,20 @@ const Index: React.FC = () => {
     <Layout pageTitle="Documents" includeFooter={false}>
       <main className="w-full flex flex-col container h-screen-[calc(100%-4rem)]">
         <div className="relative flex-grow bg-zinc-900 mt-[4rem] sm:mt-[4rem]">
-          <div className="mx-auto max-w-6xl mb-12 mt-4 p-4 h-full">
+          <div className="mx-auto max-w-6xl mb-12 p-4 h-full">
+            <h1 className="text-2xl font-bold text-white flex items-center gap-2 mb-4">
+              Documents
+              <a
+                href="https://r2r-docs.sciphi.ai/api-and-sdks/collections/collections"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center hover:text-blue-400 text-gray-400"
+                title="View Collections Documentation"
+              >
+                <ExternalLink size={18} />
+              </a>
+            </h1>
+
             <DocumentsTable
               documents={documents}
               loading={loading}

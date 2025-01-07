@@ -6,7 +6,8 @@ import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/Button';
 import { useUserContext } from '@/context/UserContext';
 
-const DEFAULT_DEPLOYMENT_URL = 'https://api.cloud.sciphi.ai';
+// const DEFAULT_DEPLOYMENT_URL = 'https://api.cloud.sciphi.ai';
+const DEFAULT_DEPLOYMENT_URL = 'http://0.0.0.0:7275'; // For local development
 
 const VerifyEmailPage: React.FC = () => {
   const router = useRouter();
@@ -21,12 +22,15 @@ const VerifyEmailPage: React.FC = () => {
 
   useEffect(() => {
     const verify = async () => {
-      if (!verification_code || !email) {
-        setStatus('error');
-        return;
-      }
 
       try {
+        if (!verification_code || !email) {
+          console.log('verification_code = ', verification_code);
+          console.log('email = ', email);
+          setStatus('error');
+          // return;
+        }
+  
         console.log('Attempting to verify...', email, verification_code);
         const response = await verifyEmail(
           email,
@@ -41,6 +45,7 @@ const VerifyEmailPage: React.FC = () => {
           `/auth/login?verified=true&email=${encodeURIComponent(email)}`
         );
       } catch (err) {
+        console.log('Email verification failed:', err);
         console.error('Email verification failed:', err);
 
         // If the error indicates the user is already verified, we still redirect to login
@@ -50,9 +55,9 @@ const VerifyEmailPage: React.FC = () => {
             `/auth/login?verified=true&email=${encodeURIComponent(email)}`
           );
           return;
+        } else {
+          setStatus('error');
         }
-
-        setStatus('error');
       }
     };
 
