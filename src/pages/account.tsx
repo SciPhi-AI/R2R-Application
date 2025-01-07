@@ -1,7 +1,7 @@
 import { ExternalLink } from 'lucide-react'; // Add this to your existing imports at the top
 import { Loader, UserRound, Pencil, PlusCircle, Trash2 } from 'lucide-react';
 import { User } from 'r2r-js';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 
 import { DeleteButton } from '@/components/ChatDemo/deleteButton';
 import Layout from '@/components/Layout';
@@ -10,7 +10,6 @@ import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
 import { useUserContext } from '@/context/UserContext';
-// import { ApiKeyNoPriv } from '@/types'; // or wherever you store your TS types
 
 interface UpdateUserModalProps {
   open: boolean;
@@ -98,7 +97,6 @@ const Index: React.FC = () => {
   const { getClient, authState, unsetCredentials } = useUserContext();
   const [loading, setLoading] = useState(true);
   const [userProfile, setUserProfile] = useState<User | null>(null);
-  const [apiKeys, setApiKeys] = useState<[] | null>(null);
 
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const { toast } = useToast();
@@ -119,35 +117,6 @@ const Index: React.FC = () => {
       setLoading(false);
     }
   }, [getClient]);
-
-  // Fetch the user's API keys
-  const fetchApiKeys = useCallback(async () => {
-    if (!userProfile) return;
-    try {
-      const client: any = await getClient();
-      if (!client) {
-        throw new Error('Failed to get authenticated client');
-      }
-      const keysResp: any = await client.users.listApiKeys({
-        id: userProfile.id,
-      });
-      setApiKeys(keysResp.results);
-    } catch (error) {
-      console.error('Error fetching API keys:', error);
-    }
-  }, [getClient, userProfile]);
-
-  // Combined effect for user & keys
-  useEffect(() => {
-    fetchUserAccount();
-  }, [fetchUserAccount]);
-
-  // Once userProfile is loaded, fetch keys
-  useEffect(() => {
-    if (userProfile?.id) {
-      fetchApiKeys();
-    }
-  }, [userProfile, fetchApiKeys]);
 
   const handleUpdateUser = async (data: Partial<User>) => {
     try {
@@ -178,80 +147,10 @@ const Index: React.FC = () => {
     }
   };
 
-  const handleCreateApiKey = async () => {
-    try {
-      if (!userProfile) return;
-      const client: any = await getClient();
-      const resp: any = await client.users.createApiKey({ id: userProfile.id });
-      const { publicKey, apiKey } = resp.results;
-
-      // Open a toast with scrollable and responsive inputs
-      toast({
-        variant: 'success',
-        title: 'API Key Created',
-        description: (
-          <div className="space-y-4 max-w-full">
-            <div>
-              <p className="font-semibold">Public Key:</p>
-              <textarea
-                readOnly
-                value={publicKey}
-                className="w-full mt-1 bg-zinc-800 text-white p-2 rounded resize-none focus:outline-none"
-                rows={2} // Adjust rows as needed
-                onFocus={(e) => e.target.select()} // Auto-select for copying
-              />
-            </div>
-            <div>
-              <p className="font-semibold">API Key (copy it now!):</p>
-              <textarea
-                readOnly
-                value={apiKey}
-                className="w-full mt-1 bg-zinc-800 text-white p-2 rounded resize-none focus:outline-none"
-                rows={4} // Adjust rows for longer keys
-                onFocus={(e) => e.target.select()} // Auto-select for copying
-              />
-            </div>
-          </div>
-        ),
-        duration: 20000, // Increase duration for easier copying
-      });
-
-      // Re-fetch the list of keys
-      fetchApiKeys();
-    } catch (error) {
-      console.error('Error creating API key:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Error Creating API Key',
-        description: String(error),
-      });
-    }
-  };
-
-  // Delete an API key
-  const handleDeleteApiKey = async (keyId: string) => {
-    try {
-      if (!userProfile) return;
-      const client: any = await getClient();
-      await client.users.deleteApiKey({ id: userProfile.id, keyId });
-
-      toast({
-        variant: 'success',
-        title: 'API Key Deleted',
-        description: 'The API key was successfully removed.',
-      });
-
-      // Refresh the list of API keys
-      fetchApiKeys();
-    } catch (error) {
-      console.error('Error deleting API key:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Error Deleting API Key',
-        description: String(error),
-      });
-    }
-  };
+  // Combined effect for user & keys
+  useEffect(() => {
+    fetchUserAccount();
+  }, [fetchUserAccount]);
 
   if (loading) {
     return (
@@ -333,71 +232,6 @@ const Index: React.FC = () => {
                           ).toLocaleDateString()}
                         </p>
                       </div>
-                    </div>
-                  </div>
-
-                  {/* Developer API Keys Section */}
-                  <div className="pt-6 border-t border-zinc-800">
-                    <h3 className="text-sm font-medium text-gray-400 mb-4">
-                      Developer API Keys
-                    </h3>
-
-                    <Button
-                      onClick={handleCreateApiKey}
-                      // variant="outline"
-                      className="pr-2"
-                    >
-                      <PlusCircle className="mr-2 w-4 h-4 mt-1" />
-                      Create New Key
-                    </Button>
-
-                    <div className="mt-4">
-                      {apiKeys && apiKeys.length > 0 ? (
-                        <table className="min-w-full text-sm">
-                          <thead>
-                            <tr className="text-left border-b border-zinc-800">
-                              <th className="py-2">Public Key</th>
-                              <th className="py-2">Key ID</th>
-                              {/* <th className="py-2">Name</th> */}
-                              <th className="py-2">Last Updated</th>
-                              <th className="py-2"></th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {apiKeys.map((key: any) => (
-                              <tr
-                                key={key.keyId}
-                                className="border-b border-zinc-800"
-                              >
-                                <td className="py-2 pr-4 break-all">
-                                  {key.publicKey}
-                                </td>
-                                <td className="py-2 pr-4 break-all">
-                                  {key.keyId}
-                                </td>
-                                {/* <td className="py-2 pr-4">
-                                  {key.name || ''}
-                                </td> */}
-                                <td className="py-2 pr-4">
-                                  {new Date(key.updatedAt).toLocaleString()}
-                                </td>
-                                <td className="py-2">
-                                  <Button
-                                    onClick={() =>
-                                      handleDeleteApiKey(key.keyId)
-                                    }
-                                    // variant="destructive"
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </Button>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      ) : (
-                        <p className="text-gray-500">No API keys found.</p>
-                      )}
                     </div>
                   </div>
 
