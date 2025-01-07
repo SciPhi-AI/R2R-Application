@@ -16,8 +16,8 @@ const VerifyEmailPage: React.FC = () => {
     'loading'
   );
   const { verification_code, email } = router.query as {
-    verification_code?: string;
-    email?: string;
+    verification_code: string;
+    email: string;
   };
 
   useEffect(() => {

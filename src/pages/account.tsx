@@ -106,7 +106,7 @@ const Index: React.FC = () => {
   const fetchUserAccount = useCallback(async () => {
     try {
       setLoading(true);
-      const client = await getClient();
+      const client: any = await getClient();
       if (!client) {
         throw new Error('Failed to get authenticated client');
       }
@@ -124,11 +124,13 @@ const Index: React.FC = () => {
   const fetchApiKeys = useCallback(async () => {
     if (!userProfile) return;
     try {
-      const client = await getClient();
+      const client: any = await getClient();
       if (!client) {
         throw new Error('Failed to get authenticated client');
       }
-      const keysResp = await client.users.listApiKeys({ id: userProfile.id });
+      const keysResp: any = await client.users.listApiKeys({
+        id: userProfile.id,
+      });
       setApiKeys(keysResp.results);
     } catch (error) {
       console.error('Error fetching API keys:', error);
@@ -149,7 +151,7 @@ const Index: React.FC = () => {
 
   const handleUpdateUser = async (data: Partial<User>) => {
     try {
-      const client = await getClient();
+      const client: any = await getClient();
       if (!client || !userProfile) {
         return;
       }
@@ -179,8 +181,8 @@ const Index: React.FC = () => {
   const handleCreateApiKey = async () => {
     try {
       if (!userProfile) return;
-      const client = await getClient();
-      const resp = await client.users.createApiKey({ id: userProfile.id });
+      const client: any = await getClient();
+      const resp: any = await client.users.createApiKey({ id: userProfile.id });
       const { publicKey, apiKey } = resp.results;
 
       // Open a toast with scrollable and responsive inputs
@@ -230,7 +232,7 @@ const Index: React.FC = () => {
   const handleDeleteApiKey = async (keyId: string) => {
     try {
       if (!userProfile) return;
-      const client = await getClient();
+      const client: any = await getClient();
       await client.users.deleteApiKey({ id: userProfile.id, keyId });
 
       toast({
@@ -342,7 +344,7 @@ const Index: React.FC = () => {
 
                     <Button
                       onClick={handleCreateApiKey}
-                      variant="outline"
+                      // variant="outline"
                       className="pr-2"
                     >
                       <PlusCircle className="mr-2 w-4 h-4 mt-1" />
@@ -362,7 +364,7 @@ const Index: React.FC = () => {
                             </tr>
                           </thead>
                           <tbody>
-                            {apiKeys.map((key) => (
+                            {apiKeys.map((key: any) => (
                               <tr
                                 key={key.keyId}
                                 className="border-b border-zinc-800"
@@ -384,7 +386,7 @@ const Index: React.FC = () => {
                                     onClick={() =>
                                       handleDeleteApiKey(key.keyId)
                                     }
-                                    variant="destructive"
+                                    // variant="destructive"
                                   >
                                     <Trash2 className="w-4 h-4" />
                                   </Button>
