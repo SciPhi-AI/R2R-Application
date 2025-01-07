@@ -222,8 +222,8 @@ importers:
         specifier: 0.0.0-beta.0
         version: 0.0.0-beta.0
       r2r-js:
-        specifier: ^0.4.7
-        version: 0.4.7
+        specifier: ^0.4.8
+        version: 0.4.8
       radix-ui:
         specifier: ^1.0.1
         version: 1.0.1(@types/react-dom@18.3.1)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -5496,8 +5496,8 @@ packages:
     resolution: {integrity: sha512-ZBbGYOpact8QAH9RprFWL4RAESYwbDodxiuDjOnzwzzk9pBzKycoifGuUrHHcDixE/eLMKPHRaXenTgu1qXBqA==}
     hasBin: true
 
-  jsesc@3.0.2:
-    resolution: {integrity: sha512-xKqzzWXDttJuOcawBt4KnKHHIf5oQ/Cxax+0PWFG+DFDgHNAdi+TXECADI+RYiFUMmx8792xsMbbgXj4CwnP4g==}
+  jsesc@3.1.0:
+    resolution: {integrity: sha512-/sM3dO2FOzXjKQhJuo0Q173wf2KOo8t4I8vHy6lF9poUp7bKT0/NHE8fPX23PwfhnykfqnC2xRxOnVw5XuGIaA==}
     engines: {node: '>=6'}
     hasBin: true
 
@@ -6406,8 +6406,8 @@ packages:
   posthog-js@1.194.3:
     resolution: {integrity: sha512-/YFpBMqZzRpywa07QeoaIojdrUDijFajT4gZBSCFUBuZA5BN5xr5S1spsvtpT7E4RjkQSVgRvUngI4W19csgQw==}
 
-  posthog-node@4.3.1:
-    resolution: {integrity: sha512-By9SEGZxBLC7GVyVb+HlJlpxM/xI4iLUgwtsBS8f4bZ0wqYKiNHoYcFEwMJnTM9xQcQZztr6dqLmsJ7jCv0vxA==}
+  posthog-node@4.3.2:
+    resolution: {integrity: sha512-vy8Mt9IEfniUgqQ1rOCQ31CBO1VNqDGd3ZtHlWR9/YfU6RiuK+9pUXPb4h6HTGzQmjL8NFnjd8K8NMXSX8S6MQ==}
     engines: {node: '>=15.0.0'}
 
   preact@10.25.1:
@@ -6464,8 +6464,8 @@ packages:
   queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
 
-  r2r-js@0.4.7:
-    resolution: {integrity: sha512-VZZ0JmlM41tPI5+85sj0rJ9fyZ8iOWreoNuU9Lc+aDHHwGWABYqYnA78GEyvE5j6nBx8CYpJnNmiwjOvAovfrg==}
+  r2r-js@0.4.8:
+    resolution: {integrity: sha512-DWrhvTkSZh9sH5CM7gnGJlLfAXAV1e8FBlsuISM4r/+Tz86h/0F90BRv84w4XykUmypVO52GI/KoGvzvr7jRRQ==}
 
   r2r@0.0.0-beta.0:
     resolution: {integrity: sha512-LwZXOYJexUffYHP+LcBP3zgF17Az9dTTM60J9q3WGBReF4qqgEvFDyzHxOukMqIR8zUz4E00rRnCW5Mdktoe6g==}
@@ -7547,7 +7547,7 @@ snapshots:
 
   '@ampproject/remapping@2.3.0':
     dependencies:
-      '@jridgewell/gen-mapping': 0.3.5
+      '@jridgewell/gen-mapping': 0.3.8
       '@jridgewell/trace-mapping': 0.3.25
 
   '@babel/code-frame@7.26.2':
@@ -7582,15 +7582,15 @@ snapshots:
     dependencies:
       '@babel/parser': 7.26.3
       '@babel/types': 7.26.3
-      '@jridgewell/gen-mapping': 0.3.5
+      '@jridgewell/gen-mapping': 0.3.8
       '@jridgewell/trace-mapping': 0.3.25
-      jsesc: 3.0.2
+      jsesc: 3.1.0
 
   '@babel/helper-compilation-targets@7.25.9':
     dependencies:
       '@babel/compat-data': 7.26.3
       '@babel/helper-validator-option': 7.25.9
-      browserslist: 4.24.2
+      browserslist: 4.24.3
       lru-cache: 5.1.1
       semver: 6.3.1
 
@@ -14236,7 +14236,7 @@ snapshots:
     dependencies:
       commander: 1.1.1
 
-  jsesc@3.0.2: {}
+  jsesc@3.1.0: {}
 
   json-buffer@3.0.1: {}
 
@@ -15577,7 +15577,7 @@ snapshots:
       preact: 10.25.1
       web-vitals: 4.2.4
 
-  posthog-node@4.3.1:
+  posthog-node@4.3.2:
     dependencies:
       axios: 1.7.9
       rusha: 0.8.14
@@ -15622,14 +15622,14 @@ snapshots:
 
   queue-microtask@1.2.3: {}
 
-  r2r-js@0.4.7:
+  r2r-js@0.4.8:
     dependencies:
       '@jest/globals': 29.7.0
       '@rrweb/types': 2.0.0-alpha.17
       axios: 1.7.9
       form-data: 4.0.1
       posthog-js: 1.194.3
-      posthog-node: 4.3.1
+      posthog-node: 4.3.2
       rrweb-snapshot: 2.0.0-alpha.4
       uuid: 10.0.0
     transitivePeerDependencies:

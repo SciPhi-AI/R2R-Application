@@ -9,6 +9,7 @@ import React, { FC, useEffect, useState, useRef } from 'react';
 
 import PdfPreviewDialog from '@/components/ChatDemo/utils/pdfPreviewDialog';
 import { useUserContext } from '@/context/UserContext';
+import { extractBlocks } from '@/lib/utils';
 import { Message } from '@/types';
 
 import { Answer } from './answer';
@@ -170,6 +171,7 @@ export const Result: FC<{
       sources: {},
     };
 
+    // Start with an empty assistant message
     const newAssistantMessage: Message = {
       role: 'assistant',
       content: '',
@@ -180,13 +182,17 @@ export const Result: FC<{
       searchPerformed: false,
     };
 
+    // Push the user message immediately
     setMessages((prevMessages) => [...prevMessages, newUserMessage]);
 
+    // We'll accumulate raw text in this buffer
     let buffer = '';
-    let inLLMResponse = false;
-    let fullContent = '';
-    let vectorSearchSources = null;
-    let kgSearchResult = null;
+    // Flags and placeholders
+    let inLLMResponse = false; // Are we inside <completion> blocks?
+    let fullContent = ''; // Combined text for the LLM
+    let assistantResponse = ''; // The final text for the assistant
+    let vectorSearchSources: string | null = null;
+    let kgSearchResult: string | null = null;
     let searchPerformed = false;
 
     try {
@@ -195,22 +201,18 @@ export const Result: FC<{
         throw new Error('Failed to get authenticated client');
       }
 
+      // Make sure we have a conversation
       let currentConversationId = selectedConversationId;
-
       if (!currentConversationId) {
         try {
           const newConversation = await client.conversations.create();
-
           if (!newConversation || !newConversation.results) {
             throw new Error('Failed to create a new conversation');
           }
-
           currentConversationId = newConversation.results.id;
-
           if (typeof currentConversationId !== 'string') {
             throw new Error('Invalid conversation ID received');
           }
-
           setSelectedConversationId(currentConversationId);
         } catch (error) {
           console.error('Error creating new conversation:', error);
@@ -218,12 +220,12 @@ export const Result: FC<{
           return;
         }
       }
-
       if (!currentConversationId) {
         setError('No valid conversation ID. Please try again.');
         return;
       }
 
+      // Build the config
       const ragGenerationConfig: GenerationConfig = {
         stream: true,
         temperature: ragTemperature ?? undefined,
@@ -235,10 +237,6 @@ export const Result: FC<{
       const vectorSearchSettings: ChunkSearchSettings = {
         indexMeasure: IndexMeasure.COSINE_DISTANCE,
         enabled: switches.vectorSearch?.checked ?? true,
-        // selectedCollectionIds:
-        //   selectedCollectionIds.length > 0
-        //     ? [selectedCollectionIds].flat()
-        //     : undefined,
       };
 
       const graphSearchSettings: GraphSearchSettings = {
@@ -254,25 +252,25 @@ export const Result: FC<{
         graphSettings: graphSearchSettings,
       };
 
+      // Call the streaming endpoint
       const streamResponse =
         mode === 'rag_agent'
           ? await client.retrieval.agent({
               message: newUserMessage,
-              ragGenerationConfig: ragGenerationConfig,
-              searchSettings: searchSettings,
+              ragGenerationConfig,
+              searchSettings,
               conversationId: currentConversationId,
             })
           : await client.retrieval.rag({
-              query: query,
-              ragGenerationConfig: ragGenerationConfig,
-              searchSettings: searchSettings,
+              query,
+              ragGenerationConfig,
+              searchSettings,
             });
 
       const reader = streamResponse.getReader();
       const decoder = new TextDecoder();
 
-      let assistantResponse = '';
-
+      // Continuously read chunks
       while (true) {
         if (signal.aborted) {
           reader.cancel();
@@ -283,65 +281,123 @@ export const Result: FC<{
         if (done) {
           break;
         }
+
         buffer += decoder.decode(value, { stream: true });
-        // Handle search results
-        if (
-          buffer.includes(CHUNK_SEARCH_STREAM_END_MARKER) ||
-          buffer.includes(GRAPH_SEARCH_STREAM_END_MARKER)
-        ) {
-          if (buffer.includes(CHUNK_SEARCH_STREAM_MARKER)) {
-            vectorSearchSources = buffer
-              .split(CHUNK_SEARCH_STREAM_MARKER)[1]
-              .split(CHUNK_SEARCH_STREAM_END_MARKER)[0];
-            searchPerformed = true;
-          }
 
-          if (buffer.includes(GRAPH_SEARCH_STREAM_MARKER)) {
-            kgSearchResult = buffer
-              .split(GRAPH_SEARCH_STREAM_MARKER)[1]
-              .split(GRAPH_SEARCH_STREAM_END_MARKER)[0];
+        //
+        // 1) Extract any <chunk_search> blocks
+        //
+        const chunkSearchResult = extractBlocks(
+          buffer,
+          CHUNK_SEARCH_STREAM_MARKER,
+          CHUNK_SEARCH_STREAM_END_MARKER
+        );
+        buffer = chunkSearchResult.newBuffer; // leftover data
+        for (const rawJson of chunkSearchResult.blocks) {
+          try {
+            vectorSearchSources = rawJson;
             searchPerformed = true;
+          } catch (err) {
+            console.error('Failed to parse chunk_search JSON:', err, rawJson);
           }
-
+          // Update state so user sees search results
           updateLastMessage(
             fullContent,
-            { vector: vectorSearchSources, kg: kgSearchResult },
+            {
+              vector: vectorSearchSources,
+              kg: kgSearchResult,
+            },
             true,
             searchPerformed
           );
           setIsSearching(false);
         }
 
-        // Handle LLM response
-        if (buffer.includes(LLM_START_TOKEN)) {
-          inLLMResponse = true;
-          buffer = buffer.split(LLM_START_TOKEN)[1] || ''; // strip pre-stream content
-        }
-
-        if (inLLMResponse) {
-          const endTokenIndex = buffer.indexOf(LLM_END_TOKEN);
-          let chunk = '';
-
-          if (endTokenIndex !== -1) {
-            chunk = buffer.slice(0, endTokenIndex);
-            buffer = buffer.slice(endTokenIndex + LLM_END_TOKEN.length);
-            inLLMResponse = false;
-          } else {
-            chunk = buffer;
-            buffer = '';
+        //
+        // 2) Extract any <graph_search> blocks
+        //
+        const graphSearchResultBlocks = extractBlocks(
+          buffer,
+          GRAPH_SEARCH_STREAM_MARKER,
+          GRAPH_SEARCH_STREAM_END_MARKER
+        );
+        buffer = graphSearchResultBlocks.newBuffer;
+        for (const rawJson of graphSearchResultBlocks.blocks) {
+          try {
+            kgSearchResult = rawJson;
+            searchPerformed = true;
+          } catch (err) {
+            console.error('Failed to parse graph_search JSON:', err, rawJson);
           }
-
-          fullContent += chunk;
-          assistantResponse += chunk;
+          // Update
           updateLastMessage(
             fullContent,
-            { vector: vectorSearchSources, kg: kgSearchResult },
+            {
+              vector: vectorSearchSources,
+              kg: kgSearchResult,
+            },
             true,
             searchPerformed
           );
+          setIsSearching(false);
+        }
+
+        //
+        // 3) Handle <completion> tokens for LLM text
+        //
+        //   The approach below is a simplified example, just like your original code,
+        //   but we keep leftover text in `buffer` in case the marker is partial.
+        //
+        if (!inLLMResponse) {
+          // See if we have the start token
+          const startIdx = buffer.indexOf(LLM_START_TOKEN);
+          if (startIdx !== -1) {
+            inLLMResponse = true;
+            // Discard anything before <completion>
+            buffer = buffer.slice(startIdx + LLM_START_TOKEN.length);
+          }
+        }
+
+        // If we're in LLM mode, check if we found the end token
+        if (inLLMResponse) {
+          const endIdx = buffer.indexOf(LLM_END_TOKEN);
+          if (endIdx !== -1) {
+            // We have a complete chunk of LLM text
+            const chunk = buffer.slice(0, endIdx);
+            buffer = buffer.slice(endIdx + LLM_END_TOKEN.length);
+            inLLMResponse = false;
+
+            fullContent += chunk;
+            assistantResponse += chunk;
+            updateLastMessage(
+              fullContent,
+              {
+                vector: vectorSearchSources,
+                kg: kgSearchResult,
+              },
+              true,
+              searchPerformed
+            );
+          } else {
+            // No closing token yet, so the entire buffer is partial LLM text
+            // We append it and clear buffer for next read
+            fullContent += buffer;
+            assistantResponse += buffer;
+            updateLastMessage(
+              fullContent,
+              {
+                vector: vectorSearchSources,
+                kg: kgSearchResult,
+              },
+              true,
+              searchPerformed
+            );
+            buffer = '';
+          }
         }
       }
 
+      // After the loop completes, we have the final `assistantResponse`
       if (assistantResponse) {
         updateLastMessage(
           assistantResponse,
@@ -349,7 +405,6 @@ export const Result: FC<{
           false,
           searchPerformed
         );
-
         try {
           await client.conversations.addMessage({
             id: currentConversationId,
