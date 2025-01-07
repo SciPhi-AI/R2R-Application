@@ -174,7 +174,9 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
     ): Promise<{ success: boolean; userRole: 'admin' | 'user' }> => {
       const newClient = new r2rClient(instanceUrl);
       try {
-        const result = await newClient.loginWithToken(token);
+        const result = await newClient.users.loginWithToken({
+          accessToken: token,
+        });
 
         const userInfo = await newClient.users.me();
 
