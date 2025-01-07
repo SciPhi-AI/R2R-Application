@@ -13,6 +13,7 @@ import {
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
+import { Progress } from "@/components/ui/progress"
 
 import R2RServerCard from '@/components/ChatDemo/ServerCard';
 import Layout from '@/components/Layout';
@@ -22,29 +23,49 @@ import { Button } from '@/components/ui/Button';
 import { CardTitle, CardHeader, CardContent, Card } from '@/components/ui/card';
 import { useUserContext } from '@/context/UserContext';
 
+
 const HomePage = () => {
   const router = useRouter();
-  const { isAuthenticated, isSuperUser, pipeline } = useUserContext();
+  const { isAuthenticated, isSuperUser, pipeline, client, authState } = useUserContext();
   const [copied, setCopied] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
 
-  // useEffect(() => {
-  //   if (isAuthenticated && !isSuperUser()) {
-  //     router.replace('/documents');
-  //   }
-  // }, [isAuthenticated, router]);
 
+  const [limits, setLimits] = useState<any>(null);
+  const [isLoadingLimits, setIsLoadingLimits] = useState(false);
+
+  // If user is not authenticated, redirect to login
   useEffect(() => {
     if (!isAuthenticated) {
-      router.push('/auth/login');
+      router.push("/auth/login");
+    } else {
+      // Fetch the user's limit usage once they are authenticated
+      fetchLimits();
     }
-  }, [isAuthenticated, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated]);
+
+  async function fetchLimits() {
+    try {
+      setIsLoadingLimits(true);
+      console.log('authState.userId = ', authState.userId)
+      const result = await client.users.getLimits({id: authState.userId}); 
+      console.log('result = ', result)
+      // ^ This calls our new Python method 
+      //   or if using the JS SDK, it'd be client.users.getLimits() 
+      //   depending on your actual environment.
+      setLimits(result.results);
+    } catch (error) {
+      console.error("Failed to fetch user limits:", error);
+    } finally {
+      setIsLoadingLimits(false);
+    }
+  }
+  console.log('limits = ', limits)
 
   if (!isAuthenticated) {
     return null;
-  }
-
-  return (
+  }  return (
     <Layout includeFooter>
       <main className="w-full flex flex-col container h-screen-[calc(100%-4rem)]">
         <div className="relative bg-zinc-900 p-5">
@@ -55,7 +76,7 @@ const HomePage = () => {
                 <AlertTitle className="text-lg ">
                   <div className="flex gap-2 text-xl">
                     <span className="text-gray-500 dark:text-gray-200 font-semibold">
-                      You're connected to your R2R deployment!
+                      Your SciPhi Cloud!
                     </span>
                   </div>
                 </AlertTitle>
@@ -108,46 +129,6 @@ const HomePage = () => {
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-start space-x-3">
-                      <Users className="w-5 h-5 text-primary" />
-                      <div>
-                        <h3 className="text-sm font-semibold mb-1">Users</h3>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          Track user queries, search results, and LLM responses.
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-start space-x-3">
-                      <FileSearch className="w-5 h-5 text-primary" />
-                      <div>
-                        <h3 className="text-sm font-semibold mb-1">Logs</h3>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          Track user queries, search results, and LLM responses.
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-start space-x-3">
-                      <BarChart2 className="w-5 h-5 text-primary" />
-                      <div>
-                        <h3 className="text-sm font-semibold mb-1">
-                          Analytics
-                        </h3>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          Rich analytics and insights on your users' queries and
-                          interactions.
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-start space-x-3">
-                      <Settings className="w-5 h-5 text-primary" />
-                      <div>
-                        <h3 className="text-sm font-semibold mb-1">Settings</h3>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          Manage your R2R deployment settings and
-                          configurations.
-                        </p>
-                      </div>
-                    </div>
                   </div>
                   <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
                     <div className="flex space-x-4">
@@ -179,202 +160,94 @@ const HomePage = () => {
                   </div>
                 </AlertDescription>
               </Alert>
-              {/* SDK Cards */}
+
+
               <div className="flex flex-col gap-4">
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <Card className="w-full sm:w-1/2 flex flex-col">
+                  <Card className="w-full sm:w-1/3 flex flex-col">
                     <CardHeader className="flex flex-row items-center space-x-2">
-                      <Image
-                        src="/images/python-logo.svg"
-                        alt="Python Logo"
-                        width={30}
-                        height={30}
-                      />
-                      <CardTitle>Python API</CardTitle>
+                      {/* <div className="text-md ">Monthly Requests</div> */}
+                      <CardTitle>Monthly Requests</CardTitle>
+
                     </CardHeader>
                     <CardContent className="flex flex-col justify-end flex-grow">
-                      <div className="flex flex-row space-x-2">
-                        <Button
-                          className="rounded-md py-1 px-3"
-                          color="light"
-                          onClick={() =>
-                            window.open(
-                              'https://r2r-docs.sciphi.ai/api-and-sdks/introduction',
-                              '_blank'
-                            )
-                          }
-                        >
-                          <div className="flex items-center">
-                            <BookOpenText size={20} className="mr-2" />
-                            <span>Docs</span>
-                          </div>
-                        </Button>
-                        <Button
-                          className="rounded-md py-1 px-3"
-                          color="light"
-                          onClick={() =>
-                            window.open(
-                              'https://github.com/SciPhi-AI/R2R/tree/main/py',
-                              '_blank'
-                            )
-                          }
-                        >
-                          <div className="flex items-center">
-                            <Image
-                              src="/images/github-mark.svg"
-                              alt="GitHub Logo"
-                              width={20}
-                              height={20}
-                              className="mr-2"
-                            />
-                            <span>View on GitHub</span>
-                          </div>
-                        </Button>
+                    <div className="flex flex-row space-x-2 mb-3">
+                        <div className="w-[100%] ">
+                        <div className="flex justify-between text-sm">
+                        <div>
+                          <div className="font-bold">Search</div>
+                        </div>
+                          <span className="font-bold">{`${limits.usage?.globalPerMin?.used}/${limits.usage?.globalPerMin?.limit}0`}</span>
+                        </div>
+                          <Progress value={0} className="h-2" />
+                        </div>
+                      </div>
+                      <div className="flex flex-row space-x-2 mt-3">
+                        <div className="w-[100%] ">
+                        <div className="flex justify-between text-sm">
+                        <div>
+                          <div className="font-bold">RAG</div>
+                        </div>
+                          <span className="font-bold">{`${limits.usage?.globalPerMin?.used}/${limits.usage?.globalPerMin?.limit}`}</span>
+                        </div>
+                          <Progress value={0} className="h-2" />
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
-                  <Card className="w-full sm:w-1/2 flex flex-col">
-                    <CardHeader className="flex flex-row items-center space-x-2">
-                      <Image
-                        src="/images/javascript-logo.svg"
-                        alt="JavaScript Logo"
-                        width={30}
-                        height={30}
-                      />
-                      <CardTitle>JavaScript SDK</CardTitle>
+                  <Card className="w-full sm:w-1/3 flex flex-col">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="font-semibold">Documents</CardTitle>
                     </CardHeader>
-                    <CardContent className="flex flex-col justify-end flex-grow">
-                      <div className="flex flex-row space-x-2">
-                        <Button
-                          className="rounded-md py-1 px-3"
-                          color="light"
-                          onClick={() =>
-                            window.open(
-                              'https://r2r-docs.sciphi.ai/documentation/js-sdk/introduction',
-                              '_blank'
-                            )
-                          }
-                        >
-                          <div className="flex items-center">
-                            <BookOpenText size={20} className="mr-2" />
-                            <span>Docs</span>
-                          </div>
-                        </Button>
-                        <Button
-                          className="rounded-md py-1 px-3"
-                          color="light"
-                          onClick={() =>
-                            window.open(
-                              'https://github.com/SciPhi-AI/R2R/tree/main/js/sdk',
-                              '_blank'
-                            )
-                          }
-                        >
-                          <div className="flex items-center">
-                            <Image
-                              src="/images/github-mark.svg"
-                              alt="GitHub Logo"
-                              width={20}
-                              height={20}
-                              className="mr-2"
-                            />
-                            <span>View on GitHub</span>
-                          </div>
-                        </Button>
+                    <CardContent>
+                      <div className="flex flex-col gap-2 mt-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-muted-foreground">Total Documents</span>
+                          <span className="text-2xl font-bold">47/100</span>
+                        </div>
+                        <Progress value={47} className="h-2" />
+                        <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                          <span>47% used</span>
+                          <span>53 remaining</span>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-4">
-                  {/* <Card className="w-full sm:w-1/2 flex flex-col">
-                    <CardHeader className="flex flex-row items-center space-x-2">
-                      <Image
-                        src="/images/hatchet-logo.svg"
-                        alt="Python Logo"
-                        width={30}
-                        height={30}
-                      />
-                      <CardTitle>Hatchet</CardTitle>
+                  <Card className="w-full sm:w-1/3 flex flex-col">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="font-semibold">Chunks</CardTitle>
                     </CardHeader>
-                    <CardContent className="flex flex-col justify-end flex-grow">
-                      <div className="flex flex-row space-x-2">
-                        <Button
-                          className="rounded-md py-1 px-3"
-                          color="light"
-                          disabled={
-                            !window.__RUNTIME_CONFIG__
-                              ?.NEXT_PUBLIC_HATCHET_DASHBOARD_URL ||
-                            window.__RUNTIME_CONFIG__.NEXT_PUBLIC_HATCHET_DASHBOARD_URL.includes(
-                              '__NEXT_PUBLIC_HATCHET_DASHBOARD_URL__'
-                            )
-                          }
-                          onClick={() => {
-                            const url =
-                              window.__RUNTIME_CONFIG__
-                                ?.NEXT_PUBLIC_HATCHET_DASHBOARD_URL;
-                            if (
-                              url &&
-                              !url.includes(
-                                '__NEXT_PUBLIC_HATCHET_DASHBOARD_URL__'
-                              )
-                            ) {
-                              window.open(url, '_blank');
-                            }
-                          }}
-                          tooltip={
-                            !window.__RUNTIME_CONFIG__
-                              ?.NEXT_PUBLIC_HATCHET_DASHBOARD_URL ||
-                            window.__RUNTIME_CONFIG__.NEXT_PUBLIC_HATCHET_DASHBOARD_URL.includes(
-                              '__NEXT_PUBLIC_HATCHET_DASHBOARD_URL__'
-                            ) ? (
-                              <div>
-                                Hatchet Dashboard Deployment URL unavailable.
-                                <br />
-                                <a
-                                  href="https://r2r-docs.sciphi.ai/cookbooks/orchestration"
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-blue-500 hover:text-blue-600 underline"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  Learn more about orchestration with R2R Full.
-                                </a>
-                              </div>
-                            ) : undefined
-                          }
-                        >
-                          <div className="flex items-center">
-                            <PanelsTopLeft size={20} className="mr-2" />
-                            <span>Dashboard</span>
-                          </div>
-                        </Button>
-                        <Button
-                          className="rounded-md py-1 px-3"
-                          color="light"
-                          onClick={() =>
-                            window.open(
-                              'https://github.com/hatchet-dev/hatchet',
-                              '_blank'
-                            )
-                          }
-                        >
-                          <div className="flex items-center">
-                            <Image
-                              src="/images/github-mark.svg"
-                              alt="GitHub Logo"
-                              width={20}
-                              height={20}
-                              className="mr-2"
-                            />
-                            <span>View on GitHub</span>
-                          </div>
-                        </Button>
+                    <CardContent>
+                      <div className="flex flex-col gap-2 mt-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-muted-foreground">Total Chunks</span>
+                          <span className="text-2xl font-bold">47/100</span>
+                        </div>
+                        <Progress value={47} className="h-2" />
+                        <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                          <span>47% used</span>
+                          <span>53 remaining</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* <Card className="w-full sm:w-1/3 flex flex-col">
+                    <CardHeader className="flex flex-row items-center space-x-2">
+                      <CardTitle>Documents</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex flex-col justify-center items-end flex-grow">
+                      <div className="text-xl font-bold">
+                        0 / 100
                       </div>
                     </CardContent>
                   </Card> */}
+                </div>
+                <div className="flex flex-col sm:flex-row gap-4">
                   <div className="w-full sm:w-1/2"></div>
                 </div>
               </div>
+
             </div>
 
             {/* Right column - Cards */}

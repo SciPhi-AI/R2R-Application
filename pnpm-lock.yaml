@@ -45,7 +45,7 @@ dependencies:
     specifier: ^1.1.2
     version: 1.1.4(@types/react@18.3.3)(react-dom@18.3.1)(react@18.3.1)
   '@radix-ui/react-progress':
-    specifier: ^1.1.0
+    specifier: ^1.1.1
     version: 1.1.1(@types/react@18.3.3)(react-dom@18.3.1)(react@18.3.1)
   '@radix-ui/react-select':
     specifier: ^2.1.2
@@ -57,7 +57,7 @@ dependencies:
     specifier: ^1.2.1
     version: 1.2.2(@types/react@18.3.3)(react-dom@18.3.1)(react@18.3.1)
   '@radix-ui/react-slot':
-    specifier: ^1.1.0
+    specifier: ^1.1.1
     version: 1.1.1(@types/react@18.3.3)(react@18.3.1)
   '@radix-ui/react-switch':
     specifier: ^1.1.1
@@ -219,8 +219,8 @@ dependencies:
     specifier: 0.0.0-beta.0
     version: 0.0.0-beta.0
   r2r-js:
-    specifier: ^0.4.9
-    version: 0.4.9
+    specifier: file:../R2R/js/sdk
+    version: file:../R2R/js/sdk
   radix-ui:
     specifier: ^1.0.1
     version: 1.0.1(@types/react@18.3.3)(react-dom@18.3.1)(react@18.3.1)
@@ -6909,7 +6909,7 @@ packages:
     hasBin: true
     dependencies:
       caniuse-lite: 1.0.30001690
-      electron-to-chromium: 1.5.77
+      electron-to-chromium: 1.5.78
       node-releases: 2.0.19
       update-browserslist-db: 1.1.1(browserslist@4.24.3)
 
@@ -7858,8 +7858,8 @@ packages:
   /eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
 
-  /electron-to-chromium@1.5.77:
-    resolution: {integrity: sha512-AnJSrt5JpRVgY6dgd5yccguLc5A7oMSF0Kt3fcW+Hp5WTuFbl5upeSFZbMZYy2o7jhmIhU8Ekrd82GhyXUqUUg==}
+  /electron-to-chromium@1.5.78:
+    resolution: {integrity: sha512-UmwIt7HRKN1rsJfddG5UG7rCTCTAKoS9JeOy/R0zSenAyaZ8SU3RuXlwcratxhdxGRNpk03iq8O7BA3W7ibLVw==}
 
   /elkjs@0.9.3:
     resolution: {integrity: sha512-f/ZeWvW/BCXbhGEf1Ujp29EASo/lk1FDnETgNKwJrsVvGZhUWCZyg3xLJjAsxfOmt8KjswHmI5EwCQcPMpOYhQ==}
@@ -11819,22 +11819,6 @@ packages:
   /queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
 
-  /r2r-js@0.4.9:
-    resolution: {integrity: sha512-UE0XE9AqlSiai0CL+89MORH2joFAq90h7mrCcLmvKLHV69ywL7mZKP7kkJGmbIpoQ3oMR6rJCoQ97p7ZIQ0fQA==}
-    dependencies:
-      '@jest/globals': 29.7.0
-      '@rrweb/types': 2.0.0-alpha.17
-      axios: 1.7.9
-      form-data: 4.0.1
-      posthog-js: 1.204.0
-      posthog-node: 4.3.2
-      rrweb-snapshot: 2.0.0-alpha.4
-      uuid: 10.0.0
-    transitivePeerDependencies:
-      - debug
-      - supports-color
-    dev: false
-
   /r2r@0.0.0-beta.0:
     resolution: {integrity: sha512-LwZXOYJexUffYHP+LcBP3zgF17Az9dTTM60J9q3WGBReF4qqgEvFDyzHxOukMqIR8zUz4E00rRnCW5Mdktoe6g==}
     dependencies:
@@ -13930,4 +13914,21 @@ packages:
 
   /zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
+    dev: false
+
+  file:../R2R/js/sdk:
+    resolution: {directory: ../R2R/js/sdk, type: directory}
+    name: r2r-js
+    dependencies:
+      '@jest/globals': 29.7.0
+      '@rrweb/types': 2.0.0-alpha.17
+      axios: 1.7.9
+      form-data: 4.0.1
+      posthog-js: 1.204.0
+      posthog-node: 4.3.2
+      rrweb-snapshot: 2.0.0-alpha.4
+      uuid: 10.0.0
+    transitivePeerDependencies:
+      - debug
+      - supports-color
     dev: false

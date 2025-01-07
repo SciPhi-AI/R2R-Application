@@ -21,8 +21,8 @@ const RegistrationPage: React.FC = () => {
   const [deploymentUrl, setDeploymentUrl] = useState('');
 
   useEffect(() => {
-    const url = process.env.R2R_DEPLOYMENT_URL || 'https://api.cloud.sciphi.ai';
-    // const url = 'http://0.0.0.0:7275'; // For local development
+    // const url = process.env.R2R_DEPLOYMENT_URL || 'https://api.cloud.sciphi.ai';
+    const url = 'http://0.0.0.0:7275'; // For local development
 
     setDeploymentUrl(url);
   }, []);
