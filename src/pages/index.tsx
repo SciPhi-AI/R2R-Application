@@ -190,7 +190,7 @@ const HomePage = () => {
                         width={30}
                         height={30}
                       />
-                      <CardTitle>Python SDK</CardTitle>
+                      <CardTitle>Python API</CardTitle>
                     </CardHeader>
                     <CardContent className="flex flex-col justify-end flex-grow">
                       <div className="flex flex-row space-x-2">
@@ -199,7 +199,7 @@ const HomePage = () => {
                           color="light"
                           onClick={() =>
                             window.open(
-                              'https://r2r-docs.sciphi.ai/documentation/python-sdk/introduction',
+                              'https://r2r-docs.sciphi.ai/api-and-sdks/introduction',
                               '_blank'
                             )
                           }
