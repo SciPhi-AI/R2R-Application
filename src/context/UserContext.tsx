@@ -22,6 +22,7 @@ function isAuthState(obj: any): obj is AuthState {
   );
 }
 
+// Add proper UserContext initialization
 const UserContext = createContext<UserContextProps>({
   pipeline: null,
   setPipeline: () => {},
@@ -29,10 +30,10 @@ const UserContext = createContext<UserContextProps>({
   setSelectedModel: () => {},
   isAuthenticated: false,
   login: async () => ({ success: false, userRole: 'user' }),
-  loginWithToken: async () => ({ success: false, userRole: 'user' }),
   logout: async () => {},
   unsetCredentials: async () => {},
   register: async () => {},
+  verifyEmail: async () => {},
   authState: {
     isAuthenticated: false,
     email: null,
@@ -167,55 +168,16 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
     []
   );
 
-  const loginWithToken = useCallback(
-    async (
-      token: string,
-      instanceUrl: string
-    ): Promise<{ success: boolean; userRole: 'admin' | 'user' }> => {
+  const verifyEmail = useCallback(
+    async (email: string, verificationCode: string, instanceUrl: string) => {
       const newClient = new r2rClient(instanceUrl);
       try {
-        const result = await newClient.loginWithToken(token);
-
-        const userInfo = await newClient.users.me();
-
-        localStorage.setItem('accessToken', result.accessToken.token);
-
-        newClient.setTokens(result.accessToken.token, '');
-        setClient(newClient);
-
-        let userRole: 'admin' | 'user' = 'user';
-        try {
-          await newClient.system.settings();
-          userRole = 'admin';
-        } catch (error) {
-          if (
-            error instanceof Error &&
-            'status' in error &&
-            error.status === 403
-          ) {
-          } else {
-            console.error('Unexpected error when checking user role:', error);
-          }
-        }
-
-        const newAuthState: AuthState = {
-          isAuthenticated: true,
-          email: '',
-          userRole,
-          userId: userInfo.results.id,
-        };
-        setAuthState(newAuthState);
-        localStorage.setItem('authState', JSON.stringify(newAuthState));
-
-        setLastLoginTime(Date.now());
-
-        const newPipeline: Pipeline = { deploymentUrl: instanceUrl };
-        setPipeline(newPipeline);
-        localStorage.setItem('pipeline', JSON.stringify(newPipeline));
-
-        return { success: true, userRole };
+        await newClient.users.verifyEmail({
+          email: email,
+          verification_code: verificationCode,
+        } as any);
       } catch (error) {
-        console.error('Login with token failed:', error);
+        console.error('Email verification failed:', error);
         throw error;
       }
     },
@@ -400,10 +362,10 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
       isAuthenticated: authState.isAuthenticated,
       authState,
       login,
-      loginWithToken,
       logout,
       unsetCredentials,
       register,
+      verifyEmail,
       getClient,
       client,
       viewMode,
@@ -418,11 +380,11 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
       viewMode,
       isSuperUser,
       login,
-      loginWithToken,
       logout,
       unsetCredentials,
       register,
       getClient,
+      verifyEmail,
     ]
   );
 

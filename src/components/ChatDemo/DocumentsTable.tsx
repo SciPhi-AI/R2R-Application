@@ -76,6 +76,11 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
     onSelectItem(itemId, selected);
   };
 
+  const handleRefreshWithDelay = async () => {
+    await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for 1 second
+    onRefresh();
+  };
+
   const columns: Column<DocumentResponse>[] = [
     {
       key: 'title',
@@ -294,7 +299,7 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
                 <UploadButton
                   setUploadedDocuments={() => {}}
                   onUploadSuccess={async () => {
-                    await onRefresh();
+                    await handleRefreshWithDelay();
                     onSelectAll(false);
                     return [];
                   }}
@@ -334,7 +339,7 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
             showPagination={showPagination}
             loading={loading}
             enableColumnToggle={false}
-            totalEntries={totalEntries}
+            totalEntries={Math.max(10, totalEntries || 0)}
           />
         </>
       )}
