@@ -91,6 +91,7 @@ export const Answer: FC<{
       }
 
       if (message.sources.kg) {
+        console.log('message.sources.kg', message.sources.kg);
         const kgLocalResult: KGSearchResult[] = JSON.parse(message.sources.kg);
         const entitiesArray = kgLocalResult.filter(
           (item: any) => item.result_type === 'entity'
