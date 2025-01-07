@@ -129,8 +129,6 @@ const Index: React.FC = () => {
         throw new Error('Failed to get authenticated client');
       }
       const keysResp = await client.users.listApiKeys({ id: userProfile.id });
-      console.log('keysResp = ', keysResp);
-      console.log('keysResp.results = ', keysResp.results);
       setApiKeys(keysResp.results);
     } catch (error) {
       console.error('Error fetching API keys:', error);
