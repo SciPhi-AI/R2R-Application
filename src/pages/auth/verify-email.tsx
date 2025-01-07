@@ -22,7 +22,6 @@ const VerifyEmailPage: React.FC = () => {
 
   useEffect(() => {
     const verify = async () => {
-
       try {
         if (!verification_code || !email) {
           console.log('verification_code = ', verification_code);
@@ -30,7 +29,7 @@ const VerifyEmailPage: React.FC = () => {
           setStatus('error');
           // return;
         }
-  
+
         console.log('Attempting to verify...', email, verification_code);
         const response = await verifyEmail(
           email,

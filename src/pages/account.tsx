@@ -129,8 +129,8 @@ const Index: React.FC = () => {
         throw new Error('Failed to get authenticated client');
       }
       const keysResp = await client.users.listApiKeys({ id: userProfile.id });
-      console.log('keysResp = ', keysResp)
-      console.log('keysResp.results = ', keysResp.results)
+      console.log('keysResp = ', keysResp);
+      console.log('keysResp.results = ', keysResp.results);
       setApiKeys(keysResp.results);
     } catch (error) {
       console.error('Error fetching API keys:', error);
@@ -184,7 +184,7 @@ const Index: React.FC = () => {
       const client = await getClient();
       const resp = await client.users.createApiKey({ id: userProfile.id });
       const { publicKey, apiKey } = resp.results;
-  
+
       // Open a toast with scrollable and responsive inputs
       toast({
         variant: 'success',
@@ -215,7 +215,7 @@ const Index: React.FC = () => {
         ),
         duration: 20000, // Increase duration for easier copying
       });
-  
+
       // Re-fetch the list of keys
       fetchApiKeys();
     } catch (error) {
@@ -228,8 +228,7 @@ const Index: React.FC = () => {
     }
   };
 
-  
-    // Delete an API key
+  // Delete an API key
   const handleDeleteApiKey = async (keyId: string) => {
     try {
       if (!userProfile) return;
@@ -271,7 +270,7 @@ const Index: React.FC = () => {
           <div className="mb-6">
             <h1 className="text-2xl font-bold text-white flex items-center gap-2 mb-4">
               Account Settings
-              <a 
+              <a
                 href="https://r2r-docs.sciphi.ai/api-and-sdks/users/users"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -325,7 +324,9 @@ const Index: React.FC = () => {
                         <p className="font-mono text-sm">{userProfile?.id}</p>
                       </div>
                       <div>
-                        <span className="text-sm text-gray-400">Created At</span>
+                        <span className="text-sm text-gray-400">
+                          Created At
+                        </span>
                         <p>
                           {new Date(
                             userProfile?.createdAt || ''
@@ -341,7 +342,11 @@ const Index: React.FC = () => {
                       Developer API Keys
                     </h3>
 
-                    <Button onClick={handleCreateApiKey} variant="outline" className="pr-2">
+                    <Button
+                      onClick={handleCreateApiKey}
+                      variant="outline"
+                      className="pr-2"
+                    >
                       <PlusCircle className="mr-2 w-4 h-4 mt-1" />
                       Create New Key
                     </Button>
