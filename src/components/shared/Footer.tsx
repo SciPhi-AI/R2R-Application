@@ -55,9 +55,9 @@ function SmallPrint() {
         reserved.
       </p>
       <div className="flex gap-4 mt-4 sm:mt-0 sm:mb-0 mr-14">
-        <SocialLink href="https://twitter.com/ocolegro?lang=en" icon={XIcon}>
+        {/* <SocialLink href="https://twitter.com/ocolegro?lang=en" icon={XIcon}>
           Follow us on X
-        </SocialLink>
+        </SocialLink> */}
         <SocialLink href="https://github.com/SciPhi-AI/R2R" icon={GitHubIcon}>
           Follow us on GitHub
         </SocialLink>

@@ -39,6 +39,8 @@ const shapeStyles = {
     'px-1 py-1 ring-1 ring-inset ring-zinc-900/10 dark:ring-white/10 rounded-md',
   outline_wide:
     'px-2 py-1 ring-1 ring-inset ring-zinc-900/10 dark:ring-white/10 rounded-md',
+  outline_widest:
+    'px-3 py-1 ring-1 ring-inset ring-zinc-900/10 dark:ring-white/10 rounded-md',
   slim: 'rounded-md px-0.5 py-0.5 h-9 flex items-center justify-center',
 };
 

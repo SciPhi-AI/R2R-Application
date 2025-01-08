@@ -342,7 +342,7 @@ const Index: React.FC = () => {
         )}
 
         {/* If truly nothing and not loading, show fallback */}
-        {personalCollections.length === 0 &&
+        {/* {personalCollections.length === 0 &&
           sharedCollections.length === 0 &&
           !loading && (
             <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 min-h-[300px] mt-4">
@@ -352,7 +352,7 @@ const Index: React.FC = () => {
                 </div>
               </div>
             </div>
-          )}
+          )} */}
       </>
     );
   };

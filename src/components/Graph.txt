@@ -4,7 +4,7 @@ import { ZoomIn, ZoomOut, Home } from 'lucide-react';
 import React, { useCallback, useRef, useEffect, useState } from 'react';
 import ForceGraph2D from 'react-force-graph-2d';
 
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 
 interface GraphNode {
   id: string;

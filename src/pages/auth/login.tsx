@@ -89,7 +89,7 @@ const LoginPage: React.FC = () => {
 
   return (
     <Layout includeFooter={false}>
-      <div className="flex flex-col items-center justify-center min-h-screen p-8 gap-16">
+      <div className="flex flex-col items-center justify-center min-h-screen p-8 ">
         <div className="bg-zinc-100 dark:bg-zinc-800 shadow-md rounded px-8 pt-6 pb-8 mb-4 w-full max-w-md flex flex-col">
           {/* Success banner after verification */}
           {verificationMessage && (
@@ -227,6 +227,14 @@ const LoginPage: React.FC = () => {
           </Button>
 
           {error && <div className="text-red-500 text-sm mt-4">{error}</div>}
+        </div>
+        <div className="text-center">
+          <span
+            onClick={() => router.push('/auth/reset-password')}
+            className="text-sm text-indigo-400 cursor-pointer hover:underline italic"
+          >
+            Forgot Password
+          </span>
         </div>
       </div>
     </Layout>

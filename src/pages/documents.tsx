@@ -212,7 +212,7 @@ const Index: React.FC = () => {
   return (
     <Layout pageTitle="Documents" includeFooter={false}>
       <main className="w-full flex flex-col container h-screen-[calc(100%-4rem)]">
-        <div className="relative flex-grow bg-zinc-900 mt-[4rem] sm:mt-[4rem]">
+        <div className="relative flex-grow bg-zinc-900 mt-[4rem] sm:mt-[4rem] pl-10">
           <div className="mx-auto max-w-6xl mb-12 p-4 h-full">
             <h1 className="text-2xl font-bold text-white flex items-center gap-2 mb-4">
               Documents
