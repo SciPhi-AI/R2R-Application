@@ -34,6 +34,8 @@ const HomePage = () => {
   const router = useRouter();
   const { isAuthenticated, authState, getClient } = useUserContext();
   const [limits, setLimits] = useState<any>(null);
+
+  console.log(' limits = ', limits);
   const [isLoadingLimits, setIsLoadingLimits] = useState(false);
   const [isLoadingUser, setLoadingUser] = useState(true);
   const [apiKeys, setApiKeys] = useState<[] | null>(null);
@@ -58,12 +60,52 @@ const HomePage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
+  // async function fetchLimits() {
+  //   try {
+  //     setIsLoadingLimits(true);
+  //     const client: any = await getClient();
+  //     const result = await client.users.getLimits({ id: authState.userId });
+  //     setLimits(result.results);
+  //   } catch (error) {
+  //     console.error('Failed to fetch user limits:', error);
+  //   } finally {
+  //     setIsLoadingLimits(false);
+  //   }
+  // }
+
   async function fetchLimits() {
     try {
       setIsLoadingLimits(true);
       const client: any = await getClient();
       const result = await client.users.getLimits({ id: authState.userId });
-      setLimits(result.results);
+      const limitsData = result.results;
+      console.log('limitsData = ', limitsData);
+
+      // Extract limits for Search and RAG
+      const searchLimits = limitsData.usage.routes['/v3/retrieval/search'];
+      console.log('searchLimits = ', searchLimits);
+      const ragLimits = limitsData.usage.routes['/v3/retrieval/rag'];
+
+      setLimits({
+        chunks: limitsData.storageLimits.chunks,
+        documents: limitsData.storageLimits.documents,
+        search: {
+          routePerMin: searchLimits?.routePerMin?.limit || 0,
+          routePerMinUsed: searchLimits?.routePerMin?.used || 0,
+          routePerMinRemaining: searchLimits?.routePerMin?.remaining || 0,
+          monthlyLimit: searchLimits?.monthlyLimit?.limit || 0,
+          monthlyUsed: searchLimits?.monthlyLimit?.used || 0,
+          monthlyRemaining: searchLimits?.monthlyLimit?.remaining || 0,
+        },
+        rag: {
+          routePerMin: ragLimits?.routePerMin?.limit || 0,
+          routePerMinUsed: ragLimits?.routePerMin?.used || 0,
+          routePerMinRemaining: ragLimits?.routePerMin?.remaining || 0,
+          monthlyLimit: ragLimits?.monthlyLimit?.limit || 0,
+          monthlyUsed: ragLimits?.monthlyLimit?.used || 0,
+          monthlyRemaining: ragLimits?.monthlyLimit?.remaining || 0,
+        },
+      });
     } catch (error) {
       console.error('Failed to fetch user limits:', error);
     } finally {
@@ -368,9 +410,19 @@ const HomePage = () => {
                               <div>
                                 <div className="font-bold">Search</div>
                               </div>
-                              <span className="font-bold">{`0 / 3000`}</span>
+                              {/* <span className="font-bold">{`0 / 3000`}</span> */}
+                              <span className="font-bold">{`${limits.search.monthlyUsed} / ${limits.search.monthlyLimit}`}</span>
                             </div>
-                            <Progress value={1} className="h-2" />
+                            <Progress
+                              value={Math.max(
+                                1,
+                                Math.round(
+                                  (100 * limits.search.monthlyUsed) /
+                                    limits.search.monthlyLimit
+                                )
+                              )}
+                              className="h-2"
+                            />
                           </div>
                         </div>
                         <div className="flex flex-row space-x-2 mt-3">
@@ -379,9 +431,19 @@ const HomePage = () => {
                               <div>
                                 <div className="font-bold">RAG</div>
                               </div>
-                              <span className="font-bold">{`0 / 300`}</span>
+                              {/* <span className="font-bold">{`0 / 300`}</span> */}
+                              <span className="font-bold">{`${limits.rag.monthlyUsed} / ${limits.rag.monthlyLimit}`}</span>
                             </div>
-                            <Progress value={1} className="h-2" />
+                            <Progress
+                              value={Math.max(
+                                1,
+                                Math.round(
+                                  (100 * limits.rag.monthlyUsed) /
+                                    limits.rag.monthlyLimit
+                                )
+                              )}
+                              className="h-2"
+                            />
                           </div>
                         </div>
                       </CardContent>
@@ -399,9 +461,18 @@ const HomePage = () => {
                               <div>
                                 <div className="font-bold">Documents</div>
                               </div>
-                              <span className="font-bold">{`0 / 100`}</span>
+                              <span className="font-bold">{`${limits.documents.used} / ${limits.documents.limit.toLocaleString()}`}</span>
                             </div>
-                            <Progress value={1} className="h-2" />
+                            <Progress
+                              value={Math.max(
+                                1,
+                                Math.round(
+                                  (100 * limits.documents.used) /
+                                    limits.documents.limit
+                                )
+                              )}
+                              className="h-2"
+                            />
                           </div>
                         </div>
                         <div className="flex flex-row space-x-2 mt-3">
@@ -410,9 +481,18 @@ const HomePage = () => {
                               <div>
                                 <div className="font-bold">Chunks</div>
                               </div>
-                              <span className="font-bold">{`0 / 10,000`}</span>
+                              <span className="font-bold">{`${limits.chunks.used} / ${limits.chunks.limit.toLocaleString()}`}</span>
                             </div>
-                            <Progress value={1} className="h-2" />
+                            <Progress
+                              value={Math.max(
+                                1,
+                                Math.round(
+                                  (100 * limits.chunks.used) /
+                                    limits.chunks.limit
+                                )
+                              )}
+                              className="h-2"
+                            />
                           </div>
                         </div>
                       </CardContent>

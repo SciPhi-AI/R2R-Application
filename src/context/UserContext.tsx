@@ -226,7 +226,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
       const newClient = new r2rClient(instanceUrl);
       if (newClient) {
         try {
-          await newClient.users.register({
+          await newClient.users.create({
             email: email,
             password: password,
           });
