@@ -219,8 +219,8 @@ dependencies:
     specifier: 0.0.0-beta.0
     version: 0.0.0-beta.0
   r2r-js:
-    specifier: 0.4.11
-    version: 0.4.11
+    specifier: file:../R2R/js/sdk
+    version: file:../R2R/js/sdk
   radix-ui:
     specifier: ^1.0.1
     version: 1.0.1(@types/react@18.3.3)(react-dom@18.3.1)(react@18.3.1)
@@ -251,6 +251,9 @@ dependencies:
   react-pdf:
     specifier: ^9.1.1
     version: 9.2.1(@types/react@18.3.3)(react-dom@18.3.1)(react@18.3.1)
+  react-spinners:
+    specifier: ^0.15.0
+    version: 0.15.0(react-dom@18.3.1)(react@18.3.1)
   react-tippy:
     specifier: ^1.4.0
     version: 1.4.0
@@ -11819,22 +11822,6 @@ packages:
   /queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
 
-  /r2r-js@0.4.11:
-    resolution: {integrity: sha512-uOtOSmcNyVEgCP9w5y/5BCKrV/83mJD1eztyZ6F0VEEQF7wR6ENUDl3Sx/ad/pLdyeMcCYva7OkrF0oE9InBMg==}
-    dependencies:
-      '@jest/globals': 29.7.0
-      '@rrweb/types': 2.0.0-alpha.17
-      axios: 1.7.9
-      form-data: 4.0.1
-      posthog-js: 1.204.0
-      posthog-node: 4.3.2
-      rrweb-snapshot: 2.0.0-alpha.4
-      uuid: 10.0.0
-    transitivePeerDependencies:
-      - debug
-      - supports-color
-    dev: false
-
   /r2r@0.0.0-beta.0:
     resolution: {integrity: sha512-LwZXOYJexUffYHP+LcBP3zgF17Az9dTTM60J9q3WGBReF4qqgEvFDyzHxOukMqIR8zUz4E00rRnCW5Mdktoe6g==}
     dependencies:
@@ -12063,6 +12050,16 @@ packages:
       tslib: 2.8.1
       use-callback-ref: 1.3.3(@types/react@18.3.3)(react@18.3.1)
       use-sidecar: 1.1.3(@types/react@18.3.3)(react@18.3.1)
+    dev: false
+
+  /react-spinners@0.15.0(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-ZO3/fNB9Qc+kgpG3SfdlMnvTX6LtLmTnOogb3W6sXIaU/kZ1ydEViPfZ06kSOaEsor58C/tzXw2wROGQu3X2pA==}
+    peerDependencies:
+      react: ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+      react-dom: ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+    dependencies:
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
     dev: false
 
   /react-style-singleton@2.2.3(@types/react@18.3.3)(react@18.3.1):
@@ -13930,4 +13927,21 @@ packages:
 
   /zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
+    dev: false
+
+  file:../R2R/js/sdk:
+    resolution: {directory: ../R2R/js/sdk, type: directory}
+    name: r2r-js
+    dependencies:
+      '@jest/globals': 29.7.0
+      '@rrweb/types': 2.0.0-alpha.17
+      axios: 1.7.9
+      form-data: 4.0.1
+      posthog-js: 1.204.0
+      posthog-node: 4.3.2
+      rrweb-snapshot: 2.0.0-alpha.4
+      uuid: 10.0.0
+    transitivePeerDependencies:
+      - debug
+      - supports-color
     dev: false

@@ -430,6 +430,7 @@ export interface UserContextProps {
   viewMode: 'admin' | 'user';
   setViewMode: (mode: 'admin' | 'user') => void;
   isSuperUser: () => boolean;
+  requestPasswordReset: (email: string, instanceUrl: string) => Promise<void>;
 
   // Authentication Methods
   login: (
