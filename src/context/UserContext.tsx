@@ -40,6 +40,7 @@ const UserContext = createContext<UserContextProps>({
     userRole: null,
     userId: null,
   },
+  requestPasswordReset: async (email: string, instanceUrl: string) => {},
   getClient: () => null,
   client: null,
   viewMode: 'admin',
@@ -221,6 +222,20 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
     setClient(null);
   }, [client, authState.isAuthenticated]);
 
+  const requestPasswordReset = useCallback(
+    async (email: string, instanceUrl: string) => {
+      const newClient = new r2rClient(instanceUrl);
+      try {
+        console.log('email = ', email);
+        await newClient.users.requestPasswordReset(email);
+      } catch (error) {
+        console.error('Failed to request password reset:', error);
+        throw error;
+      }
+    },
+    []
+  );
+
   const register = useCallback(
     async (email: string, password: string, instanceUrl: string) => {
       const newClient = new r2rClient(instanceUrl);
@@ -365,6 +380,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
       logout,
       unsetCredentials,
       register,
+      requestPasswordReset,
       verifyEmail,
       getClient,
       client,
@@ -383,6 +399,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
       logout,
       unsetCredentials,
       register,
+      requestPasswordReset,
       getClient,
       verifyEmail,
     ]

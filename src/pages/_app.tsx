@@ -19,7 +19,12 @@ function MyAppContent({ Component, pageProps }: AppProps) {
   }, []);
 
   const checkAccess = useCallback(async () => {
-    const publicRoutes = ['/auth/login', '/auth/signup', '/auth/verify-email'];
+    const publicRoutes = [
+      '/auth/login',
+      '/auth/signup',
+      '/auth/verify-email',
+      '/auth/reset-password',
+    ];
     const userRoutes = [
       // '',
       '/',
