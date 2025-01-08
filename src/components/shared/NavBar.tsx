@@ -115,10 +115,7 @@ export const Navbar = forwardRef<React.ElementRef<'nav'>, NavbarProps>(
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-14 items-center">
             <div className="flex items-center space-x-4">
-              <Link
-                href={isSuperUser() ? '/' : '/documents'}
-                className="flex-shrink-0 flex items-center"
-              >
+              <Link href={'/'} className="flex-shrink-0 flex items-center">
                 <Logo className="h-12 w-auto" />
                 <span className="ml-2 text-xl font-bold text-white">
                   SciPhi
@@ -138,9 +135,12 @@ export const Navbar = forwardRef<React.ElementRef<'nav'>, NavbarProps>(
             <div className="flex items-center space-x-4">
               <Button
                 color="primary"
-                shape="outline_wide"
+                shape="outline_widest"
                 onClick={() =>
-                  window.open('https://r2r-docs.sciphi.ai', '_blank')
+                  window.open(
+                    'https://r2r-docs.sciphi.ai/documentation/quickstart',
+                    '_blank'
+                  )
                 }
               >
                 Docs

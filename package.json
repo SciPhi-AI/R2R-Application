@@ -98,7 +98,7 @@
     "postcss": "^8.4.49",
     "posthog-js": "^1.194.3",
     "r2r": "0.0.0-beta.0",
-    "r2r-js": "file:../R2R/js/sdk",
+    "r2r-js": "^0.4.10",
     "radix-ui": "^1.0.1",
     "react": "18.3.1",
     "react-chartjs-2": "^5.2.0",

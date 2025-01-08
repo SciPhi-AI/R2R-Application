@@ -143,12 +143,12 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
             console.error('Unexpected error when checking user role:', error);
           }
         }
-
         const newAuthState: AuthState = {
           isAuthenticated: true,
           email,
           userRole,
           userId: userInfo.results.id,
+          metadata: userInfo.results.metadata,
         };
         setAuthState(newAuthState);
         localStorage.setItem('authState', JSON.stringify(newAuthState));

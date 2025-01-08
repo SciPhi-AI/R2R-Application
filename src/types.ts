@@ -34,6 +34,7 @@ export interface AuthState {
   email: string | null;
   userRole: 'admin' | 'user' | null;
   userId: string | null;
+  metadata?: Record<string, any>;
 }
 
 export interface BarChartProps {
