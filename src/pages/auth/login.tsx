@@ -10,9 +10,18 @@ import { useUserContext } from '@/context/UserContext';
 
 // import { supabase } from '@/lib/supabase'; // If not using OAuth, can be removed
 import { SignupSplitLayout } from './signup-layout';
-const DEFAULT_DEPLOYMENT_URL = 'https://api.cloud.sciphi.ai';
+// const DEFAULT_DEPLOYMENT_URL = 'https://api.cloud.sciphi.ai';
 
-// const DEFAULT_DEPLOYMENT_URL = 'http://0.0.0.0:7272'; // For local development
+// // const DEFAULT_DEPLOYMENT_URL = 'http://0.0.0.0:7272'; // For local development
+
+const PRODUCTION_URL = 'https://api.cloud.sciphi.ai';
+const DEVELOPMENT_URL = 'http://0.0.0.0:7272';
+
+// Use environment variable to determine the deployment URL
+const DEFAULT_DEPLOYMENT_URL =
+  process.env.NEXT_PUBLIC_ENV === 'development'
+    ? DEVELOPMENT_URL
+    : PRODUCTION_URL;
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
