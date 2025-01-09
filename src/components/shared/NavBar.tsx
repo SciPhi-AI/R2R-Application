@@ -48,16 +48,16 @@ const NavItems: React.FC<NavItemsProps> = ({
     { path: '/search', label: 'Search' },
   ];
 
-  const adminItems = [
-    { path: '/users', label: 'Users' },
-    { path: '/logs', label: 'Logs' },
-    // { path: '/analytics', label: 'Analytics' },
-    { path: '/settings', label: 'Settings' },
-  ];
+  // const adminItems = [
+  //   // { path: '/users', label: 'Users' },
+  //   // { path: '/logs', label: 'Logs' },
+  //   // { path: '/analytics', label: 'Analytics' },
+  //   // { path: '/settings', label: 'Settings' },
+  // ];
 
   const items =
     role === 'admin'
-      ? [homeItem, ...commonItems, ...adminItems]
+      ? [homeItem, ...commonItems,]
       : [homeItem, ...commonItems];
 
   if (!isAuthenticated) {
