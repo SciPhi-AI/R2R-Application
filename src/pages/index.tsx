@@ -1,11 +1,11 @@
 import { Clipboard, Check } from 'lucide-react';
-import { ReactTyped } from 'react-typed';
 import { FileText, Boxes, MessageCircle, ScanSearch } from 'lucide-react';
 import { PlusCircle, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { User } from 'r2r-js';
 import { useState, useEffect, useCallback } from 'react';
+import { ReactTyped } from 'react-typed';
 
 import Layout from '@/components/Layout';
 import { Logo } from '@/components/shared/Logo';
