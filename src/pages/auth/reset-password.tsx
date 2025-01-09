@@ -10,10 +10,10 @@ import { useUserContext } from '@/context/UserContext';
 
 import { SignupSplitLayout } from './signup-layout';
 
-// const DEFAULT_DEPLOYMENT_URL = 'https://api.cloud.sciphi.ai';
+const DEFAULT_DEPLOYMENT_URL = 'https://api.cloud.sciphi.ai';
 // const DEFAULT_DEPLOYMENT_URL = 'http://0.0.0.0:7275'; // For local development
 
-const DEFAULT_DEPLOYMENT_URL = 'http://0.0.0.0:7272'; // For local development
+// const DEFAULT_DEPLOYMENT_URL = 'http://0.0.0.0:7272'; // For local development
 
 const ResetPasswordPage: React.FC = () => {
   const router = useRouter();
