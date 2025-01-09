@@ -100,11 +100,6 @@ export const SignupSplitLayout: React.FC<SignupSplitLayoutProps> = ({
   return (
     <Layout includeFooter={false} pageTitle={pageTitle}>
       <div className="flex min-h-screen w-full overflow-hidden">
-        {/* LEFT SECTION: SIGNUP FORM */}
-        <div className="w-full md:w-1/2 flex items-center justify-center bg-zinc-100 dark:bg-zinc-900 p-6">
-          {children}
-        </div>
-
         {/* RIGHT SECTION: BRAND/LOGO + TYPED MESSAGING */}
         <div className="hidden md:flex w-1/2 items-center justify-center relative bg-zinc-900 text-white p-8">
           {/* Subtle fade animation */}
@@ -141,6 +136,11 @@ export const SignupSplitLayout: React.FC<SignupSplitLayoutProps> = ({
               />
             </p>
           </motion.div>
+        </div>
+
+        {/* LEFT SECTION: SIGNUP FORM */}
+        <div className="w-full md:w-1/2 flex items-center justify-center bg-zinc-100 dark:bg-zinc-900 p-6">
+          {children}
         </div>
       </div>
     </Layout>
