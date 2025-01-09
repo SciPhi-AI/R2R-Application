@@ -6,8 +6,10 @@ import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/Button';
 import { useUserContext } from '@/context/UserContext';
 
-const DEFAULT_DEPLOYMENT_URL = 'https://api.cloud.sciphi.ai';
-// const DEFAULT_DEPLOYMENT_URL = 'http://0.0.0.0:7275'; // For local development
+import { SignupSplitLayout } from './signup-layout';
+
+// const DEFAULT_DEPLOYMENT_URL = 'https://api.cloud.sciphi.ai';
+const DEFAULT_DEPLOYMENT_URL = 'http://0.0.0.0:7275'; // For local development
 
 const VerifyEmailPage: React.FC = () => {
   const router = useRouter();
@@ -63,28 +65,35 @@ const VerifyEmailPage: React.FC = () => {
     verify();
   }, [verification_code, email, router, verifyEmail]);
 
-  return (
-    <Layout includeFooter={false}>
-      <div className="flex flex-col items-center justify-center h-screen p-8">
-        {status === 'loading' && (
-          <div className="flex flex-col items-center space-y-4">
-            <Loader className="animate-spin w-12 h-12 text-white" />
-            <p className="text-white text-xl">Verifying email...</p>
-          </div>
-        )}
+  const Component = () => {
+    return (
+      <div className="container">
+        <div className="flex flex-col items-center justify-center h-screen p-8">
+          {status === 'loading' && (
+            <div className="flex flex-col items-center space-y-4">
+              <Loader className="animate-spin w-12 h-12 text-white" />
+              <p className="text-white text-xl">Verifying email...</p>
+            </div>
+          )}
 
-        {status === 'error' && (
-          <div className="flex flex-col items-center space-y-4 text-white">
-            <p className="text-red-500">
-              Failed to verify email. Please try again or contact support.
-            </p>
-            <Button onClick={() => router.push('/auth/login')}>
-              Go to Login
-            </Button>
-          </div>
-        )}
+          {status === 'error' && (
+            <div className="flex flex-col items-center space-y-4 text-white">
+              <p className="text-red-500">
+                Failed to verify email. Please try again or contact support.
+              </p>
+              <Button onClick={() => router.push('/auth/login')}>
+                Go to Login
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
-    </Layout>
+    );
+  };
+  return (
+    <SignupSplitLayout>
+      <Component />
+    </SignupSplitLayout>
   );
 };
 

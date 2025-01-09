@@ -1,9 +1,11 @@
+import { Clipboard, Check } from 'lucide-react';
 import { FileText, Boxes, MessageCircle, ScanSearch } from 'lucide-react';
 import { PlusCircle, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { User } from 'r2r-js';
 import { useState, useEffect, useCallback } from 'react';
+import { ReactTyped } from 'react-typed';
 
 import Layout from '@/components/Layout';
 import { Logo } from '@/components/shared/Logo';
@@ -72,6 +74,21 @@ const HomePage = () => {
   //     setIsLoadingLimits(false);
   //   }
   // }
+  function copyToClipboard(text: string) {
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(text);
+    } else {
+      document.execCommand('copy', true, text);
+    }
+  }
+  const [hasCopied, setHasCopied] = useState(false);
+
+  const handleCopy = (text: string) => {
+    copyToClipboard(text);
+    setHasCopied(true);
+    console.log('set has copied true');
+    // setTimeout(() => setHasCopied(false), 2000); // Reset after 2 seconds
+  };
 
   async function fetchLimits() {
     try {
@@ -177,7 +194,7 @@ const HomePage = () => {
 
       // Display the new keys in a toast
       toast({
-        variant: 'success',
+        variant: 'default',
         title: 'API Key Created',
         description: (
           <div className="space-y-4 max-w-full">
@@ -200,14 +217,33 @@ const HomePage = () => {
               />
             </div>
             <div>
-              <p className="font-semibold">API Key (copy it now!):</p>
-              <textarea
-                readOnly
-                value={apiKey}
-                className="w-full mt-1 bg-zinc-800 text-white p-2 rounded resize-none focus:outline-none"
-                rows={4}
-                onFocus={(e) => e.target.select()}
-              />
+              <div className="w-full">
+                <p className="text-sm font-semibold">
+                  Your new API Key (formatted `pk_....sk_...`):
+                </p>
+                <div className="relative w-full">
+                  <textarea
+                    readOnly
+                    value={apiKey}
+                    className="w-full bg-zinc-800 text-white p-2 rounded resize-none focus:outline-none pr-10"
+                    rows={4}
+                  />
+                  <button
+                    onClick={() => handleCopy(apiKey)}
+                    className={`absolute right-2 top-2 inline-flex items-center justify-center rounded-md border
+                 px-2 py-1 text-sm font-medium transition-colors duration-200 
+                 ${hasCopied ? 'bg-green-600 text-white' : 'bg-transparent hover:bg-secondary'}`}
+                  >
+                    {hasCopied ? (
+                      <span className="flex items-center">
+                        <Check className="w-4 h-4 mr-1" />
+                      </span>
+                    ) : (
+                      <Clipboard className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         ),
@@ -267,9 +303,25 @@ const HomePage = () => {
         <div className="relative bg-zinc-900 p-10">
           <div className="flex flex-col items-center justify-center relative bg-gradient-to-r from-zinc-900/80 via-green-500/25 bg-zinc-900/80 ">
             <Logo className="w-48 h-48" />
-            <h1 className="mt-4 text-3xl font-bold text-gray-100 text-center pb-10">
-              The most advanced AI retrieval system
+            <h1 className="mt-4 text-3xl font-bold text-gray-100 text-center ">
+              Welcome to SciPhi Cloud
             </h1>
+            {/* <h3 className="mt-4 text-lg  text-gray-100 text-center pb-10">
+              The most advanced AI retrieval system.
+            </h3> */}
+            <div className="mt-4 text-lg  text-gray-100 text-center pb-10">
+              <ReactTyped
+                strings={[
+                  "We're taking RAG to the next level",
+                  // "Your next step in R2R excellence.",
+                ]}
+                typeSpeed={40}
+                backSpeed={30}
+                backDelay={800}
+                // loop
+                showCursor
+              />
+            </div>
           </div>
           <div className="flex flex-col lg:flex-row gap-4 ">
             {/* Left column - Alert */}
