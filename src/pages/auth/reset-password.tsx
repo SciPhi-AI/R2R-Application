@@ -10,8 +10,10 @@ import { useUserContext } from '@/context/UserContext';
 
 import { SignupSplitLayout } from './signup-layout';
 
-const DEFAULT_DEPLOYMENT_URL = 'https://api.cloud.sciphi.ai';
+// const DEFAULT_DEPLOYMENT_URL = 'https://api.cloud.sciphi.ai';
 // const DEFAULT_DEPLOYMENT_URL = 'http://0.0.0.0:7275'; // For local development
+
+const DEFAULT_DEPLOYMENT_URL = 'http://0.0.0.0:7272'; // For local development
 
 const ResetPasswordPage: React.FC = () => {
   const router = useRouter();
@@ -206,8 +208,9 @@ const ResetPasswordPage: React.FC = () => {
     );
   }
 
-  const Component = () => {
-    return (
+  // Otherwise, if no token is found in the URL, show the "Forgot Password" (request) form
+  return (
+    <SignupSplitLayout>
       <div className="container">
         <div className="flex flex-col justify-center items-center min-h-screen bg-white dark:bg-zinc-900">
           {requestSuccessBanner && (
@@ -277,12 +280,6 @@ const ResetPasswordPage: React.FC = () => {
           )}
         </div>
       </div>
-    );
-  };
-  // Otherwise, if no token is found in the URL, show the "Forgot Password" (request) form
-  return (
-    <SignupSplitLayout>
-      <Component />
     </SignupSplitLayout>
   );
 };

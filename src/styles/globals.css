@@ -309,3 +309,7 @@ td {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.typed-container {
+  pointer-events: none; /* Prevent mouse interactions */
+}

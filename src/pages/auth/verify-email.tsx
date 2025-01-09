@@ -8,8 +8,8 @@ import { useUserContext } from '@/context/UserContext';
 
 import { SignupSplitLayout } from './signup-layout';
 
-const DEFAULT_DEPLOYMENT_URL = 'https://api.cloud.sciphi.ai';
-// const DEFAULT_DEPLOYMENT_URL = 'http://0.0.0.0:7275'; // For local development
+// const DEFAULT_DEPLOYMENT_URL = 'https://api.cloud.sciphi.ai';
+const DEFAULT_DEPLOYMENT_URL = 'http://0.0.0.0:7272'; // For local development
 
 const VerifyEmailPage: React.FC = () => {
   const router = useRouter();
@@ -65,8 +65,8 @@ const VerifyEmailPage: React.FC = () => {
     verify();
   }, [verification_code, email, router, verifyEmail]);
 
-  const Component = () => {
-    return (
+  return (
+    <SignupSplitLayout>
       <div className="container">
         <div className="flex flex-col items-center justify-center h-screen p-8">
           {status === 'loading' && (
@@ -88,11 +88,6 @@ const VerifyEmailPage: React.FC = () => {
           )}
         </div>
       </div>
-    );
-  };
-  return (
-    <SignupSplitLayout>
-      <Component />
     </SignupSplitLayout>
   );
 };

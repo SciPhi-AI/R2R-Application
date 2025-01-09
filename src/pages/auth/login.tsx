@@ -10,8 +10,10 @@ import { useUserContext } from '@/context/UserContext';
 
 // import { supabase } from '@/lib/supabase'; // If not using OAuth, can be removed
 import { SignupSplitLayout } from './signup-layout';
-const DEFAULT_DEPLOYMENT_URL = 'https://api.cloud.sciphi.ai';
-// const DEFAULT_DEPLOYMENT_URL = 'http://0.0.0.0:7275'; // For local development
+// const DEFAULT_DEPLOYMENT_URL = 'https://api.cloud.sciphi.ai';
+
+const DEFAULT_DEPLOYMENT_URL = 'http://0.0.0.0:7272'; // For local development
+
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -88,8 +90,8 @@ const LoginPage: React.FC = () => {
 
   const handleOAuthSignIn = async (provider: 'google' | 'github') => {};
 
-  const Component = () => {
-    return (
+  return (
+    <SignupSplitLayout>
       <div className="container">
         <div className="flex flex-col items-center justify-center min-h-screen p-8 ">
           <div className="bg-zinc-100 dark:bg-zinc-800 shadow-md rounded px-8 pt-6 pb-8 mb-4 w-full max-w-md flex flex-col">
@@ -240,11 +242,6 @@ const LoginPage: React.FC = () => {
           </div>
         </div>
       </div>
-    );
-  };
-  return (
-    <SignupSplitLayout>
-      <Component />
     </SignupSplitLayout>
   );
 };

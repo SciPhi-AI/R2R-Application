@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { Eye, EyeOff } from 'lucide-react';
 import { useRouter } from 'next/router';
-import React, { useState, FormEvent, MouseEventHandler } from 'react';
+import React, { useRef, useState, FormEvent, MouseEventHandler } from 'react';
 import { ReactTyped } from 'react-typed';
 
 import Layout from '@/components/Layout';
@@ -80,6 +80,7 @@ export const SignupSplitLayout: React.FC<SignupSplitLayoutProps> = ({
   const [confirm, setConfirm] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Toggles for password text visibility
   const togglePasswordVisibility: MouseEventHandler<HTMLButtonElement> = () => {
@@ -102,14 +103,12 @@ export const SignupSplitLayout: React.FC<SignupSplitLayoutProps> = ({
       <div className="flex min-h-screen w-full overflow-hidden">
         {/* RIGHT SECTION: BRAND/LOGO + TYPED MESSAGING */}
         <div className="hidden md:flex w-1/2 items-center justify-center relative bg-zinc-900 text-white p-8">
-          {/* Subtle fade animation */}
           <motion.div
             className="absolute inset-0 object-cover object-center bg-gradient-to-br from-zinc-900 via-green-500/20 to-zinc-700"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.9 }}
           />
-
           <motion.div
             className="relative z-10 flex flex-col items-center justify-center text-center space-y-4 max-w-sm"
             initial={{ y: 40, opacity: 0 }}
@@ -119,9 +118,7 @@ export const SignupSplitLayout: React.FC<SignupSplitLayoutProps> = ({
             <Logo className="w-32 h-32 mb-4" />
             <h2 className="text-3xl font-bold">Welcome to SciPhi Cloud</h2>
 
-            {/* Typed message */}
             <p className="text-lg text-gray-300 leading-relaxed">
-              {/* <Typewriter text={"The most advanced AI retrieval system."} /> */}
               <ReactTyped
                 strings={[
                   'The most advanced AI retrieval system.',
@@ -130,9 +127,8 @@ export const SignupSplitLayout: React.FC<SignupSplitLayoutProps> = ({
                 typeSpeed={40}
                 backSpeed={30}
                 backDelay={800}
-                // loop
-                // showCursor
                 bindInputFocusEvents={false}
+                className="typed-cursor"
               />
             </p>
           </motion.div>

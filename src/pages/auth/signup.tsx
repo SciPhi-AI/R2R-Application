@@ -23,8 +23,8 @@ const RegistrationPage: React.FC = () => {
   const [deploymentUrl, setDeploymentUrl] = useState('');
 
   useEffect(() => {
-    const url = process.env.R2R_DEPLOYMENT_URL || 'https://api.cloud.sciphi.ai';
-    // const url = 'http://0.0.0.0:7275'; // For local development
+    // const url = process.env.R2R_DEPLOYMENT_URL || 'https://api.cloud.sciphi.ai';
+    const url = 'http://0.0.0.0:7272'; // For local development
 
     setDeploymentUrl(url);
   }, []);
@@ -66,8 +66,8 @@ const RegistrationPage: React.FC = () => {
     router.push('/auth/login');
   };
 
-  const Component = () => {
-    return (
+  return (
+    <SignupSplitLayout>
       <div className="container">
         <div className="flex flex-col justify-center items-center min-h-screen bg-white dark:bg-zinc-900">
           {registrationSuccess && (
@@ -212,11 +212,6 @@ const RegistrationPage: React.FC = () => {
           )}
         </div>
       </div>
-    );
-  };
-  return (
-    <SignupSplitLayout>
-      <Component />
     </SignupSplitLayout>
   );
 };
