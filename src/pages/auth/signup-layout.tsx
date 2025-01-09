@@ -136,7 +136,8 @@ export const SignupSplitLayout: React.FC<SignupSplitLayoutProps> = ({
                 backSpeed={30}
                 backDelay={800}
                 // loop
-                showCursor
+                // showCursor
+                bindInputFocusEvents={false}
               />
             </p>
           </motion.div>

@@ -243,9 +243,11 @@ const LoginPage: React.FC = () => {
     );
   };
   return (
-    <SignupSplitLayout>
-      <Component />
-    </SignupSplitLayout>
+    <>
+    </>
+    // <SignupSplitLayout>
+    //   <Component />
+    // </SignupSplitLayout>
   );
 };
 
