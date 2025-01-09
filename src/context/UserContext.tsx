@@ -100,8 +100,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   const isSuperUser = useCallback(() => {
-    return authState.userRole === 'admin' && viewMode === 'admin';
-  }, [authState.userRole, viewMode]);
+    return false;
+  }, []);
 
   const [lastLoginTime, setLastLoginTime] = useState<number | null>(null);
 
