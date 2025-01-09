@@ -169,14 +169,14 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
               <FileUp className="mr-2 h-4 w-4" />
               <span>File Upload</span>
             </Button>
-            <Button
+            {/* <Button
               onClick={() => setIsCreateDialogOpen(true)}
               color="secondary"
               className="flex justify-between items-center"
             >
               <PencilLine className="mr-2 h-4 w-4" />
               <span>Create Chunks</span>
-            </Button>
+            </Button> */}
           </div>
         </PopoverContent>
       </Popover>

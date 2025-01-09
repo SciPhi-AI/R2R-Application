@@ -208,8 +208,23 @@ const Index: React.FC = () => {
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
+  const state = {
+    steps: [
+      {
+        target: '.my-first-step',
+        content: 'This is my awesome feature!',
+      },
+      {
+        target: '.my-other-step',
+        content: 'This another awesome feature!',
+      }
+    ]
+  };
+  const { steps } = state;
+
 
   return (
+    <>
     <Layout pageTitle="Documents" includeFooter={false}>
       <main className="w-full flex flex-col container h-screen-[calc(100%-4rem)]">
         <div className="relative flex-grow bg-zinc-900 mt-[4rem] sm:mt-[4rem] pl-10">
@@ -251,6 +266,8 @@ const Index: React.FC = () => {
         </div>
       </main>
     </Layout>
+</>
+
   );
 };
 

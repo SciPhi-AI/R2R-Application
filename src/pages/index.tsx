@@ -103,10 +103,19 @@ const HomePage = () => {
       const searchLimits = limitsData.usage.routes['/v3/retrieval/search'];
       console.log('searchLimits = ', searchLimits);
       const ragLimits = limitsData.usage.routes['/v3/retrieval/rag'];
+      const agentLimits = limitsData.usage.routes['/v3/retrieval/agent'];
 
       setLimits({
         chunks: limitsData.storageLimits.chunks,
         documents: limitsData.storageLimits.documents,
+        agent: {
+          routePerMin: agentLimits?.routePerMin?.limit || 0,
+          routePerMinUsed: agentLimits?.routePerMin?.used || 0,
+          routePerMinRemaining: agentLimits?.routePerMin?.remaining || 0,
+          monthlyLimit: agentLimits?.monthlyLimit?.limit || 0,
+          monthlyUsed: agentLimits?.monthlyLimit?.used || 0,
+          monthlyRemaining: agentLimits?.monthlyLimit?.remaining || 0,
+        },
         search: {
           routePerMin: searchLimits?.routePerMin?.limit || 0,
           routePerMinUsed: searchLimits?.routePerMin?.used || 0,
@@ -543,14 +552,14 @@ const HomePage = () => {
                           <div className="flex flex-col w-1/2">
                             <div className="flex justify-between text-sm mb-1">
                               <div className="font-bold">Agent</div>
-                              <span className="font-bold">{`${limits.rag.monthlyUsed} / ${limits.rag.monthlyLimit}`}</span>
+                              <span className="font-bold">{`${limits.agent.monthlyUsed} / ${limits.agent.monthlyLimit}`}</span>
                             </div>
                             <Progress
                               value={Math.max(
                                 1,
                                 Math.round(
-                                  (100 * limits.rag.monthlyUsed) /
-                                    limits.rag.monthlyLimit
+                                  (100 * limits.agent.monthlyUsed) /
+                                    limits.agent.monthlyLimit
                                 )
                               )}
                               className="h-2"
