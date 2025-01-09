@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/input';
 import { useUserContext } from '@/context/UserContext';
 
+import { SignupSplitLayout } from './signup-layout';
+
 const DEFAULT_DEPLOYMENT_URL = 'https://api.cloud.sciphi.ai';
 // const DEFAULT_DEPLOYMENT_URL = 'http://0.0.0.0:7275'; // For local development
 
@@ -204,77 +206,84 @@ const ResetPasswordPage: React.FC = () => {
     );
   }
 
+  const Component = () => {
+    return (
+      <div className="container">
+        <div className="flex flex-col justify-center items-center min-h-screen bg-white dark:bg-zinc-900">
+          {requestSuccessBanner && (
+            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 max-w-md w-full text-sm">
+              <strong className="font-bold">Success!</strong> If an account with
+              that email exists, a password reset link has been sent. Please
+              check your inbox (and spam folder).
+            </div>
+          )}
+
+          <form
+            onSubmit={handleRequestSubmit}
+            className="bg-zinc-100 dark:bg-zinc-800 shadow-md rounded px-8 pt-6 pb-8 mb-4 w-full max-w-md"
+          >
+            <h2 className="text-xl font-bold mb-4 text-gray-700 dark:text-gray-200">
+              Forgot Password
+            </h2>
+            <div className="mb-6">
+              <label
+                className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2"
+                htmlFor="email"
+              >
+                Email
+              </label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                disabled={requestSuccessBanner}
+                onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email"
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              {requestSuccessBanner ? (
+                <Button
+                  color="filled"
+                  className="w-full"
+                  onClick={handleGoToLogin}
+                  type="button"
+                >
+                  Go to Login
+                </Button>
+              ) : (
+                <Button color="filled" className="w-full" type="submit">
+                  Send Reset Link
+                </Button>
+              )}
+            </div>
+          </form>
+
+          {!requestSuccessBanner && (
+            <div className="text-gray-700 dark:text-gray-400 text-sm font-bold">
+              <p>
+                Remember your password?{' '}
+                <span
+                  onClick={handleGoToLogin}
+                  className="text-indigo-400 cursor-pointer hover:underline"
+                >
+                  Log in
+                </span>
+                .
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
   // Otherwise, if no token is found in the URL, show the "Forgot Password" (request) form
   return (
-    <Layout includeFooter={false}>
-      <div className="flex flex-col justify-center items-center min-h-screen bg-white dark:bg-zinc-900">
-        {requestSuccessBanner && (
-          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 max-w-md w-full text-sm">
-            <strong className="font-bold">Success!</strong> If an account with
-            that email exists, a password reset link has been sent. Please check
-            your inbox (and spam folder).
-          </div>
-        )}
-
-        <form
-          onSubmit={handleRequestSubmit}
-          className="bg-zinc-100 dark:bg-zinc-800 shadow-md rounded px-8 pt-6 pb-8 mb-4 w-full max-w-md"
-        >
-          <h2 className="text-xl font-bold mb-4 text-gray-700 dark:text-gray-200">
-            Forgot Password
-          </h2>
-          <div className="mb-6">
-            <label
-              className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2"
-              htmlFor="email"
-            >
-              Email
-            </label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              disabled={requestSuccessBanner}
-              onChange={(e) => setEmail(e.target.value)}
-              autoComplete="email"
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            {requestSuccessBanner ? (
-              <Button
-                color="filled"
-                className="w-full"
-                onClick={handleGoToLogin}
-                type="button"
-              >
-                Go to Login
-              </Button>
-            ) : (
-              <Button color="filled" className="w-full" type="submit">
-                Send Reset Link
-              </Button>
-            )}
-          </div>
-        </form>
-
-        {!requestSuccessBanner && (
-          <div className="text-gray-700 dark:text-gray-400 text-sm font-bold">
-            <p>
-              Remember your password?{' '}
-              <span
-                onClick={handleGoToLogin}
-                className="text-indigo-400 cursor-pointer hover:underline"
-              >
-                Log in
-              </span>
-              .
-            </p>
-          </div>
-        )}
-      </div>
-    </Layout>
+    <SignupSplitLayout>
+      <Component />
+    </SignupSplitLayout>
   );
 };
 

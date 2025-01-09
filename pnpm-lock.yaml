@@ -257,6 +257,9 @@ dependencies:
   react-tippy:
     specifier: ^1.4.0
     version: 1.4.0
+  react-typed:
+    specifier: ^2.0.12
+    version: 2.0.12(react@18.3.1)
   sass:
     specifier: ^1.82.0
     version: 1.83.1
@@ -12114,6 +12117,15 @@ packages:
       popper.js: 1.16.1
     dev: false
 
+  /react-typed@2.0.12(react@18.3.1):
+    resolution: {integrity: sha512-sn59lrb4NKgvQLDGBRWM4wRNEz5Fp37F0BrLA2cKUmDqPSyQJOOiFigz+6wJof0o99QoE16nVCa3B3ID34ejsg==}
+    peerDependencies:
+      react: '>16.8.0'
+    dependencies:
+      react: 18.3.1
+      typed.js: 2.1.0
+    dev: false
+
   /react-use-measure@2.1.1(react-dom@18.3.1)(react@18.3.1):
     resolution: {integrity: sha512-nocZhN26cproIiIduswYpV5y5lQpSQS1y/4KuvUCjSKmw7ZWIS/+g3aFnX3WdBkyuGUtTLif3UTqnLLhbDoQig==}
     peerDependencies:
@@ -13340,6 +13352,10 @@ packages:
       possible-typed-array-names: 1.0.0
       reflect.getprototypeof: 1.0.10
     dev: true
+
+  /typed.js@2.1.0:
+    resolution: {integrity: sha512-bDuXEf7YcaKN4g08NMTUM6G90XU25CK3bh6U0THC/Mod/QPKlEt9g/EjvbYB8x2Qwr2p6J6I3NrsoYaVnY6wsQ==}
+    dev: false
 
   /typescript@5.5.2:
     resolution: {integrity: sha512-NcRtPEOsPFFWjobJEtfihkLCZCXZt/os3zf8nTxjVH3RvTSxjrCamJpbExGvYOF+tFHc3pA65qpdwPbzjohhew==}

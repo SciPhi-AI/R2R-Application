@@ -111,6 +111,7 @@
     "react-pdf": "^9.1.1",
     "react-spinners": "^0.15.0",
     "react-tippy": "^1.4.0",
+    "react-typed": "^2.0.12",
     "sass": "^1.82.0",
     "sharp": "^0.33.5",
     "tailwind-merge": "^2.5.5",

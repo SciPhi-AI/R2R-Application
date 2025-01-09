@@ -132,7 +132,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
 
         let userRole: 'admin' | 'user' = 'user';
         try {
-          await newClient.system.settings();
+          // await newClient.system.settings();
           userRole = 'admin';
         } catch (error) {
           if (

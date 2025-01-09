@@ -7,8 +7,9 @@ import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/input';
 import { useUserContext } from '@/context/UserContext';
-// import { supabase } from '@/lib/supabase'; // If not using OAuth, can be removed
 
+// import { supabase } from '@/lib/supabase'; // If not using OAuth, can be removed
+import { SignupSplitLayout } from './signup-layout';
 const DEFAULT_DEPLOYMENT_URL = 'https://api.cloud.sciphi.ai';
 // const DEFAULT_DEPLOYMENT_URL = 'http://0.0.0.0:7275'; // For local development
 const LoginPage: React.FC = () => {
@@ -87,25 +88,26 @@ const LoginPage: React.FC = () => {
 
   const handleOAuthSignIn = async (provider: 'google' | 'github') => {};
 
-  return (
-    <Layout includeFooter={false}>
-      <div className="flex flex-col items-center justify-center min-h-screen p-8 ">
-        <div className="bg-zinc-100 dark:bg-zinc-800 shadow-md rounded px-8 pt-6 pb-8 mb-4 w-full max-w-md flex flex-col">
-          {/* Success banner after verification */}
-          {verificationMessage && (
-            <div
-              className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4"
-              role="alert"
-            >
-              <strong className="font-bold">Success!</strong>
-              <span className="block sm:inline ml-2">
-                {verificationMessage}
-              </span>
-            </div>
-          )}
+  const Component = () => {
+    return (
+      <div className="container">
+        <div className="flex flex-col items-center justify-center min-h-screen p-8 ">
+          <div className="bg-zinc-100 dark:bg-zinc-800 shadow-md rounded px-8 pt-6 pb-8 mb-4 w-full max-w-md flex flex-col">
+            {/* Success banner after verification */}
+            {verificationMessage && (
+              <div
+                className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4"
+                role="alert"
+              >
+                <strong className="font-bold">Success!</strong>
+                <span className="block sm:inline ml-2">
+                  {verificationMessage}
+                </span>
+              </div>
+            )}
 
-          {/* Commenting out R2R Deployment URL Field */}
-          {/* <div className="mb-4">
+            {/* Commenting out R2R Deployment URL Field */}
+            {/* <div className="mb-4">
             <label
               className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2"
               htmlFor="deploymentUrl"
@@ -123,121 +125,127 @@ const LoginPage: React.FC = () => {
             />
           </div> */}
 
-          <form onSubmit={handleSubmit} className="mt-4">
-            <div className="mb-4">
-              <div className="flex items-center justify-between">
+            <form onSubmit={handleSubmit} className="mt-4">
+              <div className="mb-4">
+                <div className="flex items-center justify-between">
+                  <label
+                    className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2"
+                    htmlFor="email"
+                  >
+                    Email
+                  </label>
+                  <span
+                    onClick={() => router.push('/auth/signup')}
+                    className="text-sm font-semibold text-indigo-400 cursor-pointer hover:underline"
+                  >
+                    Sign up with Email
+                  </span>
+                </div>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="email"
+                />
+              </div>
+
+              <div className="mb-6">
                 <label
                   className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2"
-                  htmlFor="email"
+                  htmlFor="password"
                 >
-                  Email
+                  Password
                 </label>
-                <span
-                  onClick={() => router.push('/auth/signup')}
-                  className="text-sm font-semibold text-indigo-400 cursor-pointer hover:underline"
-                >
-                  Sign up with Email
-                </span>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="pr-10"
+                    autoComplete="current-password"
+                  />
+                  <button
+                    type="button"
+                    onClick={togglePasswordVisibility}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-5 w-5" aria-hidden="true" />
+                    ) : (
+                      <Eye className="h-5 w-5" aria-hidden="true" />
+                    )}
+                  </button>
+                </div>
               </div>
-              <Input
-                id="email"
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                autoComplete="email"
-              />
-            </div>
 
-            <div className="mb-6">
-              <label
-                className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2"
-                htmlFor="password"
+              <Button
+                type="submit"
+                color="filled"
+                className="w-full my-2"
+                disabled={isLoading}
               >
-                Password
-              </label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pr-10"
-                  autoComplete="current-password"
+                {isLoading ? 'Signing in...' : 'Sign in with Email'}
+              </Button>
+            </form>
+
+            {/* OAuth buttons disabled for now */}
+            <Button
+              onClick={() => handleOAuthSignIn('google')}
+              color="filled"
+              className="w-full my-2 relative"
+              disabled={true}
+            >
+              <div className="absolute left-2 top-1/2 transform -translate-y-1/2">
+                <Image
+                  src="/images/google-logo.svg"
+                  alt="Google logo"
+                  width={20}
+                  height={20}
                 />
-                <button
-                  type="button"
-                  onClick={togglePasswordVisibility}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-5 w-5" aria-hidden="true" />
-                  ) : (
-                    <Eye className="h-5 w-5" aria-hidden="true" />
-                  )}
-                </button>
               </div>
-            </div>
+              <span className="flex-grow text-center">Sign in with Google</span>
+            </Button>
 
             <Button
-              type="submit"
+              onClick={() => handleOAuthSignIn('github')}
               color="filled"
-              className="w-full my-2"
-              disabled={isLoading}
+              className="w-full my-2 relative"
+              disabled={true}
             >
-              {isLoading ? 'Signing in...' : 'Sign in with Email'}
+              <div className="absolute left-2 top-1/2 transform -translate-y-1/2">
+                <Image
+                  src="/images/github-mark.svg"
+                  alt="Github logo"
+                  width={20}
+                  height={20}
+                />
+              </div>
+              <span className="flex-grow text-center">Sign in with GitHub</span>
             </Button>
-          </form>
 
-          {/* OAuth buttons disabled for now */}
-          <Button
-            onClick={() => handleOAuthSignIn('google')}
-            color="filled"
-            className="w-full my-2 relative"
-            disabled={true}
-          >
-            <div className="absolute left-2 top-1/2 transform -translate-y-1/2">
-              <Image
-                src="/images/google-logo.svg"
-                alt="Google logo"
-                width={20}
-                height={20}
-              />
-            </div>
-            <span className="flex-grow text-center">Sign in with Google</span>
-          </Button>
-
-          <Button
-            onClick={() => handleOAuthSignIn('github')}
-            color="filled"
-            className="w-full my-2 relative"
-            disabled={true}
-          >
-            <div className="absolute left-2 top-1/2 transform -translate-y-1/2">
-              <Image
-                src="/images/github-mark.svg"
-                alt="Github logo"
-                width={20}
-                height={20}
-              />
-            </div>
-            <span className="flex-grow text-center">Sign in with GitHub</span>
-          </Button>
-
-          {error && <div className="text-red-500 text-sm mt-4">{error}</div>}
-        </div>
-        <div className="text-center">
-          <span
-            onClick={() => router.push('/auth/reset-password')}
-            className="text-sm text-indigo-400 cursor-pointer hover:underline italic"
-          >
-            Forgot Password
-          </span>
+            {error && <div className="text-red-500 text-sm mt-4">{error}</div>}
+          </div>
+          <div className="text-center">
+            <span
+              onClick={() => router.push('/auth/reset-password')}
+              className="text-sm text-indigo-400 cursor-pointer hover:underline italic"
+            >
+              Forgot Password
+            </span>
+          </div>
         </div>
       </div>
-    </Layout>
+    );
+  };
+  return (
+    <SignupSplitLayout>
+      <Component />
+    </SignupSplitLayout>
   );
 };
 
