@@ -1,11 +1,11 @@
 import { Clipboard, Check } from 'lucide-react';
+import { ReactTyped } from 'react-typed';
 import { FileText, Boxes, MessageCircle, ScanSearch } from 'lucide-react';
 import { PlusCircle, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { User } from 'r2r-js';
 import { useState, useEffect, useCallback } from 'react';
-import { ReactTyped } from 'react-typed';
 
 import Layout from '@/components/Layout';
 import { Logo } from '@/components/shared/Logo';
@@ -312,7 +312,7 @@ const HomePage = () => {
             <div className="mt-4 text-lg  text-gray-100 text-center pb-10">
               <ReactTyped
                 strings={[
-                  "We're taking RAG to the next level",
+                  "We're taking RAG to the next level!",
                   // "Your next step in R2R excellence.",
                 ]}
                 typeSpeed={40}
