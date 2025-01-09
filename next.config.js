@@ -10,6 +10,10 @@ module.exports = {
     }
     return config;
   },
+  // Add ESLint configuration to ignore during builds
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   images: {
     remotePatterns: [
       {

@@ -6,6 +6,7 @@ import { useRouter } from 'next/router';
 import { User } from 'r2r-js';
 import { useState, useEffect, useCallback } from 'react';
 import { ReactTyped } from 'react-typed';
+import { Rocket, Star } from 'lucide-react';
 
 import Layout from '@/components/Layout';
 import { Logo } from '@/components/shared/Logo';
@@ -15,7 +16,6 @@ import {
   CardContent,
   AdvancedCard,
 } from '@/components/ui/AdvancedCard';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/Button';
 import {
   Dialog,
@@ -29,6 +29,8 @@ import {
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/components/ui/use-toast';
 import { useUserContext } from '@/context/UserContext';
+
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 // ------- IMPORT YOUR DIALOG/MODAL COMPONENTS HERE -------
 
@@ -296,11 +298,48 @@ const HomePage = () => {
   if (!isAuthenticated) {
     return null;
   }
+  const [isBannerVisible, setIsBannerVisible] = useState(true);
+
+  useEffect(() => {
+    // Check localStorage to see if the banner has been dismissed
+    const bannerDismissed = localStorage.getItem('isBannerDismissed');
+    if (bannerDismissed === 'true') {
+      setIsBannerVisible(false);
+    }
+  }, []);
+
+  const handleCloseBanner = () => {
+    setIsBannerVisible(false);
+    localStorage.setItem('isBannerDismissed', 'true'); // Persist dismissal
+  };
 
   return (
     <Layout includeFooter>
       <main className="w-full flex flex-col container h-screen-[calc(100%-4rem)]">
         <div className="relative bg-zinc-900 p-10">
+        {isBannerVisible && (
+          <Alert
+            variant="default"
+            // className="relative bg-indigo-700 text-white flex items-center justify-between"
+          >
+            <div className="flex items-center">
+              <Rocket className="h-4 w-4 mr-2  -mt-1  text-indigo-400" />
+              <AlertTitle>
+                SciPhi Cloud is powered entirely by the open source R2R library - {' '}
+                <Link className="text-indigo-400" href="https://github.com/SciPhi-AI/R2R">
+                  give us a <Star className="inline w-4 h-4 " />
+                </Link>
+              </AlertTitle>
+            </div>
+            <button
+              className="absolute top-2 right-2 text-white hover:text-gray-300"
+              onClick={handleCloseBanner}
+            >
+              &times;
+            </button>
+          </Alert>
+        )}
+
           <div className="flex flex-col items-center justify-center relative bg-gradient-to-r from-zinc-900/80 via-green-500/25 bg-zinc-900/80 ">
             <Logo className="w-48 h-48" />
             <h1 className="mt-4 text-3xl font-bold text-gray-100 text-center ">
@@ -326,6 +365,7 @@ const HomePage = () => {
           <div className="flex flex-col lg:flex-row gap-4 ">
             {/* Left column - Alert */}
             <div className="w-full flex flex-col gap-4">
+
               <Alert variant="default" className="flex flex-col">
                 <AlertTitle className="text-lg ">
                   <div className="flex gap-2 text-xl">

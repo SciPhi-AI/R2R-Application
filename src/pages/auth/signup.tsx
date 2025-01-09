@@ -8,6 +8,14 @@ import { Input } from '@/components/ui/input';
 import { useUserContext } from '@/context/UserContext';
 
 import { SignupSplitLayout } from './signup-layout';
+const PRODUCTION_URL = 'https://api.cloud.sciphi.ai';
+const DEVELOPMENT_URL = 'http://0.0.0.0:7272';
+
+// Use environment variable to determine the deployment URL
+const DEFAULT_DEPLOYMENT_URL =
+  process.env.NEXT_PUBLIC_ENV === 'development'
+    ? DEVELOPMENT_URL
+    : PRODUCTION_URL;
 
 const RegistrationPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -23,10 +31,10 @@ const RegistrationPage: React.FC = () => {
   const [deploymentUrl, setDeploymentUrl] = useState('');
 
   useEffect(() => {
-    const url = process.env.R2R_DEPLOYMENT_URL || 'https://api.cloud.sciphi.ai';
+    // const url = process.env.R2R_DEPLOYMENT_URL || 'https://api.cloud.sciphi.ai';
     // const url = 'http://0.0.0.0:7272'; // For local development
 
-    setDeploymentUrl(url);
+    setDeploymentUrl(DEFAULT_DEPLOYMENT_URL);
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
