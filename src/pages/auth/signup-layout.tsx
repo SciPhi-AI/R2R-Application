@@ -104,7 +104,9 @@ export const SignupSplitLayout: React.FC<SignupSplitLayoutProps> = ({
         {/* RIGHT SECTION: BRAND/LOGO + TYPED MESSAGING */}
         <div className="hidden md:flex w-1/2 items-center justify-center relative bg-zinc-900 text-white p-8">
           <motion.div
-            className="absolute inset-0 object-cover object-center bg-gradient-to-br from-zinc-900 via-green-500/20 to-zinc-700"
+            // className="absolute inset-0 object-cover object-center bg-gradient-to-br from-zinc-900 via-green-500/20 to-zinc-700"
+            // className="absolute inset-0 object-cover object-center bg-gradient-to-b from-zinc-900 via-green-500/20 to-zinc-700"
+            className="absolute inset-0 object-cover object-center bg-gradient-to-tl from-zinc-900 via-green-500/20 to-zinc-700"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.9 }}

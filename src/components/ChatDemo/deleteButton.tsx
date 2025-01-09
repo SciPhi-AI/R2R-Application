@@ -154,7 +154,7 @@ export const DeleteButton: React.FC<ExtendedDeleteButtonProps> = ({
           style={{ zIndex: 20, minWidth: '100px' }}
         >
           <Trash2 className="mr-2 h-4 w-4 mt-1" />
-          Delete Account
+          Delete
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>

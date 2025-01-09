@@ -169,7 +169,7 @@ const AssignDocumentToCollectionDialog: React.FC<
       <DialogContent className="text-white max-w-4xl">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold mb-4">
-            Assign Documents to Collection
+            Adding documents to the collection
           </DialogTitle>
         </DialogHeader>
         {loading ? (
@@ -207,8 +207,9 @@ const AssignDocumentToCollectionDialog: React.FC<
                 color="filled"
                 disabled={assigning || selectedDocumentIds.length === 0}
                 style={{ zIndex: 20 }}
+                className="pl-3 pr-3"
               >
-                Assign to Collection
+                Add Documents
               </Button>
             </DialogFooter>
           </>

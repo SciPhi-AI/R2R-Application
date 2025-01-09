@@ -197,7 +197,7 @@ const CollectionDialog: React.FC<CollectionDialogProps> = ({
                         },
                       ]}
                     />
-                    <InfoRow
+                    {/* <InfoRow
                       label="Graph"
                       values={[
                         {
@@ -209,12 +209,12 @@ const CollectionDialog: React.FC<CollectionDialogProps> = ({
                           value: collection.graphSyncStatus,
                         },
                       ]}
-                    />
+                    /> */}
                   </div>
                 )}
 
                 <div className="flex flex-col gap-3 mt-6 pb-4">
-                  <div className="grid grid-cols-2 gap-3">
+                  {/* <div className="grid grid-cols-2 gap-3">
                     <Button
                       onClick={handlePull}
                       color="primary"
@@ -248,16 +248,24 @@ const CollectionDialog: React.FC<CollectionDialogProps> = ({
                     >
                       Manage Users
                     </Button>
-                  </div>
+                  </div> */}
+                  {/* <Button
+                      onClick={() => setIsAssignDocumentDialogOpen(true)}
+                      color="primary"
+                      className="font-medium py-2.5 px-4 rounded-lg"
+                    >
+                      Manage Files
+                    </Button> */}
+
                   <div className="grid grid-cols-1 gap-3">
-                    <DeleteButton
+                    {/* <DeleteButton
                       collectionId={id}
                       isCollection={true}
                       onSuccess={() => router.push('/collections')}
                       showToast={toast}
                       selectedDocumentIds={[]}
                       onDelete={() => {}}
-                    />
+                    /> */}
                   </div>
                 </div>
               </>
