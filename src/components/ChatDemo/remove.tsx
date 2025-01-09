@@ -115,7 +115,8 @@ export const RemoveButton: React.FC<RemoveButtonProps> = ({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            Are you sure you want to remove this {itemType} from the collection?
+            {/* Are you sure you want to remove this {itemType} from the collection? */}
+            Removing {itemType} from the collection.
           </AlertDialogTitle>
           <AlertDialogDescription>
             This action will remove the {itemType} from the current collection.
@@ -124,7 +125,7 @@ export const RemoveButton: React.FC<RemoveButtonProps> = ({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={handleRemove}>Remove</AlertDialogAction>
+          <AlertDialogAction onClick={handleRemove}>Confirm</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

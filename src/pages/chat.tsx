@@ -54,7 +54,7 @@ const Index: React.FC = () => {
   const [localSearchLimits, setLocalSearchLimits] = useState<
     Record<string, number>
   >({});
-  const [mode, setMode] = useState<'rag' | 'rag_agent'>('rag_agent');
+  const [mode, setMode] = useState<'rag' | 'rag_agent'>('rag');
   const [sidebarIsOpen, setSidebarIsOpen] = useState(false);
 
   useEffect(() => {
@@ -302,8 +302,8 @@ const Index: React.FC = () => {
                   <SelectValue placeholder="Select Mode" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="rag">RAG Q&A</SelectItem>
                   <SelectItem value="rag_agent">RAG Agent</SelectItem>
-                  <SelectItem value="rag">Question and Answer</SelectItem>
                 </SelectContent>
               </Select>
             </div>

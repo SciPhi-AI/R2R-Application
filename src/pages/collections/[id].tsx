@@ -1,3 +1,4 @@
+import { AlertTriangleIcon } from 'lucide-react'; // Add this to your existing imports at the top
 import { Loader, FileSearch2, Settings } from 'lucide-react';
 import { useRouter } from 'next/router';
 import {
@@ -16,12 +17,15 @@ import React, {
   useMemo,
 } from 'react';
 
+import { DeleteButton } from '@/components/ChatDemo/deleteButton';
 import { RemoveButton } from '@/components/ChatDemo/remove';
 import Table, { Column } from '@/components/ChatDemo/Table';
+import AssignDocumentToCollectionDialog from '@/components/ChatDemo/utils/AssignDocumentToCollectionDialog';
 import CollectionDialog from '@/components/ChatDemo/utils/collectionDialog';
 import DocumentInfoDialog from '@/components/ChatDemo/utils/documentDialogInfo';
 import KnowledgeGraph from '@/components/knowledgeGraph';
 import Layout from '@/components/Layout';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/input';
@@ -32,6 +36,9 @@ import { IngestionStatus, KGExtractionStatus } from '@/types';
 
 const PAGE_SIZE = 100;
 const ITEMS_PER_PAGE = 10;
+const handleAssignSuccess = () => {
+  // Do nothing
+};
 
 const CollectionIdPage: React.FC = () => {
   const router = useRouter();
@@ -577,24 +584,58 @@ const CollectionIdPage: React.FC = () => {
     setSearchQuery(query);
     setPagination((prev) => ({ ...prev, [activeTab]: 1 }));
   };
+  const [isAssignDocumentDialogOpen, setIsAssignDocumentDialogOpen] =
+    useState(false);
+  const [isAssignUserDialogOpen, setIsAssignUserDialogOpen] = useState(false);
 
   const renderActionButtons = () => {
     return (
       <div className="flex justify-between items-center mb-2">
-        <h1 className="text-2xl font-bold text-white">{collection?.name}</h1>
+        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+          <a
+            href="/collections"
+            // target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center hover:text-blue-400 text-gray-400"
+            title="View Collections Documentation"
+          >
+            Collections {'>> '}
+          </a>{' '}
+          <div className="font-bold">{collection?.name}</div>
+        </h1>
+
         <div className="flex items-center space-x-2">
+          <Button
+            onClick={() => setIsAssignDocumentDialogOpen(true)}
+            className={`pl-4 pr-4 py-2 px-4`}
+            color="filled"
+            shape="rounded"
+          >
+            + Add Files
+          </Button>
+
           <Button
             onClick={() => {
               setIsCollectionDialogOpen(true);
             }}
             className={`pl-4 pr-4 py-2 px-4`}
-            color="filled"
+            // color="disabled"
+            color="light"
             shape="rounded"
             style={{ zIndex: 20 }}
           >
             <Settings className="mr-2 h-4 w-4 mt-1" />
-            Manage
+            Overview
           </Button>
+
+          <DeleteButton
+            collectionId={currentCollectionId}
+            isCollection={true}
+            onSuccess={() => router.push('/collections')}
+            showToast={toast}
+            selectedDocumentIds={[]}
+            onDelete={() => {}}
+          />
         </div>
       </div>
     );
@@ -798,7 +839,7 @@ const CollectionIdPage: React.FC = () => {
             <TabsTrigger value="users" className="flex items-center">
               Users
             </TabsTrigger>
-            <TabsTrigger value="entities" className="flex items-center">
+            {/* <TabsTrigger value="entities" className="flex items-center">
               Entities
             </TabsTrigger>
             <TabsTrigger value="relationships" className="flex items-center">
@@ -809,7 +850,7 @@ const CollectionIdPage: React.FC = () => {
             </TabsTrigger>
             <TabsTrigger value="viewEntities" className="flex items-center">
               Explore
-            </TabsTrigger>
+            </TabsTrigger> */}
           </TabsList>
           <TabsContent value="documents" className="flex-1 overflow-auto">
             <div className="flex justify-between items-center mb-4">
@@ -844,7 +885,26 @@ const CollectionIdPage: React.FC = () => {
             />
           </TabsContent>
           <TabsContent value="users" className="flex-1 overflow-auto">
-            <Table
+            <Alert
+              style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+            >
+              <AlertTriangleIcon
+                style={{ width: '16px', height: '16px', color: '#FFC107' }}
+                className="mt-0.5"
+              />
+              <span style={{ fontWeight: 'bold' }}>
+                User management is unavailable for Free and Starter tier.
+                <a
+                  href="mailto:support@sciphi.ai"
+                  className="text-indigo-400"
+                  style={{ textDecoration: 'underline', marginLeft: '4px' }}
+                >
+                  Contact support
+                </a>{' '}
+                for more information.
+              </span>
+            </Alert>
+            {/* <Table
               data={users}
               columns={userColumns}
               itemsPerPage={itemsPerPage}
@@ -859,7 +919,7 @@ const CollectionIdPage: React.FC = () => {
               onPageChange={handlePageChange}
               loading={loading}
               showPagination={true}
-            />
+            /> */}
           </TabsContent>
           <TabsContent value="entities" className="flex-1 overflow-auto">
             <Table
@@ -931,6 +991,13 @@ const CollectionIdPage: React.FC = () => {
           </TabsContent>
         </Tabs>
       </main>
+      <AssignDocumentToCollectionDialog
+        open={isAssignDocumentDialogOpen}
+        onClose={() => setIsAssignDocumentDialogOpen(false)}
+        collection_id={currentCollectionId}
+        onAssignSuccess={handleAssignSuccess}
+      />
+
       <DocumentInfoDialog
         id={selectedDocumentId}
         open={isDocumentInfoDialogOpen}

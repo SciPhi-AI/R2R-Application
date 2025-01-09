@@ -69,7 +69,11 @@ const NavItems: React.FC<NavItemsProps> = ({
           <NavItem
             key={item.path}
             href={item.path}
-            isActive={pathname === item.path}
+            isActive={
+              item.path != '/'
+                ? pathname != null && pathname.includes(item.path)
+                : pathname === item.path
+            }
           >
             {item.label}
           </NavItem>

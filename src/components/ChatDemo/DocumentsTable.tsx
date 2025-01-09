@@ -186,11 +186,11 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
           onUpdateSuccess={() => onRefresh()}
           showToast={toast}
         /> */}
-        <ExtractButtonContainer
+        {/* <ExtractButtonContainer
           id={doc.id}
           ingestionStatus={doc.ingestionStatus}
           showToast={toast}
-        />
+        /> */}
         <DownloadFileContainer
           id={doc.id}
           fileName={doc.title ? doc.title : ''}
