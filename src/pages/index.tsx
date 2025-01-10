@@ -1,4 +1,4 @@
-import { Clipboard, Check } from 'lucide-react';
+import { Clipboard, Check, ExternalLink } from 'lucide-react';
 import { FileText, Boxes, MessageCircle, ScanSearch } from 'lucide-react';
 import { PlusCircle, Trash2 } from 'lucide-react';
 import { Rocket, Star } from 'lucide-react';
@@ -505,6 +505,15 @@ const HomePage = () => {
                       <CardHeader className="flex flex-row items-center space-x-2">
                         <CardTitle className="text-muted-foreground">
                           Monthly Requests
+                          <a
+                            href="https://r2r-docs.sciphi.ai/documentation/limits"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center hover:text-blue-400 text-gray-400 pl-1.5"
+                            title="View Collections Documentation"
+                          >
+                            <ExternalLink size={18} />
+                          </a>
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="flex flex-col justify-end flex-grow">
