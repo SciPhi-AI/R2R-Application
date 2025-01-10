@@ -33,7 +33,7 @@ const GoogleOAuthCallback: React.FC = () => {
     if (!code || !state) {
       console.error('Missing code or state in query params.');
       // Optionally redirect the user or show an error
-      router.push('/auth/error'); // Adjust the error page route if necessary
+      // router.push('/auth/error'); // Adjust the error page route if necessary
       return;
     }
 
