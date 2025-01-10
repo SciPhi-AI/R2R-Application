@@ -424,6 +424,12 @@ export interface UserContextProps {
 
   // Client
   client: r2rClient | null;
+  setAuthState: React.Dispatch<React.SetStateAction<AuthState>>;
+  completeOAuthLogin: (
+    instanceUrl: string,
+    accessToken: string,
+    refreshToken: string
+  ) => void;
   getClient: () => r2rClient | null;
 
   // View Mode
@@ -438,7 +444,11 @@ export interface UserContextProps {
     password: string,
     instanceUrl: string
   ) => Promise<{ success: boolean; userRole: 'admin' | 'user' }>;
-
+  loginWithTokens: (
+    accessToken: string,
+    refreshToken: string,
+    instanceUrl: string
+  ) => Promise<{ success: boolean; userRole: 'admin' | 'user' }>;
   logout: () => Promise<void>;
 
   unsetCredentials: () => Promise<void>;

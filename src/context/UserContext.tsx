@@ -31,6 +31,14 @@ const UserContext = createContext<UserContextProps>({
   isAuthenticated: false,
   login: async () => ({ success: false, userRole: 'user' }),
   logout: async () => {},
+  loginWithTokens: async (
+    accessToken: string,
+    refreshToken: string,
+    instanceUrl: string
+  ) => ({
+    success: false,
+    userRole: 'user',
+  }),
   unsetCredentials: async () => {},
   register: async () => {},
   verifyEmail: async () => {},
@@ -40,6 +48,8 @@ const UserContext = createContext<UserContextProps>({
     userRole: null,
     userId: null,
   },
+  setAuthState: () => {},
+  completeOAuthLogin: () => {},
   requestPasswordReset: async (email: string, instanceUrl: string) => {},
   getClient: () => null,
   client: null,
@@ -104,6 +114,70 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   const [lastLoginTime, setLastLoginTime] = useState<number | null>(null);
+
+  const loginWithTokens = useCallback(
+    async (
+      accessToken: string,
+      refreshToken: string,
+      instanceUrl: string
+    ): Promise<{ success: boolean; userRole: 'admin' | 'user' }> => {
+      const newClient = new r2rClient(instanceUrl);
+      try {
+        // const tokens = await newClient.users.login({
+        //   email: email,
+        //   password: password,
+        // });
+
+        console.log('accessToken = ', accessToken);
+        console.log('refreshToken = ', refreshToken);
+
+        localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('refreshToken', refreshToken);
+
+        newClient.setTokens(accessToken, refreshToken);
+
+        setClient(newClient);
+
+        const userInfo = await newClient.users.me();
+
+        let userRole: 'admin' | 'user' = 'user';
+        try {
+          // await newClient.system.settings();
+          userRole = 'admin';
+        } catch (error) {
+          if (
+            error instanceof Error &&
+            'status' in error &&
+            error.status === 403
+          ) {
+          } else {
+            console.error('Unexpected error when checking user role:', error);
+          }
+        }
+        const newAuthState: AuthState = {
+          isAuthenticated: true,
+          email: userInfo.results.email,
+          userRole,
+          userId: userInfo.results.id,
+          metadata: userInfo.results.metadata,
+        };
+        setAuthState(newAuthState);
+        localStorage.setItem('authState', JSON.stringify(newAuthState));
+
+        setLastLoginTime(Date.now());
+
+        const newPipeline: Pipeline = { deploymentUrl: instanceUrl };
+        setPipeline(newPipeline);
+        localStorage.setItem('pipeline', JSON.stringify(newPipeline));
+
+        return { success: true, userRole };
+      } catch (error) {
+        console.error('Login failed:', error);
+        throw error;
+      }
+    },
+    []
+  );
 
   const login = useCallback(
     async (
@@ -256,6 +330,33 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
     },
     []
   );
+  const completeOAuthLogin = useCallback(
+    (instanceUrl: string, accessToken: string, refreshToken: string) => {
+      const newClient = new r2rClient(instanceUrl);
+      newClient.setTokens(accessToken, refreshToken);
+
+      localStorage.setItem('accessToken', accessToken);
+      localStorage.setItem('refreshToken', refreshToken);
+
+      setClient(newClient);
+
+      // Possibly fetch "me" here, store user data in authState, etc.
+      // Or do it in the page itself, then call setAuthState.
+      setAuthState({
+        isAuthenticated: true,
+        email: 'test@gmail.com', // userEmail,   // from the "me" response or your callback
+        userRole: 'user', // or 'admin', as you do in your normal login
+        userId: 'XXX', /// userId,
+      });
+      // store pipeline if needed
+      setPipeline({ deploymentUrl: instanceUrl });
+      localStorage.setItem(
+        'pipeline',
+        JSON.stringify({ deploymentUrl: instanceUrl })
+      );
+    },
+    []
+  );
 
   const refreshTokenPeriodically = useCallback(async () => {
     type ActualTokenResponse = {
@@ -375,12 +476,15 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
       selectedModel,
       setSelectedModel,
       isAuthenticated: authState.isAuthenticated,
+      setAuthState,
       authState,
       login,
+      loginWithTokens,
       logout,
       unsetCredentials,
       register,
       requestPasswordReset,
+      completeOAuthLogin,
       verifyEmail,
       getClient,
       client,
@@ -391,15 +495,18 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
     [
       pipeline,
       selectedModel,
+      setAuthState,
       authState,
       client,
       viewMode,
       isSuperUser,
       login,
+      loginWithTokens,
       logout,
       unsetCredentials,
       register,
       requestPasswordReset,
+      completeOAuthLogin,
       getClient,
       verifyEmail,
     ]
