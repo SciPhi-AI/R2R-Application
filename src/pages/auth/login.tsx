@@ -257,7 +257,7 @@ const LoginPage: React.FC = () => {
               <span className="flex-grow text-center">Sign in with Google</span>
             </Button>
 
-            {/* <Button
+            <Button
               onClick={() => handleOAuthSignIn('github')}
               color="light"
               className="w-full my-2 relative"
@@ -272,7 +272,7 @@ const LoginPage: React.FC = () => {
               </div>
               <span className="flex-grow text-center">Sign in with GitHub</span>
             </Button>
- */}
+
             {error && <div className="text-red-500 text-sm mt-4">{error}</div>}
           </div>
           <div className="text-center">
