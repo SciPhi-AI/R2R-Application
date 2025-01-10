@@ -74,16 +74,16 @@ const SearchPage: React.FC = () => {
       'Vector search is a search method that uses vectors to represent documents and queries.'
     );
     initializeSwitch(
-      'hybridSearch',
-      false,
-      'Hybrid Search',
-      'Hybrid search combines multiple search methods to provide more accurate and relevant search results.'
-    );
-    initializeSwitch(
       'knowledgeGraphSearch',
       true,
       'Graph Search',
       'Please construct a Knowledge Graph to use this feature.'
+    );
+    initializeSwitch(
+      'hybridSearch',
+      false,
+      'Hybrid Search',
+      'Hybrid search combines multiple search methods to provide more accurate and relevant search results.'
     );
   }, [initializeSwitch]);
 

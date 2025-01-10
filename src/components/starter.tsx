@@ -36,7 +36,6 @@ const notifications = [
 type CardProps = React.ComponentProps<typeof Card>;
 export function Starter({ className, ...props }: CardProps) {
   const { isAuthenticated, authState, getClient } = useUserContext();
-  console.log('authState = ', authState);
   return (
     <Card
       className={cn('w-[300px] h-[500px] flex flex-col', className)}

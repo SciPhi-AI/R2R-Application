@@ -84,7 +84,6 @@ export const Result: FC<{
     string | null
   >(null);
   const [initialPage, setInitialPage] = useState<number>(1);
-
   useEffect(() => {
     abortCurrentRequest();
     setMessages([]);
@@ -159,7 +158,6 @@ export const Result: FC<{
 
     setIsProcessingQuery(true);
     setIsStreaming(true);
-    setIsSearching(true);
     setError(null);
 
     const newUserMessage: Message = {
@@ -240,7 +238,18 @@ export const Result: FC<{
         //     ? [selectedCollectionIds].flat()
         //     : undefined,
       };
-
+      if (selectedCollectionIds.length > 0) {
+        if (Object.keys(searchFilters).length > 0) {
+          searchFilters = {
+            $and: [
+              searchFilters,
+              { collection_id: { $in: selectedCollectionIds } },
+            ],
+          };
+        } else {
+          searchFilters = { collection_id: { $in: selectedCollectionIds } };
+        }
+      }
       const graphSearchSettings: GraphSearchSettings = {
         enabled: switches.knowledgeGraphSearch?.checked ?? true,
       };
@@ -253,6 +262,7 @@ export const Result: FC<{
         chunkSettings: vectorSearchSettings,
         graphSettings: graphSearchSettings,
       };
+      setIsSearching(true);
 
       const streamResponse =
         mode === 'rag_agent'
@@ -310,15 +320,19 @@ export const Result: FC<{
             searchPerformed
           );
           setIsSearching(false);
+          // sleep 500ms to allow the user to see the loading spinner and for state to update
         }
 
         // Handle LLM response
         if (buffer.includes(LLM_START_TOKEN)) {
+          setIsSearching(false);
           inLLMResponse = true;
           buffer = buffer.split(LLM_START_TOKEN)[1] || ''; // strip pre-stream content
         }
 
         if (inLLMResponse) {
+          setIsSearching(false);
+
           const endTokenIndex = buffer.indexOf(LLM_END_TOKEN);
           let chunk = '';
 
@@ -366,7 +380,6 @@ export const Result: FC<{
     } catch (err: unknown) {
       if (err instanceof Error) {
         if (err.name === 'AbortError') {
-          console.log('Request was aborted');
         } else {
           console.error('Error in streaming:', err.message);
           setError(err.message);
@@ -376,6 +389,7 @@ export const Result: FC<{
         setError('An unknown error occurred');
       }
     } finally {
+      setIsSearching(false);
       setIsStreaming(false);
       updateLastMessage(
         fullContent,
@@ -387,6 +401,7 @@ export const Result: FC<{
       setIsProcessingQuery(false);
       abortControllerRef.current = null;
     }
+    setIsStreaming(false);
   };
 
   useEffect(() => {
@@ -428,9 +443,7 @@ export const Result: FC<{
               <Answer
                 message={message}
                 isStreaming={message.isStreaming || false}
-                isSearching={
-                  index === messages.length - 1 ? isSearching : false
-                }
+                isSearching={isSearching}
                 // mode={mode}
                 // onOpenPdfPreview={handleOpenPdfPreview}
               />

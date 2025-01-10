@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 
 import SingleSwitch from '@/components/ChatDemo/SingleSwitch';
@@ -133,6 +133,15 @@ const Sidebar: React.FC<SidebarProps> = ({
 
           <h3 className="text-lg font-semibold text-accent-base mt-2">
             Search Settings
+            <a
+              href="https://r2r-docs.sciphi.ai/api-and-sdks/retrieval/retrieval"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center hover:text-blue-400 text-gray-400 pl-2 -mt-2"
+              title="View Retrieval Documentation"
+            >
+              <ExternalLink size={16} />
+            </a>
           </h3>
 
           {/* Switches */}
@@ -212,21 +221,21 @@ const Sidebar: React.FC<SidebarProps> = ({
                       label="Include Metadatas"
                     /> */}
 
-                    <Label htmlFor="probes">Probes</Label>
+                    {/* <Label htmlFor="probes">Probes</Label>
                     <Input
                       id="probes"
                       type="number"
                       value={probes}
                       onChange={(e) => setProbes(Number(e.target.value))}
-                    />
+                    /> */}
 
-                    <Label htmlFor="efSearch">EF Search</Label>
+                    {/* <Label htmlFor="efSearch">EF Search</Label>
                     <Input
                       id="efSearch"
                       type="number"
                       value={efSearch}
                       onChange={(e) => setEfSearch(Number(e.target.value))}
-                    />
+                    /> */}
                   </div>
                 </AccordionContent>
               </AccordionItem>
@@ -346,8 +355,8 @@ const Sidebar: React.FC<SidebarProps> = ({
                   </AccordionTrigger>
                   <AccordionContent className="mx-1">
                     <div className="flex flex-col gap-2">
-                      <Label htmlFor="model">Model</Label>
-                      <ModelSelector id="sidebar-model-selector" />
+                      {/* <Label htmlFor="model">Model</Label>
+                      <ModelSelector id="sidebar-model-selector" /> */}
                       <Label htmlFor="temperature">Temperature</Label>
                       <Input
                         id="temperature"
@@ -368,12 +377,15 @@ const Sidebar: React.FC<SidebarProps> = ({
                         max={1}
                         step={0.1}
                       />
-                      <Label htmlFor="topK">Top K</Label>f
+                      <Label htmlFor="topK">Top K</Label>
                       <Input
                         id="topK"
                         type="number"
                         value={topK}
                         onChange={(e) => setTopK(Number(e.target.value))}
+                        min={0}
+                        max={1}
+                        step={0.1}
                       />
                       <Label htmlFor="maxTokens">Max Tokens to Sample</Label>
                       <Input

@@ -58,7 +58,7 @@ const SourceInfo: React.FC<{
 }> = ({ isSearching, sourcesCount }) => (
   <div className="flex items-center justify-between w-full">
     <Logo width={50} height={50} disableLink={true} />
-    <span className="text-sm font-normal text-white">
+    <span className="text-sm font-normal text-white" key={String(isSearching)}>
       {isSearching ? (
         <span className="searching-animation">Searching over sources...</span>
       ) : sourcesCount !== null && sourcesCount > 0 ? (
@@ -273,9 +273,14 @@ export const Answer: FC<{
         onValueChange={(value) => setIsOpen(value === 'answer')}
       >
         <AccordionItem value="answer">
-          <AccordionTrigger className="py-2 text-lg font-bold text-zinc-200 hover:no-underline text-white">
-            <SourceInfo isSearching={isSearching} sourcesCount={sourcesCount} />
-          </AccordionTrigger>
+          {!isSearching && sourcesCount !== null && sourcesCount > 0 && (
+            <AccordionTrigger className="py-2 text-lg font-bold text-zinc-200 hover:no-underline text-white">
+              <SourceInfo
+                isSearching={isSearching}
+                sourcesCount={sourcesCount}
+              />
+            </AccordionTrigger>
+          )}
           <AccordionContent>
             {!isSearching && sourcesCount !== null && sourcesCount > 0 && (
               <SearchResults
