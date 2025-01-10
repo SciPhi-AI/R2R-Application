@@ -83,7 +83,7 @@ const GoogleOAuthCallback: React.FC = () => {
         // });
 
         // Redirect to home or dashboard
-        router.push('/');
+        // router.push('/');
       } catch (err) {
         console.error('Error during OAuth handling:', err);
         // router.push('/auth/error'); // Adjust the error page route if necessary

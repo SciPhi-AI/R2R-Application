@@ -139,6 +139,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
         setClient(newClient);
 
         const userInfo = await newClient.users.me();
+        console.log('userInfo = ', userInfo);
 
         let userRole: 'admin' | 'user' = 'user';
         try {
@@ -161,6 +162,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
           userId: userInfo.results.id,
           metadata: userInfo.results.metadata,
         };
+        console.log('newAuthState = ', newAuthState);
+
         setAuthState(newAuthState);
         localStorage.setItem('authState', JSON.stringify(newAuthState));
 
