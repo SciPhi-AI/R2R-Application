@@ -24,6 +24,8 @@ function MyAppContent({ Component, pageProps }: AppProps) {
       '/auth/signup',
       '/auth/verify-email',
       '/auth/reset-password',
+      '/auth/oauth/google',
+      '/auth/oauth/*',
     ];
     const userRoutes = [
       // '',

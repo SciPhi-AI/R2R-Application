@@ -217,57 +217,55 @@ const Index: React.FC = () => {
       {
         target: '.my-other-step',
         content: 'This another awesome feature!',
-      }
-    ]
+      },
+    ],
   };
   const { steps } = state;
 
-
   return (
     <>
-    <Layout pageTitle="Documents" includeFooter={false}>
-      <main className="w-full flex flex-col container h-screen-[calc(100%-4rem)]">
-        <div className="relative flex-grow bg-zinc-900 mt-[4rem] sm:mt-[4rem] pl-10">
-          <div className="mx-auto max-w-6xl mb-12 p-4 h-full">
-            <h1 className="text-2xl font-bold text-white flex items-center gap-2 mb-4">
-              Documents
-              <a
-                href="https://r2r-docs.sciphi.ai/api-and-sdks/collections/collections"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center hover:text-blue-400 text-gray-400"
-                title="View Collections Documentation"
-              >
-                <ExternalLink size={18} />
-              </a>
-            </h1>
+      <Layout pageTitle="Documents" includeFooter={false}>
+        <main className="w-full flex flex-col container h-screen-[calc(100%-4rem)]">
+          <div className="relative flex-grow bg-zinc-900 mt-[4rem] sm:mt-[4rem] pl-10">
+            <div className="mx-auto max-w-6xl mb-12 p-4 h-full">
+              <h1 className="text-2xl font-bold text-white flex items-center gap-2 mb-4">
+                Documents
+                <a
+                  href="https://r2r-docs.sciphi.ai/api-and-sdks/collections/collections"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center hover:text-blue-400 text-gray-400"
+                  title="View Collections Documentation"
+                >
+                  <ExternalLink size={18} />
+                </a>
+              </h1>
 
-            <DocumentsTable
-              documents={documents}
-              loading={loading}
-              onRefresh={refetchDocuments}
-              pendingDocuments={pendingDocuments}
-              setPendingDocuments={setPendingDocuments}
-              onSelectAll={handleSelectAll}
-              onSelectItem={handleSelectItem}
-              selectedItems={selectedDocumentIds}
-              visibleColumns={visibleColumns}
-              onToggleColumn={handleToggleColumn}
-              totalEntries={totalEntries}
-              currentPage={currentPage}
-              onPageChange={handlePageChange}
-              itemsPerPage={ITEMS_PER_PAGE}
-              filters={filters}
-              onFiltersChange={handleFiltersChange}
-              searchQuery={searchQuery}
-              onSearchQueryChange={handleSearchQueryChange}
-            />
+              <DocumentsTable
+                documents={documents}
+                loading={loading}
+                onRefresh={refetchDocuments}
+                pendingDocuments={pendingDocuments}
+                setPendingDocuments={setPendingDocuments}
+                onSelectAll={handleSelectAll}
+                onSelectItem={handleSelectItem}
+                selectedItems={selectedDocumentIds}
+                visibleColumns={visibleColumns}
+                onToggleColumn={handleToggleColumn}
+                totalEntries={totalEntries}
+                currentPage={currentPage}
+                onPageChange={handlePageChange}
+                itemsPerPage={ITEMS_PER_PAGE}
+                filters={filters}
+                onFiltersChange={handleFiltersChange}
+                searchQuery={searchQuery}
+                onSearchQueryChange={handleSearchQueryChange}
+              />
+            </div>
           </div>
-        </div>
-      </main>
-    </Layout>
-</>
-
+        </main>
+      </Layout>
+    </>
   );
 };
 

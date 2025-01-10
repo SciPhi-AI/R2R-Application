@@ -1,6 +1,7 @@
 import { Eye, EyeOff } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
+import { r2rClient } from 'r2r-js';
 import React, { useState, useEffect, useCallback } from 'react';
 
 import Layout from '@/components/Layout';
@@ -97,7 +98,41 @@ const LoginPage: React.FC = () => {
     setShowPassword(!showPassword);
   };
 
-  const handleOAuthSignIn = async (provider: 'google' | 'github') => {};
+  // 1) Remove disabled = true
+  // 2) Perform client.users.oauthGoogleAuthorize()
+  // 3) redirect user
+  const handleOAuthSignIn = useCallback(
+    async (provider: 'google' | 'github') => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const client = new r2rClient(DEFAULT_DEPLOYMENT_URL);
+
+        let redirectResult;
+        if (provider === 'google') {
+          // This calls your JS SDK’s users.oauthGoogleAuthorize() -> GET /users/oauth/google/authorize
+          redirectResult = await client.users.oauthGoogleAuthorize();
+          console.log('redirectResult = ', redirectResult);
+        } else {
+          redirectResult = await client.users.oauthGithubAuthorize();
+        }
+        // The returned shape: { redirect_url: 'https://accounts.google.com/...' }
+        // @ts-ignore
+        if (redirectResult?.redirectUrl) {
+          // @ts-ignore
+          window.location.href = redirectResult.redirectUrl;
+        } else {
+          // Fallback
+          throw new Error('No redirect URL returned by server');
+        }
+      } catch (err) {
+        setError(String(err));
+        setIsLoading(false);
+      }
+    },
+    []
+  );
 
   return (
     <SignupSplitLayout>
@@ -207,9 +242,9 @@ const LoginPage: React.FC = () => {
             {/* OAuth buttons disabled for now */}
             <Button
               onClick={() => handleOAuthSignIn('google')}
-              color="filled"
+              color="light"
               className="w-full my-2 relative"
-              disabled={true}
+              // disabled={true}
             >
               <div className="absolute left-2 top-1/2 transform -translate-y-1/2">
                 <Image
@@ -222,11 +257,10 @@ const LoginPage: React.FC = () => {
               <span className="flex-grow text-center">Sign in with Google</span>
             </Button>
 
-            <Button
+            {/* <Button
               onClick={() => handleOAuthSignIn('github')}
-              color="filled"
+              color="light"
               className="w-full my-2 relative"
-              disabled={true}
             >
               <div className="absolute left-2 top-1/2 transform -translate-y-1/2">
                 <Image
@@ -238,7 +272,7 @@ const LoginPage: React.FC = () => {
               </div>
               <span className="flex-grow text-center">Sign in with GitHub</span>
             </Button>
-
+ */}
             {error && <div className="text-red-500 text-sm mt-4">{error}</div>}
           </div>
           <div className="text-center">
