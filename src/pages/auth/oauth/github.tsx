@@ -84,7 +84,7 @@ const GoogleOAuthCallback: React.FC = () => {
 
         // Redirect to home or dashboard
         await new Promise((resolve) => setTimeout(resolve, 1500));
-        router.push('/');
+        // router.push('/');
 
       } catch (err) {
         console.error('Error during OAuth handling:', err);
