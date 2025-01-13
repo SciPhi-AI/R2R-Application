@@ -11,10 +11,11 @@ const SearchPage: React.FC = () => {
 
   return (
       <Layout includeFooter={false}>
-        <div className="relative text-center">
+        <div className="relative text-center pl-4 pr-4 pt-2">
           <Alert className="relative inline-block">
             <AlertTitle className="text-lg mt-8 text-zinc-300">
-              Cloud application coming here soon.
+              <AlertTriangle size={20} className="inline-block -mt-1 mr-1 text-accent-base" />
+              SciPhi's graph cloud application is coming here soon!
               <br />
               In the meantime, graphs are available through the{' '}
               <Link
@@ -22,7 +23,7 @@ const SearchPage: React.FC = () => {
                 className="text-accent-base"
                 target="_blank"
               >
-                R2R API
+                R2R API.
 
                 {/* <ExternalLink size={18}  /> */}
                 </Link>
