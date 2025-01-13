@@ -21,7 +21,7 @@ export const DefaultQueries: FC<DefaultQueriesProps> = ({ setQuery, mode }) => {
     },
     {
       query: 'How are these documents interrelated?',
-      icon: <Earth className="h-6 w-6 text-green-400" />,
+      icon: <Earth className="h-6 w-6 text-accent-base" />,
     },
   ];
 
@@ -40,7 +40,7 @@ export const DefaultQueries: FC<DefaultQueriesProps> = ({ setQuery, mode }) => {
     },
     {
       query: 'What is the coolest thing you can do?',
-      icon: <Earth className="h-6 w-6 text-green-400" />,
+      icon: <Earth className="h-6 w-6 text-accent-base" />,
     },
   ];
 

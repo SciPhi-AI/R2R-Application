@@ -182,7 +182,7 @@ const LoginPage: React.FC = () => {
                   </label>
                   <span
                     onClick={() => router.push('/auth/signup')}
-                    className="text-sm font-semibold text-indigo-400 cursor-pointer hover:underline"
+                    className="text-sm font-semibold text-accent-base cursor-pointer hover:underline"
                   >
                     Sign up with Email
                   </span>
@@ -278,7 +278,7 @@ const LoginPage: React.FC = () => {
           <div className="text-center">
             <span
               onClick={() => router.push('/auth/reset-password')}
-              className="text-sm text-indigo-400 cursor-pointer hover:underline italic"
+              className="text-sm text-accent-base cursor-pointer hover:underline italic"
             >
               Forgot Password
             </span>

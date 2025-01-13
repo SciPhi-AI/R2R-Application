@@ -19,7 +19,7 @@ const SearchPage: React.FC = () => {
               In the meantime, graphs are available through the{' '}
               <Link
                 href="https://r2r-docs.sciphi.ai/api-and-sdks/graphs/graphs"
-                className="text-green-400"
+                className="text-accent-base"
                 target="_blank"
               >
                 R2R API

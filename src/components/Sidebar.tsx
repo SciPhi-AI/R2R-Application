@@ -140,7 +140,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               className="inline-flex items-center hover:text-blue-400 text-gray-400 pl-2 -mt-2"
               title="View Retrieval Documentation"
             >
-              <ExternalLink size={16} className="text-green-400" />
+              <ExternalLink size={16} className="text-accent-base -mt-1" />
             </a>
           </h3>
 

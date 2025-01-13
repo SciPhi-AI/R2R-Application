@@ -247,7 +247,7 @@ const Index: React.FC = () => {
                   className="inline-flex items-center hover:text-blue-400 text-gray-400"
                   title="View Collections Documentation"
                 >
-                  <ExternalLink size={18}  className="text-green-400" />
+                  <ExternalLink size={18}  className="text-accent-base -mt-0.5" />
                 </a>
               </h1>
 

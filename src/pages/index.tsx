@@ -332,12 +332,12 @@ const HomePage = () => {
               // className="relative bg-indigo-700 text-white flex items-center justify-between"
             >
               <div className="flex items-center">
-                <Rocket className="h-4 w-4 mr-2  -mt-1  text-indigo-400" />
+                <Rocket className="h-4 w-4 mr-2  -mt-1  text-accent-base" />
                 <AlertTitle>
                   SciPhi Cloud is powered entirely by the open source R2R
                   library -{' '}
                   <Link
-                    className="text-indigo-400"
+                    className="text-accent-base"
                     href="https://github.com/SciPhi-AI/R2R"
                   >
                     give us a <Star className="inline w-4 h-4 " />
@@ -509,7 +509,7 @@ const HomePage = () => {
                             href="https://r2r-docs.sciphi.ai/documentation/limits"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center hover:text-blue-400 text-white pl-1.5"
+                            className="inline-flex items-center hover:text-blue-400 text-accent-base pl-1.5"
                             title="View Collections Documentation"
                           >
                             <ExternalLink size={18} />
