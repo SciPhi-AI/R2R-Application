@@ -509,7 +509,7 @@ const HomePage = () => {
                             href="https://r2r-docs.sciphi.ai/documentation/limits"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center hover:text-blue-400 text-gray-400 pl-1.5"
+                            className="inline-flex items-center hover:text-blue-400 text-white pl-1.5"
                             title="View Collections Documentation"
                           >
                             <ExternalLink size={18} />

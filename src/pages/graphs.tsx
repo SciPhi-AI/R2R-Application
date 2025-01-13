@@ -1,4 +1,6 @@
-import { AlertTriangle } from 'lucide-react';
+
+import Link from 'next/link';
+import { ExternalLink, AlertTriangle } from 'lucide-react';
 
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import React, { useState, useEffect, useRef } from 'react';
@@ -15,13 +17,16 @@ const SearchPage: React.FC = () => {
               Cloud application coming here soon.
               <br />
               In the meantime, graphs are available through the{' '}
-              <a
+              <Link
                 href="https://r2r-docs.sciphi.ai/api-and-sdks/graphs/graphs"
-                className="text-indigo-400"
+                className="text-green-400"
                 target="_blank"
               >
                 R2R API
-              </a>
+
+                {/* <ExternalLink size={18}  /> */}
+                </Link>
+
             </AlertTitle>
           </Alert>
         </div>
