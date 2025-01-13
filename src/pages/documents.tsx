@@ -11,7 +11,7 @@ const PAGE_SIZE = 1000;
 const ITEMS_PER_PAGE = 10;
 
 const Index: React.FC = () => {
-  const { pipeline, getClient } = useUserContext();
+  const { pipeline, getClient, authState } = useUserContext();
   const [documents, setDocuments] = useState<DocumentResponse[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [totalEntries, setTotalEntries] = useState<number>(0);
@@ -65,6 +65,7 @@ const Index: React.FC = () => {
         setTotalEntries(totalCount);
 
         allDocs = firstBatch.results;
+        console.log('allDocs = ', allDocs);
         setDocuments(allDocs);
 
         // End loading spinner after first batch
@@ -116,6 +117,8 @@ const Index: React.FC = () => {
 
   /*** Monitor Documents for Pending Status ***/
   useEffect(() => {
+    if (!authState.isAuthenticated) return;
+
     // Identify documents that are not SUCCESS, ENRICHED, or FAILED
     const pending = documents.filter(
       (doc) =>
@@ -128,8 +131,15 @@ const Index: React.FC = () => {
     // 2) Poll if we still have pending documents
     if (pending.length > 0) {
       const pollInterval = setInterval(() => {
+        // If user logs out in the meantime, the next call to fetchAllDocuments would 401 again
+        // so double-check isAuthenticated here as well:
+        if (!authState.isAuthenticated) return;
         fetchAllDocuments();
       }, 5000);
+
+      // const pollInterval = setInterval(() => {
+      //   fetchAllDocuments();
+      // }, 5000);
 
       return () => clearInterval(pollInterval);
     }
