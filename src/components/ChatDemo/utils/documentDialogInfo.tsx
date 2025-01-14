@@ -335,7 +335,7 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
                     />
                   </div>
                 )}
-                {documentOverview &&
+                {/* {documentOverview &&
                   documentOverview.documentType &&
                   ['pdf', 'application/pdf'].includes(
                     documentOverview.documentType.toLowerCase()
@@ -348,7 +348,7 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
                         Preview PDF
                       </Button>
                     </div>
-                  )}
+                  )} */}
                 <Tabs
                   value={activeTab}
                   onValueChange={setActiveTab}
