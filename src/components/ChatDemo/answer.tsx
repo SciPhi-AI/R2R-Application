@@ -43,7 +43,7 @@ const parseVectorSearchSources = (sources: string | object): Source[] => {
   if (typeof sources === 'string') {
     try {
       const cleanedSources = sources;
-      return JSON.parse(cleanedSources);
+       JSON.parse(cleanedSources);
     } catch (error) {
       console.error('Failed to parse sources:', error);
       return [];
@@ -91,7 +91,13 @@ export const Answer: FC<{
       }
 
       if (message.sources.kg) {
-        const kgLocalResult: KGSearchResult[] = JSON.parse(message.sources.kg);
+        let kgLocalResult: KGSearchResult[] = [];
+        try {
+          kgLocalResult = JSON.parse(message.sources.kg);
+        }
+        catch (error) {
+          console.error('Failed to parse kg sources:', error);
+        }
         const entitiesArray = kgLocalResult.filter(
           (item: any) => item.result_type === 'entity'
         );
