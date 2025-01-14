@@ -16,6 +16,20 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 
+// export interface Column<T> {
+//   key: string;
+//   label: string;
+//   sortable?: boolean;
+//   filterable?: boolean;
+//   filterType?: 'text' | 'select' | 'multiselect';
+//   filterOptions?: string[];
+//   renderCell?: (item: T) => React.ReactNode;
+//   truncate?: boolean;
+//   truncatedSubstring?: boolean;
+//   copyable?: boolean;
+//   selected?: boolean;
+// }
+
 export interface Column<T> {
   key: string;
   label: string;
@@ -28,6 +42,9 @@ export interface Column<T> {
   truncatedSubstring?: boolean;
   copyable?: boolean;
   selected?: boolean;
+
+  // NEW: optional tooltip content
+  headerTooltip?: string | React.ReactNode; 
 }
 
 export interface TableProps<T extends object> {
@@ -306,14 +323,34 @@ function Table<T extends object>({
                   className="px-4 py-2 text-white text-center overflow-hidden"
                 >
                   <div className="flex items-center justify-center">
-                    <span className="mr-2 truncate">{col.label}</span>
+                    <span className="mr-2 truncate">
+
+                      {col.headerTooltip ? (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <span className="mr-2 truncate">{col.label}</span>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                {col.headerTooltip}
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        ) : (
+                          // If no tooltip, just render label
+                          <span className="mr-2 truncate">
+                            {col.label}
+                          </span>
+                        )}
+                    </span>
+             
                     {col.sortable && (
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger>
                             <button
                               onClick={() => handleSort(col.key)}
-                              className="p-1"
+                              className="p-1 mt-0.5 -ml-3"
                             >
                               {sort.key === col.key && sort.order === 'asc' ? (
                                 <ChevronUpSquare className="h-4 w-4 hover:bg-zinc-500 cursor-pointer" />
@@ -336,7 +373,7 @@ function Table<T extends object>({
                     {col.filterable && (
                       <Popover>
                         <PopoverTrigger asChild>
-                          <Filter className="h-4 w-4 hover:bg-zinc-500 cursor-pointer ml-2" />
+                          <Filter className="h-4 w-4 hover:bg-zinc-500 cursor-pointer  -ml-2" />
                         </PopoverTrigger>
                         <PopoverContent className="w-80 z-50">
                           <div className="grid gap-4">

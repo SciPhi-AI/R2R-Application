@@ -146,19 +146,20 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
 
   return (
     <>
-      <Popover>
-        <PopoverTrigger asChild>
+      {/* <Popover> */}
+        {/* <PopoverTrigger asChild> */}
           <Button
             className="pl-2 pr-2 py-2 px-4"
             color="filled"
             shape="rounded"
             disabled={isUploading}
             style={{ zIndex: 20, minWidth: '100px' }}
+            onClick={() => setIsUploadDialogOpen(true)}
           >
             <Plus className="mr-2 h-4 w-4 mt-1" />
             {isUploading ? 'Uploading...' : 'New'}
           </Button>
-        </PopoverTrigger>
+        {/* </PopoverTrigger>
         <PopoverContent align="start" className="w-[150px] p-1">
           <div className="flex flex-col gap-1">
             <Button
@@ -169,17 +170,9 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
               <FileUp className="mr-2 h-4 w-4" />
               <span>File Upload</span>
             </Button>
-            {/* <Button
-              onClick={() => setIsCreateDialogOpen(true)}
-              color="secondary"
-              className="flex justify-between items-center"
-            >
-              <PencilLine className="mr-2 h-4 w-4" />
-              <span>Create Chunks</span>
-            </Button> */}
           </div>
-        </PopoverContent>
-      </Popover>
+        </PopoverContent> */}
+      {/* </Popover> */}
       <UploadDialog
         isOpen={isUploadDialogOpen}
         onClose={() => setIsUploadDialogOpen(false)}

@@ -88,9 +88,10 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
       truncatedSubstring: true,
       sortable: true,
       copyable: true,
+      headerTooltip:"The title of the document",
     },
-    { key: 'id', label: 'Document ID', truncate: true, copyable: true },
-    { key: 'ownerId', label: 'Owner ID', truncate: true, copyable: true },
+    { key: 'id', label: 'Document ID', truncate: true, copyable: true,       headerTooltip:"The document ID, used to uniquely identify the document" },
+    // { key: 'ownerId', label: 'Owner ID', truncate: true, copyable: true },
     {
       key: 'collectionIds',
       label: 'Collection IDs',
@@ -102,10 +103,11 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
     },
     {
       key: 'ingestionStatus',
-      label: 'Ingestion',
+      label: 'Ingestion Status',
       filterable: true,
       filterType: 'multiselect',
       filterOptions: ['success', 'failed', 'pending', 'enriched'],
+      headerTooltip:"The status of the document ingestion",
       renderCell: (doc) => {
         let variant: 'success' | 'destructive' | 'pending' | 'enriched' =
           'pending';
@@ -128,7 +130,8 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
     },
     {
       key: 'extractionStatus',
-      label: 'Extraction',
+      label: 'Extraction Status',
+      headerTooltip:"The status of the document extraction, which follows ingestion",
       filterable: true,
       filterType: 'multiselect',
       filterOptions: ['success', 'failed', 'pending', 'processing', 'enriched'],
