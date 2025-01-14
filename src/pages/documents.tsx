@@ -122,9 +122,14 @@ const Index: React.FC = () => {
     // Identify documents that are not SUCCESS, ENRICHED, or FAILED
     const pending = documents.filter(
       (doc) =>
-        doc.ingestionStatus !== IngestionStatus.SUCCESS &&
+        (doc.ingestionStatus !== IngestionStatus.SUCCESS &&
         doc.ingestionStatus !== IngestionStatus.ENRICHED &&
-        doc.ingestionStatus !== IngestionStatus.FAILED
+        doc.ingestionStatus !== IngestionStatus.FAILED)
+        ||
+        (
+          doc.extractionStatus !== IngestionStatus.SUCCESS &&
+          doc.extractionStatus !== IngestionStatus.FAILED
+        )
     );
     setPendingDocuments(pending.map((doc) => doc.id));
 
