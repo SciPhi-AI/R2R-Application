@@ -4,7 +4,7 @@ import { useToast } from '@/components/ui/use-toast';
 
 interface CopyableContentProps {
   content: string;
-  truncated: string;
+  truncated?: any;
 }
 
 const CopyableContent: React.FC<CopyableContentProps> = ({

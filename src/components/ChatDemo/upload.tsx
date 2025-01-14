@@ -43,7 +43,7 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
 
   const handleDocumentUpload = async (
     files: File[],
-    hiRes?: boolean = false
+    hiRes: boolean = false
   ) => {
     setIsUploading(true);
     const client = await getClient();

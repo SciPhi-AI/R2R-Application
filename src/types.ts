@@ -410,7 +410,7 @@ export interface UpdateButtonProps {
 export interface UploadDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onUpload: (files: File[]) => void;
+  onUpload: (files: File[], hiRes: boolean) => void;
 }
 
 export interface UserContextProps {

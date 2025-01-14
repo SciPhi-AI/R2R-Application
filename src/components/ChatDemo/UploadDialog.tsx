@@ -10,7 +10,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-
 import { Switch } from '@/components/ui/switch';
 import {
   Tooltip,
@@ -18,7 +17,6 @@ import {
   TooltipContent,
   TooltipProvider,
 } from '@/components/ui/tooltip';
-
 import { UploadDialogProps } from '@/types';
 
 export const UploadDialog: React.FC<UploadDialogProps> = ({
