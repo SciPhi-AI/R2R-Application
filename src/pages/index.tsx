@@ -325,7 +325,7 @@ const HomePage = () => {
   return (
     <Layout includeFooter>
       <main className="w-full flex flex-col container h-screen-[calc(100%-4rem)]">
-        <div className="relative bg-zinc-900 p-10">
+        <div className="relative bg-zinc-900 p-5">
           {isBannerVisible && (
             <Alert
               variant="default"

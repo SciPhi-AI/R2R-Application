@@ -360,11 +360,11 @@ const Index: React.FC = () => {
   return (
     <Layout pageTitle="Collections" includeFooter={false}>
       <main className="w-full flex flex-col container h-screen-[calc(100%-4rem)]">
-        <div className="mx-auto max-w-6xl mb-12 mt-20">
+        <div className="mx-auto max-w-6xl mb-12 mt-4">
           {loading &&
           personalCollections.length === 0 &&
           sharedCollections.length === 0 ? (
-            <div className="flex justify-center mt-20">
+            <div className="flex justify-center mt-4">
               <Loader className="animate-spin" size={64} />
             </div>
           ) : (

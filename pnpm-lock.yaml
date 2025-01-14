@@ -219,8 +219,8 @@ dependencies:
     specifier: 0.0.0-beta.0
     version: 0.0.0-beta.0
   r2r-js:
-    specifier: 0.4.15
-    version: 0.4.15
+    specifier: 0.4.16
+    version: 0.4.16
   radix-ui:
     specifier: ^1.0.1
     version: 1.0.1(@types/react@18.3.3)(react-dom@18.3.1)(react@18.3.1)
@@ -11825,8 +11825,8 @@ packages:
   /queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
 
-  /r2r-js@0.4.15:
-    resolution: {integrity: sha512-KZvz4bc4lqr/FtgJUf0Z0GBTGXRlLTEjgVeyz47iig0x3cpO1DIIFSxkbkYb8ogPv9RQ41CdkjR++RUzqPADAw==}
+  /r2r-js@0.4.16:
+    resolution: {integrity: sha512-tQL6oQ3TK1Gg3QliVY/l1KMHlsYIFTDFLBhWuJkGN3upBGceXox3ueJrBUYokJ2ckM3sluPnbwv/I2bepderqw==}
     dependencies:
       '@jest/globals': 29.7.0
       '@rrweb/types': 2.0.0-alpha.17

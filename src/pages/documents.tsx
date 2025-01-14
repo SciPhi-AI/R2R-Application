@@ -236,9 +236,10 @@ const Index: React.FC = () => {
     <>
       <Layout pageTitle="Documents" includeFooter={false}>
         <main className="w-full flex flex-col container h-screen-[calc(100%-4rem)]">
-          <div className="relative flex-grow bg-zinc-900 mt-[4rem] sm:mt-[4rem] pl-10">
+          {/* <div className={loading? "relative flex-grow bg-zinc-900  pl-2": "relative flex-grow bg-zinc-900  pl-10"}> */}
+          <div className="relative flex-grow bg-zinc-900  pl-10">
             <div className="mx-auto max-w-6xl mb-12 p-4 h-full">
-              <h1 className="text-2xl font-bold text-white flex items-center gap-2 mb-4">
+              <h1 className={"text-2xl font-bold text-white flex items-center gap-2 mb-4" + (loading? " -ml-2" : "")}>
                 Documents
                 <a
                   href="https://r2r-docs.sciphi.ai/api-and-sdks/collections/collections"

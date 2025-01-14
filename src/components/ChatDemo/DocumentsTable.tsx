@@ -340,6 +340,7 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
             loading={loading}
             enableColumnToggle={false}
             totalEntries={Math.max(10, totalEntries || 0)}
+            emptyTableText={'No data available, try ingesting a document first.'}
           />
         </>
       )}
