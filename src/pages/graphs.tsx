@@ -1,18 +1,4 @@
 import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-  TooltipProvider,
-} from '@/components/ui/tooltip';
-import React, {
-  useEffect,
-  useCallback,
-  useState,
-  useMemo,
-  useRef,
-} from 'react';
-import { useRouter } from 'next/router';
-import {
   // Example icons – you can swap with your own
   AlertTriangleIcon,
   InfoIcon,
@@ -23,6 +9,7 @@ import {
   Settings,
   ExternalLink,
 } from 'lucide-react';
+import { useRouter } from 'next/router';
 import {
   CollectionResponse,
   DocumentResponse,
@@ -30,31 +17,49 @@ import {
   RelationshipResponse,
   CommunityResponse,
 } from 'r2r-js/dist/types';
-import ExtractButtonContainer from '@/components/ChatDemo/ExtractContainer';
+import React, {
+  useEffect,
+  useCallback,
+  useState,
+  useMemo,
+  useRef,
+} from 'react';
 
-import Layout from '@/components/Layout';
-import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Tabs, TabsList, TabsContent, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import Table, { Column } from '@/components/ChatDemo/Table';
-import KnowledgeGraph from '@/components/knowledgeGraph';
-
-import { RemoveButton } from '@/components/ChatDemo/remove';
 import { DeleteButton } from '@/components/ChatDemo/deleteButton';
+import ExtractButtonContainer from '@/components/ChatDemo/ExtractContainer';
+import { RemoveButton } from '@/components/ChatDemo/remove';
+import Table, { Column } from '@/components/ChatDemo/Table';
+import AssignDocumentToCollectionDialog from '@/components/ChatDemo/utils/AssignDocumentToCollectionDialog';
+import CollectionDialog from '@/components/ChatDemo/utils/collectionDialog';
+import DocumentInfoDialog from '@/components/ChatDemo/utils/documentDialogInfo';
+import KnowledgeGraph from '@/components/knowledgeGraph';
+import Layout from '@/components/Layout';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+  SelectLabel,
+} from '@/components/ui/select';
+import { Tabs, TabsList, TabsContent, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+} from '@/components/ui/tooltip';
 import { useToast } from '@/components/ui/use-toast';
 import { useUserContext } from '@/context/UserContext';
-
 import { IngestionStatus, KGExtractionStatus } from '@/types';
 
 // You could create modals/dialogs for these steps as well
-import DocumentInfoDialog from '@/components/ChatDemo/utils/documentDialogInfo';
-import AssignDocumentToCollectionDialog from '@/components/ChatDemo/utils/AssignDocumentToCollectionDialog';
-import CollectionDialog from '@/components/ChatDemo/utils/collectionDialog';
-import {Select, SelectTrigger, SelectContent, SelectItem, SelectValue, SelectLabel} from '@/components/ui/select';
 // Example function to show success or error toasts
-function showToast(toast, title: string, description?: string) {
+function showToast(toast: any, title: string, description?: string) {
   toast({
     title,
     description,
@@ -69,7 +74,7 @@ const KnowledgeGraphsPage: React.FC = () => {
   const { getClient, authState } = useUserContext();
   const { toast } = useToast();
 
-  console.log('authState =', authState)
+  console.log('authState =', authState);
   /****************************************
    * Local state
    ****************************************/
@@ -84,10 +89,10 @@ const KnowledgeGraphsPage: React.FC = () => {
 
   // We also track documents, entities, relationships, communities
   const [documents, setDocuments] = useState<DocumentResponse[]>([]);
-  console.log('documents = ', documents)
+  console.log('documents = ', documents);
   const [entities, setEntities] = useState<EntityResponse[]>([]);
-  console.log('entities = ', entities)
-  console.log('setEntities = ', )
+  console.log('entities = ', entities);
+  console.log('setEntities = ');
   const [relationships, setRelationships] = useState<RelationshipResponse[]>(
     []
   );
@@ -110,19 +115,27 @@ const KnowledgeGraphsPage: React.FC = () => {
   const [selectedDocumentIds, setSelectedDocumentIds] = useState<string[]>([]);
   const [currentDocumentsPage, setCurrentDocumentsPage] = useState<number>(1);
   const [currentEntitiesPage, setCurrentEntitiesPage] = useState<number>(1);
-  const [currentRelationshipsPage, setCurrentRelationshipsPage] = useState<number>(1);
-  const [currentCommunitiesPage, setCurrentCommunitiesPage] = useState<number>(1);
+  const [currentRelationshipsPage, setCurrentRelationshipsPage] =
+    useState<number>(1);
+  const [currentCommunitiesPage, setCurrentCommunitiesPage] =
+    useState<number>(1);
 
   // Tab states
-  const [activeTab, setActiveTab] = useState<'documents' | 'entities' | 'relationships' | 'communities' | 'explore'>(
-    'documents'
-  );
+  const [activeTab, setActiveTab] = useState<
+    'documents' | 'entities' | 'relationships' | 'communities' | 'explore'
+  >('documents');
 
   // For searching documents
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [filters, setFilters] = useState<Record<string, any>>({
     ingestionStatus: ['success', 'failed', 'pending', 'enriched'],
-    extractionStatus: ['success', 'failed', 'pending', 'processing', 'enriched'],
+    extractionStatus: [
+      'success',
+      'failed',
+      'pending',
+      'processing',
+      'enriched',
+    ],
   });
 
   // Container size for the graph explorer
@@ -140,16 +153,17 @@ const KnowledgeGraphsPage: React.FC = () => {
     try {
       const client = await getClient();
       if (!client) throw new Error('No authenticated client.');
-  
+      if (!authState?.userId) throw new Error('No authenticated user.');
+
       // Grab the user’s personal collections as an example
       const { results } = await client.users.listCollections({
         id: authState?.userId,
         offset: 0,
         limit: PAGE_SIZE,
       });
-  
+
       setCollections(results);
-  
+
       // Try to find a collection whose name is "Default"
       if (results.length > 0) {
         const defaultCollection = results.find(
@@ -162,7 +176,7 @@ const KnowledgeGraphsPage: React.FC = () => {
           setSelectedCollectionId(results[0].id);
         }
       }
-  
+
       setLoading(false);
     } catch (err) {
       setLoading(false);
@@ -170,7 +184,7 @@ const KnowledgeGraphsPage: React.FC = () => {
       console.error(err);
     }
   }, [getClient]);
-  
+
   // const fetchCollections = useCallback(async () => {
   //   setLoading(true);
   //   try {
@@ -213,7 +227,7 @@ const KnowledgeGraphsPage: React.FC = () => {
         const client = await getClient();
         if (!client) throw new Error('No authenticated client');
 
-        console.log('collectionId = ', collectionId)
+        console.log('collectionId = ', collectionId);
         // 2a) Documents in collection
         let offset = 0;
         let fetchedDocs: DocumentResponse[] = [];
@@ -234,7 +248,7 @@ const KnowledgeGraphsPage: React.FC = () => {
           fetchedDocs = fetchedDocs.concat(batch.results);
           offset += PAGE_SIZE;
         }
-        console.log('fetchedDocs = ', fetchedDocs)
+        console.log('fetchedDocs = ', fetchedDocs);
         setDocuments(fetchedDocs);
 
         // 2b) Entities
@@ -246,7 +260,7 @@ const KnowledgeGraphsPage: React.FC = () => {
           limit: PAGE_SIZE,
         });
         fetchedEntities = firstEntityBatch.results;
-        console.log('fetchedEntities = ', fetchedEntities)
+        console.log('fetchedEntities = ', fetchedEntities);
         offset += PAGE_SIZE;
         while (offset < firstEntityBatch.totalEntries) {
           const batch = await client.graphs.listEntities({
@@ -364,10 +378,14 @@ const KnowledgeGraphsPage: React.FC = () => {
       if (!client) throw new Error('No authenticated client');
 
       // By default, run actual extraction:
-      const resp = await client.documents.extract(docId, 'run');
+      const resp = await client.documents.extract({id: docId, runType: 'run'});
       console.log('Extraction response => ', resp);
 
-      showToast(toast, 'Extraction started', 'Check document’s extraction status shortly.');
+      showToast(
+        toast,
+        'Extraction started',
+        'Check document’s extraction status shortly.'
+      );
       // Re-fetch docs to update statuses
       await fetchCollectionData(selectedCollectionId);
     } catch (err: any) {
@@ -388,7 +406,7 @@ const KnowledgeGraphsPage: React.FC = () => {
 
   /**
    * (3) Pull (sync) docs into the graph
-   * This ensures that the documents’ extracted entities & relationships 
+   * This ensures that the documents’ extracted entities & relationships
    * are copied into the collection’s knowledge graph tables.
    */
   async function handlePullGraph() {
@@ -398,12 +416,21 @@ const KnowledgeGraphsPage: React.FC = () => {
       const client = await getClient();
       if (!client) throw new Error('No authenticated client');
 
-      console.log(' in `handlePullGraph` selectedCollectionId = ', selectedCollectionId)
+      console.log(
+        ' in `handlePullGraph` selectedCollectionId = ',
+        selectedCollectionId
+      );
       // console.log(' in `handlePullGraph` selectedCollectionId = ', selectedCollectionId)
-      const resp = await client.graphs.pull({collectionId: selectedCollectionId});
+      const resp = await client.graphs.pull({
+        collectionId: selectedCollectionId,
+      });
       console.log('Pull response => ', resp);
 
-      showToast(toast, 'Pull successful', 'The graph is now synced with document knowledge.');
+      showToast(
+        toast,
+        'Pull successful',
+        'The graph is now synced with document knowledge.'
+      );
       // Re-fetch data
       await fetchCollectionData(selectedCollectionId);
     } catch (err: any) {
@@ -417,7 +444,7 @@ const KnowledgeGraphsPage: React.FC = () => {
   /**
    * (4) Build the graph (and optionally do community detection)
    * You can do `run_type: 'estimate'` or `'run'`.
-   * By default, calling "build" with run_with_orchestration = true will 
+   * By default, calling "build" with run_with_orchestration = true will
    * queue a background job that you can poll until it’s done.
    */
   async function handleBuildGraph() {
@@ -428,10 +455,17 @@ const KnowledgeGraphsPage: React.FC = () => {
       if (!client) throw new Error('No authenticated client');
 
       // This is an example call to build communities:
-      const resp = await client.graphs.buildCommunities({collectionId: selectedCollectionId, runWithOrchestration: true});
+      const resp = await client.graphs.buildCommunities({
+        collectionId: selectedCollectionId,
+        runWithOrchestration: true,
+      });
       console.log('Build response => ', resp);
 
-      showToast(toast, 'Graph build queued', 'Community detection and enrichment in progress.');
+      showToast(
+        toast,
+        'Graph build queued',
+        'Community detection and enrichment in progress.'
+      );
       // Re-fetch data in a few seconds or poll
       await fetchCollectionData(selectedCollectionId);
     } catch (err: any) {
@@ -441,7 +475,6 @@ const KnowledgeGraphsPage: React.FC = () => {
       setLoading(false);
     }
   }
-
 
   /****************************************
    * Filter + Search for Documents
@@ -466,13 +499,15 @@ const KnowledgeGraphsPage: React.FC = () => {
     // apply search query
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      result = result.filter((doc) =>
-        doc.title?.toLowerCase().includes(q) || doc.id.toLowerCase().includes(q)
+      result = result.filter(
+        (doc) =>
+          doc.title?.toLowerCase().includes(q) ||
+          doc.id.toLowerCase().includes(q)
       );
     }
     return result;
   }, [documents, filters, searchQuery]);
-  console.log('filteredDocuments = ', filteredDocuments)
+  console.log('filteredDocuments = ', filteredDocuments);
   /****************************************
    * Documents Table Config
    ****************************************/
@@ -523,8 +558,8 @@ const KnowledgeGraphsPage: React.FC = () => {
             doc.extractionStatus === KGExtractionStatus.ENRICHED
               ? 'success'
               : doc.extractionStatus === KGExtractionStatus.FAILED
-              ? 'destructive'
-              : 'pending'
+                ? 'destructive'
+                : 'pending'
           }
         >
           {doc.extractionStatus}
@@ -546,11 +581,11 @@ const KnowledgeGraphsPage: React.FC = () => {
         <SlidersHorizontal className="h-5 w-5" />
         
       </Button> */}
-        <ExtractButtonContainer
-          id={doc.id}
-          ingestionStatus={doc.ingestionStatus}
-          showToast={toast}
-        />
+      <ExtractButtonContainer
+        id={doc.id}
+        ingestionStatus={doc.ingestionStatus}
+        showToast={toast}
+      />
 
       {/* Remove from the collection */}
       <RemoveButton
@@ -610,19 +645,16 @@ const KnowledgeGraphsPage: React.FC = () => {
     );
   }
 
-
   /****************************************
    * Render Page
    ****************************************/
   return (
     <Layout pageTitle="Knowledge Graphs" includeFooter={false}>
       <main className="w-full flex flex-col container h-screen-[calc(100%-4rem)]">
-
         <div className="pl-8 mx-auto max-w-6xl mt-4 mb-12">
           {/* Header + Quick Buttons */}
 
           <div className="flex items-center justify-between mb-6">
-
             <h1 className="text-2xl font-bold flex items-center gap-2 text-white">
               Knowledge Graphs
               <a
@@ -636,50 +668,71 @@ const KnowledgeGraphsPage: React.FC = () => {
             </h1>
 
             <div className="flex gap-2 items-center">
-              <Button onClick={() => setIsAssignDocumentDialogOpen(true)} color="filled" shape="outline_widest">
+              <Button
+                onClick={() => setIsAssignDocumentDialogOpen(true)}
+                color="filled"
+                shape="outline_widest"
+              >
                 <Plus className="w-4 h-4 mr-1 mt-1" />
                 Document
               </Button>
-              <Button onClick={() => setIsCollectionDialogOpen(true)} color="light" shape="outline_widest">
+              <Button
+                onClick={() => setIsCollectionDialogOpen(true)}
+                color="light"
+                shape="outline_widest"
+              >
                 <Settings className="w-4 h-4 mr-1 mt-1" />
                 Settings
               </Button>
             </div>
           </div>
 
-
           {/* Explanation / Steps (Optional) */}
           <Alert className="mb-6 ">
-          <div className="flex items-center text-accent-base pb-1">
-            <InfoIcon className="h-4 w-4 mr-2 -mt-0.5" />
-            <AlertTitle className="pt-1">How to Build a Graph</AlertTitle>
-          </div>
+            <div className="flex items-center text-accent-base pb-1">
+              <InfoIcon className="h-4 w-4 mr-2 -mt-0.5" />
+              <AlertTitle className="pt-1">How to Build a Graph</AlertTitle>
+            </div>
             <AlertDescription>
               <ol className="list-decimal list-inside ml-4 space-y-1">
-                <li><strong>Ingest</strong> or upload your documents in the Documents tab (or from your Documents page).</li>
-                <li><strong>Extract</strong> each document using the <em>Extract</em> button, which identifies entities &amp; relationships.</li>
-                <li><strong>Assign</strong> these documents to a Collection <em>(by default, all documents are added to `Default`)</em>.</li>
-                <li><strong>Pull</strong> the extracted data into your graph by clicking <em>Sync Graph</em> below.</li>
-                <li><strong>Build</strong> communities or run advanced graph operations using <em>Build Graph</em> below.</li>
+                <li>
+                  <strong>Ingest</strong> or upload your documents in the
+                  Documents tab (or from your Documents page).
+                </li>
+                <li>
+                  <strong>Extract</strong> each document using the{' '}
+                  <em>Extract</em> button, which identifies entities &amp;
+                  relationships.
+                </li>
+                <li>
+                  <strong>Assign</strong> these documents to a Collection{' '}
+                  <em>(by default, all documents are added to `Default`)</em>.
+                </li>
+                <li>
+                  <strong>Pull</strong> the extracted data into your graph by
+                  clicking <em>Sync Graph</em> below.
+                </li>
+                <li>
+                  <strong>Build</strong> communities or run advanced graph
+                  operations using <em>Build Graph</em> below.
+                </li>
               </ol>
             </AlertDescription>
           </Alert>
-          <Alert
-              variant="default"
-            >
-              <div className="flex items-center text-red-400">
-                {/* <Rocket className="h-4 w-4 mr-2  -mt-1  text-accent-base" /> */}
-                <AlertTriangleIcon className="h-5 w-5 mr-2 -mt-2" />
-                <AlertTitle>
-                  SciPhi Knowledge Graphs are still under development. Please report any issues you encounter.
-                </AlertTitle>
-              </div>
+          <Alert variant="default">
+            <div className="flex items-center text-red-400">
+              {/* <Rocket className="h-4 w-4 mr-2  -mt-1  text-accent-base" /> */}
+              <AlertTriangleIcon className="h-5 w-5 mr-2 -mt-2" />
+              <AlertTitle>
+                SciPhi Knowledge Graphs are still under development. Please
+                report any issues you encounter.
+              </AlertTitle>
+            </div>
           </Alert>
 
           <div className="mb-6 flex items-center gap-2 mt-6 pl-2">
-
-          {/* Only show if user has multiple collections */}
-          {/* {collections.length > 1 && (
+            {/* Only show if user has multiple collections */}
+            {/* {collections.length > 1 && (
             <>
               <label className="text-white mr-2">Select Collection:</label>
               <select
@@ -695,53 +748,60 @@ const KnowledgeGraphsPage: React.FC = () => {
               </select>
             </>
           )} */}
-          {collections.length > 1 && (
-            <>
+            {collections.length > 1 && (
+              <>
+                <Select
+                  value={selectedCollectionId}
+                  onValueChange={(val) => setSelectedCollectionId(val)}
+                >
+                  <SelectTrigger id="collection-select" className="w-[200px]">
+                    <SelectValue placeholder="Select a collection" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {collections.map((col) => (
+                      <SelectItem key={col.id} value={col.id}>
+                        {col.name} ({col.id})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </>
+            )}
 
-              <Select
-                value={selectedCollectionId}
-                onValueChange={(val) => setSelectedCollectionId(val)}
-              >
-                <SelectTrigger id="collection-select" className="w-[200px]">
-                  <SelectValue placeholder="Select a collection" />
-                </SelectTrigger>
-                <SelectContent>
-                  {collections.map((col) => (
-                    <SelectItem key={col.id} value={col.id}>
-                      {col.name} ({col.id})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </>
-          )}
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button onClick={handlePullGraph} color="filled">
+                    Sync Graph
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {
+                    'Syncs document entities and relationships for this collection'
+                  }
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
 
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button onClick={handlePullGraph} color="filled">
-                  Sync Graph
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>{"Syncs document entities and relationships for this collection"}</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button onClick={handleBuildGraph} color="filled">
-                  Build Graph
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>{"Rebuilds the communities for this collection"}</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button onClick={handleBuildGraph} color="filled">
+                    Build Graph
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {'Rebuilds the communities for this collection'}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
 
           {/* Tabs for each area */}
-          <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val)}>
+          <Tabs value={activeTab} onValueChange={
+            // @ts-expect-error Tab value type mismatch
+            (val) => setActiveTab(val)}
+            >
             <TabsList className="grid w-full grid-cols-6">
               {/* <TabsTrigger value="overview">Overview</TabsTrigger> */}
               <TabsTrigger value="documents">Documents</TabsTrigger>
@@ -758,8 +818,9 @@ const KnowledgeGraphsPage: React.FC = () => {
                 <AlertTitle>Graph Overview</AlertTitle>
                 <AlertDescription>
                   <p>
-                    Here you can find a high-level summary of your graph, see how many documents are in it, 
-                    how many entities and relationships you have, and kick off bigger operations like 
+                    Here you can find a high-level summary of your graph, see
+                    how many documents are in it, how many entities and
+                    relationships you have, and kick off bigger operations like
                     community detection or further enrichment.
                   </p>
                 </AlertDescription>
@@ -806,6 +867,7 @@ const KnowledgeGraphsPage: React.FC = () => {
               </div>
 
               <Table<DocumentResponse>
+                loading={loading}
                 data={filteredDocuments}
                 columns={documentColumns}
                 actions={renderDocumentActions}
@@ -832,13 +894,16 @@ const KnowledgeGraphsPage: React.FC = () => {
                 showPagination={true}
                 currentPage={currentDocumentsPage}
                 onPageChange={(page) => setCurrentDocumentsPage(page)}
-                emptyTableText={'No data available, try ingesting a document first.'}
+                emptyTableText={
+                  'No data available, try ingesting a document first.'
+                }
               />
             </TabsContent>
 
             {/* 3) Entities Tab */}
             <TabsContent value="entities" className="mt-4">
               <Table<EntityResponse>
+                loading={loading}
                 data={entities}
                 columns={entityColumns}
                 itemsPerPage={10}
@@ -850,20 +915,25 @@ const KnowledgeGraphsPage: React.FC = () => {
                       itemId={entity.id}
                       collectionId={selectedCollectionId}
                       itemType="entity"
-                      onSuccess={() => fetchCollectionData(selectedCollectionId)}
+                      onSuccess={() =>
+                        fetchCollectionData(selectedCollectionId)
+                      }
                       showToast={toast}
                     />
                   </div>
                 )}
                 currentPage={currentEntitiesPage}
                 onPageChange={(page) => setCurrentEntitiesPage(page)}
-                emptyTableText={'No data available, try clicking "Sync Graph" above after ingesting and extracting a document.'}
+                emptyTableText={
+                  'No data available, try clicking "Sync Graph" above after ingesting and extracting a document.'
+                }
               />
             </TabsContent>
 
             {/* 4) Relationships Tab */}
             <TabsContent value="relationships" className="mt-4">
               <Table<RelationshipResponse>
+                loading={loading}
                 data={relationships}
                 columns={relationshipColumns}
                 itemsPerPage={10}
@@ -874,12 +944,16 @@ const KnowledgeGraphsPage: React.FC = () => {
                       itemId={rel.id}
                       collectionId={selectedCollectionId}
                       itemType="relationship"
-                      onSuccess={() => fetchCollectionData(selectedCollectionId)}
+                      onSuccess={() =>
+                        fetchCollectionData(selectedCollectionId)
+                      }
                       showToast={toast}
                     />
                   </div>
                 )}
-                emptyTableText={'No data available, try clicking "Sync Graph" above after ingesting and extracting a document.'}
+                emptyTableText={
+                  'No data available, try clicking "Sync Graph" above after ingesting and extracting a document.'
+                }
                 currentPage={currentRelationshipsPage}
                 onPageChange={(page) => setCurrentRelationshipsPage(page)}
               />
@@ -888,6 +962,7 @@ const KnowledgeGraphsPage: React.FC = () => {
             {/* 5) Communities Tab */}
             <TabsContent value="communities" className="mt-4">
               <Table<CommunityResponse>
+                loading={loading}
                 data={communities}
                 columns={communityColumns}
                 itemsPerPage={10}
@@ -898,14 +973,18 @@ const KnowledgeGraphsPage: React.FC = () => {
                       itemId={community.id}
                       collectionId={selectedCollectionId}
                       itemType="community"
-                      onSuccess={() => fetchCollectionData(selectedCollectionId)}
+                      onSuccess={() =>
+                        fetchCollectionData(selectedCollectionId)
+                      }
                       showToast={toast}
                     />
                   </div>
                 )}
                 currentPage={currentCommunitiesPage}
                 onPageChange={(page) => setCurrentCommunitiesPage(page)}
-                emptyTableText={'No data available, try clicking "Build Graph" above after successfully syncing entities and relationships.'}
+                emptyTableText={
+                  'No data available, try clicking "Build Graph" above after successfully syncing entities and relationships.'
+                }
               />
             </TabsContent>
 
@@ -916,7 +995,8 @@ const KnowledgeGraphsPage: React.FC = () => {
                 className="w-full h-[600px] border border-zinc-700 rounded"
               >
                 {/* If you have any custom logic for converting Entities/Relationships into nodes + edges, do it in <KnowledgeGraph /> */}
-                {(containerDimensions.width > 0 || containerDimensions.height > 0) && (
+                {(containerDimensions.width > 0 ||
+                  containerDimensions.height > 0) && (
                   <KnowledgeGraph
                     entities={entities}
                     width={containerDimensions.width}

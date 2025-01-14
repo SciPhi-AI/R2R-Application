@@ -77,7 +77,7 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
   };
 
   const handleRefreshWithDelay = async () => {
-    await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for 1 second
+    await new Promise((resolve) => setTimeout(resolve, 2500)); // Wait for 2.5 second
     onRefresh();
   };
 
@@ -340,7 +340,9 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
             loading={loading}
             enableColumnToggle={false}
             totalEntries={Math.max(10, totalEntries || 0)}
-            emptyTableText={'No data available, try ingesting a document first.'}
+            emptyTableText={
+              'No data available, try ingesting a document first.'
+            }
           />
         </>
       )}

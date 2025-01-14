@@ -239,7 +239,12 @@ const Index: React.FC = () => {
           {/* <div className={loading? "relative flex-grow bg-zinc-900  pl-2": "relative flex-grow bg-zinc-900  pl-10"}> */}
           <div className="relative flex-grow bg-zinc-900  pl-10">
             <div className="mx-auto max-w-6xl mb-12 p-4 h-full">
-              <h1 className={"text-2xl font-bold text-white flex items-center gap-2 mb-4" + (loading? " -ml-2" : "")}>
+              <h1
+                className={
+                  'text-2xl font-bold text-white flex items-center gap-2 mb-4' +
+                  (loading ? ' -ml-2' : '')
+                }
+              >
                 Documents
                 <a
                   href="https://r2r-docs.sciphi.ai/api-and-sdks/collections/collections"
@@ -248,7 +253,10 @@ const Index: React.FC = () => {
                   className="inline-flex items-center hover:text-blue-400 text-gray-400"
                   title="View Collections Documentation"
                 >
-                  <ExternalLink size={18}  className="text-accent-base -mt-0.5" />
+                  <ExternalLink
+                    size={18}
+                    className="text-accent-base -mt-0.5"
+                  />
                 </a>
               </h1>
 

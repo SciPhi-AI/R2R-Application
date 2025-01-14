@@ -440,7 +440,9 @@ function Table<T extends object>({
                           checked={selectedItems.includes(
                             getRowKey(item).toString()
                           )}
-                          onCheckedChange={(checked: boolean | 'indeterminate') =>
+                          onCheckedChange={(
+                            checked: boolean | 'indeterminate'
+                          ) =>
                             handleSelectItemInternal(item, checked as boolean)
                           }
                         />
