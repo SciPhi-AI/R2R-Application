@@ -42,8 +42,7 @@ interface Source extends VectorSearchResult {
 const parseVectorSearchSources = (sources: string | object): Source[] => {
   if (typeof sources === 'string') {
     try {
-      const cleanedSources = sources;
-       JSON.parse(cleanedSources);
+      return JSON.parse(sources);
     } catch (error) {
       console.error('Failed to parse sources:', error);
       return [];

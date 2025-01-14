@@ -306,7 +306,7 @@ export const Result: FC<{
             searchPerformed = true;
           }
 
-          if (buffer.includes(GRAPH_SEARCH_STREAM_MARKER)) {
+          if (buffer.includes(GRAPH_SEARCH_STREAM_END_MARKER)) {
             kgSearchResult = buffer
               .split(GRAPH_SEARCH_STREAM_MARKER)[1]
               .split(GRAPH_SEARCH_STREAM_END_MARKER)[0];
