@@ -84,15 +84,11 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
   const fetchAllChunks = useCallback(
     async (offset: number, limit: number) => {
       try {
-        if (id == '' || id == null || id == undefined) {
-          return { results: [], totalEntries: 0 };
-        }
         const client = await getClient();
         if (!client) {
           throw new Error('Failed to get authenticated client');
         }
 
-        console.log('id = ', id);
         const response = await client.documents.listChunks({
           id: id,
           offset: offset,
@@ -117,9 +113,6 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
         const client = await getClient();
         if (!client) {
           throw new Error('Failed to get authenticated client');
-        }
-        if (id == '' || id != null || id != undefined) {
-          return { results: [], totalEntries: 0 };
         }
 
         const response = await client.documents.listEntities({
@@ -146,9 +139,6 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
         const client = await getClient();
         if (!client) {
           throw new Error('Failed to get authenticated client');
-        }
-        if (id == '' || id != null || id != undefined) {
-          return { results: [], totalEntries: 0 };
         }
 
         const response = await client.documents.listRelationships({
@@ -345,7 +335,7 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
                     />
                   </div>
                 )}
-                {/* {documentOverview &&
+                {documentOverview &&
                   documentOverview.documentType &&
                   ['pdf', 'application/pdf'].includes(
                     documentOverview.documentType.toLowerCase()
@@ -358,7 +348,7 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
                         Preview PDF
                       </Button>
                     </div>
-                  )} */}
+                  )}
                 <Tabs
                   value={activeTab}
                   onValueChange={setActiveTab}
@@ -522,7 +512,7 @@ const ExpandableDocumentChunks: React.FC<{
   };
 
   if (!chunks || chunks.length === 0) {
-    return <div>No chunks available.</div>;
+    return <div className="pl-2 pt-2">No chunks available.</div>;
   }
 
   return (
@@ -803,12 +793,7 @@ const ExpandableDocumentEntities: React.FC<{
   };
 
   if (!entities || entities.length === 0) {
-    return (
-      <div className="pt-4">
-        No entities available, navigate to /graphs to perform an extraction on
-        this document.
-      </div>
-    );
+    return <div className="pl-2 pt-2">No entities available, ensure `extraction` completed successfully.</div>;
   }
 
   return (
@@ -933,12 +918,9 @@ const ExpandableDocumentRelationships: React.FC<{
   };
 
   if (!relationships || relationships.length === 0) {
-    return (
-      <div className="pt-4">
-        No relationships available, navigate to /graphs to perform an extraction
-        on this document.
-      </div>
-    );
+    // return <div>No relationships available.</div>;
+    return <div className="pl-2 pt-2">No relationships are available, ensure `extraction` completed successfully.</div>;
+
   }
 
   return (
