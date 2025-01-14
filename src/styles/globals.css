@@ -313,3 +313,14 @@ td {
 .typed-container {
   pointer-events: none; /* Prevent mouse interactions */
 }
+
+/* Example forcing scrollbars to show (WebKit) */
+.force-show-scrollbar::-webkit-scrollbar {
+  -webkit-appearance: none;
+  width: 8px; /* adjust as needed */
+  height: 8px;
+}
+.force-show-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(100, 100, 100, 0.5);
+  border-radius: 4px;
+}

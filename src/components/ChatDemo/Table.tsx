@@ -16,19 +16,8 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 
-// export interface Column<T> {
-//   key: string;
-//   label: string;
-//   sortable?: boolean;
-//   filterable?: boolean;
-//   filterType?: 'text' | 'select' | 'multiselect';
-//   filterOptions?: string[];
-//   renderCell?: (item: T) => React.ReactNode;
-//   truncate?: boolean;
-//   truncatedSubstring?: boolean;
-//   copyable?: boolean;
-//   selected?: boolean;
-// }
+// Import your HoverTruncatedCell component
+import HoverTruncatedCell from './HoverTruncatedCell';
 
 export interface Column<T> {
   key: string;
@@ -43,8 +32,8 @@ export interface Column<T> {
   copyable?: boolean;
   selected?: boolean;
 
-  // NEW: optional tooltip content
-  headerTooltip?: string | React.ReactNode; 
+  // Optional tooltip content for the header
+  headerTooltip?: string | React.ReactNode;
 }
 
 export interface TableProps<T extends object> {
@@ -73,6 +62,7 @@ export interface TableProps<T extends object> {
    * Defaults to "No data available."
    */
   emptyTableText?: string;
+  maxLength?: number;
 }
 
 function Table<T extends object>({
@@ -99,10 +89,8 @@ function Table<T extends object>({
     const id = item[idKey];
     return id ? id.toString() : Math.random().toString();
   },
-  /**
-   * The text to display when the table is empty.
-   */
   emptyTableText = 'No data available.',
+  maxLength = 20,
 }: TableProps<T>) {
   const [sort, setSort] = useState(
     initialSort || { key: '', order: 'asc' as const }
@@ -262,7 +250,10 @@ function Table<T extends object>({
     if (col.renderCell) {
       return col.renderCell(item);
     }
+
     const content = (item as any)[col.key];
+
+    // 1) If "truncate" is true, use old logic (truncate in the middle)
     if (col.truncate && typeof content === 'string') {
       const truncated = `${content.substring(0, 8)}...${content.slice(-4)}`;
       return col.copyable ? (
@@ -270,18 +261,36 @@ function Table<T extends object>({
       ) : (
         truncated
       );
-    } else if (col.truncatedSubstring && typeof content === 'string') {
-      const maxLength = 20;
-      const truncated =
-        content.length > maxLength
-          ? `${content.substring(0, maxLength)}...`
-          : content;
-      return col.copyable ? (
-        <CopyableContent content={content} truncated={truncated} />
-      ) : (
-        truncated
-      );
     }
+
+    // 2) If "truncatedSubstring" is true, show a snippet + tooltip on hover
+    if (col.truncatedSubstring && typeof content === 'string') {
+      // const maxLength = 5; // or 20, depending on your preference
+      if (col.copyable) {
+        // Combine copy icon + hover-truncated snippet
+        return (
+          <CopyableContent
+            content={content}
+            truncated={
+              <HoverTruncatedCell
+                text={content}
+                maxLength={maxLength}
+                helpCursor={false}
+              />
+            }
+          />
+        );
+      }
+      // Not copyable => just hover-truncated
+      return <HoverTruncatedCell text={content} maxLength={maxLength} />;
+    }
+
+    // 3) If column is copyable but not truncated
+    if (col.copyable && typeof content === 'string') {
+      return <CopyableContent content={content} />;
+    }
+
+    // 4) Otherwise, just return the content as is
     return content;
   };
 
@@ -300,9 +309,9 @@ function Table<T extends object>({
 
   return (
     <div className="flex flex-col h-full">
-      {/* Column toggle popover might be handled externally; removed here */}
+      {/* Table container with forced scrollbar */}
       <div
-        className="overflow-x-auto"
+        className="overflow-x-auto force-show-scrollbar"
         style={{ height: tableHeight, maxWidth: '100%' }}
       >
         <table className="w-full bg-zinc-800 border border-gray-600">
@@ -324,26 +333,20 @@ function Table<T extends object>({
                 >
                   <div className="flex items-center justify-center">
                     <span className="mr-2 truncate">
-
                       {col.headerTooltip ? (
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger>
-                                <span className="mr-2 truncate">{col.label}</span>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                {col.headerTooltip}
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        ) : (
-                          // If no tooltip, just render label
-                          <span className="mr-2 truncate">
-                            {col.label}
-                          </span>
-                        )}
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <span className="mr-2 truncate">{col.label}</span>
+                            </TooltipTrigger>
+                            <TooltipContent>{col.headerTooltip}</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      ) : (
+                        // If no tooltip, just render label
+                        <span className="mr-2 truncate">{col.label}</span>
+                      )}
                     </span>
-             
                     {col.sortable && (
                       <TooltipProvider>
                         <Tooltip>
@@ -373,7 +376,7 @@ function Table<T extends object>({
                     {col.filterable && (
                       <Popover>
                         <PopoverTrigger asChild>
-                          <Filter className="h-4 w-4 hover:bg-zinc-500 cursor-pointer  -ml-2" />
+                          <Filter className="h-4 w-4 hover:bg-zinc-500 cursor-pointer -ml-2" />
                         </PopoverTrigger>
                         <PopoverContent className="w-80 z-50">
                           <div className="grid gap-4">
@@ -510,9 +513,9 @@ function Table<T extends object>({
                       <td
                         key={col.key}
                         className="px-4 py-2 text-white text-center overflow-hidden"
-                      ></td>
+                      />
                     ))}
-                    {actions && <td></td>}
+                    {actions && <td />}
                   </tr>
                 ))}
               </>
@@ -553,6 +556,7 @@ export default Table;
 //   TooltipProvider,
 //   TooltipTrigger,
 // } from '@/components/ui/tooltip';
+// import HoverTruncatedCell from './HoverTruncatedCell';
 
 // export interface Column<T> {
 //   key: string;
@@ -566,9 +570,12 @@ export default Table;
 //   truncatedSubstring?: boolean;
 //   copyable?: boolean;
 //   selected?: boolean;
+
+//   // NEW: optional tooltip content
+//   headerTooltip?: string | React.ReactNode;
 // }
 
-// interface TableProps<T extends object> {
+// export interface TableProps<T extends object> {
 //   data: T[];
 //   columns: Column<T>[];
 //   itemsPerPage?: number;
@@ -589,6 +596,11 @@ export default Table;
 //   enableColumnToggle?: boolean;
 //   totalEntries?: number;
 //   getRowKey?: (item: T) => string | number;
+//   /**
+//    * The text to display when the table has no data.
+//    * Defaults to "No data available."
+//    */
+//   emptyTableText?: string;
 // }
 
 // function Table<T extends object>({
@@ -615,15 +627,23 @@ export default Table;
 //     const id = item[idKey];
 //     return id ? id.toString() : Math.random().toString();
 //   },
+//   /**
+//    * The text to display when the table is empty.
+//    */
+//   emptyTableText = 'No data available.',
 // }: TableProps<T>) {
 //   const [sort, setSort] = useState(
 //     initialSort || { key: '', order: 'asc' as const }
 //   );
 //   const [filters, setFilters] = useState(initialFilters || {});
 
+//   /**
+//    * Filter + Sort logic
+//    */
 //   const filteredAndSortedData = useMemo(() => {
 //     let result = [...data];
 
+//     // Filters
 //     Object.entries(filters).forEach(([key, value]) => {
 //       const column = columns.find((col) => col.key === key);
 //       if (
@@ -642,7 +662,7 @@ export default Table;
 //             return itemValue === value;
 //           } else if (typeof value === 'string') {
 //             return itemValue
-//               .toString()
+//               ?.toString()
 //               .toLowerCase()
 //               .includes(value.toLowerCase());
 //           }
@@ -651,6 +671,7 @@ export default Table;
 //       }
 //     });
 
+//     // Sorting
 //     if (sort.key) {
 //       result.sort((a, b) => {
 //         const aValue = (a as any)[sort.key];
@@ -673,6 +694,9 @@ export default Table;
 //     ? Math.ceil(totalEntries / itemsPerPage)
 //     : Math.ceil(filteredAndSortedData.length / itemsPerPage);
 
+//   /**
+//    * Pagination logic
+//    */
 //   const currentPageData = useMemo(() => {
 //     const startIndex = (currentPage - 1) * itemsPerPage;
 //     const endIndex = startIndex + itemsPerPage;
@@ -710,6 +734,9 @@ export default Table;
 //     }
 //   };
 
+//   /**
+//    * Sorting handlers
+//    */
 //   const handleSort = (key: string) => {
 //     const newSort: { key: string; order: 'asc' | 'desc' } = {
 //       key,
@@ -721,6 +748,9 @@ export default Table;
 //     }
 //   };
 
+//   /**
+//    * Filtering handlers
+//    */
 //   const handleFilter = (key: string, value: any) => {
 //     const newFilters = { ...filters, [key]: value };
 //     setFilters(newFilters);
@@ -729,9 +759,14 @@ export default Table;
 //     }
 //   };
 
-//   const isAllSelected = currentPageData.every((item) =>
-//     selectedItems.includes(getRowKey(item).toString())
-//   );
+//   /**
+//    * Selection logic
+//    */
+//   const isAllSelected =
+//     currentPageData.length > 0 &&
+//     currentPageData.every((item) =>
+//       selectedItems.includes(getRowKey(item).toString())
+//     );
 
 //   const handleSelectAllInternal = (checked: boolean) => {
 //     if (onSelectAll) {
@@ -748,6 +783,9 @@ export default Table;
 //     }
 //   };
 
+//   /**
+//    * Cell rendering logic
+//    */
 //   const renderCellContent = (item: T, col: Column<T>) => {
 //     if (col.renderCell) {
 //       return col.renderCell(item);
@@ -775,14 +813,24 @@ export default Table;
 //     return content;
 //   };
 
+//   /**
+//    * We track how many rows we need to fill to maintain table height,
+//    * especially if there's pagination.
+//    */
 //   const visibleRowsCount = currentPageData.length;
 //   const emptyRowsCount = Math.max(0, itemsPerPage - visibleRowsCount);
 
+//   /**
+//    * Compute total number of columns for spanning the "empty table" row
+//    */
+//   const totalColumnCount =
+//     columns.length + (onSelectAll ? 1 : 0) + (actions ? 1 : 0);
+
 //   return (
 //     <div className="flex flex-col h-full">
-//       {/* Remove the column toggle popover as it's now handled in DocumentsTable */}
+//       {/* Column toggle popover might be handled externally; removed here */}
 //       <div
-//         className="overflow-x-auto"
+//         className="overflow-x-auto force-show-scrollbar"
 //         style={{ height: tableHeight, maxWidth: '100%' }}
 //       >
 //         <table className="w-full bg-zinc-800 border border-gray-600">
@@ -803,14 +851,34 @@ export default Table;
 //                   className="px-4 py-2 text-white text-center overflow-hidden"
 //                 >
 //                   <div className="flex items-center justify-center">
-//                     <span className="mr-2 truncate">{col.label}</span>
+//                     <span className="mr-2 truncate">
+
+//                       {col.headerTooltip ? (
+//                           <TooltipProvider>
+//                             <Tooltip>
+//                               <TooltipTrigger>
+//                                 <span className="mr-2 truncate">{col.label}</span>
+//                               </TooltipTrigger>
+//                               <TooltipContent>
+//                                 {col.headerTooltip}
+//                               </TooltipContent>
+//                             </Tooltip>
+//                           </TooltipProvider>
+//                         ) : (
+//                           // If no tooltip, just render label
+//                           <span className="mr-2 truncate">
+//                             {col.label}
+//                           </span>
+//                         )}
+//                     </span>
+
 //                     {col.sortable && (
 //                       <TooltipProvider>
 //                         <Tooltip>
 //                           <TooltipTrigger>
 //                             <button
 //                               onClick={() => handleSort(col.key)}
-//                               className="p-1"
+//                               className="p-1 mt-0.5 -ml-3"
 //                             >
 //                               {sort.key === col.key && sort.order === 'asc' ? (
 //                                 <ChevronUpSquare className="h-4 w-4 hover:bg-zinc-500 cursor-pointer" />
@@ -833,7 +901,7 @@ export default Table;
 //                     {col.filterable && (
 //                       <Popover>
 //                         <PopoverTrigger asChild>
-//                           <Filter className="h-4 w-4 hover:bg-zinc-500 cursor-pointer ml-2" />
+//                           <Filter className="h-4 w-4 hover:bg-zinc-500 cursor-pointer  -ml-2" />
 //                         </PopoverTrigger>
 //                         <PopoverContent className="w-80 z-50">
 //                           <div className="grid gap-4">
@@ -918,49 +986,65 @@ export default Table;
 //             </tr>
 //           </thead>
 //           <tbody>
-//             {currentPageData.map((item) => (
-//               <tr key={getRowKey(item)}>
-//                 {onSelectItem && (
-//                   <td className="w-[50px] px-4 py-2 text-white text-center">
-//                     <Checkbox
-//                       checked={selectedItems.includes(
-//                         getRowKey(item).toString()
-//                       )}
-//                       onCheckedChange={(checked: boolean | 'indeterminate') =>
-//                         handleSelectItemInternal(item, checked as boolean)
-//                       }
-//                     />
-//                   </td>
-//                 )}
-//                 {columns.map((col) => (
-//                   <td
-//                     key={col.key}
-//                     className="px-4 py-2 text-white text-center overflow-hidden"
-//                   >
-//                     <div className="overflow-x-auto whitespace-nowrap">
-//                       {renderCellContent(item, col)}
-//                     </div>
-//                   </td>
-//                 ))}
-//                 {actions && (
-//                   <td className="w-[110px] px-4 py-2 text-white text-right">
-//                     {actions(item)}
-//                   </td>
-//                 )}
+//             {currentPageData.length === 0 ? (
+//               <tr>
+//                 <td
+//                   colSpan={totalColumnCount}
+//                   className="px-4 py-4 text-center text-white"
+//                 >
+//                   {emptyTableText}
+//                 </td>
 //               </tr>
-//             ))}
-//             {Array.from({ length: emptyRowsCount }).map((_, index) => (
-//               <tr key={`empty-${index}`} style={{ height: '50px' }}>
-//                 {onSelectItem && <td></td>}
-//                 {columns.map((col) => (
-//                   <td
-//                     key={col.key}
-//                     className="px-4 py-2 text-white text-center overflow-hidden"
-//                   ></td>
+//             ) : (
+//               <>
+//                 {currentPageData.map((item) => (
+//                   <tr key={getRowKey(item)}>
+//                     {onSelectItem && (
+//                       <td className="w-[50px] px-4 py-2 text-white text-center">
+//                         <Checkbox
+//                           checked={selectedItems.includes(
+//                             getRowKey(item).toString()
+//                           )}
+//                           onCheckedChange={(
+//                             checked: boolean | 'indeterminate'
+//                           ) =>
+//                             handleSelectItemInternal(item, checked as boolean)
+//                           }
+//                         />
+//                       </td>
+//                     )}
+//                     {columns.map((col) => (
+//                       <td
+//                         key={col.key}
+//                         className="px-4 py-2 text-white text-center overflow-hidden"
+//                       >
+//                         <div className="overflow-x-auto whitespace-nowrap">
+//                           {renderCellContent(item, col)}
+//                         </div>
+//                       </td>
+//                     ))}
+//                     {actions && (
+//                       <td className="w-[110px] px-4 py-2 text-white text-right">
+//                         {actions(item)}
+//                       </td>
+//                     )}
+//                   </tr>
 //                 ))}
-//                 {actions && <td></td>}
-//               </tr>
-//             ))}
+
+//                 {Array.from({ length: emptyRowsCount }).map((_, index) => (
+//                   <tr key={`empty-${index}`} style={{ height: '50px' }}>
+//                     {onSelectItem && <td></td>}
+//                     {columns.map((col) => (
+//                       <td
+//                         key={col.key}
+//                         className="px-4 py-2 text-white text-center overflow-hidden"
+//                       ></td>
+//                     ))}
+//                     {actions && <td></td>}
+//                   </tr>
+//                 ))}
+//               </>
+//             )}
 //           </tbody>
 //         </table>
 //       </div>
@@ -978,5 +1062,4 @@ export default Table;
 //   );
 // }
 
-// export type { TableProps };
 // export default Table;

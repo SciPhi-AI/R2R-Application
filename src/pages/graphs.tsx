@@ -378,7 +378,10 @@ const KnowledgeGraphsPage: React.FC = () => {
       if (!client) throw new Error('No authenticated client');
 
       // By default, run actual extraction:
-      const resp = await client.documents.extract({id: docId, runType: 'run'});
+      const resp = await client.documents.extract({
+        id: docId,
+        runType: 'run',
+      });
       console.log('Extraction response => ', resp);
 
       showToast(
@@ -517,6 +520,7 @@ const KnowledgeGraphsPage: React.FC = () => {
       label: 'Title',
       truncatedSubstring: true,
       copyable: true,
+      headerTooltip: 'The title of the document',
     },
     {
       key: 'id',
@@ -547,7 +551,9 @@ const KnowledgeGraphsPage: React.FC = () => {
     // },
     {
       key: 'extractionStatus',
-      label: 'Extraction',
+      label: 'Extraction Status',
+      headerTooltip:
+        'The status of the document extraction, which follows ingestion',
       filterable: true,
       filterType: 'multiselect',
       filterOptions: ['success', 'failed', 'pending', 'processing', 'enriched'],
@@ -605,14 +611,14 @@ const KnowledgeGraphsPage: React.FC = () => {
     { key: 'id', label: 'Entity ID', truncate: true },
     { key: 'name', label: 'Name' },
     { key: 'category', label: 'Category' },
-    { key: 'description', label: 'Description' },
+    { key: 'description', label: 'Description', truncatedSubstring: true },
   ];
   const relationshipColumns: Column<RelationshipResponse>[] = [
     { key: 'id', label: 'Relationship ID', truncate: true },
     { key: 'subject', label: 'Subject' },
     { key: 'predicate', label: 'Predicate' },
     { key: 'object', label: 'Object' },
-    { key: 'description', label: 'Description' },
+    { key: 'description', label: 'Description', truncatedSubstring: true },
   ];
   const communityColumns: Column<CommunityResponse>[] = [
     { key: 'id', label: 'Community ID', truncate: true },
@@ -798,10 +804,13 @@ const KnowledgeGraphsPage: React.FC = () => {
           </div>
 
           {/* Tabs for each area */}
-          <Tabs value={activeTab} onValueChange={
-            // @ts-expect-error Tab value type mismatch
-            (val) => setActiveTab(val)}
-            >
+          <Tabs
+            value={activeTab}
+            onValueChange={
+              // @ts-expect-error Tab value type mismatch
+              (val) => setActiveTab(val)
+            }
+          >
             <TabsList className="grid w-full grid-cols-6">
               {/* <TabsTrigger value="overview">Overview</TabsTrigger> */}
               <TabsTrigger value="documents">Documents</TabsTrigger>

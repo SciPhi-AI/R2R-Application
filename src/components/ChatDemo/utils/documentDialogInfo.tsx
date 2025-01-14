@@ -793,7 +793,11 @@ const ExpandableDocumentEntities: React.FC<{
   };
 
   if (!entities || entities.length === 0) {
-    return <div className="pl-2 pt-2">No entities available, ensure `extraction` completed successfully.</div>;
+    return (
+      <div className="pl-2 pt-2">
+        No entities available, ensure `extraction` completed successfully.
+      </div>
+    );
   }
 
   return (
@@ -919,8 +923,12 @@ const ExpandableDocumentRelationships: React.FC<{
 
   if (!relationships || relationships.length === 0) {
     // return <div>No relationships available.</div>;
-    return <div className="pl-2 pt-2">No relationships are available, ensure `extraction` completed successfully.</div>;
-
+    return (
+      <div className="pl-2 pt-2">
+        No relationships are available, ensure `extraction` completed
+        successfully.
+      </div>
+    );
   }
 
   return (

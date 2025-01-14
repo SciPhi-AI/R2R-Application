@@ -95,6 +95,7 @@ const Index: React.FC = () => {
       }
 
       setDocuments(allDocs);
+      setLoading(false);
     } catch (error) {
       console.error('Error fetching documents:', error);
       setLoading(false);
@@ -123,13 +124,11 @@ const Index: React.FC = () => {
     const pending = documents.filter(
       (doc) =>
         (doc.ingestionStatus !== IngestionStatus.SUCCESS &&
-        doc.ingestionStatus !== IngestionStatus.ENRICHED &&
-        doc.ingestionStatus !== IngestionStatus.FAILED)
-        ||
-        (
-          doc.extractionStatus !== IngestionStatus.SUCCESS &&
-          doc.extractionStatus !== IngestionStatus.FAILED
-        )
+          doc.ingestionStatus !== IngestionStatus.ENRICHED &&
+          doc.ingestionStatus !== IngestionStatus.FAILED) ||
+        (doc.extractionStatus !== IngestionStatus.SUCCESS &&
+          doc.extractionStatus !== IngestionStatus.ENRICHED &&
+          doc.extractionStatus !== IngestionStatus.FAILED)
     );
     setPendingDocuments(pending.map((doc) => doc.id));
 
@@ -223,19 +222,6 @@ const Index: React.FC = () => {
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
-  const state = {
-    steps: [
-      {
-        target: '.my-first-step',
-        content: 'This is my awesome feature!',
-      },
-      {
-        target: '.my-other-step',
-        content: 'This another awesome feature!',
-      },
-    ],
-  };
-  const { steps } = state;
 
   return (
     <>

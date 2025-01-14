@@ -41,7 +41,10 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
 
   const { getClient } = useUserContext();
 
-  const handleDocumentUpload = async (files: File[]) => {
+  const handleDocumentUpload = async (
+    files: File[],
+    hiRes?: boolean = false
+  ) => {
     setIsUploading(true);
     const client = await getClient();
     if (!client) {
@@ -57,6 +60,7 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
       client.documents
         .create({
           file: file,
+          ingestionMode: hiRes ? 'hi-res' : 'fast',
         })
         .catch((err) => {
           showToast({
@@ -147,19 +151,19 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
   return (
     <>
       {/* <Popover> */}
-        {/* <PopoverTrigger asChild> */}
-          <Button
-            className="pl-2 pr-2 py-2 px-4"
-            color="filled"
-            shape="rounded"
-            disabled={isUploading}
-            style={{ zIndex: 20, minWidth: '100px' }}
-            onClick={() => setIsUploadDialogOpen(true)}
-          >
-            <Plus className="mr-2 h-4 w-4 mt-1" />
-            {isUploading ? 'Uploading...' : 'New'}
-          </Button>
-        {/* </PopoverTrigger>
+      {/* <PopoverTrigger asChild> */}
+      <Button
+        className="pl-2 pr-2 py-2 px-4"
+        color="filled"
+        shape="rounded"
+        disabled={isUploading}
+        style={{ zIndex: 20, minWidth: '100px' }}
+        onClick={() => setIsUploadDialogOpen(true)}
+      >
+        <Plus className="mr-2 h-4 w-4 mt-1" />
+        {isUploading ? 'Uploading...' : 'New'}
+      </Button>
+      {/* </PopoverTrigger>
         <PopoverContent align="start" className="w-[150px] p-1">
           <div className="flex flex-col gap-1">
             <Button
