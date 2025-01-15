@@ -182,6 +182,12 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
       renderCell: (doc) => new Date(doc.updatedAt).toLocaleString(),
       selected: false,
     },
+    {
+      key: 'summary',
+      label: 'Summary',
+      truncatedSubstring: true,
+      selected: true,
+    }
   ];
 
   const renderActions = (doc: DocumentResponse) =>

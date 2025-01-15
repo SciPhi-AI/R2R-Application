@@ -28,7 +28,8 @@ const Index: React.FC = () => {
       documentType: false,
       metadata: false,
       version: false,
-      createdAt: true,
+      createdAt: false,
+      summary: true,
       updatedAt: false,
     }
   );

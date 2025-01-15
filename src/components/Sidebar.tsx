@@ -144,6 +144,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                   conversations.map((conv) => (
                     <button
                       key={conv.id}
+                      // @ts-ignore
                       onClick={() => onConversationSelect(conv.id)}
                       className="w-full text-left p-3 rounded bg-zinc-700 hover:bg-zinc-600 transition flex flex-col"
                     >

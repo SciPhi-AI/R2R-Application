@@ -431,6 +431,7 @@ export const Result: FC<{
         // Store the final assistant message into the conversation
         try {
           await client.conversations.addMessage({
+            // @ts-ignore
             id: currentConversationId,
             role: 'assistant',
             content: assistantResponse,
