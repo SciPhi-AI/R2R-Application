@@ -87,7 +87,7 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
     showToast({
       variant: 'success',
       title: 'Upload Started',
-      description: 'Files are being uploaded in the background.',
+      description: 'The document ingestion has been requested, refreshing documents...',
     });
 
     if (onUploadSuccess) {

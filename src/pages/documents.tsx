@@ -60,20 +60,21 @@ const Index: React.FC = () => {
         limit: PAGE_SIZE,
       });
 
-      if (firstBatch.results.length > 0) {
-        totalCount = firstBatch.totalEntries;
-        setTotalEntries(totalCount);
+      // if (firstBatch.results.length > 0) {
+      totalCount = firstBatch.totalEntries;
+      setTotalEntries(totalCount);
 
-        allDocs = firstBatch.results;
-        console.log('allDocs = ', allDocs);
-        setDocuments(allDocs);
+      allDocs = firstBatch.results;
+      console.log('allDocs = ', allDocs);
+      setDocuments(allDocs);
 
-        // End loading spinner after first batch
-        setLoading(false);
-      } else {
-        setLoading(false);
-        return;
-      }
+      // End loading spinner after first batch
+      setLoading(false);
+      // } 
+      // else {
+        // setLoading(false);
+        // return;
+      // }
 
       offset += PAGE_SIZE;
 
@@ -232,8 +233,7 @@ const Index: React.FC = () => {
             <div className="mx-auto max-w-6xl mb-12 p-4 h-full">
               <h1
                 className={
-                  'text-2xl font-bold text-white flex items-center gap-2 mb-4' +
-                  (loading ? ' -ml-2' : '')
+                  'text-2xl font-bold text-white flex items-center gap-2 mb-4'
                 }
               >
                 Documents
