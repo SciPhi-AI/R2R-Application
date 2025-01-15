@@ -278,15 +278,6 @@ const Index: React.FC = () => {
           onConversationSelect={handleConversationSelect}
         />
 
-        {/* top_k={top_k}
-          setTop_k={setTop_k}
-          maxTokensToSample={maxTokensToSample}
-          setmaxTokensToSample={setmaxTokensToSample}
-          temperature={temperature}
-          setTemperature={setTemperature}
-          topP={topP}
-          setTopP={setTopP} */}
-
         {/* Main Content */}
         <div
           className={`main-content-wrapper ${sidebarIsOpen ? '' : 'sidebar-closed'}`}

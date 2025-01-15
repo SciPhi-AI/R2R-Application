@@ -98,17 +98,21 @@ export const DeleteButton: React.FC<ExtendedDeleteButtonProps> = ({
         onSuccess();
         router.push('/auth/login');
       } else if (selectedDocumentIds.length > 0) {
+        console.log('submitting delete requests for', selectedDocumentIds);
         for (const documentId of selectedDocumentIds) {
           await client.documents.delete({
             id: documentId,
           });
         }
+        console.log('showing toast');
         showToast({
           variant: 'success',
           title: 'Documents deleted',
-          description: 'The selected documents have been successfully deleted',
+          description: 'The selected documents have been successfully deleted, refreshing documents...',
         });
+        console.log('calling onSuccess');
         onSuccess();
+        console.log('calling onDelete');
         onDelete();
       }
     } catch (error: unknown) {

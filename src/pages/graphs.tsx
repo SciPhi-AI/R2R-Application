@@ -669,7 +669,7 @@ const KnowledgeGraphsPage: React.FC = () => {
                 rel="noopener noreferrer"
                 className="inline-flex items-center text-accent-base"
               >
-                <ExternalLink size={18} />
+                <ExternalLink size={18} className="-mt-0.5" />
               </a>
             </h1>
 

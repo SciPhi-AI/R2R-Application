@@ -880,7 +880,7 @@ const ExpandableEntity: React.FC<{
             </p>
           </div>
 
-          <div className="bg-zinc-800 rounded-lg">
+          {/* <div className="bg-zinc-800 rounded-lg">
             <div
               className="flex items-center justify-between p-4 cursor-pointer"
               onClick={toggleMetadata}
@@ -903,7 +903,7 @@ const ExpandableEntity: React.FC<{
                 )}
               </button>
             </div>
-          </div>
+          </div> */}
         </div>
       )}
     </div>
@@ -1016,7 +1016,7 @@ const ExpandableRelationship: React.FC<{
           </div>
 
           <div className="bg-zinc-800 rounded-lg">
-            <div
+            {/* <div
               className="flex items-center justify-between p-4 cursor-pointer"
               onClick={toggleMetadata}
             >
@@ -1036,8 +1036,8 @@ const ExpandableRelationship: React.FC<{
                     )}
                   </div>
                 )}
-              </button>
-            </div>
+              </button> 
+            </div>*/}
           </div>
         </div>
       )}
