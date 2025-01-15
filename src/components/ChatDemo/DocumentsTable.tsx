@@ -70,7 +70,8 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
 }) => {
   const { toast } = useToast();
   const [selectedDocumentId, setSelectedDocumentId] = useState('');
-  const [isDocumentInfoDialogOpen, setIsDocumentInfoDialogOpen] = useState(false);
+  const [isDocumentInfoDialogOpen, setIsDocumentInfoDialogOpen] =
+    useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
   const handleSelectAllInternal = (selected: boolean) => {
@@ -187,7 +188,7 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
       label: 'Summary',
       truncatedSubstring: true,
       selected: true,
-    }
+    },
   ];
 
   const renderActions = (doc: DocumentResponse) =>
@@ -238,9 +239,7 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
         <>
           {/* Show a subtle "Refreshing..." message if we do have data and are refetching */}
           {isRefetching && documents.length > 0 && (
-            <div className="mb-2 text-sm text-gray-400">
-              Refreshing data...
-            </div>
+            <div className="mb-2 text-sm text-gray-400">Refreshing data...</div>
           )}
 
           <div className="flex justify-between items-center mb-4">
@@ -261,7 +260,10 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
                   </div>
                   <div className="grid gap-2">
                     {columns.map((col) => (
-                      <div key={col.key} className="flex items-center space-x-2">
+                      <div
+                        key={col.key}
+                        className="flex items-center space-x-2"
+                      >
                         <Checkbox
                           id={`column-toggle-${col.key}`}
                           checked={visibleColumns[col.key]}
@@ -301,6 +303,9 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
                   onUploadSuccess={async () => {
                     await handleRefreshWithDelay();
                     onSelectAll(false);
+                    await handleRefreshWithDelay();
+                    await handleRefreshWithDelay();
+                    await handleRefreshWithDelay();
                     return [];
                   }}
                   showToast={toast}

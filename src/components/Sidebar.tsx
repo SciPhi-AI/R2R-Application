@@ -1,6 +1,7 @@
 import { ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react';
-import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import React, { useState, useEffect } from 'react';
+
 import SingleSwitch from '@/components/ChatDemo/SingleSwitch';
 import {
   Accordion,
@@ -25,11 +26,11 @@ import { SidebarProps } from '@/types';
 // Example: If your conversation objects have these fields:
 interface Conversation {
   id: string;
-  name?: string;         // some conversations might have a name
+  name?: string; // some conversations might have a name
   createdAt: string;
-  lastMessage?: string;  // optional: last message snippet
+  lastMessage?: string; // optional: last message snippet
 }
-const LAST_N_CONVERSATIONS_TO_LIST = 5
+const LAST_N_CONVERSATIONS_TO_LIST = 5;
 
 const Sidebar: React.FC<SidebarProps> = ({
   isOpen,
@@ -92,19 +93,24 @@ const Sidebar: React.FC<SidebarProps> = ({
           limit: 25,
         });
         // Example: If the raw data is in `response.results`
-        const fetched = response.results.map((c: any) => ({
-          id: c.id,
-          // name: c.name?.slice(0, 20) + (c.name?.length > 25 ? "..." : ""), // Example: remove quotes
-          //  modify above to remove leading and trailing quotes
-          name: c.name?.replace(/^"|"$/g, '').slice(0, 20) + (c.name?.length > 25 ? "..." : ""),
-          createdAt: c.created_at || c.createdAt,
-          // If you have a lastMessage field or want to retrieve from messages
-          lastMessage: c.last_message || 'No messages yet',
-        })).filter(
-          // Filter out conversations without a name
-          (c: Conversation) => c.name != "undefined"
-        ).slice(0, LAST_N_CONVERSATIONS_TO_LIST);
-        console.log('fetched = ', fetched)
+        const fetched = response.results
+          .map((c: any) => ({
+            id: c.id,
+            // name: c.name?.slice(0, 20) + (c.name?.length > 25 ? "..." : ""), // Example: remove quotes
+            //  modify above to remove leading and trailing quotes
+            name:
+              c.name?.replace(/^"|"$/g, '').slice(0, 20) +
+              (c.name?.length > 25 ? '...' : ''),
+            createdAt: c.created_at || c.createdAt,
+            // If you have a lastMessage field or want to retrieve from messages
+            lastMessage: c.last_message || 'No messages yet',
+          }))
+          .filter(
+            // Filter out conversations without a name
+            (c: Conversation) => c.name != 'undefined'
+          )
+          .slice(0, LAST_N_CONVERSATIONS_TO_LIST);
+        console.log('fetched = ', fetched);
         setConversations(fetched);
       } catch (error) {
         console.error('Error fetching conversations:', error);
@@ -114,7 +120,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     fetchConversations();
   }, [getClient]);
 
-  // 
+  //
   // Render the sidebar (collapsible). Add a conversation list that is visually appealing
   //
   return (

@@ -46,7 +46,9 @@ export const Result: FC<{
   messages: Message[];
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
   selectedConversationId: string | null;
-  setSelectedConversationId: React.Dispatch<React.SetStateAction<string | null>>;
+  setSelectedConversationId: React.Dispatch<
+    React.SetStateAction<string | null>
+  >;
 }> = ({
   query,
   setQuery,
@@ -91,7 +93,9 @@ export const Result: FC<{
 
   // For PDF previews
   const [pdfPreviewOpen, setPdfPreviewOpen] = useState(false);
-  const [pdfPreviewDocumentId, setPdfPreviewDocumentId] = useState<string | null>(null);
+  const [pdfPreviewDocumentId, setPdfPreviewDocumentId] = useState<
+    string | null
+  >(null);
   const [initialPage, setInitialPage] = useState<number>(1);
 
   const { getClient } = useUserContext();
@@ -126,7 +130,8 @@ export const Result: FC<{
     // 2) enough time has passed since last scroll up (the user let go)
     const userIsNearBottom = distanceFromBottom < 50;
     const now = Date.now();
-    const enoughTimeSinceScrollUp = now - lastScrollUpTime > SCROLL_BACK_DELAY_MS;
+    const enoughTimeSinceScrollUp =
+      now - lastScrollUpTime > SCROLL_BACK_DELAY_MS;
 
     if (userIsNearBottom || enoughTimeSinceScrollUp) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -437,7 +442,10 @@ export const Result: FC<{
             content: assistantResponse,
           });
         } catch (convError) {
-          console.error('Error adding assistant message to conversation:', convError);
+          console.error(
+            'Error adding assistant message to conversation:',
+            convError
+          );
         }
       }
     } catch (err: unknown) {
@@ -536,14 +544,17 @@ export const Result: FC<{
         <DefaultQueries setQuery={setQuery} mode={mode} />
       )}
 
-      {hasAttemptedFetch && uploadedDocuments?.length === 0 && pipelineUrl && mode === 'rag' && (
-        <div className="absolute inset-4 flex items-center justify-center backdrop-blur-sm">
-          <div className="flex items-center p-4 bg-white shadow-2xl rounded text-black font-medium gap-4">
-            Please upload at least one document to submit queries.&nbsp;
-            <UploadButton setUploadedDocuments={setUploadedDocuments} />
+      {hasAttemptedFetch &&
+        uploadedDocuments?.length === 0 &&
+        pipelineUrl &&
+        mode === 'rag' && (
+          <div className="absolute inset-4 flex items-center justify-center backdrop-blur-sm">
+            <div className="flex items-center p-4 bg-white shadow-2xl rounded text-black font-medium gap-4">
+              Please upload at least one document to submit queries.&nbsp;
+              <UploadButton setUploadedDocuments={setUploadedDocuments} />
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
       <PdfPreviewDialog
         id={pdfPreviewDocumentId || ''}
@@ -1022,11 +1033,11 @@ export const Result: FC<{
 //    */
 //   return (
 //     <div className="flex flex-col gap-8 h-full">
-//       {/* 
+//       {/*
 //         The container that scrolls:
 //         - attach containerRef
 //         - define overflow-y-auto so it can scroll
-//         - set some height or let flex-based layout control it 
+//         - set some height or let flex-based layout control it
 //       */}
 //       <div
 //         ref={containerRef}

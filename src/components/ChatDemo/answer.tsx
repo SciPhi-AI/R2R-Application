@@ -93,8 +93,7 @@ export const Answer: FC<{
         let kgLocalResult: KGSearchResult[] = [];
         try {
           kgLocalResult = JSON.parse(message.sources.kg);
-        }
-        catch (error) {
+        } catch (error) {
           console.error('Failed to parse kg sources:', error);
         }
         const entitiesArray = kgLocalResult.filter(
