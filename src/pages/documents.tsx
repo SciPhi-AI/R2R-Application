@@ -71,10 +71,10 @@ const Index: React.FC = () => {
 
       // End loading spinner after first batch
       setLoading(false);
-      // } 
+      // }
       // else {
-        // setLoading(false);
-        // return;
+      // setLoading(false);
+      // return;
       // }
 
       offset += PAGE_SIZE;

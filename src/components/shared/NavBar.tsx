@@ -67,7 +67,7 @@ const NavItems: React.FC<NavItemsProps> = ({
     <nav>
       <div className="flex items-center space-x-2 ">
         {items.map((item) => (
-          <div >
+          <div>
             <NavItem
               key={item.path}
               href={item.path}

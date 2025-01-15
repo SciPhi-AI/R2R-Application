@@ -13,14 +13,10 @@ import {
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { User } from 'r2r-js';
-import {
-  useState,
-  useEffect,
-  useCallback,
-  forwardRef,
-} from 'react';
+import { useState, useEffect, useCallback, forwardRef } from 'react';
 import { ReactTyped } from 'react-typed';
 
+import { BeaconComponent } from '@/components/BeaconComponent';
 import Layout from '@/components/Layout';
 import { Logo } from '@/components/shared/Logo';
 import {
@@ -42,8 +38,6 @@ import {
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/components/ui/use-toast';
 import { useUserContext } from '@/context/UserContext';
-import { BeaconComponent } from '@/components/BeaconComponent';
-
 
 const HomePage = () => {
   const router = useRouter();
@@ -55,7 +49,6 @@ const HomePage = () => {
   const [apiKeys, setApiKeys] = useState<[] | null>(null);
   const [userProfile, setUserProfile] = useState<User | null>(null);
   const { toast } = useToast();
-
 
   // State to manage Create Key modal
   const [isCreateKeyModalOpen, setIsCreateKeyModalOpen] = useState(false);
@@ -314,7 +307,7 @@ const HomePage = () => {
   }
 
   return (
-    <Layout >
+    <Layout>
       <main className="w-full flex flex-col container h-screen-[calc(100%-4rem)]">
         <div className="relative bg-zinc-900 p-5">
           {isBannerVisible && (
@@ -348,9 +341,7 @@ const HomePage = () => {
             </h1>
             <div className="mt-4 text-lg text-gray-100 text-center pb-10">
               <ReactTyped
-                strings={[
-                  "We're taking RAG to the next level!",
-                ]}
+                strings={["We're taking RAG to the next level!"]}
                 typeSpeed={40}
                 backSpeed={30}
                 backDelay={800}
@@ -370,10 +361,10 @@ const HomePage = () => {
                     <div className="flex items-start space-x-3">
                       <Link href="/documents" className="-mr-1">
                         <FileText className="w-5 h-5 text-accent-base documents-index" />
-                        </Link>
+                      </Link>
                       <div>
                         <h3 className="text-sm font-semibold mb-1 ">
-                          <Link href="/documents" > Documents </Link>
+                          <Link href="/documents"> Documents </Link>
                         </h3>
                         <p className="text-xs text-gray-500 dark:text-gray-400">
                           Upload, update, and delete documents and their
@@ -666,9 +657,7 @@ const HomePage = () => {
                         <td className="py-2 pr-4 break-all">
                           {key.description || '—'}
                         </td>
-                        <td className="py-2 pr-4 break-all">
-                          {key.publicKey}
-                        </td>
+                        <td className="py-2 pr-4 break-all">{key.publicKey}</td>
                         <td className="py-2 pr-4 break-all">{key.keyId}</td>
                         <td className="py-2 pr-4">
                           {new Date(key.updatedAt).toLocaleString()}

@@ -1,19 +1,21 @@
-
 import Head from 'next/head';
+import { useRouter } from 'next/router';
+import React, {
+  useMemo,
+  useState,
+  useCallback,
+  useEffect,
+  ReactNode,
+} from 'react';
+import Joyride, { Step, CallBackProps, STATUS } from 'react-joyride';
 
+import { BeaconComponent } from '@/components/BeaconComponent';
 import { Footer } from '@/components/shared/Footer';
 import { Navbar } from '@/components/shared/NavBar';
 import { Toaster } from '@/components/ui/toaster';
 // components/Layout.tsx
 
-import React, { useMemo, useState, useCallback, useEffect, ReactNode} from 'react';
-import { useRouter } from 'next/router';
-import Joyride, { Step, CallBackProps, STATUS } from 'react-joyride';
 import { useJoyrideContext } from '@/context/JoyrideContext';
-
-// If you want a custom Beacon (like a pulsing circle), import it:
-import BeaconComponent from '@/components/BeaconComponent'; 
-// Or just skip if not needed
 
 type Props = {
   children: ReactNode;
@@ -44,43 +46,42 @@ const Layout: React.FC<Props> = ({
         {
           target: '.documents-index',
           content: 'Start by uploading your first document here!',
-          placement: "left"
+          placement: 'left',
         },
         {
           target: '.collections-index',
           content: 'Manage your documents with collections',
-          placement: "left"
+          placement: 'left',
         },
         {
           target: '.graphs-index',
           content: 'Build knowledge graphs from input documents',
-          placement: "left"
+          placement: 'left',
         },
         {
           target: '.chat-index',
           content: 'Get RAG powered Q&A and agentic responses',
-          placement: "left"
+          placement: 'left',
         },
         {
           target: '.monthly-requests',
           content: 'Monitor your monthly usage here',
-          placement: "top"
+          placement: 'top',
         },
         {
           target: '.storage-usage',
           content: 'Track total storage here',
-          placement: "top"
+          placement: 'top',
         },
         {
           target: '.create-new-key-button',
           content: 'Developers start here - create an API key!',
-          placement: "top"
+          placement: 'top',
         },
         {
           target: '.upgrade-account-button',
           content: 'Click here to upgrade your account when ready.',
-          placement: "top"
-
+          placement: 'top',
         },
       ],
       // '/documents': [
@@ -93,7 +94,6 @@ const Layout: React.FC<Props> = ({
     }),
     []
   );
-
 
   // If the user has already completed or skipped a route, or if skipAll is on, we skip
   const stepsForRoute = routeSteps[router.pathname] || [];
@@ -111,7 +111,7 @@ const Layout: React.FC<Props> = ({
     // Delay Joyride for 2 seconds (2000ms)
     const timer = setTimeout(() => {
       setShouldStartTour(true);
-    }, 5000);
+    }, 5);
 
     // Cleanup in case user navigates away quickly
     return () => clearTimeout(timer);
@@ -123,7 +123,8 @@ const Layout: React.FC<Props> = ({
       const { status } = data;
       const finishedStatuses = [STATUS.FINISHED, STATUS.SKIPPED];
 
-      if (finishedStatuses.includes(status)) {
+      // @ts-ignore
+      if (finishedStatuses?.includes(status)) {
         // Mark the entire route as completed
         markTourAsCompleted(router.pathname);
         setRunJoyride(false);
@@ -131,7 +132,7 @@ const Layout: React.FC<Props> = ({
     },
     [router.pathname, markTourAsCompleted]
   );
-  
+
   useEffect(() => {
     // Let React know we've mounted
     setHasMounted(true);
@@ -169,7 +170,6 @@ const Layout: React.FC<Props> = ({
     );
   }
 
-  
   // Otherwise, render the normal layout
   return (
     <div className="flex flex-col min-h-screen bg-zinc-900">
@@ -178,7 +178,7 @@ const Layout: React.FC<Props> = ({
         run={shouldStartTour && shouldRunTour && runJoyride}
         continuous
         showSkipButton
-        beaconComponent={BeaconComponent}
+        // beaconComponent={BeaconComponent}
         callback={handleJoyrideCallback}
         tooltipComponent={(props) => {
           const {
@@ -191,34 +191,60 @@ const Layout: React.FC<Props> = ({
           } = props;
           return (
             <div
-            {...tooltipProps}
-            className="bg-black text-white p-4 rounded-md shadow-lg w-96"
-          >
-                  {step.title && <h4 className="text-lg font-semibold mb-2">{step.title}</h4>}
+              {...tooltipProps}
+              className="bg-black text-white p-4 rounded-md shadow-lg w-96"
+            >
+              {step.title && (
+                <h4 className="text-lg font-semibold mb-2">{step.title}</h4>
+              )}
               <div>{step.content}</div>
-              <div style={{ marginTop: 20, display: 'flex', justifyContent: 'space-between' }}>
+              <div
+                style={{
+                  marginTop: 20,
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                }}
+              >
                 <button {...skipProps}>Skip Tour</button>
                 <button onClick={() => setSkipAllJoyrides(true)}>
                   Disable All Tours
                 </button>
                 <div>
                   {/* <button {...backProps}>Back</button> */}
-                  <button {...primaryProps} className="border border-white text-white px-4 py-1 rounded hover:bg-gray-700 transition-colors">Next</button>
+                  <button
+                    {...primaryProps}
+                    className="border border-white text-white px-4 py-1 rounded hover:bg-gray-700 transition-colors"
+                  >
+                    Next
+                  </button>
                 </div>
               </div>
             </div>
           );
         }}
         styles={{
-          options: { zIndex: 9999, 
-            backgroundColor: 'rgba(0, 0, 0, 0)'
-           },
+          options: { zIndex: 9999, backgroundColor: 'rgba(0, 0, 0, 0)' },
+          beaconOuter: {
+            marginLeft: '-2px',
+            // borderColor: "#007948",
+          },
+          beaconInner: {
+            backgroundColor: '#007948',
+          },
+          //  beaconInner:{
+          //   backgroundColor: "#818cf8",
+          //  },
+          // //  beaconOuter:{
+          // //   backgroundColor: "#818cf8",
+          // //  },
+          // // beacon:{
+          // //   backgroundColor: "#818cf8",
+          // // },
           tooltip: {
-            width:"400px",
-            backgroundColor: '#000', 
+            width: '400px',
+            backgroundColor: '#000',
             opacity: 1,
           },
-          
         }}
       />
 

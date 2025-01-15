@@ -108,7 +108,8 @@ export const DeleteButton: React.FC<ExtendedDeleteButtonProps> = ({
         showToast({
           variant: 'success',
           title: 'Documents deleted',
-          description: 'The selected documents have been successfully deleted, refreshing documents...',
+          description:
+            'The selected documents have been successfully deleted, refreshing documents...',
         });
         console.log('calling onSuccess');
         onSuccess();

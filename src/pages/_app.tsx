@@ -7,7 +7,7 @@ import { ThemeProvider } from '@/components/ThemeProvider';
 import { UserProvider, useUserContext } from '@/context/UserContext';
 import '@/styles/globals.css';
 import { initializePostHog } from '@/lib/posthog-client';
-import { JoyrideProvider } from '@/context/JoyrideContext';  // <--- our new context
+import { JoyrideProvider } from '@/context/JoyrideContext'; // <--- our new context
 
 function MyAppContent({ Component, pageProps }: AppProps) {
   const { setTheme } = useTheme();
@@ -90,7 +90,6 @@ function MyApp(props: AppProps) {
     document.body.appendChild(script);
   }, []);
 
-  
   return (
     <ThemeProvider
       attribute="class"

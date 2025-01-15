@@ -41,10 +41,7 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
 
   const { getClient } = useUserContext();
 
-  const handleDocumentUpload = async (
-    files: File[],
-    hiRes: boolean = true
-  ) => {
+  const handleDocumentUpload = async (files: File[], hiRes: boolean = true) => {
     setIsUploading(true);
     const client = await getClient();
     if (!client) {
@@ -87,7 +84,8 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
     showToast({
       variant: 'success',
       title: 'Upload Started',
-      description: 'The document ingestion has been requested, refreshing documents...',
+      description:
+        'The document ingestion has been requested, refreshing documents...',
     });
 
     if (onUploadSuccess) {
