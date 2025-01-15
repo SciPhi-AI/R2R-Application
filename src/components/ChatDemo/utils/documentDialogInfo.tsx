@@ -683,7 +683,7 @@ const ExpandableChunk: React.FC<{
       {localExpanded && (
         <div className="px-6 pb-4 text-gray-300 space-y-6">
           <div className="grid grid-cols-2 gap-4">
-            <InfoRow label="Extraction ID" value={chunk.id} />
+            <InfoRow label="Chunk ID" value={chunk.id} />
             <InfoRow label="Document ID" value={chunk.documentId} />
           </div>
           <div className="grid grid-cols-2 gap-4">

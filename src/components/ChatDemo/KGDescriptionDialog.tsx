@@ -130,7 +130,7 @@ const KGDescriptionDialog: React.FC<KGDescriptionDialogProps> = ({
         values={entity.community_numbers}
       />
       <ExpandableInfoRow
-        label="Extraction IDs"
+        label="Chunk IDs"
         values={entity.extraction_ids}
       />
       <InfoRow label="Document ID" value={entity.documentId} />
@@ -169,7 +169,7 @@ const KGDescriptionDialog: React.FC<KGDescriptionDialogProps> = ({
       <InfoRow label="Weight" value={triple.weight} />
       <InfoRow label="Description" value={triple.description} />
       <ExpandableInfoRow
-        label="Extraction IDs"
+        label="Chunk IDs"
         values={triple.extraction_ids}
       />
       <ExpandableInfoRow label="Document IDs" values={triple.documentIds} />
