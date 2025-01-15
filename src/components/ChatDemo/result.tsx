@@ -259,9 +259,9 @@ export const Result: FC<{
         throw new Error('Failed to get authenticated client');
       }
 
-      // If we don't have a conversation ID, create one
+      // If we don't have a conversation ID, wait for one one
       let currentConversationId = selectedConversationId;
-      if (!currentConversationId) {
+      if (!currentConversationId && mode === 'rag_agent') {
         const newConversation = await client.conversations.create();
         if (!newConversation?.results) {
           throw new Error('Failed to create a new conversation');
@@ -273,7 +273,7 @@ export const Result: FC<{
         setSelectedConversationId(currentConversationId);
       }
 
-      if (!currentConversationId) {
+      if (!currentConversationId && mode === 'rag_agent') {
         setError('No valid conversation ID. Please try again.');
         return;
       }
@@ -329,6 +329,7 @@ export const Result: FC<{
               message: newUserMessage,
               ragGenerationConfig,
               searchSettings,
+              //@ts-ignore
               conversationId: currentConversationId,
             })
           : await client.retrieval.rag({
@@ -336,7 +337,6 @@ export const Result: FC<{
               ragGenerationConfig,
               searchSettings,
             });
-
       // Stream reading
       const reader = streamResponse.getReader();
       const decoder = new TextDecoder();
