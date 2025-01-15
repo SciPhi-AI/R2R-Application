@@ -1,11 +1,24 @@
 import { Clipboard, Check, ExternalLink } from 'lucide-react';
-import { FileText, Boxes, MessageCircle, ScanSearch, GitGraph } from 'lucide-react';
-import { PlusCircle, Trash2 } from 'lucide-react';
-import { Rocket, Star } from 'lucide-react';
+import {
+  FileText,
+  Boxes,
+  MessageCircle,
+  ScanSearch,
+  GitGraph,
+  PlusCircle,
+  Trash2,
+  Rocket,
+  Star,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { User } from 'r2r-js';
-import { useState, useEffect, useCallback } from 'react';
+import {
+  useState,
+  useEffect,
+  useCallback,
+  forwardRef,
+} from 'react';
 import { ReactTyped } from 'react-typed';
 
 import Layout from '@/components/Layout';
@@ -20,31 +33,29 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/Button';
 import {
   Dialog,
-  DialogTrigger,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from '@/components/ui/dialog'; // <--- Adjust path or component as needed
+} from '@/components/ui/dialog';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/components/ui/use-toast';
 import { useUserContext } from '@/context/UserContext';
+import { BeaconComponent } from '@/components/BeaconComponent';
 
-// ------- IMPORT YOUR DIALOG/MODAL COMPONENTS HERE -------
 
 const HomePage = () => {
   const router = useRouter();
   const { isAuthenticated, authState, getClient } = useUserContext();
   const [limits, setLimits] = useState<any>(null);
 
-  console.log(' limits = ', limits);
   const [isLoadingLimits, setIsLoadingLimits] = useState(false);
   const [isLoadingUser, setLoadingUser] = useState(true);
   const [apiKeys, setApiKeys] = useState<[] | null>(null);
-  console.log('apiKeys = ', apiKeys);
   const [userProfile, setUserProfile] = useState<User | null>(null);
   const { toast } = useToast();
+
 
   // State to manage Create Key modal
   const [isCreateKeyModalOpen, setIsCreateKeyModalOpen] = useState(false);
@@ -57,24 +68,11 @@ const HomePage = () => {
     if (!isAuthenticated) {
       router.push('/auth/login');
     } else {
-      // Fetch the user's limit usage once they are authenticated
       fetchLimits();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
-  // async function fetchLimits() {
-  //   try {
-  //     setIsLoadingLimits(true);
-  //     const client: any = await getClient();
-  //     const result = await client.users.getLimits({ id: authState.userId });
-  //     setLimits(result.results);
-  //   } catch (error) {
-  //     console.error('Failed to fetch user limits:', error);
-  //   } finally {
-  //     setIsLoadingLimits(false);
-  //   }
-  // }
   function copyToClipboard(text: string) {
     if (navigator?.clipboard?.writeText) {
       navigator.clipboard.writeText(text);
@@ -82,13 +80,12 @@ const HomePage = () => {
       document.execCommand('copy', true, text);
     }
   }
+
   const [hasCopied, setHasCopied] = useState(false);
 
   const handleCopy = (text: string) => {
     copyToClipboard(text);
     setHasCopied(true);
-    console.log('set has copied true');
-    // setTimeout(() => setHasCopied(false), 2000); // Reset after 2 seconds
   };
 
   async function fetchLimits() {
@@ -97,11 +94,8 @@ const HomePage = () => {
       const client: any = await getClient();
       const result = await client.users.getLimits({ id: authState.userId });
       const limitsData = result.results;
-      console.log('limitsData = ', limitsData);
 
-      // Extract limits for Search and RAG
       const searchLimits = limitsData.usage.routes['/v3/retrieval/search'];
-      console.log('searchLimits = ', searchLimits);
       const ragLimits = limitsData.usage.routes['/v3/retrieval/rag'];
       const agentLimits = limitsData.usage.routes['/v3/retrieval/agent'];
 
@@ -186,15 +180,13 @@ const HomePage = () => {
     }
   }, [userProfile, fetchApiKeys]);
 
-  // -------------------------------------------------
   // Handler for creating a new API key (called by modal)
-  // -------------------------------------------------
   const handleCreateApiKey = async () => {
     try {
       if (!userProfile) return;
       const client: any = await getClient();
 
-      // Create the API key with the user-entered name/description
+      // Create the API key
       const resp: any = await client.users.createApiKey({
         id: userProfile.id,
         name: newApiKeyName,
@@ -257,13 +249,12 @@ const HomePage = () => {
             </div>
           </div>
         ),
-        duration: 20000, // Increase duration for easier copying
+        duration: 20000,
       });
 
-      // Clear modal fields
+      // Clear modal fields and close
       setNewApiKeyName('');
       setNewApiKeyDescription('');
-      // Close modal
       setIsCreateKeyModalOpen(false);
 
       // Re-fetch the list of keys
@@ -315,7 +306,7 @@ const HomePage = () => {
 
   const handleCloseBanner = () => {
     setIsBannerVisible(false);
-    localStorage.setItem('isBannerDismissed', 'true'); // Persist dismissal
+    localStorage.setItem('isBannerDismissed', 'true');
   };
 
   if (!isAuthenticated) {
@@ -323,19 +314,16 @@ const HomePage = () => {
   }
 
   return (
-    <Layout includeFooter>
+    <Layout >
       <main className="w-full flex flex-col container h-screen-[calc(100%-4rem)]">
         <div className="relative bg-zinc-900 p-5">
           {isBannerVisible && (
-            <Alert
-              variant="default"
-              // className="relative bg-indigo-700 text-white flex items-center justify-between"
-            >
+            <Alert variant="default">
               <div className="flex items-center">
-                <Rocket className="h-4 w-4 mr-2  -mt-1  text-accent-base" />
+                <Rocket className="h-4 w-4 mr-2 -mt-1 text-accent-base" />
                 <AlertTitle>
                   SciPhi Cloud is powered entirely by the open source R2R
-                  library -{' '}
+                  library —{' '}
                   <Link
                     className="text-accent-base"
                     href="https://github.com/SciPhi-AI/R2R"
@@ -353,50 +341,39 @@ const HomePage = () => {
             </Alert>
           )}
 
-          <div className="flex flex-col items-center justify-center relative bg-gradient-to-r from-zinc-900/80 via-green-500/25 bg-zinc-900/80 ">
+          <div className="flex flex-col items-center justify-center relative bg-gradient-to-r from-zinc-900/80 via-green-500/25 bg-zinc-900/80">
             <Logo className="w-48 h-48" />
-            <h1 className="mt-4 text-3xl font-bold text-gray-100 text-center ">
+            <h1 className="mt-4 text-3xl font-bold text-gray-100 text-center">
               Welcome to SciPhi Cloud
             </h1>
-            {/* <h3 className="mt-4 text-lg  text-gray-100 text-center pb-10">
-              The most advanced AI retrieval system.
-            </h3> */}
-            <div className="mt-4 text-lg  text-gray-100 text-center pb-10">
+            <div className="mt-4 text-lg text-gray-100 text-center pb-10">
               <ReactTyped
                 strings={[
                   "We're taking RAG to the next level!",
-                  // "Your next step in R2R excellence.",
                 ]}
                 typeSpeed={40}
                 backSpeed={30}
                 backDelay={800}
-                // loop
                 showCursor
               />
             </div>
           </div>
-          <div className="flex flex-col lg:flex-row gap-4 ">
-            {/* Left column - Alert */}
+
+          <div className="flex flex-col lg:flex-row gap-4">
             <div className="w-full flex flex-col gap-4">
               <Alert variant="default" className="flex flex-col">
-                <AlertTitle className="text-lg ">
-                  <div className="flex gap-2 text-xl">
-                    {/* <span className="text-gray-500 dark:text-gray-200 font-semibold">
-                      Welcome to SciPhi Cloud!
-                    </span> */}
-                  </div>
+                <AlertTitle className="text-lg">
+                  <div className="flex gap-2 text-xl"></div>
                 </AlertTitle>
                 <AlertDescription>
-                  {/* <p className="mb-4 text-sm text-gray-600 dark:text-gray-300">
-                    Here, you'll find a number of tools to help your journey
-                    with R2R.
-                  </p> */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div className="flex items-start space-x-3">
-                      <FileText className="w-5 h-5 text-accent-base" />
+                      <Link href="/documents" className="-mr-1">
+                        <FileText className="w-5 h-5 text-accent-base documents-index" />
+                        </Link>
                       <div>
-                        <h3 className="text-sm font-semibold mb-1">
-                          <Link href="/documents"> Documents </Link>
+                        <h3 className="text-sm font-semibold mb-1 ">
+                          <Link href="/documents" > Documents </Link>
                         </h3>
                         <p className="text-xs text-gray-500 dark:text-gray-400">
                           Upload, update, and delete documents and their
@@ -405,7 +382,9 @@ const HomePage = () => {
                       </div>
                     </div>
                     <div className="flex items-start space-x-3">
-                      <Boxes className="w-5 h-5 text-accent-base" />
+                      <Link href="/collections" className="-mr-1">
+                        <Boxes className="w-5 h-5 text-accent-base collections-index" />
+                      </Link>
                       <div>
                         <h3 className="text-sm font-semibold mb-1">
                           <Link href="/collections"> Collections </Link>
@@ -416,7 +395,9 @@ const HomePage = () => {
                       </div>
                     </div>
                     <div className="flex items-start space-x-3">
-                      <GitGraph className="w-5 h-5 text-accent-base" />
+                      <Link href="/graphs" className="-mr-1">
+                        <GitGraph className="w-5 h-5 text-accent-base graphs-index" />
+                      </Link>
                       <div>
                         <h3 className="text-sm font-semibold mb-1">
                           <Link href="/graphs"> Graphs </Link>
@@ -427,7 +408,9 @@ const HomePage = () => {
                       </div>
                     </div>
                     <div className="flex items-start space-x-3">
-                      <MessageCircle className="w-5 h-5 text-accent-base" />
+                      <Link href="/chat" className="-mr-1">
+                        <MessageCircle className="w-5 h-5 text-accent-base chat-index" />
+                      </Link>
                       <div>
                         <h3 className="text-sm font-semibold mb-1">
                           <Link href="/chat"> Chat </Link>
@@ -437,7 +420,7 @@ const HomePage = () => {
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-start space-x-3">
+                    {/* <div className="flex items-start space-x-3">
                       <ScanSearch className="w-5 h-5 text-accent-base" />
                       <div>
                         <h3 className="text-sm font-semibold mb-1">
@@ -447,11 +430,10 @@ const HomePage = () => {
                           Conduct search over your documents and collections.
                         </p>
                       </div>
-                    </div>
+                    </div> */}
                   </div>
                   <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
                     <div className="flex justify-between items-center">
-                      {/* Left section: Feature Request and Bug Report */}
                       <div className="flex items-center space-x-4">
                         <Button
                           className="flex items-center justify-center px-4 py-2 text-sm"
@@ -478,26 +460,23 @@ const HomePage = () => {
                           Report a Bug
                         </Button>
                       </div>
-
-                      {/* Right section: Free Tier and Upgrade Account */}
                       <div className="flex items-center space-x-4">
-                        {authState?.metadata?.tier != 'starter' && (
+                        {authState?.metadata?.tier !== 'starter' && (
                           <div className="flex items-center justify-center bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded px-4 py-2">
                             <span className="text-sm font-semibold">
                               Free Tier
                             </span>
                           </div>
                         )}
-                        {authState?.metadata?.tier == 'starter' && (
+                        {authState?.metadata?.tier === 'starter' && (
                           <div className="flex items-center justify-center bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded px-4 py-2">
                             <span className="text-sm font-semibold">
                               Starter Tier
                             </span>
                           </div>
                         )}
-
                         <Button
-                          className="flex items-center justify-center px-4 py-2 text-sm bg-primary text-white hover:bg-primary-dark rounded"
+                          className="flex items-center justify-center px-4 py-2 text-sm bg-primary text-white hover:bg-primary-dark rounded upgrade-account-button"
                           onClick={() => router.push('/account?tab=plans')}
                         >
                           Upgrade Account
@@ -513,7 +492,7 @@ const HomePage = () => {
                   <div className="flex flex-col sm:flex-row gap-4">
                     <AdvancedCard className="w-full sm:w-3/6 flex flex-col">
                       <CardHeader className="flex flex-row items-center space-x-2">
-                        <CardTitle className="text-muted-foreground">
+                        <CardTitle className="text-muted-foreground monthly-requests">
                           Monthly Requests
                           <a
                             href="https://r2r-docs.sciphi.ai/documentation/limits"
@@ -533,8 +512,9 @@ const HomePage = () => {
                               <div>
                                 <div className="font-bold">Search</div>
                               </div>
-                              {/* <span className="font-bold">{`0 / 3000`}</span> */}
-                              <span className="font-bold">{`${limits.search.monthlyUsed} / ${limits.search.monthlyLimit}`}</span>
+                              <span className="font-bold">
+                                {`${limits.search.monthlyUsed} / ${limits.search.monthlyLimit}`}
+                              </span>
                             </div>
                             <Progress
                               value={Math.max(
@@ -549,11 +529,12 @@ const HomePage = () => {
                           </div>
                         </div>
                         <div className="flex flex-row justify-between w-full space-x-4">
-                          {/* RAG Q&A */}
                           <div className="flex flex-col w-1/2">
                             <div className="flex justify-between text-sm mb-1">
                               <div className="font-bold">RAG Q&A</div>
-                              <span className="font-bold">{`${limits.rag.monthlyUsed} / ${limits.rag.monthlyLimit}`}</span>
+                              <span className="font-bold">
+                                {`${limits.rag.monthlyUsed} / ${limits.rag.monthlyLimit}`}
+                              </span>
                             </div>
                             <Progress
                               value={Math.max(
@@ -566,12 +547,12 @@ const HomePage = () => {
                               className="h-2"
                             />
                           </div>
-
-                          {/* Agent */}
                           <div className="flex flex-col w-1/2">
                             <div className="flex justify-between text-sm mb-1">
                               <div className="font-bold">Agent</div>
-                              <span className="font-bold">{`${limits.agent.monthlyUsed} / ${limits.agent.monthlyLimit}`}</span>
+                              <span className="font-bold">
+                                {`${limits.agent.monthlyUsed} / ${limits.agent.monthlyLimit}`}
+                              </span>
                             </div>
                             <Progress
                               value={Math.max(
@@ -585,32 +566,11 @@ const HomePage = () => {
                             />
                           </div>
                         </div>
-
-                        {/* <div className="flex flex-row space-x-2 mt-3">
-                          <div className="w-[100%]">
-                            <div className="flex justify-between text-sm">
-                              <div>
-                                <div className="font-bold">RAG</div>
-                              </div>
-                              <span className="font-bold">{`${limits.rag.monthlyUsed} / ${limits.rag.monthlyLimit}`}</span>
-                            </div>
-                            <Progress
-                              value={Math.max(
-                                1,
-                                Math.round(
-                                  (100 * limits.rag.monthlyUsed) /
-                                    limits.rag.monthlyLimit
-                                )
-                              )}
-                              className="h-2"
-                            />
-                          </div>
-                        </div> */}
                       </CardContent>
                     </AdvancedCard>
                     <AdvancedCard className="w-full sm:w-3/6 flex flex-col">
                       <CardHeader className="flex flex-row items-center space-x-2">
-                        <CardTitle className="text-muted-foreground">
+                        <CardTitle className="text-muted-foreground storage-usage">
                           Storage
                         </CardTitle>
                       </CardHeader>
@@ -621,7 +581,9 @@ const HomePage = () => {
                               <div>
                                 <div className="font-bold">Documents</div>
                               </div>
-                              <span className="font-bold">{`${limits.documents.used} / ${limits.documents.limit.toLocaleString()}`}</span>
+                              <span className="font-bold">
+                                {`${limits.documents.used} / ${limits.documents.limit.toLocaleString()}`}
+                              </span>
                             </div>
                             <Progress
                               value={Math.max(
@@ -641,7 +603,9 @@ const HomePage = () => {
                               <div>
                                 <div className="font-bold">Chunks</div>
                               </div>
-                              <span className="font-bold">{`${limits.chunks.used} / ${limits.chunks.limit.toLocaleString()}`}</span>
+                              <span className="font-bold">
+                                {`${limits.chunks.used} / ${limits.chunks.limit.toLocaleString()}`}
+                              </span>
                             </div>
                             <Progress
                               value={Math.max(
@@ -669,14 +633,10 @@ const HomePage = () => {
           {/* Developer API Keys Section */}
           <div className="pt-6 border-t border-zinc-800">
             <div className="flex items-center justify-between border-t border-zinc-800 pt-6">
-              <h3 className="text-sm font-medium text-gray-400 mb-4">
-                Developer API Keys
-              </h3>
-
               {/* Button that triggers the modal */}
               <Button
                 onClick={() => setIsCreateKeyModalOpen(true)}
-                className="pr-4 pl-2"
+                className="pr-4 pl-2 create-new-key-button"
               >
                 <PlusCircle className="mr-2 w-4 h-4 mt-1" />
                 Create New Key
@@ -706,7 +666,9 @@ const HomePage = () => {
                         <td className="py-2 pr-4 break-all">
                           {key.description || '—'}
                         </td>
-                        <td className="py-2 pr-4 break-all">{key.publicKey}</td>
+                        <td className="py-2 pr-4 break-all">
+                          {key.publicKey}
+                        </td>
                         <td className="py-2 pr-4 break-all">{key.keyId}</td>
                         <td className="py-2 pr-4">
                           {new Date(key.updatedAt).toLocaleString()}
@@ -728,9 +690,7 @@ const HomePage = () => {
         </div>
       </main>
 
-      {/* ---------------------
-          CREATE KEY MODAL
-      ---------------------- */}
+      {/* CREATE KEY MODAL */}
       <Dialog
         open={isCreateKeyModalOpen}
         onOpenChange={setIsCreateKeyModalOpen}
@@ -776,10 +736,7 @@ const HomePage = () => {
             </div>
           </div>
           <DialogFooter>
-            <Button
-              // variant="outline"
-              onClick={() => setIsCreateKeyModalOpen(false)}
-            >
+            <Button onClick={() => setIsCreateKeyModalOpen(false)}>
               Cancel
             </Button>
             <Button onClick={handleCreateApiKey}>Create Key</Button>

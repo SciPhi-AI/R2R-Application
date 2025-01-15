@@ -65,19 +65,21 @@ const NavItems: React.FC<NavItemsProps> = ({
 
   return (
     <nav>
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center space-x-2 ">
         {items.map((item) => (
-          <NavItem
-            key={item.path}
-            href={item.path}
-            isActive={
-              item.path != '/'
-                ? pathname != null && pathname.includes(item.path)
-                : pathname === item.path
-            }
-          >
-            {item.label}
-          </NavItem>
+          <div >
+            <NavItem
+              key={item.path}
+              href={item.path}
+              isActive={
+                item.path != '/'
+                  ? pathname != null && pathname.includes(item.path)
+                  : pathname === item.path
+              }
+            >
+              {item.label}
+            </NavItem>
+          </div>
         ))}
       </div>
     </nav>

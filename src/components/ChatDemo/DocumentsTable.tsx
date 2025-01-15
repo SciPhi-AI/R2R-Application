@@ -301,6 +301,9 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
                   onUploadSuccess={async () => {
                     await handleRefreshWithDelay();
                     onSelectAll(false);
+                    await handleRefreshWithDelay();
+                    await handleRefreshWithDelay();
+                    await handleRefreshWithDelay();
                     return [];
                   }}
                   showToast={toast}
