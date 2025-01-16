@@ -166,11 +166,11 @@ const Sidebar: React.FC<SidebarProps> = ({
                         </span>
                       </div>
                       {/* Last message snippet (if available) */}
-                      {conv.lastMessage && (
+                      {/* {conv.lastMessage && (
                         <p className="mt-1 text-xs text-gray-300 line-clamp-2 leading-snug">
                           {conv.lastMessage}
                         </p>
-                      )}
+                      )} */}
                     </button>
                   ))
                 )}
