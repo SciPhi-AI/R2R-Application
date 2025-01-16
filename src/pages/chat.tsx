@@ -54,7 +54,7 @@ const Index: React.FC = () => {
   const [localSearchLimits, setLocalSearchLimits] = useState<
     Record<string, number>
   >({});
-  const [mode, setMode] = useState<'rag' | 'rag_agent'>('rag');
+  const [mode, setMode] = useState<'rag' | 'rag_agent'>('rag_agent');
   const [sidebarIsOpen, setSidebarIsOpen] = useState(true);
 
   useEffect(() => {
@@ -209,11 +209,12 @@ const Index: React.FC = () => {
       const response = await client.conversations.retrieve({
         id: conversationId,
       });
+      console.log("response = ", response);
       const fetchedMessages = response.results.map(
         (message: MessageResponse) => ({
           id: message.id,
-          role: message.metadata?.role || 'user',
-          content: message.metadata?.content || '',
+          role: message.message.role || 'user',
+          content: message.message.content || '',
           timestamp: message.metadata?.timestamp || new Date().toISOString(),
         })
       );
