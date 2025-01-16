@@ -54,7 +54,7 @@ const Index: React.FC = () => {
   const [localSearchLimits, setLocalSearchLimits] = useState<
     Record<string, number>
   >({});
-  const [mode, setMode] = useState<'rag' | 'rag_agent'>('rag');
+  const [mode, setMode] = useState<'rag' | 'rag_agent'>('rag_agent');
   const [sidebarIsOpen, setSidebarIsOpen] = useState(true);
 
   useEffect(() => {
