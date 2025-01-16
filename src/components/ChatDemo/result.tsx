@@ -380,6 +380,7 @@ export const Result: FC<{
             searchPerformed = true;
           }
 
+          console.log('vectorSearchSources = ', vectorSearchSources)
           // Update the assistant message with search results so far
           updateLastMessage(
             fullContent,
@@ -547,7 +548,7 @@ export const Result: FC<{
       {hasAttemptedFetch &&
         uploadedDocuments?.length === 0 &&
         pipelineUrl &&
-        (
+         (
           <div className="absolute inset-4 flex items-center justify-center backdrop-blur-sm">
             <div className="flex items-center p-4 bg-white shadow-2xl rounded text-black font-medium gap-4">
               Please upload at least one document to submit queries.&nbsp;

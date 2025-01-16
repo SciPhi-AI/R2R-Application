@@ -8,11 +8,19 @@ import { UserProvider, useUserContext } from '@/context/UserContext';
 import '@/styles/globals.css';
 import { initializePostHog } from '@/lib/posthog-client';
 import { JoyrideProvider } from '@/context/JoyrideContext'; // <--- our new context
+import posthog from 'posthog-js';
+import { PostHogProvider } from 'posthog-js/react';
 
 function MyAppContent({ Component, pageProps }: AppProps) {
   const { setTheme } = useTheme();
   const { isAuthenticated, isSuperUser, authState } = useUserContext();
   const router = useRouter();
+  // Check that PostHog is client-side (used to handle Next.js SSR)
+  if (typeof window !== 'undefined') {
+    posthog.init("phc_pE4e6AhYVYxz0q2JgdVpdcLreryBT3g7zZuWMviCgkb", {
+      api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://app.posthog.com',
+    });
+  }
 
   useEffect(() => {
     setTheme('dark');
@@ -97,11 +105,13 @@ function MyApp(props: AppProps) {
       enableSystem={false}
       disableTransitionOnChange
     >
-      <UserProvider>
-        <JoyrideProvider>
-          <MyAppContent {...props} />
-        </JoyrideProvider>
-      </UserProvider>
+      <PostHogProvider client={posthog}>
+        <UserProvider>
+          <JoyrideProvider>
+            <MyAppContent {...props} />
+          </JoyrideProvider>
+        </UserProvider>
+      </PostHogProvider>
     </ThemeProvider>
   );
 }
