@@ -88,7 +88,9 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
         if (!client) {
           throw new Error('Failed to get authenticated client');
         }
-
+        if (!id) {
+          return { results: [], totalEntries: 0 };
+        }
         const response = await client.documents.listChunks({
           id: id,
           offset: offset,
@@ -113,6 +115,9 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
         const client = await getClient();
         if (!client) {
           throw new Error('Failed to get authenticated client');
+        }
+        if (!id) {
+          return { results: [], totalEntries: 0 };
         }
 
         const response = await client.documents.listEntities({
@@ -139,6 +144,9 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
         const client = await getClient();
         if (!client) {
           throw new Error('Failed to get authenticated client');
+        }
+        if (!id) {
+          return { results: [], totalEntries: 0 };
         }
 
         const response = await client.documents.listRelationships({
