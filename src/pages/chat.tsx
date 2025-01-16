@@ -294,7 +294,7 @@ const Index: React.FC = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="rag">RAG Q&A</SelectItem>
-                  <SelectItem value="rag_agent">RAG Agent</SelectItem>
+                  {/* <SelectItem value="rag_agent">RAG Agent</SelectItem> */}
                 </SelectContent>
               </Select>
             </div>
