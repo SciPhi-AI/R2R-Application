@@ -37,7 +37,7 @@ const Index: React.FC = () => {
   >(null);
   const [messages, setMessages] = useState<Message[]>([]);
 
-  const [searchLimit, setSearchLimit] = useState<number>(20);
+  const [searchLimit, setSearchLimit] = useState<number>(50);
   const [searchFilters, setSearchFilters] = useState('{}');
   const [indexMeasure, setIndexMeasure] = useState<string>('cosine_distance');
   const [includeMetadatas, setIncludeMetadatas] = useState<boolean>(false);

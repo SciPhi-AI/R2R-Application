@@ -394,7 +394,7 @@ const HomePage = () => {
                           <Link href="/graphs"> Graphs </Link>
                         </h3>
                         <p className="text-xs text-gray-500 dark:text-gray-400">
-                          Construct knowledge graphs from input collections
+                          Construct knowledge graphs from input collections.
                         </p>
                       </div>
                     </div>
