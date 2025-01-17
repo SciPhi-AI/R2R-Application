@@ -26,6 +26,7 @@ RUN npm install -g pnpm
 
 # Set node environment to production
 ENV NODE_ENV=production
+ENV HOSTNAME="0.0.0.0"
 
 # Copy necessary files from builder stage
 COPY --from=builder /app/next.config.js ./
