@@ -37,7 +37,7 @@ const Index: React.FC = () => {
   >(null);
   const [messages, setMessages] = useState<Message[]>([]);
 
-  const [searchLimit, setSearchLimit] = useState<number>(20);
+  const [searchLimit, setSearchLimit] = useState<number>(50);
   const [searchFilters, setSearchFilters] = useState('{}');
   const [indexMeasure, setIndexMeasure] = useState<string>('cosine_distance');
   const [includeMetadatas, setIncludeMetadatas] = useState<boolean>(false);
@@ -54,7 +54,7 @@ const Index: React.FC = () => {
   const [localSearchLimits, setLocalSearchLimits] = useState<
     Record<string, number>
   >({});
-  const [mode, setMode] = useState<'rag' | 'rag_agent'>('rag');
+  const [mode, setMode] = useState<'rag' | 'rag_agent'>('rag_agent');
   const [sidebarIsOpen, setSidebarIsOpen] = useState(true);
 
   useEffect(() => {
@@ -294,7 +294,7 @@ const Index: React.FC = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="rag">RAG Q&A</SelectItem>
-                  {/* <SelectItem value="rag_agent">RAG Agent</SelectItem> */}
+                  <SelectItem value="rag_agent">RAG Agent</SelectItem>
                 </SelectContent>
               </Select>
             </div>
