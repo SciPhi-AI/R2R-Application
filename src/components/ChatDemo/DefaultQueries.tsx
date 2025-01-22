@@ -27,19 +27,19 @@ export const DefaultQueries: FC<DefaultQueriesProps> = ({ setQuery, mode }) => {
 
   const defaultAgentQueries = [
     {
-      query: 'Hey! How are you today?',
+      query: 'What is happening in California today?',
       icon: <Lightbulb className="h-6 w-6 text-yellow-400" />,
     },
     {
-      query: 'Can you help me understand my documents better?',
+      query: 'What documents do I have uploaded?',
       icon: <FlaskConical className="h-6 w-6 text-purple-400" />,
     },
     {
-      query: 'How might agentic RAG help me in the long run?',
+      query: 'Search for an interesting fact in my data.',
       icon: <Flame className="h-6 w-6 text-red-400" />,
     },
     {
-      query: 'What is the coolest thing you can do?',
+      query: 'What tools do you have access to?',
       icon: <Earth className="h-6 w-6 text-accent-base" />,
     },
   ];

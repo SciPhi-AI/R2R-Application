@@ -283,7 +283,6 @@ const Index: React.FC = () => {
 
 export default Index;
 
-
 // import { ExternalLink } from 'lucide-react';
 // import { DocumentResponse } from 'r2r-js';
 // import React, { useState, useCallback, useEffect, useMemo } from 'react';

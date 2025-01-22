@@ -1,5 +1,4 @@
-import { FC } from 'react';
-import React, { useState, useEffect } from 'react';
+import { FC, useEffect, useState } from 'react';
 import Markdown from 'react-markdown';
 
 import {
@@ -18,6 +17,7 @@ import {
 } from '@/components/ui/accordion';
 import { Message } from '@/types';
 import { VectorSearchResult, KGSearchResult } from '@/types';
+import { ClipLoader } from 'react-spinners';
 
 function formatMarkdownNewLines(markdown: string) {
   return markdown
@@ -67,11 +67,46 @@ const SourceInfo: React.FC<{
   </div>
 );
 
-export const Answer: FC<{
+/** Animated ellipsis for streaming messages **/
+const AnimatedEllipsis: FC = () => {
+  const [dots, setDots] = useState('');
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setDots((prevDots) => (prevDots.length >= 3 ? '' : prevDots + '.'));
+    }, 200);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <span
+      style={{
+        color: 'white',
+        display: 'inline-block',
+        width: '1em',
+        height: '1em',
+        textAlign: 'left',
+      }}
+    >
+      {dots}
+    </span>
+  );
+};
+
+interface AnswerProps {
   message: Message;
   isStreaming: boolean;
   isSearching: boolean;
-}> = ({ message, isStreaming, isSearching }) => {
+  /** Added a new prop to indicate whether we’re in 'rag' or 'rag_agent' mode **/
+  mode: 'rag' | 'rag_agent';
+}
+
+export const Answer: FC<AnswerProps> = ({
+  message,
+  isStreaming,
+  isSearching,
+  mode,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [parsedVectorSources, setParsedVectorSources] = useState<Source[]>([]);
   const [parsedEntities, setParsedEntities] = useState<KGSearchResult[]>([]);
@@ -79,6 +114,19 @@ export const Answer: FC<{
     []
   );
   const [sourcesCount, setSourcesCount] = useState<number | null>(null);
+
+  // For the flashing/rewriting effect of "thinking..."
+  const [thinkingText, setThinkingText] = useState('Thinking');
+
+  useEffect(() => {
+    let i = 0;
+    const variants = ['Thinking ', 'Thinking.', 'Thinking..', 'Thinking...'];
+    const interval = setInterval(() => {
+      i = (i + 1) % variants.length;
+      setThinkingText(variants[i]);
+    }, 500);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (message.sources) {
@@ -113,32 +161,42 @@ export const Answer: FC<{
     }
   }, [message.sources]);
 
-  const AnimatedEllipsis: FC = () => {
-    const [dots, setDots] = useState('');
-
-    useEffect(() => {
-      const interval = setInterval(() => {
-        setDots((prevDots) => (prevDots.length >= 3 ? '' : prevDots + '.'));
-      }, 200);
-
-      return () => clearInterval(interval);
-    }, []);
-
+  /**
+   * If we are in Agent mode and the assistant is still streaming the response,
+   * show the “thinking” UI right away in the top-right corner.
+   **/
+  if (
+    mode === 'rag_agent' &&
+    isStreaming &&
+    message.role === 'assistant' &&
+    !message.content
+  ) {
     return (
-      <span
-        style={{
-          color: 'white',
-          display: 'inline-block',
-          width: '1em',
-          height: '1em',
-          textAlign: 'left',
-        }}
-      >
-        {dots}
-      </span>
-    );
-  };
+      <div className="relative mt-4">
+        {/* The normal “header” row with a Logo (optional) */}
+        <div className="flex items-center justify-between w-full">
+          <Logo width={50} height={50} disableLink={true} />
+        </div>
 
+        {/* Absolutely-positioned "thinking" text & smaller loader in top-right */}
+        <div className="absolute top-0 right-0 flex items-center gap-2 mr-2">
+          <ClipLoader color="#888" size={24} />
+          <span
+            className="text-gray-500 font-medium"
+            style={{
+              width: '10ch', // Reserve enough width for the longest "Thinking..." variant
+            }}
+          >
+            {thinkingText}
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  /** Otherwise, we show the normal final content once done streaming (or if not agent mode) **/
+
+  /** Renders the actual message in Markdown once content is available **/
   const renderContent = () => {
     const paragraphs = message.content.split('\n\n');
     return paragraphs.map((paragraph, index) => (
@@ -169,7 +227,7 @@ export const Answer: FC<{
           em: (props) => <em style={{ color: 'white' }} {...props} />,
           code: (props) => <code style={{ color: 'white' }} {...props} />,
           pre: (props) => <pre style={{ color: 'white' }} {...props} />,
-
+          /** Link handling for the [1], [2] references in markdown **/
           a: ({ href, ...props }) => {
             if (!href) return null;
             let source: Source | KGSearchResult | null = null;
@@ -201,7 +259,8 @@ export const Answer: FC<{
             const title = isKGElement ? metadata.name : metadata.title;
             const description = isKGElement
               ? metadata.description
-              : (source as Source).text;
+              : (source as Source).metadata.text;
+
             return (
               <span className="inline-block w-4">
                 <Popover>
@@ -268,8 +327,10 @@ export const Answer: FC<{
       </Markdown>
     ));
   };
+
   return (
     <div className="mt-4">
+      {/* Show a concise alert if we are in rag_agent mode and this is an assistant message */}
       <Accordion
         type="single"
         collapsible
@@ -284,10 +345,9 @@ export const Answer: FC<{
                 sourcesCount={sourcesCount}
               />
             </AccordionTrigger>
-          ) :
-           (
+          ) : (
             <div className="flex items-center justify-between w-full">
-            <Logo width={50} height={50} disableLink={true} />
+              <Logo width={50} height={50} disableLink={true} />
             </div>
           )}
           <AccordionContent>

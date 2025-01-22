@@ -1,6 +1,8 @@
 import type { AppProps } from 'next/app';
 import { useRouter } from 'next/router';
 import { useTheme } from 'next-themes';
+import posthog from 'posthog-js';
+import { PostHogProvider } from 'posthog-js/react';
 import { useEffect, useCallback } from 'react';
 
 import { ThemeProvider } from '@/components/ThemeProvider';
@@ -22,6 +24,24 @@ function MyAppContent({ Component, pageProps }: AppProps) {
   //   });
   // }
 
+  // Add this component before your MyApp component
+  const PostHogUserIdentifier: React.FC<{ children: React.ReactNode }> = ({
+    children,
+  }) => {
+    const { authState } = useUserContext();
+
+    useEffect(() => {
+      if (authState?.user) {
+        posthog.identify(authState?.user.id, {
+          email: authState?.user.email,
+          // Add any other user properties you want to track
+          // isSuperUser: authState.userRole === 'SUPER_USER',
+        });
+      }
+    }, [authState]);
+
+    return <>{children}</>;
+  };
   useEffect(() => {
     setTheme('dark');
     // initializePostHog();
@@ -105,13 +125,13 @@ function MyApp(props: AppProps) {
       enableSystem={false}
       disableTransitionOnChange
     >
-      {/* <PostHogProvider client={posthog}> */}
+      <PostHogProvider client={posthog}>
         <UserProvider>
           <JoyrideProvider>
             <MyAppContent {...props} />
           </JoyrideProvider>
         </UserProvider>
-      {/* </PostHogProvider> */}
+      </PostHogProvider>
     </ThemeProvider>
   );
 }

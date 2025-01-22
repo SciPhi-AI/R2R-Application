@@ -13,8 +13,10 @@ const DEFAULT_PRODUCTION_URL = 'https://api.cloud.sciphi.ai';
 const DEFAULT_DEVELOPMENT_URL = 'http://0.0.0.0:7272';
 
 // Get URLs from environment variables with fallbacks
-const PRODUCTION_URL = process.env.NEXT_PUBLIC_PRODUCTION_API_URL || DEFAULT_PRODUCTION_URL;
-const DEVELOPMENT_URL = process.env.NEXT_PUBLIC_DEVELOPMENT_API_URL || DEFAULT_DEVELOPMENT_URL;
+const PRODUCTION_URL =
+  process.env.NEXT_PUBLIC_PRODUCTION_API_URL || DEFAULT_PRODUCTION_URL;
+const DEVELOPMENT_URL =
+  process.env.NEXT_PUBLIC_DEVELOPMENT_API_URL || DEFAULT_DEVELOPMENT_URL;
 
 // Use environment variable to determine the deployment URL
 const DEFAULT_DEPLOYMENT_URL =
@@ -22,7 +24,7 @@ const DEFAULT_DEPLOYMENT_URL =
     ? DEVELOPMENT_URL
     : PRODUCTION_URL;
 
-    const RegistrationPage: React.FC = () => {
+const RegistrationPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmedPassword, setConfirmedPassword] = useState('');
