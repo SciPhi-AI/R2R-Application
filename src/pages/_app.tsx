@@ -6,25 +6,25 @@ import { useEffect, useCallback } from 'react';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { UserProvider, useUserContext } from '@/context/UserContext';
 import '@/styles/globals.css';
-import { initializePostHog } from '@/lib/posthog-client';
+// import { initializePostHog } from '@/lib/posthog-client';
 import { JoyrideProvider } from '@/context/JoyrideContext'; // <--- our new context
-import posthog from 'posthog-js';
-import { PostHogProvider } from 'posthog-js/react';
+// import posthog from 'posthog-js';
+// import { PostHogProvider } from 'posthog-js/react';
 
 function MyAppContent({ Component, pageProps }: AppProps) {
   const { setTheme } = useTheme();
   const { isAuthenticated, isSuperUser, authState } = useUserContext();
   const router = useRouter();
-  // Check that PostHog is client-side (used to handle Next.js SSR)
-  if (typeof window !== 'undefined') {
-    posthog.init("phc_pE4e6AhYVYxz0q2JgdVpdcLreryBT3g7zZuWMviCgkb", {
-      api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://app.posthog.com',
-    });
-  }
+  // // Check that PostHog is client-side (used to handle Next.js SSR)
+  // if (typeof window !== 'undefined') {
+  //   posthog.init("phc_pE4e6AhYVYxz0q2JgdVpdcLreryBT3g7zZuWMviCgkb", {
+  //     api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://app.posthog.com',
+  //   });
+  // }
 
   useEffect(() => {
     setTheme('dark');
-    initializePostHog();
+    // initializePostHog();
   }, []);
 
   const checkAccess = useCallback(async () => {
@@ -105,13 +105,13 @@ function MyApp(props: AppProps) {
       enableSystem={false}
       disableTransitionOnChange
     >
-      <PostHogProvider client={posthog}>
+      {/* <PostHogProvider client={posthog}> */}
         <UserProvider>
           <JoyrideProvider>
             <MyAppContent {...props} />
           </JoyrideProvider>
         </UserProvider>
-      </PostHogProvider>
+      {/* </PostHogProvider> */}
     </ThemeProvider>
   );
 }

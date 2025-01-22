@@ -277,13 +277,18 @@ export const Answer: FC<{
         onValueChange={(value) => setIsOpen(value === 'answer')}
       >
         <AccordionItem value="answer">
-          {!isSearching && sourcesCount !== null && sourcesCount > 0 && (
+          {!isSearching && sourcesCount !== null && sourcesCount > 0 ? (
             <AccordionTrigger className="py-2 text-lg font-bold text-zinc-200 hover:no-underline text-white">
               <SourceInfo
                 isSearching={isSearching}
                 sourcesCount={sourcesCount}
               />
             </AccordionTrigger>
+          ) :
+           (
+            <div className="flex items-center justify-between w-full">
+            <Logo width={50} height={50} disableLink={true} />
+            </div>
           )}
           <AccordionContent>
             {!isSearching && sourcesCount !== null && sourcesCount > 0 && (
