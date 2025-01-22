@@ -9,21 +9,22 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/input';
 import { useUserContext } from '@/context/UserContext';
 
-// import { supabase } from '@/lib/supabase'; // If not using OAuth, can be removed
 import { SignupSplitLayout } from './signup-layout';
-// const DEFAULT_DEPLOYMENT_URL = 'https://api.cloud.sciphi.ai';
 
-// // const DEFAULT_DEPLOYMENT_URL = 'http://0.0.0.0:7272'; // For local development
+// Default URLs as fallbacks
+const DEFAULT_PRODUCTION_URL = 'https://api.cloud.sciphi.ai';
+const DEFAULT_DEVELOPMENT_URL = 'http://0.0.0.0:7272';
 
-const PRODUCTION_URL = 'https://api.cloud.sciphi.ai';
-const DEVELOPMENT_URL = 'http://0.0.0.0:7272';
+// Get URLs from environment variables with fallbacks
+const PRODUCTION_URL = process.env.NEXT_PUBLIC_PRODUCTION_API_URL || DEFAULT_PRODUCTION_URL;
+const DEVELOPMENT_URL = process.env.NEXT_PUBLIC_DEVELOPMENT_API_URL || DEFAULT_DEVELOPMENT_URL;
 
 // Use environment variable to determine the deployment URL
 const DEFAULT_DEPLOYMENT_URL =
   process.env.NEXT_PUBLIC_ENV === 'development'
     ? DEVELOPMENT_URL
     : PRODUCTION_URL;
-
+    
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

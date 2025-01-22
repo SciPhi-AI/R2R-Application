@@ -6,8 +6,13 @@ import { ClipLoader } from 'react-spinners';
 import Layout from '@/components/Layout';
 import { useUserContext } from '@/context/UserContext'; // Adjust your import path as necessary
 
-const PRODUCTION_URL = 'https://api.cloud.sciphi.ai';
-const DEVELOPMENT_URL = 'http://0.0.0.0:7272';
+// Default URLs as fallbacks
+const DEFAULT_PRODUCTION_URL = 'https://api.cloud.sciphi.ai';
+const DEFAULT_DEVELOPMENT_URL = 'http://0.0.0.0:7272';
+
+// Get URLs from environment variables with fallbacks
+const PRODUCTION_URL = process.env.NEXT_PUBLIC_PRODUCTION_API_URL || DEFAULT_PRODUCTION_URL;
+const DEVELOPMENT_URL = process.env.NEXT_PUBLIC_DEVELOPMENT_API_URL || DEFAULT_DEVELOPMENT_URL;
 
 // Use environment variable to determine the deployment URL
 const DEFAULT_DEPLOYMENT_URL =
