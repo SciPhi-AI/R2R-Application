@@ -31,9 +31,9 @@ function MyAppContent({ Component, pageProps }: AppProps) {
     const { authState } = useUserContext();
 
     useEffect(() => {
-      if (authState?.user) {
-        posthog.identify(authState?.user.id, {
-          email: authState?.user.email,
+      if (authState?.email && authState?.userId) {
+        posthog.identify(authState?.userId, {
+          email: authState?.email,
           // Add any other user properties you want to track
           // isSuperUser: authState.userRole === 'SUPER_USER',
         });

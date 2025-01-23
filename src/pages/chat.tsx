@@ -43,10 +43,10 @@ const Index: React.FC = () => {
   const [includeMetadatas, setIncludeMetadatas] = useState<boolean>(false);
   const [probes, setProbes] = useState<number>();
   const [efSearch, setEfSearch] = useState<number>();
-  const [fullTextWeight, setFullTextWeight] = useState<number>();
-  const [semanticWeight, setSemanticWeight] = useState<number>();
-  const [fullTextLimit, setFullTextLimit] = useState<number>();
-  const [rrfK, setRrfK] = useState<number>();
+  const [fullTextWeight, setFullTextWeight] = useState<number>(1);
+  const [semanticWeight, setSemanticWeight] = useState<number>(10);
+  const [fullTextLimit, setFullTextLimit] = useState<number>(100);
+  const [rrfK, setRrfK] = useState<number>(5);
   const [maxLlmQueries, setMaxLlmQueries] = useState<number>();
   const [kgSearchLevel, setKgSearchLevel] = useState<number | null>(null);
   const [maxCommunityDescriptionLength, setMaxCommunityDescriptionLength] =
@@ -73,14 +73,26 @@ const Index: React.FC = () => {
 
   const { switches, initializeSwitch, updateSwitch } = useSwitchManager();
 
-  const [temperature, setTemperature] = useState(0.1);
+  const [temperature, setTemperature] = useState(0.7);
   const [topP, setTopP] = useState(1);
   const [top_k, setTop_k] = useState(100);
-  const [maxTokensToSample, setmaxTokensToSample] = useState(1024);
+  const [maxTokensToSample, setmaxTokensToSample] = useState(4096);
   const [kg_temperature, setKgTemperature] = useState(0.1);
   const [kg_topP, setKgTopP] = useState(1);
   const [kg_top_k, setKgTop_k] = useState(100);
   const [kg_maxTokensToSample, setKgmaxTokensToSample] = useState(1024);
+  // Add new state for tool toggles
+  const [webSearch, setWebSearch] = useState(true);
+  const [magnify, setMagnify] = useState(true);
+  const [contextTool, setContextTool] = useState(true);
+  // Function to get currently enabled tools
+  const getEnabledTools = () => {
+    const enabledTools = [];
+    if (webSearch) enabledTools.push('web_search');
+    if (magnify) enabledTools.push('local_search');
+    if (contextTool) enabledTools.push('content');
+    return enabledTools;
+  };
 
   const [graphDimensions, setGraphDimensions] = useState({
     width: 0,
@@ -223,6 +235,8 @@ const Index: React.FC = () => {
     }
   };
 
+  console.log('getEnabledTools() = ', getEnabledTools());
+
   return (
     <Layout pageTitle="Chat" includeFooter={false}>
       <div className="flex flex-col h-screen-[calc(100%-4rem)] overflow-hidden">
@@ -324,6 +338,7 @@ const Index: React.FC = () => {
                   setMessages={setMessages}
                   selectedConversationId={selectedConversationId}
                   setSelectedConversationId={setSelectedConversationId}
+                  enabledTools={getEnabledTools()} // Add this new prop
                 />
               </div>
 
@@ -338,6 +353,13 @@ const Index: React.FC = () => {
                       : 'Start a conversation...'
                   }
                   disabled={uploadedDocuments?.length === 0 && mode === 'rag'}
+                  mode={mode}
+                  webSearch={webSearch}
+                  setWebSearch={setWebSearch}
+                  magnify={magnify}
+                  setMagnify={setMagnify}
+                  contextTool={contextTool}
+                  setContextTool={setContextTool}
                 />
               </div>
             </div>
