@@ -632,27 +632,25 @@ const KnowledgeGraphsPage: React.FC = () => {
   if (loading && !error) {
     return (
       <Layout pageTitle="Knowledge Graphs" includeFooter={false}>
-
-      {/* left align */}
+        {/* left align */}
         <div className="mx-auto max-w-6xl pt-4 flex flex-col container h-screen-[calc(100%-4rem)] justify-center items-left">
           {/* Header + Quick Buttons */}
           {/* <div className="flex  mb-6"> */}
-            <h1 className="text-2xl font-bold   gap-2 text-white -ml-1">
-              Knowledge Graphs
-              <a
-                href="https://r2r-docs.sciphi.ai/api-and-sdks/graphs/graphs"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex  text-accent-base"
-              >
-                <ExternalLink size={18} className="-mt-0.5 ml-1" />
-              </a>
-            </h1>
-          </div>
+          <h1 className="text-2xl font-bold   gap-2 text-white -ml-1">
+            Knowledge Graphs
+            <a
+              href="https://r2r-docs.sciphi.ai/api-and-sdks/graphs/graphs"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex  text-accent-base"
+            >
+              <ExternalLink size={18} className="-mt-0.5 ml-1" />
+            </a>
+          </h1>
+        </div>
         {/* </div> */}
 
         <div className="w-full flex flex-col container h-screen-[calc(100%-4rem)] justify-center items-center">
-
           <Loader className="animate-spin" size={64} />
           <p className="mt-4">Loading knowledge graph data...</p>
         </div>

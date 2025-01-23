@@ -295,10 +295,17 @@ export interface RagGenerationConfig {
 }
 
 export interface SearchProps {
-  pipeline?: Pipeline;
+  pipeline?: any;
   setQuery: (query: string) => void;
   placeholder?: string;
   disabled?: boolean;
+  mode?: string;
+  webSearch: boolean;
+  setWebSearch: React.Dispatch<React.SetStateAction<boolean>>;
+  magnify: boolean;
+  setMagnify: React.Dispatch<React.SetStateAction<boolean>>;
+  contextTool: boolean;
+  setContextTool: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export interface SidebarProps {
