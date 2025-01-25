@@ -1,5 +1,6 @@
 import { FC, useEffect, useState } from 'react';
 import Markdown from 'react-markdown';
+import { ClipLoader } from 'react-spinners';
 
 import {
   Popover,
@@ -17,7 +18,6 @@ import {
 } from '@/components/ui/accordion';
 import { Message } from '@/types';
 import { VectorSearchResult, KGSearchResult } from '@/types';
-import { ClipLoader } from 'react-spinners';
 
 function formatMarkdownNewLines(markdown: string) {
   return markdown
