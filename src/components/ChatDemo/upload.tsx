@@ -21,7 +21,6 @@ export interface UploadButtonProps {
   setCurrentPage?: React.Dispatch<React.SetStateAction<number>>;
   documentsPerPage?: number;
 }
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const UploadButton: React.FC<UploadButtonProps> = ({
   setUploadedDocuments,
@@ -47,9 +46,6 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
     const uploadedFiles: any[] = [];
     const uploadPromises: Promise<any>[] = [];
   
-    // Add 10s delay for testing
-    await delay(10000);
-
     for (const file of files) {
       const fileId = generateIdFromLabel(file.name);
       uploadedFiles.push({ documentId: fileId, title: file.name });
@@ -82,7 +78,7 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
   
     showToast({
       variant: 'success',
-      title: 'Upload Started',
+      title: 'Upload Succeeded',
       description: 'The document ingestion has been requested, refreshing documents...',
     });
   
