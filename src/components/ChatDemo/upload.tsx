@@ -1,13 +1,8 @@
-import { FileUp, PencilLine, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { UnprocessedChunk } from 'r2r-js/dist/types';
 import React, { useState, Dispatch, SetStateAction } from 'react';
 
 import { Button } from '@/components/ui/Button';
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from '@/components/ui/popover';
 import { useUserContext } from '@/context/UserContext';
 import { generateIdFromLabel } from '@/lib/utils';
 
@@ -26,6 +21,7 @@ export interface UploadButtonProps {
   setCurrentPage?: React.Dispatch<React.SetStateAction<number>>;
   documentsPerPage?: number;
 }
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const UploadButton: React.FC<UploadButtonProps> = ({
   setUploadedDocuments,
@@ -47,14 +43,18 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
     if (!client) {
       throw new Error('Failed to get authenticated client');
     }
-
+  
     const uploadedFiles: any[] = [];
+    const uploadPromises: Promise<any>[] = [];
+  
+    // Add 10s delay for testing
+    await delay(10000);
 
     for (const file of files) {
       const fileId = generateIdFromLabel(file.name);
       uploadedFiles.push({ documentId: fileId, title: file.name });
-
-      client.documents
+  
+      const uploadPromise = client.documents
         .create({
           file: file,
           ingestionMode: hiRes ? 'hi-res' : 'fast',
@@ -63,44 +63,40 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
           showToast({
             variant: 'destructive',
             title: 'Upload Failed',
-            description:
-              err instanceof Error
-                ? err.message
-                : 'An unexpected error occurred',
+            description: err instanceof Error ? err.message : 'An unexpected error occurred',
           });
         });
+      
+      uploadPromises.push(uploadPromise);
     }
-
-    setUploadedDocuments((prevDocuments) => [
-      ...prevDocuments,
-      ...uploadedFiles,
-    ]);
-
+  
+    // Wait for all uploads to complete
+    await Promise.all(uploadPromises);
+  
+    setUploadedDocuments((prevDocuments) => [...prevDocuments, ...uploadedFiles]);
+  
     if (setPendingDocuments) {
       const newUploadedFiles = uploadedFiles.map((file) => file.documentId);
       setPendingDocuments((prev) => [...prev, ...newUploadedFiles]);
     }
-
+  
     showToast({
       variant: 'success',
       title: 'Upload Started',
-      description:
-        'The document ingestion has been requested, refreshing documents...',
+      description: 'The document ingestion has been requested, refreshing documents...',
     });
-
+  
     if (onUploadSuccess) {
-      onUploadSuccess().then((updatedDocuments) => {
+      await onUploadSuccess().then((updatedDocuments) => {
         if (updatedDocuments.length > 0 && setCurrentPage && documentsPerPage) {
-          const totalPages = Math.ceil(
-            updatedDocuments.length / documentsPerPage
-          );
+          const totalPages = Math.ceil(updatedDocuments.length / documentsPerPage);
           setCurrentPage(1);
         } else if (setCurrentPage) {
           setCurrentPage(1);
         }
       });
     }
-
+  
     setIsUploading(false);
   };
 
@@ -148,8 +144,6 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
 
   return (
     <>
-      {/* <Popover> */}
-      {/* <PopoverTrigger asChild> */}
       <Button
         className="pl-2 pr-2 py-2 px-4"
         color="filled"
@@ -161,20 +155,6 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
         <Plus className="mr-2 h-4 w-4 mt-1" />
         {isUploading ? 'Uploading...' : 'New'}
       </Button>
-      {/* </PopoverTrigger>
-        <PopoverContent align="start" className="w-[150px] p-1">
-          <div className="flex flex-col gap-1">
-            <Button
-              onClick={() => setIsUploadDialogOpen(true)}
-              color="secondary"
-              className="flex justify-between items-center"
-            >
-              <FileUp className="mr-2 h-4 w-4" />
-              <span>File Upload</span>
-            </Button>
-          </div>
-        </PopoverContent> */}
-      {/* </Popover> */}
       <UploadDialog
         isOpen={isUploadDialogOpen}
         onClose={() => setIsUploadDialogOpen(false)}

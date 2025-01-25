@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/tooltip';
 import { UploadDialogProps } from '@/types';
 
+
 export const UploadDialog: React.FC<UploadDialogProps> = ({
   isOpen,
   onClose,
@@ -26,8 +27,8 @@ export const UploadDialog: React.FC<UploadDialogProps> = ({
 }) => {
   const [files, setFiles] = useState<File[]>([]);
   const [hiRes, setHiRes] = useState(true);
+  const [isUploading, setIsUploading] = useState(false);
 
-  // Dropzone logic
   const onDrop = useCallback((acceptedFiles: File[]) => {
     setFiles((prevFiles) => {
       const newFiles = acceptedFiles.filter((newFile) => {
@@ -45,33 +46,32 @@ export const UploadDialog: React.FC<UploadDialogProps> = ({
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     multiple: true,
+    disabled: isUploading
   });
 
   // On Upload click
-  const handleUpload = () => {
-    onUpload(files, hiRes);
-    setFiles([]); // clear local state
-    onClose(); // close the modal
+  const handleUpload = async () => {
+    setIsUploading(true);
+    try {
+      await onUpload(files, hiRes);
+    } finally {
+      setFiles([]); 
+      setIsUploading(false);
+      onClose();
+    }
   };
 
-  // Remove single file from list
   const removeFile = (index: number) => {
     setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
-        {/*
-      Turn the DialogHeader into a flex container. 
-      Remove bottom margin from DialogTitle (e.g. `mb-0`) to prevent stacking.
-    */}
+    <Dialog open={isOpen} onOpenChange={isUploading ? undefined : onClose}>
+      <DialogContent hideCloseButton={isUploading}>
         <DialogHeader className="flex items-left justify-between">
           <DialogTitle className="mb-0">
-            {/* Right-aligned switch + label */}
             <div className="flex items-center space-x-2">
               Upload Files or Folders
-              {/* grow rest of space */}
               <div className="flex-grow"></div>
               <TooltipProvider>
                 <div className="flex items-center space-x-2 mt-4">
@@ -80,8 +80,9 @@ export const UploadDialog: React.FC<UploadDialogProps> = ({
                       <Switch
                         checked={hiRes}
                         onCheckedChange={setHiRes}
+                        disabled={isUploading}
                         aria-label="Ingestion quality: hi-res uses an advanced VLM approach."
-                        className="text-accent-base bg-accent-base"
+                        className="text-accent-base bg-accent-base disabled:opacity-50"
                       />
                     </TooltipTrigger>
                     <TooltipContent>
@@ -97,58 +98,81 @@ export const UploadDialog: React.FC<UploadDialogProps> = ({
           </DialogTitle>
         </DialogHeader>
 
-        {/* Dropzone area */}
-        <div
-          {...getRootProps()}
-          className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer ${
-            isDragActive ? 'border-accent-dark bg-indigo-50' : 'border-gray-300'
-          }`}
-        >
-          <input {...getInputProps()} />
-          {isDragActive ? (
-            <p>Drop the files or folders here ...</p>
-          ) : (
-            <div>
-              <Upload className="mx-auto h-12 w-12 text-gray-400" />
-              <p>Drag and drop files or folders here, or click to select</p>
-            </div>
-          )}
-        </div>
-
-        {/* Selected files display */}
-        {files.length > 0 && (
-          <div>
-            <h3 className="font-semibold mt-4 mb-2">Selected files:</h3>
-            <ul className="pl-5 max-h-40 overflow-y-auto">
+        {isUploading ? (
+          <div className="flex flex-col items-center justify-center space-y-4 p-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-base"></div>
+            <p className="text-lg font-semibold">Uploading Files...</p>
+            <p className="text-sm text-gray-500 text-center">
+              Please do not navigate away from this page while the upload is in progress
+            </p>
+            <ul className="pl-5 max-h-40 overflow-y-auto w-full">
               {files.map((file, index) => (
-                <li
-                  key={index}
-                  className="flex items-center justify-between mb-2"
-                >
+                <li key={index} className="flex items-center justify-between mb-2">
                   <span className="truncate max-w-xs">
                     {(file as any).webkitRelativePath || file.name}
                   </span>
-                  <button
-                    onClick={() => removeFile(index)}
-                    className="mr-4 text-red-500 hover:text-red-700"
-                  >
-                    <X size={16} />
-                  </button>
+                  <span className="text-xs text-gray-500">
+                    {(file.size / 1024 / 1024).toFixed(2)} MB
+                  </span>
                 </li>
               ))}
             </ul>
           </div>
-        )}
+        ) : (
+          <>
+            <div
+              {...getRootProps()}
+              className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer ${
+                isDragActive ? 'border-accent-dark bg-indigo-50' : 'border-gray-300'
+              }`}
+            >
+              <input {...getInputProps()} />
+              {isDragActive ? (
+                <p>Drop the files or folders here ...</p>
+              ) : (
+                <div>
+                  <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                  <p>Drag and drop files or folders here, or click to select</p>
+                </div>
+              )}
+            </div>
 
-        {/* Upload button */}
-        <Button
-          onClick={handleUpload}
-          disabled={files.length === 0}
-          className="mt-4 py-2 px-4 rounded-full transition-colors"
-          color={files.length === 0 ? 'disabled' : 'filled'}
-        >
-          Upload
-        </Button>
+            {files.length > 0 && (
+              <div>
+                <h3 className="font-semibold mt-4 mb-2">Selected files:</h3>
+                <ul className="pl-5 max-h-40 overflow-y-auto">
+                  {files.map((file, index) => (
+                    <li key={index} className="flex items-center justify-between mb-2">
+                      <span className="truncate max-w-xs">
+                        {(file as any).webkitRelativePath || file.name}
+                      </span>
+                      <div className="flex items-center">
+                        <span className="text-xs text-gray-500 mr-4">
+                          {(file.size / 1024 / 1024).toFixed(2)} MB
+                        </span>
+                        <button
+                          onClick={() => removeFile(index)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <Button
+              onClick={handleUpload}
+              disabled={files.length === 0}
+              className="mt-4 py-2 px-4 rounded-full transition-colors"
+              color={files.length === 0 ? 'disabled' : 'filled'}
+            >
+              Upload {files.length > 0 ? `(${files.length} files)` : ''}
+            </Button>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );
