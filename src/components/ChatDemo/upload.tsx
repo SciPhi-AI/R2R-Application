@@ -42,14 +42,14 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
     if (!client) {
       throw new Error('Failed to get authenticated client');
     }
-  
+
     const uploadedFiles: any[] = [];
     const uploadPromises: Promise<any>[] = [];
-  
+
     for (const file of files) {
       const fileId = generateIdFromLabel(file.name);
       uploadedFiles.push({ documentId: fileId, title: file.name });
-  
+
       const uploadPromise = client.documents
         .create({
           file: file,
@@ -59,40 +59,49 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
           showToast({
             variant: 'destructive',
             title: 'Upload Failed',
-            description: err instanceof Error ? err.message : 'An unexpected error occurred',
+            description:
+              err instanceof Error
+                ? err.message
+                : 'An unexpected error occurred',
           });
         });
-      
+
       uploadPromises.push(uploadPromise);
     }
-  
+
     // Wait for all uploads to complete
     await Promise.all(uploadPromises);
-  
-    setUploadedDocuments((prevDocuments) => [...prevDocuments, ...uploadedFiles]);
-  
+
+    setUploadedDocuments((prevDocuments) => [
+      ...prevDocuments,
+      ...uploadedFiles,
+    ]);
+
     if (setPendingDocuments) {
       const newUploadedFiles = uploadedFiles.map((file) => file.documentId);
       setPendingDocuments((prev) => [...prev, ...newUploadedFiles]);
     }
-  
+
     showToast({
       variant: 'success',
       title: 'Upload Succeeded',
-      description: 'The document ingestion has been requested, refreshing documents...',
+      description:
+        'The document ingestion has been requested, refreshing documents...',
     });
-  
+
     if (onUploadSuccess) {
       await onUploadSuccess().then((updatedDocuments) => {
         if (updatedDocuments.length > 0 && setCurrentPage && documentsPerPage) {
-          const totalPages = Math.ceil(updatedDocuments.length / documentsPerPage);
+          const totalPages = Math.ceil(
+            updatedDocuments.length / documentsPerPage
+          );
           setCurrentPage(1);
         } else if (setCurrentPage) {
           setCurrentPage(1);
         }
       });
     }
-  
+
     setIsUploading(false);
   };
 

@@ -19,7 +19,6 @@ import {
 } from '@/components/ui/tooltip';
 import { UploadDialogProps } from '@/types';
 
-
 export const UploadDialog: React.FC<UploadDialogProps> = ({
   isOpen,
   onClose,
@@ -46,7 +45,7 @@ export const UploadDialog: React.FC<UploadDialogProps> = ({
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     multiple: true,
-    disabled: isUploading
+    disabled: isUploading,
   });
 
   // On Upload click
@@ -55,7 +54,7 @@ export const UploadDialog: React.FC<UploadDialogProps> = ({
     try {
       await onUpload(files, hiRes);
     } finally {
-      setFiles([]); 
+      setFiles([]);
       setIsUploading(false);
       onClose();
     }
@@ -103,11 +102,15 @@ export const UploadDialog: React.FC<UploadDialogProps> = ({
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-base"></div>
             <p className="text-lg font-semibold">Uploading Files...</p>
             <p className="text-sm text-gray-500 text-center">
-              Please do not navigate away from this page while the upload is in progress
+              Please do not navigate away from this page while the upload is in
+              progress. Note that ingestion of the input document may take up to a few minutes after upload.
             </p>
             <ul className="pl-5 max-h-40 overflow-y-auto w-full">
               {files.map((file, index) => (
-                <li key={index} className="flex items-center justify-between mb-2">
+                <li
+                  key={index}
+                  className="flex items-center justify-between mb-2"
+                >
                   <span className="truncate max-w-xs">
                     {(file as any).webkitRelativePath || file.name}
                   </span>
@@ -123,7 +126,9 @@ export const UploadDialog: React.FC<UploadDialogProps> = ({
             <div
               {...getRootProps()}
               className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer ${
-                isDragActive ? 'border-accent-dark bg-indigo-50' : 'border-gray-300'
+                isDragActive
+                  ? 'border-accent-dark bg-indigo-50'
+                  : 'border-gray-300'
               }`}
             >
               <input {...getInputProps()} />
@@ -142,7 +147,10 @@ export const UploadDialog: React.FC<UploadDialogProps> = ({
                 <h3 className="font-semibold mt-4 mb-2">Selected files:</h3>
                 <ul className="pl-5 max-h-40 overflow-y-auto">
                   {files.map((file, index) => (
-                    <li key={index} className="flex items-center justify-between mb-2">
+                    <li
+                      key={index}
+                      className="flex items-center justify-between mb-2"
+                    >
                       <span className="truncate max-w-xs">
                         {(file as any).webkitRelativePath || file.name}
                       </span>
