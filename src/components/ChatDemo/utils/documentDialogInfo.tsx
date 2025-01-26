@@ -357,6 +357,7 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
                       </Button>
                     </div>
                   )} */}
+                  {documentOverview?.summary}
                 <Tabs
                   value={activeTab}
                   onValueChange={setActiveTab}

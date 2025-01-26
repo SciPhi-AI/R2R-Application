@@ -1,3 +1,4 @@
+import { Github } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useRouter } from 'next/router';
@@ -43,10 +44,10 @@ const NavItems: React.FC<NavItemsProps> = ({
 
   const commonItems = [
     { path: '/documents', label: 'Documents' },
-    { path: '/collections', label: 'Collections' },
+    // { path: '/collections', label: 'Collections' },
     { path: '/graphs', label: 'Graphs' },
-    { path: '/chat', label: 'Chat' },
-    { path: '/search', label: 'Search' },
+    // { path: '/chat', label: 'Chat' },
+    // { path: '/search', label: 'Search' },
   ];
 
   // const adminItems = [
@@ -150,8 +151,16 @@ export const Navbar = forwardRef<React.ElementRef<'nav'>, NavbarProps>(
               >
                 Docs
               </Button>
+              <Button
+  color="blank"
+  shape="outline_widest"
+  onClick={() => window.open('https://github.com/SciPhi-AI/R2R', '_blank')}
+  aria-label="View GitHub Repository"
+>
+  <Github className="h-6 w-6" />
+</Button>
 
-              {isSignedIn && (
+              {/* {isSignedIn && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Avatar className="cursor-pointer">
@@ -175,7 +184,7 @@ export const Navbar = forwardRef<React.ElementRef<'nav'>, NavbarProps>(
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-              )}
+              )} */}
             </div>
           </div>
         </div>

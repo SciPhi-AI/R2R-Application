@@ -132,52 +132,6 @@ const Sidebar: React.FC<SidebarProps> = ({
         }}
       >
         <div className="p-4 overflow-y-auto h-[calc(100%-var(--header-height))]">
-          {/* Conversations Section */}
-          {config.showConversations && (
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-accent-base mb-2">
-                Conversation History
-              </h3>
-              <p className="text-sm text-gray-400 mb-3">
-                {/* (Click on a conversation to load its messages) */}
-              </p>
-              <div className="space-y-2">
-                {conversations.length === 0 ? (
-                  <p className="text-xs text-gray-500 italic">
-                    No conversations found.
-                  </p>
-                ) : (
-                  conversations.map((conv) => (
-                    <button
-                      key={conv.id}
-                      // @ts-ignore
-                      onClick={() => onConversationSelect(conv.id)}
-                      className="w-full text-left p-3 rounded bg-zinc-700 hover:bg-zinc-600 transition flex flex-col"
-                    >
-                      {/* Top row: name or truncated ID, plus timestamp */}
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-semibold text-white">
-                          {conv.name
-                            ? conv.name
-                            : `Conversation ${conv.id.slice(0, 5)}...`}
-                        </span>
-                        <span className="text-xs text-gray-400 ml-2">
-                          {new Date(conv.createdAt).toLocaleDateString()}
-                        </span>
-                      </div>
-                      {/* Last message snippet (if available) */}
-                      {/* {conv.lastMessage && (
-                        <p className="mt-1 text-xs text-gray-300 line-clamp-2 leading-snug">
-                          {conv.lastMessage}
-                        </p>
-                      )} */}
-                    </button>
-                  ))
-                )}
-              </div>
-            </div>
-          )}
-
           {/* Search Settings Section */}
           <h3 className="text-lg font-semibold text-accent-base mt-2">
             Search Settings

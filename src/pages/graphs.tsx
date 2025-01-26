@@ -498,27 +498,27 @@ const KnowledgeGraphsPage: React.FC = () => {
       truncate: true,
       copyable: true,
     },
-    // {
-    //   key: 'ingestionStatus',
-    //   label: 'Ingestion',
-    //   filterable: true,
-    //   filterType: 'multiselect',
-    //   filterOptions: ['success', 'failed', 'pending', 'enriched'],
-    //   renderCell: (doc) => (
-    //     <Badge
-    //       variant={
-    //         doc.ingestionStatus === IngestionStatus.SUCCESS ||
-    //         doc.ingestionStatus === IngestionStatus.ENRICHED
-    //           ? 'success'
-    //           : doc.ingestionStatus === IngestionStatus.FAILED
-    //           ? 'destructive'
-    //           : 'pending'
-    //       }
-    //     >
-    //       {doc.ingestionStatus}
-    //     </Badge>
-    //   ),
-    // },
+    {
+      key: 'ingestionStatus',
+      label: 'Ingestion',
+      filterable: true,
+      filterType: 'multiselect',
+      filterOptions: ['success', 'failed', 'pending', 'enriched'],
+      renderCell: (doc) => (
+        <Badge
+          variant={
+            doc.ingestionStatus === IngestionStatus.SUCCESS ||
+            doc.ingestionStatus === IngestionStatus.ENRICHED
+              ? 'success'
+              : doc.ingestionStatus === IngestionStatus.FAILED
+              ? 'destructive'
+              : 'pending'
+          }
+        >
+          {doc.ingestionStatus}
+        </Badge>
+      ),
+    },
     {
       key: 'extractionStatus',
       label: 'Extraction Status',
@@ -542,6 +542,13 @@ const KnowledgeGraphsPage: React.FC = () => {
         </Badge>
       ),
     },
+    {
+      key: 'summary',
+      label: 'Summary',
+      truncatedSubstring: true,
+      copyable: true,
+    },
+
   ];
 
   // Document actions in the rightmost column
@@ -593,7 +600,7 @@ const KnowledgeGraphsPage: React.FC = () => {
   const communityColumns: Column<CommunityResponse>[] = [
     { key: 'id', label: 'Community ID', truncate: true },
     { key: 'name', label: 'Name' },
-    { key: 'summary', label: 'Summary' },
+    { key: 'summary', label: 'Summary', truncatedSubstring: true },
   ];
 
   /****************************************
@@ -662,14 +669,14 @@ const KnowledgeGraphsPage: React.FC = () => {
             </h1>
 
             <div className="flex gap-2 items-center">
-              <Button
+              {/* <Button
                 onClick={() => setIsAssignDocumentDialogOpen(true)}
                 color="filled"
                 shape="outline_widest"
               >
                 <Plus className="w-4 h-4 mr-1 mt-1" />
                 Document
-              </Button>
+              </Button> */}
               <Button
                 onClick={() => setIsCollectionDialogOpen(true)}
                 color="light"
@@ -682,7 +689,7 @@ const KnowledgeGraphsPage: React.FC = () => {
           </div>
 
           {/* Explanation / Steps (Optional) */}
-          <Alert className="mb-6 ">
+          {/* <Alert className="mb-6 ">
             <div className="flex items-center text-accent-base pb-1">
               <InfoIcon className="h-4 w-4 mr-2 -mt-0.5" />
               <AlertTitle className="pt-1">How to Build a Graph</AlertTitle>
@@ -712,15 +719,15 @@ const KnowledgeGraphsPage: React.FC = () => {
                 </li>
               </ol>
             </AlertDescription>
-          </Alert>
+          </Alert> */}
           <Alert variant="default">
             <div className="flex items-center text-red-400">
               {/* <Rocket className="h-4 w-4 mr-2  -mt-1  text-accent-base" /> */}
               <AlertTriangleIcon className="h-5 w-5 mr-2 -mt-2" />
               <AlertTitle>
                 SciPhi Knowledge Graphs are still under development, results below are limited to 200 entries returned.
-                <br/>
-                Please report any issues you encounter.
+                {/* <br/> */}
+                {/* Please report any issues you encounter. */}
               </AlertTitle>
             </div>
           </Alert>
@@ -743,7 +750,7 @@ const KnowledgeGraphsPage: React.FC = () => {
               </select>
             </>
           )} */}
-            {collections.length > 1 && (
+            {/* {collections.length > 1 && (
               <>
                 <Select
                   value={selectedCollectionId}
@@ -761,9 +768,9 @@ const KnowledgeGraphsPage: React.FC = () => {
                   </SelectContent>
                 </Select>
               </>
-            )}
+            )} */}
 
-            <TooltipProvider>
+            {/* <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button onClick={handlePullGraph} color="filled">
@@ -777,8 +784,8 @@ const KnowledgeGraphsPage: React.FC = () => {
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-
-            <TooltipProvider>
+ */}
+            {/* <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button onClick={handleBuildGraph} color="filled">
@@ -789,7 +796,7 @@ const KnowledgeGraphsPage: React.FC = () => {
                   {'Rebuilds the communities for this collection'}
                 </TooltipContent>
               </Tooltip>
-            </TooltipProvider>
+            </TooltipProvider> */}
           </div>
 
           {/* Tabs for each area */}
@@ -868,7 +875,7 @@ const KnowledgeGraphsPage: React.FC = () => {
                 loading={loading}
                 data={filteredDocuments}
                 columns={documentColumns}
-                actions={renderDocumentActions}
+                // actions={renderDocumentActions}
                 // selection
                 onSelectAll={(selected) => {
                   if (selected) {
@@ -907,19 +914,19 @@ const KnowledgeGraphsPage: React.FC = () => {
                 itemsPerPage={10}
                 showPagination={true}
                 // If you want to support removing/editing entities, define actions:
-                actions={(entity: EntityResponse) => (
-                  <div className="flex space-x-2 justify-end">
-                    <RemoveButton
-                      itemId={entity.id}
-                      collectionId={selectedCollectionId}
-                      itemType="entity"
-                      onSuccess={() =>
-                        fetchCollectionData(selectedCollectionId)
-                      }
-                      showToast={toast}
-                    />
-                  </div>
-                )}
+                // actions={(entity: EntityResponse) => (
+                //   <div className="flex space-x-2 justify-end">
+                //     <RemoveButton
+                //       itemId={entity.id}
+                //       collectionId={selectedCollectionId}
+                //       itemType="entity"
+                //       onSuccess={() =>
+                //         fetchCollectionData(selectedCollectionId)
+                //       }
+                //       showToast={toast}
+                //     />
+                //   </div>
+                // )}
                 currentPage={currentEntitiesPage}
                 onPageChange={(page) => setCurrentEntitiesPage(page)}
                 emptyTableText={
@@ -936,19 +943,19 @@ const KnowledgeGraphsPage: React.FC = () => {
                 columns={relationshipColumns}
                 itemsPerPage={10}
                 showPagination={true}
-                actions={(rel: RelationshipResponse) => (
-                  <div className="flex space-x-2 justify-end">
-                    <RemoveButton
-                      itemId={rel.id}
-                      collectionId={selectedCollectionId}
-                      itemType="relationship"
-                      onSuccess={() =>
-                        fetchCollectionData(selectedCollectionId)
-                      }
-                      showToast={toast}
-                    />
-                  </div>
-                )}
+                // actions={(rel: RelationshipResponse) => (
+                //   <div className="flex space-x-2 justify-end">
+                //     <RemoveButton
+                //       itemId={rel.id}
+                //       collectionId={selectedCollectionId}
+                //       itemType="relationship"
+                //       onSuccess={() =>
+                //         fetchCollectionData(selectedCollectionId)
+                //       }
+                //       showToast={toast}
+                //     />
+                //   </div>
+                // )}
                 emptyTableText={
                   'No data available, try clicking "Sync Graph" above after ingesting and extracting a document.'
                 }
@@ -965,19 +972,19 @@ const KnowledgeGraphsPage: React.FC = () => {
                 columns={communityColumns}
                 itemsPerPage={10}
                 showPagination={true}
-                actions={(community: CommunityResponse) => (
-                  <div className="flex space-x-2 justify-end">
-                    <RemoveButton
-                      itemId={community.id}
-                      collectionId={selectedCollectionId}
-                      itemType="community"
-                      onSuccess={() =>
-                        fetchCollectionData(selectedCollectionId)
-                      }
-                      showToast={toast}
-                    />
-                  </div>
-                )}
+                // actions={(community: CommunityResponse) => (
+                //   <div className="flex space-x-2 justify-end">
+                //     <RemoveButton
+                //       itemId={community.id}
+                //       collectionId={selectedCollectionId}
+                //       itemType="community"
+                //       onSuccess={() =>
+                //         fetchCollectionData(selectedCollectionId)
+                //       }
+                //       showToast={toast}
+                //     />
+                //   </div>
+                // )}
                 currentPage={currentCommunitiesPage}
                 onPageChange={(page) => setCurrentCommunitiesPage(page)}
                 emptyTableText={
