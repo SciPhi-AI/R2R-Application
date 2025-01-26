@@ -63,7 +63,8 @@ const Index: React.FC = () => {
     }
   }, [searchParams]);
 
-  const { pipeline, getClient, selectedModel } = useUserContext();
+  // NOTE: Grab the selectedModel and its setter from the user context.
+  const { pipeline, getClient, selectedModel, setSelectedModel } = useUserContext();
 
   const toggleSidebar = () => {
     setSidebarIsOpen(!sidebarIsOpen);
@@ -85,7 +86,7 @@ const Index: React.FC = () => {
   const [webSearch, setWebSearch] = useState(true);
   const [magnify, setMagnify] = useState(true);
   const [contextTool, setContextTool] = useState(true);
-  // Function to get currently enabled tools
+
   const getEnabledTools = () => {
     const enabledTools = [];
     if (webSearch) enabledTools.push('web_search');
@@ -113,7 +114,7 @@ const Index: React.FC = () => {
       'vectorSearch',
       true,
       'Vector Search',
-      'Vector search is a search method that uses vectors to represent documents and queries. It is used to find similar documents to a given query.'
+      'Vector search is a search method that uses vectors to represent documents and queries.'
     );
     initializeSwitch(
       'knowledgeGraphSearch',
@@ -125,7 +126,7 @@ const Index: React.FC = () => {
       'hybridSearch',
       false,
       'Hybrid Search',
-      'Hybrid search is a search method that combines multiple search methods to provide more accurate and relevant search results.'
+      'Hybrid search is a search method that combines multiple search methods.'
     );
   }, [initializeSwitch]);
 
@@ -235,6 +236,13 @@ const Index: React.FC = () => {
     }
   };
 
+  // Make sure we have a default model if none is set:
+  useEffect(() => {
+    if (!selectedModel) {
+      setSelectedModel('azure/gpt-4o');
+    }
+  }, [selectedModel, setSelectedModel]);
+
   console.log('getEnabledTools() = ', getEnabledTools());
 
   return (
@@ -262,7 +270,7 @@ const Index: React.FC = () => {
           setEfSearch={setEfSearch}
           fullTextWeight={fullTextWeight}
           setFullTextWeight={setFullTextWeight}
-          semanticWeight={semanticWeight}
+          semanticWeight={setSemanticWeight}
           setSemanticWeight={setSemanticWeight}
           fullTextLimit={fullTextLimit}
           setFullTextLimit={setFullTextLimit}
@@ -300,21 +308,44 @@ const Index: React.FC = () => {
             className={`main-content ${sidebarIsOpen ? '' : 'sidebar-closed'}`}
             ref={contentAreaRef}
           >
-            {/* Mode Selector */}
-            <div className="mode-selector h-0">
-              <Select value={mode} onValueChange={handleModeChange}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Select Mode" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="rag">RAG Q&A</SelectItem>
-                  <SelectItem value="rag_agent">RAG Agent</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+    
+
             <div className="w-full max-w-4xl flex flex-col flex-grow overflow-hidden">
               {/* Chat Interface */}
+              
+            {/* Mode and Model selectors in a single row */}
+            <div className="flex items-center justify-between mb-4">
+                  {/* Left: Mode Selector */}
+                  <div className="mode-selector">
+                    <Select value={mode} onValueChange={handleModeChange}>
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Select Mode" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="rag">RAG Q&A</SelectItem>
+                        <SelectItem value="rag_agent">RAG Agent</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Right: Model Selector */}
+                  <div className="model-selector">
+                    <Select
+                      value={selectedModel || 'azure/gpt-4o'}
+                      onValueChange={(val) => setSelectedModel(val)}
+                    >
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Select Model" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="azure/gpt-4o">gpt-4o</SelectItem>
+                        <SelectItem value="anthropic/claude-3-5-sonnet-20241022">claude-3-5-sonnet</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>              
               <div className="flex-1 overflow-auto p-4 mt-16">
+                
                 <Result
                   query={query}
                   setQuery={setQuery}
@@ -338,7 +369,7 @@ const Index: React.FC = () => {
                   setMessages={setMessages}
                   selectedConversationId={selectedConversationId}
                   setSelectedConversationId={setSelectedConversationId}
-                  enabledTools={getEnabledTools()} // Add this new prop
+                  enabledTools={getEnabledTools()}
                 />
               </div>
 

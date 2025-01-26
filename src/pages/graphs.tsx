@@ -185,35 +185,6 @@ const KnowledgeGraphsPage: React.FC = () => {
     }
   }, [getClient]);
 
-  // const fetchCollections = useCallback(async () => {
-  //   setLoading(true);
-  //   try {
-  //     const client = await getClient();
-  //     if (!client) throw new Error('No authenticated client.');
-
-  //     // Grab the user’s personal collections as an example
-  //     // const userId = client.users.userId || '';
-  //     const { results, totalEntries } = await client.users.listCollections({
-  //       id: authState?.userId,
-  //       offset: 0,
-  //       limit: PAGE_SIZE,
-  //     });
-
-  //     setCollections(results);
-
-  //     if (results.length > 0) {
-  //       // Optionally auto-select the first collection or let user choose
-  //       setSelectedCollectionId(results[0].id);
-  //     }
-
-  //     setLoading(false);
-  //   } catch (err) {
-  //     setLoading(false);
-  //     setError('Failed to fetch collections.');
-  //     console.error(err);
-  //   }
-  // }, [getClient]);
-
   /****************************************
    * 2) Load data for the currently selected collection
    ****************************************/
@@ -238,16 +209,16 @@ const KnowledgeGraphsPage: React.FC = () => {
         });
         fetchedDocs = firstBatch.results;
         offset += PAGE_SIZE;
-        while (offset < firstBatch.totalEntries) {
-          const batch = await client.collections.listDocuments({
-            id: collectionId,
-            offset,
-            limit: PAGE_SIZE,
-          });
-          if (batch.results.length === 0) break;
-          fetchedDocs = fetchedDocs.concat(batch.results);
-          offset += PAGE_SIZE;
-        }
+        // while (offset < firstBatch.totalEntries) {
+        //   const batch = await client.collections.listDocuments({
+        //     id: collectionId,
+        //     offset,
+        //     limit: PAGE_SIZE,
+        //   });
+        //   if (batch.results.length === 0) break;
+        //   fetchedDocs = fetchedDocs.concat(batch.results);
+        //   offset += PAGE_SIZE;
+        // }
         console.log('fetchedDocs = ', fetchedDocs);
         setDocuments(fetchedDocs);
 
@@ -260,18 +231,17 @@ const KnowledgeGraphsPage: React.FC = () => {
           limit: PAGE_SIZE,
         });
         fetchedEntities = firstEntityBatch.results;
-        console.log('fetchedEntities = ', fetchedEntities);
         offset += PAGE_SIZE;
-        while (offset < firstEntityBatch.totalEntries) {
-          const batch = await client.graphs.listEntities({
-            collectionId,
-            offset,
-            limit: PAGE_SIZE,
-          });
-          if (batch.results.length === 0) break;
-          fetchedEntities = fetchedEntities.concat(batch.results);
-          offset += PAGE_SIZE;
-        }
+        // while (offset < firstEntityBatch.totalEntries) {
+        //   const batch = await client.graphs.listEntities({
+        //     collectionId,
+        //     offset,
+        //     limit: PAGE_SIZE,
+        //   });
+        //   if (batch.results.length === 0) break;
+        //   fetchedEntities = fetchedEntities.concat(batch.results);
+        //   offset += PAGE_SIZE;
+        // }
         setEntities(fetchedEntities);
 
         // 2c) Relationships
@@ -284,16 +254,16 @@ const KnowledgeGraphsPage: React.FC = () => {
         });
         fetchedRelationships = firstRelationBatch.results;
         offset += PAGE_SIZE;
-        while (offset < firstRelationBatch.totalEntries) {
-          const batch = await client.graphs.listRelationships({
-            collectionId,
-            offset,
-            limit: PAGE_SIZE,
-          });
-          if (batch.results.length === 0) break;
-          fetchedRelationships = fetchedRelationships.concat(batch.results);
-          offset += PAGE_SIZE;
-        }
+        // while (offset < firstRelationBatch.totalEntries) {
+        //   const batch = await client.graphs.listRelationships({
+        //     collectionId,
+        //     offset,
+        //     limit: PAGE_SIZE,
+        //   });
+        //   if (batch.results.length === 0) break;
+        //   fetchedRelationships = fetchedRelationships.concat(batch.results);
+        //   offset += PAGE_SIZE;
+        // }
         setRelationships(fetchedRelationships);
 
         // 2d) Communities
@@ -306,16 +276,16 @@ const KnowledgeGraphsPage: React.FC = () => {
         });
         fetchedCommunities = firstCommBatch.results;
         offset += PAGE_SIZE;
-        while (offset < firstCommBatch.totalEntries) {
-          const batch = await client.graphs.listCommunities({
-            collectionId,
-            offset,
-            limit: PAGE_SIZE,
-          });
-          if (batch.results.length === 0) break;
-          fetchedCommunities = fetchedCommunities.concat(batch.results);
-          offset += PAGE_SIZE;
-        }
+        // while (offset < firstCommBatch.totalEntries) {
+        //   const batch = await client.graphs.listCommunities({
+        //     collectionId,
+        //     offset,
+        //     limit: PAGE_SIZE,
+        //   });
+        //   if (batch.results.length === 0) break;
+        //   fetchedCommunities = fetchedCommunities.concat(batch.results);
+        //   offset += PAGE_SIZE;
+        // }
         setCommunities(fetchedCommunities);
 
         setLoading(false);
@@ -748,8 +718,9 @@ const KnowledgeGraphsPage: React.FC = () => {
               {/* <Rocket className="h-4 w-4 mr-2  -mt-1  text-accent-base" /> */}
               <AlertTriangleIcon className="h-5 w-5 mr-2 -mt-2" />
               <AlertTitle>
-                SciPhi Knowledge Graphs are still under development. Please
-                report any issues you encounter.
+                SciPhi Knowledge Graphs are still under development, results below are limited to 200 entries returned.
+                <br/>
+                Please report any issues you encounter.
               </AlertTitle>
             </div>
           </Alert>
