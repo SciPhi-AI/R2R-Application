@@ -511,8 +511,8 @@ const KnowledgeGraphsPage: React.FC = () => {
             doc.ingestionStatus === IngestionStatus.ENRICHED
               ? 'success'
               : doc.ingestionStatus === IngestionStatus.FAILED
-              ? 'destructive'
-              : 'pending'
+                ? 'destructive'
+                : 'pending'
           }
         >
           {doc.ingestionStatus}
@@ -548,7 +548,6 @@ const KnowledgeGraphsPage: React.FC = () => {
       truncatedSubstring: true,
       copyable: true,
     },
-
   ];
 
   // Document actions in the rightmost column
@@ -725,7 +724,8 @@ const KnowledgeGraphsPage: React.FC = () => {
               {/* <Rocket className="h-4 w-4 mr-2  -mt-1  text-accent-base" /> */}
               <AlertTriangleIcon className="h-5 w-5 mr-2 -mt-2" />
               <AlertTitle>
-                SciPhi graphs display are still under development, results below are limited to 200 entries returned.
+                SciPhi graphs display are still under development, results below
+                are limited to 200 entries returned.
                 {/* <br/> */}
                 {/* Please report any issues you encounter. */}
               </AlertTitle>

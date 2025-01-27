@@ -56,19 +56,18 @@ export const DefaultQueries: FC<DefaultQueriesProps> = ({ setQuery, mode }) => {
 
   const defaultQueries = getQueriesBasedOnMode(mode);
 
-
-
-const AsciiLogo = () => {
-  return (
-    <pre 
-      className="text-sm sm:text-base leading-none whitespace-pre select-none bg-transparent text-primary mb-8"
-      style={{ 
-        fontFamily: '"BlurVision ASCII", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
-        // Optional: adjust character spacing if needed for this specific font
-        letterSpacing: '0.01em'
-      }}
-    >
-      {`░▒▓███████▓▒░  ░▒▓███████▓▒░  ░▒▓███████▓▒░  ░▒▓████████▓▒░ 
+  const AsciiLogo = () => {
+    return (
+      <pre
+        className="text-sm sm:text-base leading-none whitespace-pre select-none bg-transparent text-primary mb-8"
+        style={{
+          fontFamily:
+            '"BlurVision ASCII", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+          // Optional: adjust character spacing if needed for this specific font
+          letterSpacing: '0.01em',
+        }}
+      >
+        {`░▒▓███████▓▒░  ░▒▓███████▓▒░  ░▒▓███████▓▒░  ░▒▓████████▓▒░ 
 ░▒▓█▓▒░░▒▓█▓▒░        ░▒▓█▓▒░ ░▒▓█▓▒░░▒▓█▓▒░ ░▒▓█▓▒░░▒▓█▓▒░ 
 ░▒▓█▓▒░░▒▓█▓▒░        ░▒▓█▓▒░ ░▒▓█▓▒░░▒▓█▓▒░ ░▒▓█▓▒░░▒▓█▓▒░ 
 ░▒▓███████▓▒░   ░▒▓██████▓▒░  ░▒▓███████▓▒░  ░▒▓█▓▒░░▒▓█▓▒░ 
@@ -77,10 +76,9 @@ const AsciiLogo = () => {
 ░▒▓█▓▒░░▒▓█▓▒░ ░▒▓████████▓▒░ ░▒▓█▓▒░░▒▓█▓▒░ ░▒▓████████▓▒░ 
                                                             
                                                             `}
-    </pre>
-  );
-};
-
+      </pre>
+    );
+  };
 
   // const AsciiLogo = () => {
   //   return (
@@ -98,8 +96,7 @@ const AsciiLogo = () => {
 
   return (
     <div className="flex flex-col items-center justify-center h-full space-y-8">
-
-      <AsciiLogo/>
+      <AsciiLogo />
       {/* <Logo
         width={150}
         height={150}

@@ -152,13 +152,15 @@ export const Navbar = forwardRef<React.ElementRef<'nav'>, NavbarProps>(
                 Docs
               </Button>
               <Button
-  color="blank"
-  shape="outline_widest"
-  onClick={() => window.open('https://github.com/SciPhi-AI/R2R', '_blank')}
-  aria-label="View GitHub Repository"
->
-  <Github className="h-6 w-6" />
-</Button>
+                // color="blank"
+                shape="outline_widest"
+                onClick={() =>
+                  window.open('https://github.com/SciPhi-AI/R2R', '_blank')
+                }
+                aria-label="View GitHub Repository"
+              >
+                <Github className="h-6 w-6" />
+              </Button>
 
               {/* {isSignedIn && (
                 <DropdownMenu>

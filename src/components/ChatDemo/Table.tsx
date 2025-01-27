@@ -309,7 +309,6 @@ function Table<T extends object>({
 
   return (
     <div className="flex flex-col">
-
       {/* Table container with forced scrollbar */}
       <div
         className="overflow-x-auto force-show-scrollbar"
@@ -524,15 +523,15 @@ function Table<T extends object>({
           </tbody>
         </table>
         {showPagination && (
-        <div className="mt-4">
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChangeInternal}
-            isLoading={loading}
-          />
-        </div>
-      )}
+          <div className="mt-4">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChangeInternal}
+              isLoading={loading}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

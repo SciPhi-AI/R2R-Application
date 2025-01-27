@@ -103,7 +103,8 @@ export const UploadDialog: React.FC<UploadDialogProps> = ({
             <p className="text-lg font-semibold">Uploading Files...</p>
             <p className="text-sm text-gray-500 text-center">
               Please do not navigate away from this page while the upload is in
-              progress. Note that ingestion of the input document may take up to a few minutes after upload.
+              progress. Note that ingestion of the input document may take up to
+              a few minutes after upload.
             </p>
             <ul className="pl-5 max-h-40 overflow-y-auto w-full">
               {files.map((file, index) => (

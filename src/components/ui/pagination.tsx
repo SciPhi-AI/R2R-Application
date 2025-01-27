@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/input';
 import debounce from '@/lib/debounce';
@@ -57,7 +58,10 @@ const Pagination: React.FC<PaginationProps> = ({
   };
 
   return (
-    <nav className="flex justify-center items-center space-x-1" aria-label="Pagination">
+    <nav
+      className="flex justify-center items-center space-x-1"
+      aria-label="Pagination"
+    >
       <Button
         onClick={() => handlePageChange(currentPage - 1)}
         disabled={currentPage <= 1 || isLoading}

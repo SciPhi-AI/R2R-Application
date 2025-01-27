@@ -64,7 +64,8 @@ const Index: React.FC = () => {
   }, [searchParams]);
 
   // NOTE: Grab the selectedModel and its setter from the user context.
-  const { pipeline, getClient, selectedModel, setSelectedModel } = useUserContext();
+  const { pipeline, getClient, selectedModel, setSelectedModel } =
+    useUserContext();
 
   const toggleSidebar = () => {
     setSidebarIsOpen(!sidebarIsOpen);
@@ -270,7 +271,7 @@ const Index: React.FC = () => {
           setEfSearch={setEfSearch}
           fullTextWeight={fullTextWeight}
           setFullTextWeight={setFullTextWeight}
-          semanticWeight={setSemanticWeight}
+          semanticWeight={semanticWeight}
           setSemanticWeight={setSemanticWeight}
           fullTextLimit={fullTextLimit}
           setFullTextLimit={setFullTextLimit}
@@ -308,44 +309,43 @@ const Index: React.FC = () => {
             className={`main-content ${sidebarIsOpen ? '' : 'sidebar-closed'}`}
             ref={contentAreaRef}
           >
-    
-
             <div className="w-full max-w-4xl flex flex-col flex-grow overflow-hidden">
               {/* Chat Interface */}
-              
-            {/* Mode and Model selectors in a single row */}
-            <div className="flex items-center justify-between mb-4">
-                  {/* Left: Mode Selector */}
-                  <div className="mode-selector">
-                    <Select value={mode} onValueChange={handleModeChange}>
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Select Mode" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="rag">RAG Q&A</SelectItem>
-                        <SelectItem value="rag_agent">RAG Agent</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
 
-                  {/* Right: Model Selector */}
-                  <div className="model-selector">
-                    <Select
-                      value={selectedModel || 'azure/gpt-4o'}
-                      onValueChange={(val) => setSelectedModel(val)}
-                    >
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Select Model" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="azure/gpt-4o">gpt-4o</SelectItem>
-                        <SelectItem value="anthropic/claude-3-5-sonnet-20241022">claude-3-5-sonnet</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>              
+              {/* Mode and Model selectors in a single row */}
+              <div className="flex items-center justify-between mb-4">
+                {/* Left: Mode Selector */}
+                <div className="mode-selector">
+                  <Select value={mode} onValueChange={handleModeChange}>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Select Mode" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="rag">RAG Q&A</SelectItem>
+                      <SelectItem value="rag_agent">RAG Agent</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Right: Model Selector */}
+                <div className="model-selector">
+                  <Select
+                    value={selectedModel || 'azure/gpt-4o'}
+                    onValueChange={(val) => setSelectedModel(val)}
+                  >
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Select Model" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="azure/gpt-4o">gpt-4o</SelectItem>
+                      <SelectItem value="anthropic/claude-3-5-sonnet-20241022">
+                        claude-3-5-sonnet
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
               <div className="flex-1 overflow-auto p-4 mt-16">
-                
                 <Result
                   query={query}
                   setQuery={setQuery}
