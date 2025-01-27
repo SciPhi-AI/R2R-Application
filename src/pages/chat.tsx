@@ -270,7 +270,7 @@ const Index: React.FC = () => {
           setEfSearch={setEfSearch}
           fullTextWeight={fullTextWeight}
           setFullTextWeight={setFullTextWeight}
-          semanticWeight={setSemanticWeight}
+          semanticWeight={semanticWeight}
           setSemanticWeight={setSemanticWeight}
           fullTextLimit={fullTextLimit}
           setFullTextLimit={setFullTextLimit}
