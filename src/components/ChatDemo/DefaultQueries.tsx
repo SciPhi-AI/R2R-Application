@@ -56,14 +56,56 @@ export const DefaultQueries: FC<DefaultQueriesProps> = ({ setQuery, mode }) => {
 
   const defaultQueries = getQueriesBasedOnMode(mode);
 
+
+
+const AsciiLogo = () => {
+  return (
+    <pre 
+      className="text-sm sm:text-base leading-none whitespace-pre select-none bg-transparent text-primary mb-8"
+      style={{ 
+        fontFamily: '"BlurVision ASCII", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+        // Optional: adjust character spacing if needed for this specific font
+        letterSpacing: '0.01em'
+      }}
+    >
+      {`░▒▓███████▓▒░  ░▒▓███████▓▒░  ░▒▓███████▓▒░  ░▒▓████████▓▒░ 
+░▒▓█▓▒░░▒▓█▓▒░        ░▒▓█▓▒░ ░▒▓█▓▒░░▒▓█▓▒░ ░▒▓█▓▒░░▒▓█▓▒░ 
+░▒▓█▓▒░░▒▓█▓▒░        ░▒▓█▓▒░ ░▒▓█▓▒░░▒▓█▓▒░ ░▒▓█▓▒░░▒▓█▓▒░ 
+░▒▓███████▓▒░   ░▒▓██████▓▒░  ░▒▓███████▓▒░  ░▒▓█▓▒░░▒▓█▓▒░ 
+░▒▓█▓▒░░▒▓█▓▒░ ░▒▓█▓▒░        ░▒▓█▓▒░░▒▓█▓▒░ ░▒▓█▓▒░░▒▓█▓▒░ 
+░▒▓█▓▒░░▒▓█▓▒░ ░▒▓█▓▒░        ░▒▓█▓▒░░▒▓█▓▒░ ░▒▓█▓▒░░▒▓█▓▒░ 
+░▒▓█▓▒░░▒▓█▓▒░ ░▒▓████████▓▒░ ░▒▓█▓▒░░▒▓█▓▒░ ░▒▓████████▓▒░ 
+                                                            
+                                                            `}
+    </pre>
+  );
+};
+
+
+  // const AsciiLogo = () => {
+  //   return (
+  //     <pre className="font-mono text-sm sm:text-base leading-none whitespace-pre select-none bg-transparent text-primary mb-8">
+  //       {`  ░▒▓███████▓▒░░▒▓███████▓▒░░▒▓███████▓▒░░▒▓████████▓▒░
+  // ░▒▓█▓▒░░▒▓█▓▒░      ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░
+  // ░▒▓█▓▒░░▒▓█▓▒░      ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░
+  // ░▒▓███████▓▒░ ░▒▓██████▓▒░░▒▓███████▓▒░░▒▓█▓▒░░▒▓█▓▒░
+  // ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░
+  // ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░
+  // ░▒▓█▓▒░░▒▓█▓▒░▒▓████████▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓████████▓▒░`}
+  //     </pre>
+  //   );
+  // };
+
   return (
     <div className="flex flex-col items-center justify-center h-full space-y-8">
-      <Logo
+
+      <AsciiLogo/>
+      {/* <Logo
         width={150}
         height={150}
         disableLink={true}
         className={mode == 'rag_agent' ? '-mt-5' : ''}
-      />
+      /> */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full max-w-4xl px-4">
         {defaultQueries.map(({ query, icon }, index) => (
           <Alert

@@ -123,7 +123,7 @@ const KnowledgeGraphsPage: React.FC = () => {
   // Tab states
   const [activeTab, setActiveTab] = useState<
     'documents' | 'entities' | 'relationships' | 'communities' | 'explore'
-  >('documents');
+  >('entities');
 
   // For searching documents
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -610,7 +610,7 @@ const KnowledgeGraphsPage: React.FC = () => {
     return (
       <Layout pageTitle="Knowledge Graphs" includeFooter={false}>
         {/* left align */}
-        <div className="mx-auto max-w-6xl pt-4 flex flex-col container h-screen-[calc(100%-4rem)] justify-center items-left">
+        <div className="mx-auto max-w-6xl pt-4 flex flex-col container  justify-center items-left">
           {/* Header + Quick Buttons */}
           {/* <div className="flex  mb-6"> */}
           <h1 className="text-2xl font-bold   gap-2 text-white -ml-1">
@@ -627,7 +627,7 @@ const KnowledgeGraphsPage: React.FC = () => {
         </div>
         {/* </div> */}
 
-        <div className="w-full flex flex-col container h-screen-[calc(100%-4rem)] justify-center items-center">
+        <div className="w-full flex flex-col container  justify-center items-center">
           <Loader className="animate-spin" size={64} />
           <p className="mt-4">Loading knowledge graph data...</p>
         </div>
@@ -638,7 +638,7 @@ const KnowledgeGraphsPage: React.FC = () => {
   if (error) {
     return (
       <Layout pageTitle="Knowledge Graphs" includeFooter={false}>
-        <div className="w-full flex flex-col container h-screen-[calc(100%-4rem)] justify-center items-center">
+        <div className="w-full flex flex-col container  justify-center items-center">
           <h1 className="text-2xl font-bold text-red-500 mb-4">Error</h1>
           <p>{error}</p>
         </div>
@@ -651,7 +651,7 @@ const KnowledgeGraphsPage: React.FC = () => {
    ****************************************/
   return (
     <Layout pageTitle="Knowledge Graphs" includeFooter={false}>
-      <main className="w-full flex flex-col container h-screen-[calc(100%-4rem)]">
+      <main className="w-full flex flex-col container ">
         <div className="pl-8 mx-auto max-w-6xl mt-4 mb-12">
           {/* Header + Quick Buttons */}
 
@@ -725,7 +725,7 @@ const KnowledgeGraphsPage: React.FC = () => {
               {/* <Rocket className="h-4 w-4 mr-2  -mt-1  text-accent-base" /> */}
               <AlertTriangleIcon className="h-5 w-5 mr-2 -mt-2" />
               <AlertTitle>
-                SciPhi Knowledge Graphs are still under development, results below are limited to 200 entries returned.
+                SciPhi graphs display are still under development, results below are limited to 200 entries returned.
                 {/* <br/> */}
                 {/* Please report any issues you encounter. */}
               </AlertTitle>
@@ -809,7 +809,7 @@ const KnowledgeGraphsPage: React.FC = () => {
           >
             <TabsList className="grid w-full grid-cols-6">
               {/* <TabsTrigger value="overview">Overview</TabsTrigger> */}
-              <TabsTrigger value="documents">Documents</TabsTrigger>
+              {/* <TabsTrigger value="documents">Documents</TabsTrigger> */}
               <TabsTrigger value="entities">Entities</TabsTrigger>
               <TabsTrigger value="relationships">Relationships</TabsTrigger>
               <TabsTrigger value="communities">Communities</TabsTrigger>
@@ -862,14 +862,14 @@ const KnowledgeGraphsPage: React.FC = () => {
 
             {/* 2) Documents Tab */}
             <TabsContent value="documents" className="mt-4">
-              <div className="flex items-center gap-2 mb-4">
+              {/* <div className="flex items-center gap-2 mb-4">
                 <Input
                   placeholder="Search by Title or Document ID"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="flex-grow"
                 />
-              </div>
+              </div> */}
 
               <Table<DocumentResponse>
                 loading={loading}

@@ -246,7 +246,7 @@ const Index: React.FC = () => {
   console.log('getEnabledTools() = ', getEnabledTools());
 
   return (
-    <Layout pageTitle="AI Research Assistant" includeFooter={false}>
+    <Layout pageTitle="R2R0 | AI Research Assistant" includeFooter={false}>
       <div className="flex flex-col h-screen-[calc(100%-4rem)] overflow-hidden">
         <Sidebar
           isOpen={sidebarIsOpen}

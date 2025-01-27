@@ -380,7 +380,7 @@ export const Search: React.FC<SearchProps> = ({
         {/* Right side buttons: Paperclip (upload) + Up Arrow (submit) */}
         <div className="flex items-center gap-2">
           {/* Paperclip Button -> opens UploadDialog */}
-          <TooltipProvider delayDuration={300}>
+          {/* <TooltipProvider delayDuration={300}>
             <Tooltip>
               <div className="flex items-center">
                 <TooltipTrigger asChild>
@@ -399,7 +399,7 @@ export const Search: React.FC<SearchProps> = ({
                 <p>Upload new documents</p>
               </TooltipContent>
             </Tooltip>
-          </TooltipProvider>
+          </TooltipProvider> */}
 
           {/* Up Arrow (submit) */}
           <Button type="submit" className="rounded-md shrink-0" disabled={disabled}>
