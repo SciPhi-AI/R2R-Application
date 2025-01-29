@@ -372,6 +372,8 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
                     <ExpandableDocumentChunks
                       chunks={currentChunks}
                       onChunkDeleted={refreshChunks}
+                      currentPage={chunksCurrentPage}
+                      pageSize={10}
                     />
                     {chunksLoading && (
                       <Loader className="mx-auto mt-4 animate-spin" size={32} />
@@ -504,7 +506,9 @@ const ExpandableInfoRow: React.FC<{
 const ExpandableDocumentChunks: React.FC<{
   chunks: ChunkResponse[] | undefined;
   onChunkDeleted?: () => void;
-}> = ({ chunks, onChunkDeleted }) => {
+  currentPage?: number;
+  pageSize?: number;
+}> = ({ chunks, onChunkDeleted, currentPage = 1, pageSize = 10 }) => {
   const [allExpanded, setAllExpanded] = useState(false);
 
   const toggleAllExpanded = () => {
@@ -530,7 +534,7 @@ const ExpandableDocumentChunks: React.FC<{
           <ExpandableChunk
             key={index}
             chunk={chunk}
-            index={index}
+            index={(currentPage - 1) * pageSize + index}
             isExpanded={allExpanded}
             onDelete={onChunkDeleted}
           />
@@ -595,14 +599,12 @@ const ExpandableChunk: React.FC<{
         throw new Error('Failed to get authenticated client');
       }
 
-      // FIXME: Pretty sure this is wrong! It needs the chunk ID, not the document ID
       await client.chunks.update({
-        id: chunk.id, // Corrected to use chunk.id
+        id: chunk.id,
         text: editText,
         metadata: chunk.metadata,
       });
       setIsEditing(false);
-      // Optionally, refresh chunks
       onDelete?.();
     } catch (error) {
       console.error('Error updating chunk:', error);
