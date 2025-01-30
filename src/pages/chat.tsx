@@ -64,7 +64,8 @@ const Index: React.FC = () => {
   }, [searchParams]);
 
   // NOTE: Grab the selectedModel and its setter from the user context.
-  const { pipeline, getClient, selectedModel, setSelectedModel } = useUserContext();
+  const { pipeline, getClient, selectedModel, setSelectedModel } =
+    useUserContext();
 
   const toggleSidebar = () => {
     setSidebarIsOpen(!sidebarIsOpen);
@@ -239,15 +240,18 @@ const Index: React.FC = () => {
   // Make sure we have a default model if none is set:
   useEffect(() => {
     if (!selectedModel) {
-      setSelectedModel('azure/gpt-4o');
+      setSelectedModel('anthropic/claude-3-5-sonnet-20241022');
     }
   }, [selectedModel, setSelectedModel]);
 
-  console.log('getEnabledTools() = ', getEnabledTools());
+  // console.log('getEnabledTools() = ', getEnabledTools());
 
   return (
-    <Layout pageTitle="Chat" includeFooter={false}>
-      <div className="flex flex-col h-screen-[calc(100%-4rem)] overflow-hidden">
+    <Layout pageTitle="Agentic RAG with R2R" includeFooter={false}>
+      {/* <div className="flex flex-col h-screen-[calc(100%-4rem)] overflow-hidden"> */}
+      <div className="flex h-[calc(100vh-4rem)]">
+        {' '}
+        {/* Subtract navbar height */}
         <Sidebar
           isOpen={sidebarIsOpen}
           onToggle={toggleSidebar}
@@ -299,53 +303,53 @@ const Index: React.FC = () => {
           }}
           onConversationSelect={handleConversationSelect}
         />
-
         {/* Main Content */}
-        <div
-          className={`main-content-wrapper ${sidebarIsOpen ? '' : 'sidebar-closed'}`}
-        >
+        <div className="flex-1 flex flex-col overflow-y-auto">
           <div
-            className={`main-content ${sidebarIsOpen ? '' : 'sidebar-closed'}`}
+            className={`flex-1 flex flex-col overflow-y-auto transition-all duration-300 ease-in-out ${
+              sidebarIsOpen ? 'ml-80' : 'ml-6'
+            }`}
             ref={contentAreaRef}
           >
-    
-
-            <div className="w-full max-w-4xl flex flex-col flex-grow overflow-hidden">
+            {/* <div className="w-full max-w-4xl flex flex-col flex-grow"> */}
+            <div className="w-full max-w-4xl mx-auto px-4 py-4 flex flex-col h-full">
               {/* Chat Interface */}
-              
-            {/* Mode and Model selectors in a single row */}
-            <div className="flex items-center justify-between mb-4">
-                  {/* Left: Mode Selector */}
-                  <div className="mode-selector">
-                    <Select value={mode} onValueChange={handleModeChange}>
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Select Mode" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="rag">RAG Q&A</SelectItem>
-                        <SelectItem value="rag_agent">RAG Agent</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
 
-                  {/* Right: Model Selector */}
-                  <div className="model-selector">
-                    <Select
-                      value={selectedModel || 'azure/gpt-4o'}
-                      onValueChange={(val) => setSelectedModel(val)}
-                    >
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Select Model" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="azure/gpt-4o">gpt-4o</SelectItem>
-                        <SelectItem value="anthropic/claude-3-5-sonnet-20241022">claude-3-5-sonnet</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>              
+              {/* Mode and Model selectors in a single row */}
+              <div className="flex items-center justify-between mb-4">
+                {/* Left: Mode Selector */}
+                <div className="mode-selector">
+                  <Select value={mode} onValueChange={handleModeChange}>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Select Mode" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {/* <SelectItem value="rag">RAG Q&A</SelectItem> */}
+                      <SelectItem value="rag_agent">Reasoning Agent</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Right: Model Selector */}
+                <div className="model-selector">
+                  <Select
+                    value={selectedModel || 'azure/gpt-4o'}
+                    onValueChange={(val) => setSelectedModel(val)}
+                  >
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Select Model" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {/* <SelectItem value="gemini/gemini-2.0-flash-thinking-exp-01-21">gemini-2.0-flash</SelectItem> */}
+                      {/* <SelectItem value="azure/gpt-4o">gpt-4o</SelectItem> */}
+                      <SelectItem value="anthropic/claude-3-5-sonnet-20241022">
+                        claude-3-5-sonnet
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
               <div className="flex-1 overflow-auto p-4 mt-16">
-                
                 <Result
                   query={query}
                   setQuery={setQuery}
