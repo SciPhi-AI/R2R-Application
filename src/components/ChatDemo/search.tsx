@@ -253,7 +253,7 @@ export const Search: React.FC<SearchProps> = ({
   const navigateToSearch = React.useCallback(
     debounce((searchValue: string) => {
       if (pipeline) {
-        router.push(`/chat/?q=${encodeURIComponent(searchValue)}`);
+        router.push(`/?q=${encodeURIComponent(searchValue)}`);
       }
     }, 50),
     [router, pipeline]

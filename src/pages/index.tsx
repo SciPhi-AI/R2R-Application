@@ -248,7 +248,9 @@ const Index: React.FC = () => {
 
   return (
     <Layout pageTitle="R2R0 | AI Research Assistant" includeFooter={false}>
-      <div className="flex flex-col h-screen-[calc(100%-4rem)] overflow-hidden">
+      {/* <div className="flex flex-col h-screen-[calc(100%-4rem)] overflow-hidden"> */}
+      <div className="flex h-[calc(100vh-4rem)]"> {/* Subtract navbar height */}
+
         <Sidebar
           isOpen={sidebarIsOpen}
           onToggle={toggleSidebar}
@@ -302,14 +304,16 @@ const Index: React.FC = () => {
         />
 
         {/* Main Content */}
-        <div
-          className={`main-content-wrapper ${sidebarIsOpen ? '' : 'sidebar-closed'}`}
-        >
+        <div className='flex-1 flex flex-col overflow-y-auto'>
           <div
-            className={`main-content ${sidebarIsOpen ? '' : 'sidebar-closed'}`}
+            className={`flex-1 flex flex-col overflow-y-auto transition-all duration-300 ease-in-out ${
+              sidebarIsOpen ? 'ml-80' : 'ml-6'
+            }`}
             ref={contentAreaRef}
           >
-            <div className="w-full max-w-4xl flex flex-col flex-grow overflow-hidden">
+            {/* <div className="w-full max-w-4xl flex flex-col flex-grow"> */}
+            <div className="w-full max-w-4xl mx-auto px-4 py-4 flex flex-col h-full">
+
               {/* Chat Interface */}
 
               {/* Mode and Model selectors in a single row */}
@@ -337,8 +341,9 @@ const Index: React.FC = () => {
                       <SelectValue placeholder="Select Model" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="azure/gpt-4o">gpt-4o</SelectItem>
-                      <SelectItem value="anthropic/claude-3-5-sonnet-20241022">
+                    <SelectItem value="gemini/gemini-2.0-flash-thinking-exp-01-21">gemini-2.0-flash</SelectItem>
+                    <SelectItem value="azure/gpt-4o">gpt-4o</SelectItem>
+                    <SelectItem value="anthropic/claude-3-5-sonnet-20241022">
                         claude-3-5-sonnet
                       </SelectItem>
                     </SelectContent>

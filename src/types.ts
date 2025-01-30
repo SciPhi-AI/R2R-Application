@@ -253,6 +253,7 @@ export interface Message {
     vector?: string | null;
     kg?: string | null;
   };
+  chainOfThought?: string;
   isStreaming?: boolean;
   searchPerformed?: boolean;
 }
