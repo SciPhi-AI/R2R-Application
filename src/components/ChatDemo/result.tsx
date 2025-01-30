@@ -425,7 +425,7 @@ export const Result: FC<ResultProps> = ({
 
       const streamResponse =
         mode === 'rag_agent'
-          ? await client.retrieval.agent({
+          ? await client.retrieval.reasoningAgent({
               message: newUserMessage,
               ragGenerationConfig,
               searchSettings,
@@ -460,6 +460,7 @@ export const Result: FC<ResultProps> = ({
       let isCapturingThought = false;
       let isCapturingResponse = false;
 
+      let chunk = ""
       while (true) {
         if (signal.aborted) {
           reader.cancel();
@@ -467,17 +468,56 @@ export const Result: FC<ResultProps> = ({
         }
         const { done, value } = await reader.read();
         if (done) break;
-
-        let chunk = decoder.decode(value, { stream: true });
+        let tempChunk = decoder.decode(value, { stream: true });
+        console.log('tempChunk = ', tempChunk)
+        if (tempChunk.includes('</Thought') && !tempChunk.includes('</Thought>')) {
+          chunk = tempChunk;
+          continue;
+        } else {
+          if (tempChunk.includes('</Thought') && !tempChunk.includes('</Thought>'))
+          {
+            chunk += tempChunk;
+          } else {
+            chunk = tempChunk;
+          }
+        }
+        // console.log("chunk = ", chunk);
+      
+        // First, try to find and process any complete thought blocks in the chunk
+        const thoughtBlockRegex = /<Thought>(.*?)<\/Thought>/gs;
+        let thoughtBlockMatch;
+        let processedIndex = 0;
+      
+        while ((thoughtBlockMatch = thoughtBlockRegex.exec(chunk)) !== null) {
+          // If we were capturing a thought, complete it first
+          if (isCapturingThought && processedIndex < thoughtBlockMatch.index) {
+            thoughtBuffer += chunk.slice(processedIndex, thoughtBlockMatch.index);
+            chainOfThoughtBlocks.push(thoughtBuffer.trim());
+            thoughtBuffer = '';
+            isCapturingThought = false;
+          }
+      
+          // Add the complete thought block
+          chainOfThoughtBlocks.push(thoughtBlockMatch[1].trim());
+          processedIndex = thoughtBlockMatch.index + thoughtBlockMatch[0].length;
+      
+          // Update UI with the new thought block
+          const partialResponse = finalResponse + (isCapturingResponse ? responseBuffer : '');
+          updateLastMessage(partialResponse, chainOfThoughtBlocks, true);
+        }
+      
+        // Now process any remaining partial tags
+        chunk = chunk.slice(processedIndex);
+        
         // Keep processing while there are known tag boundaries
         while (true) {
           const tokenRegex = new RegExp(
             `(${THOUGHT_START}|${THOUGHT_END}|${RESPONSE_START}|${RESPONSE_END})`
           );
           const match = chunk.match(tokenRegex);
-
+      
           if (!match) {
-            // No more special tags in this chunk, so just append to whichever buffer we’re in
+            // No more special tags in this chunk, so just append to whichever buffer we're in
             if (isCapturingThought) {
               thoughtBuffer += chunk;
             } else if (isCapturingResponse) {
@@ -486,29 +526,29 @@ export const Result: FC<ResultProps> = ({
             // After accumulating the chunk, do a partial UI update
             const partialChainOfThought = [
               ...chainOfThoughtBlocks,
-              ...(isCapturingThought ? [thoughtBuffer] : []),
+              ...(isCapturingThought ? [thoughtBuffer.trim()] : []),
             ];
             const partialResponse =
               finalResponse + (isCapturingResponse ? responseBuffer : '');
             updateLastMessage(partialResponse, partialChainOfThought, true);
-
+      
             break;
           }
-
+      
           // If we found a tag, split around it
           const tokenIndex = match.index ?? 0;
           const beforeTag = chunk.slice(0, tokenIndex);
           const tag = match[0];
           // The remainder after this tag
           const afterTag = chunk.slice(tokenIndex + tag.length);
-
+      
           // Append `beforeTag` text to whichever buffer is active
           if (isCapturingThought) {
             thoughtBuffer += beforeTag;
           } else if (isCapturingResponse) {
             responseBuffer += beforeTag;
           }
-
+      
           // Update UI with partial content so far
           {
             const partialChainOfThought = [
@@ -519,7 +559,7 @@ export const Result: FC<ResultProps> = ({
               finalResponse + (isCapturingResponse ? responseBuffer : '');
             updateLastMessage(partialResponse, partialChainOfThought, true);
           }
-
+      
           // Handle the tag itself
           if (tag === THOUGHT_START) {
             isCapturingThought = true;
@@ -529,7 +569,7 @@ export const Result: FC<ResultProps> = ({
             // A full thought block is now complete
             chainOfThoughtBlocks.push(thoughtBuffer);
             thoughtBuffer = '';
-
+      
             // Update UI now that the thought block is finalized
             const partialChainOfThought = [...chainOfThoughtBlocks];
             const partialResponse =
@@ -543,16 +583,111 @@ export const Result: FC<ResultProps> = ({
             // We finalize whatever was in responseBuffer
             finalResponse += responseBuffer;
             responseBuffer = '';
-
+      
             // Update UI with the newly finalized portion
             const partialChainOfThought = [...chainOfThoughtBlocks];
             updateLastMessage(finalResponse, partialChainOfThought, true);
           }
-
+      
           // Continue parsing the remainder of this chunk
           chunk = afterTag;
         }
       }
+      
+      // while (true) {
+      //   if (signal.aborted) {
+      //     reader.cancel();
+      //     break;
+      //   }
+      //   const { done, value } = await reader.read();
+      //   if (done) break;
+
+      //   let chunk = decoder.decode(value, { stream: true });
+      //   console.log("chunk = ", chunk)
+      //   // Keep processing while there are known tag boundaries
+      //   while (true) {
+      //     const tokenRegex = new RegExp(
+      //       `(${THOUGHT_START}|${THOUGHT_END}|${RESPONSE_START}|${RESPONSE_END})`
+      //     );
+      //     const match = chunk.match(tokenRegex);
+
+      //     if (!match) {
+      //       // No more special tags in this chunk, so just append to whichever buffer we’re in
+      //       if (isCapturingThought) {
+      //         thoughtBuffer += chunk;
+      //       } else if (isCapturingResponse) {
+      //         responseBuffer += chunk;
+      //       }
+      //       // After accumulating the chunk, do a partial UI update
+      //       const partialChainOfThought = [
+      //         ...chainOfThoughtBlocks,
+      //         ...(isCapturingThought ? [thoughtBuffer] : []),
+      //       ];
+      //       const partialResponse =
+      //         finalResponse + (isCapturingResponse ? responseBuffer : '');
+      //       updateLastMessage(partialResponse, partialChainOfThought, true);
+
+      //       break;
+      //     }
+
+      //     // If we found a tag, split around it
+      //     const tokenIndex = match.index ?? 0;
+      //     const beforeTag = chunk.slice(0, tokenIndex);
+      //     const tag = match[0];
+      //     // The remainder after this tag
+      //     const afterTag = chunk.slice(tokenIndex + tag.length);
+
+      //     // Append `beforeTag` text to whichever buffer is active
+      //     if (isCapturingThought) {
+      //       thoughtBuffer += beforeTag;
+      //     } else if (isCapturingResponse) {
+      //       responseBuffer += beforeTag;
+      //     }
+
+      //     // Update UI with partial content so far
+      //     {
+      //       const partialChainOfThought = [
+      //         ...chainOfThoughtBlocks,
+      //         ...(isCapturingThought ? [thoughtBuffer] : []),
+      //       ];
+      //       const partialResponse =
+      //         finalResponse + (isCapturingResponse ? responseBuffer : '');
+      //       updateLastMessage(partialResponse, partialChainOfThought, true);
+      //     }
+
+      //     // Handle the tag itself
+      //     if (tag === THOUGHT_START) {
+      //       isCapturingThought = true;
+      //       thoughtBuffer = '';
+      //     } else if (tag === THOUGHT_END) {
+      //       isCapturingThought = false;
+      //       // A full thought block is now complete
+      //       chainOfThoughtBlocks.push(thoughtBuffer);
+      //       thoughtBuffer = '';
+
+      //       // Update UI now that the thought block is finalized
+      //       const partialChainOfThought = [...chainOfThoughtBlocks];
+      //       const partialResponse =
+      //         finalResponse + (isCapturingResponse ? responseBuffer : '');
+      //       updateLastMessage(partialResponse, partialChainOfThought, true);
+      //     } else if (tag === RESPONSE_START) {
+      //       isCapturingResponse = true;
+      //       responseBuffer = '';
+      //     } else if (tag === RESPONSE_END) {
+      //       isCapturingResponse = false;
+      //       // We finalize whatever was in responseBuffer
+      //       finalResponse += responseBuffer;
+      //       responseBuffer = '';
+
+      //       // Update UI with the newly finalized portion
+      //       const partialChainOfThought = [...chainOfThoughtBlocks];
+      //       updateLastMessage(finalResponse, partialChainOfThought, true);
+      //     }
+
+      //     // Continue parsing the remainder of this chunk
+      //     chunk = afterTag;
+      //   }
+      // }
 
       // Final update if there's leftover buffers and no closing tags
       // (In case the stream ends abruptly without a closing </Thought> or </Response>)
@@ -562,7 +697,8 @@ export const Result: FC<ResultProps> = ({
       ];
       const leftoverResponse = finalResponse + (isCapturingResponse ? responseBuffer : '');
       updateLastMessage(leftoverResponse, leftoverChainOfThought, false);
-    } catch (err: any) {
+    } 
+    catch (err: any) {
       if (err.name === 'AbortError') {
         // aborted
       } else {
