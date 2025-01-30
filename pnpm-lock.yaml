@@ -231,8 +231,8 @@ dependencies:
     specifier: 0.0.0-beta.0
     version: 0.0.0-beta.0
   r2r-js:
-    specifier: 0.4.18
-    version: 0.4.18
+    specifier: 0.4.20
+    version: 0.4.20
   radix-ui:
     specifier: ^1.0.1
     version: 1.0.1(@types/react@18.3.3)(react-dom@18.3.1)(react@18.3.1)
@@ -12194,16 +12194,6 @@ packages:
       web-vitals: 4.2.4
     dev: false
 
-  /posthog-node@4.3.2:
-    resolution: {integrity: sha512-vy8Mt9IEfniUgqQ1rOCQ31CBO1VNqDGd3ZtHlWR9/YfU6RiuK+9pUXPb4h6HTGzQmjL8NFnjd8K8NMXSX8S6MQ==}
-    engines: {node: '>=15.0.0'}
-    dependencies:
-      axios: 1.7.9
-      rusha: 0.8.14
-    transitivePeerDependencies:
-      - debug
-    dev: false
-
   /preact@10.25.4:
     resolution: {integrity: sha512-jLdZDb+Q+odkHJ+MpW/9U5cODzqnB+fy2EiHSZES7ldV5LK7yjlVzTp7R8Xy6W6y75kfK8iWYtFVH7lvjwrCMA==}
     dev: false
@@ -12310,15 +12300,13 @@ packages:
   /queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
 
-  /r2r-js@0.4.18:
-    resolution: {integrity: sha512-oBcgH9IygHqHQwoFwRPoavRtMWIbZnEGJZuVCbCco41Kwxntpp8eWQmTYFhPNnulnGFJYE686tJQNQ5CUu50Ow==}
+  /r2r-js@0.4.20:
+    resolution: {integrity: sha512-NfWH6t03BI/KrtD1bdR14yluc7U3GxKFGypXmRrq+QQxo4Evue7WiFTiQgHQkN3JJOKnHT0Vf7DAXVvZrZkRXA==}
     dependencies:
       '@jest/globals': 29.7.0
       '@rrweb/types': 2.0.0-alpha.17
       axios: 1.7.9
       form-data: 4.0.1
-      posthog-js: 1.204.0
-      posthog-node: 4.3.2
       rrweb-snapshot: 2.0.0-alpha.4
       uuid: 10.0.0
     transitivePeerDependencies:
@@ -12954,10 +12942,6 @@ packages:
     resolution: {integrity: sha512-5l4VyZR86LZ/lDxZTR6jqL8AFE2S0IFLMP26AbjsLVADxHdhB/c0GUsH+y39UfCi3dzz8OlQuPmnaJOMoDHQBA==}
     dependencies:
       queue-microtask: 1.2.3
-
-  /rusha@0.8.14:
-    resolution: {integrity: sha512-cLgakCUf6PedEu15t8kbsjnwIFFR2D4RfL+W3iWFJ4iac7z4B0ZI8fxy4R3J956kAI68HclCFGL8MPoUVC3qVA==}
-    dev: false
 
   /rw@1.3.3:
     resolution: {integrity: sha512-PdhdWy89SiZogBLaw42zdeqtRJ//zFd2PgQavcICDUgJT5oW10QCRKbJ6bg4r0/UY2M6BWd5tkxuGFRvCkgfHQ==}
