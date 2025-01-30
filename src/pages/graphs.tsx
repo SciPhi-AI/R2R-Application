@@ -718,8 +718,9 @@ const KnowledgeGraphsPage: React.FC = () => {
               {/* <Rocket className="h-4 w-4 mr-2  -mt-1  text-accent-base" /> */}
               <AlertTriangleIcon className="h-5 w-5 mr-2 -mt-2" />
               <AlertTitle>
-                SciPhi Knowledge Graphs are still under development, results below are limited to 200 entries returned.
-                <br/>
+                SciPhi Knowledge Graphs are still under development, results
+                below are limited to 200 entries returned.
+                <br />
                 Please report any issues you encounter.
               </AlertTitle>
             </div>

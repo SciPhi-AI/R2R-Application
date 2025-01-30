@@ -1,6 +1,5 @@
 // File: SearchWithUpload.tsx
 
-import React from 'react';
 import {
   ArrowUp,
   FolderOpen,
@@ -8,21 +7,12 @@ import {
   Paperclip,
   Search as SearchIcon,
 } from 'lucide-react';
+import { Upload, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-
-import { useUserContext } from '@/context/UserContext';
-import { generateIdFromLabel } from '@/lib/utils';
-import { SearchProps } from '@/types';
+import React from 'react';
+import { useDropzone } from 'react-dropzone';
 
 import { Button } from '@/components/ui/Button';
-import { Toggle } from '@/components/ui/toggle';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
-
 import {
   Dialog,
   DialogContent,
@@ -30,8 +20,16 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
-import { Upload, X } from 'lucide-react';
-import { useDropzone } from 'react-dropzone';
+import { Toggle } from '@/components/ui/toggle';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { useUserContext } from '@/context/UserContext';
+import { generateIdFromLabel } from '@/lib/utils';
+import { SearchProps } from '@/types';
 
 /* ------------------------------------------------------------------
  * Simple debounce utility
@@ -139,11 +137,15 @@ const UploadDialog: React.FC<UploadDialogProps> = ({
             <p className="text-lg font-semibold">Uploading Files...</p>
             <p className="text-sm text-gray-500 text-center">
               Please do not navigate away from this page while the upload is in
-              progress.  Note that ingestion of the input document may take up to a few minutes after upload.
+              progress. Note that ingestion of the input document may take up to
+              a few minutes after upload.
             </p>
             <ul className="pl-5 max-h-40 overflow-y-auto w-full">
               {files.map((file, index) => (
-                <li key={index} className="flex items-center justify-between mb-2">
+                <li
+                  key={index}
+                  className="flex items-center justify-between mb-2"
+                >
                   <span className="truncate max-w-xs">
                     {(file as any).webkitRelativePath || file.name}
                   </span>
@@ -402,7 +404,11 @@ export const Search: React.FC<SearchProps> = ({
           </TooltipProvider>
 
           {/* Up Arrow (submit) */}
-          <Button type="submit" className="rounded-md shrink-0" disabled={disabled}>
+          <Button
+            type="submit"
+            className="rounded-md shrink-0"
+            disabled={disabled}
+          >
             <ArrowUp size={20} />
           </Button>
         </div>
