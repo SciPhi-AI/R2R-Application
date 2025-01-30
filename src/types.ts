@@ -244,6 +244,7 @@ export interface LogoProps {
   priority?: boolean;
 }
 
+
 export interface Message {
   role: 'user' | 'assistant';
   content: string;
@@ -253,6 +254,7 @@ export interface Message {
     vector?: string | null;
     kg?: string | null;
   };
+  chainOfThought?: string[];
   isStreaming?: boolean;
   searchPerformed?: boolean;
 }
