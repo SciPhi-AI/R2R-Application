@@ -324,3 +324,33 @@ td {
   background-color: rgba(100, 100, 100, 0.5);
   border-radius: 4px;
 }
+
+
+@keyframes float {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  25% {
+    transform: translate(-20px, 20px) scale(1.02);
+  }
+  50% {
+    transform: translate(10px, -15px) scale(0.98);
+  }
+  75% {
+    transform: translate(15px, 10px) scale(1.01);
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+}
+@layer utilities {
+  /* Add this section to ensure Tailwind recognizes our custom animation */
+  .animate-float {
+    animation: float var(--animation-duration, 20s) ease-in-out infinite;
+  }
+  
+  /* We might also need this fallback class */
+  .float {
+    animation: float 20s ease-in-out infinite;
+  }
+}

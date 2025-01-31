@@ -27,15 +27,16 @@ export const DefaultQueries: FC<DefaultQueriesProps> = ({ setQuery, mode }) => {
 
   const defaultAgentQueries = [
     {
+      query: 'Search deeply for some interesting facts.',
+      icon: <FlaskConical className="h-6 w-6 text-purple-400" />,
+
+    },
+    {
       query: 'What is happening in California today?',
       icon: <Lightbulb className="h-6 w-6 text-yellow-400" />,
     },
     {
       query: 'What documents do I have uploaded?',
-      icon: <FlaskConical className="h-6 w-6 text-purple-400" />,
-    },
-    {
-      query: 'Search for an interesting fact in my data.',
       icon: <Flame className="h-6 w-6 text-red-400" />,
     },
     {
@@ -56,14 +57,38 @@ export const DefaultQueries: FC<DefaultQueriesProps> = ({ setQuery, mode }) => {
 
   const defaultQueries = getQueriesBasedOnMode(mode);
 
+  const AsciiLogo = () => {
+    return (
+      <div className="flex justify-center w-full pl-10">
+        <pre
+          className="text-sm sm:text-base leading-none whitespace-pre select-none bg-transparent text-primary mb-8"
+          style={{
+            fontFamily:
+              '"BlurVision ASCII", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+            // Optional: adjust character spacing if needed for this specific font
+            letterSpacing: '0.01em',
+            transform: 'translateX(8%)', // Fine-tune horizontal centering
+
+          }}
+        >
+          {`  ░▒▓███████▓▒░  ░▒▓███████▓▒░  ░▒▓███████▓▒░
+  ░▒▓█▓▒░░▒▓█▓▒░        ░▒▓█▓▒░ ░▒▓█▓▒░░▒▓█▓▒░
+  ░▒▓█▓▒░░▒▓█▓▒░        ░▒▓█▓▒░ ░▒▓█▓▒░░▒▓█▓▒░
+  ░▒▓███████▓▒░   ░▒▓██████▓▒░  ░▒▓███████▓▒░
+  ░▒▓█▓▒░░▒▓█▓▒░ ░▒▓█▓▒░        ░▒▓█▓▒░░▒▓█▓▒░
+  ░▒▓█▓▒░░▒▓█▓▒░ ░▒▓█▓▒░        ░▒▓█▓▒░░▒▓█▓▒░
+  ░▒▓█▓▒░░▒▓█▓▒░ ░▒▓████████▓▒░ ░▒▓█▓▒░░▒▓█▓▒░
+                                                              
+                                                              `}
+        </pre>
+        </div>
+
+    );
+  };
+
   return (
     <div className="flex flex-col items-center justify-center h-full space-y-8">
-      <Logo
-        width={150}
-        height={150}
-        disableLink={true}
-        className={mode == 'rag_agent' ? '-mt-5' : ''}
-      />
+      <AsciiLogo />
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full max-w-4xl px-4">
         {defaultQueries.map(({ query, icon }, index) => (
           <Alert
@@ -81,3 +106,4 @@ export const DefaultQueries: FC<DefaultQueriesProps> = ({ setQuery, mode }) => {
     </div>
   );
 };
+

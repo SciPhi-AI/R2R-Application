@@ -94,7 +94,6 @@ export const Answer: FC<AnswerProps> = ({
     const chunks = content.split(/(?<=\n\n)(?![|])/);
     return chunks.map((chunk) => chunk.trim()).filter(Boolean);
   };
-
   if (
     message.chainOfThought?.length === 0 &&
     mode === 'rag_agent' &&
@@ -120,7 +119,8 @@ export const Answer: FC<AnswerProps> = ({
   const contentChunks = message.content
     ? splitContent(processMarkdown(message.content))
     : [];
-
+    
+  console.log('message.chainOfThought = ', message.chainOfThought);
   return (
     <div className="mt-4">
       {/* {isSearching && (
@@ -128,7 +128,7 @@ export const Answer: FC<AnswerProps> = ({
           (Retrieving additional context...)
         </div>
       )} */}
-
+      
       {message.chainOfThought && message.chainOfThought.length > 0 && (
         <Accordion
           type="single"
@@ -144,7 +144,7 @@ export const Answer: FC<AnswerProps> = ({
             <AccordionContent>
               {message.chainOfThought.map(
                 (thought, idx) =>
-                  thought?.trim().length > 0 && (
+                  thought?.trim().length > 1 && (
                     <div
                       key={`${idx}-${thought.slice(0, 20)}`}
                       className="bg-zinc-700 p-2 rounded mb-2"
