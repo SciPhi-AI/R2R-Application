@@ -83,7 +83,7 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
   };
 
   const handleRefreshWithDelay = async () => {
-    await new Promise((resolve) => setTimeout(resolve, 2500)); // Wait 2.5s
+    await new Promise((resolve) => setTimeout(resolve, 500)); // Wait 2.5s
     onRefresh();
   };
 
@@ -303,9 +303,6 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
                   onUploadSuccess={async () => {
                     await handleRefreshWithDelay();
                     onSelectAll(false);
-                    await handleRefreshWithDelay();
-                    await handleRefreshWithDelay();
-                    await handleRefreshWithDelay();
                     return [];
                   }}
                   showToast={toast}
@@ -318,7 +315,7 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
                   onDelete={() => onSelectAll(false)}
                   onSuccess={async () => {
                     // small delay
-                    await new Promise((resolve) => setTimeout(resolve, 1500));
+                    await new Promise((resolve) => setTimeout(resolve, 500));
                     await onRefresh();
                   }}
                   showToast={toast}
