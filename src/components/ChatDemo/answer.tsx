@@ -144,13 +144,13 @@ export const Answer: FC<AnswerProps> = ({
             <AccordionContent>
               {message.chainOfThought.map(
                 (thought, idx) =>
-                  thought.length > 0 && (
+                  thought?.length > 0 && (
                     <div
                       key={`${idx}-${thought.slice(0, 20)}`}
                       className="bg-zinc-700 p-2 rounded mb-2"
                     >
                       <div className="text-sm text-gray-200 whitespace-pre-wrap">
-                        {thought.trim()}
+                        {(thought.startsWith(">") ? thought.slice(1,thought.length) : thought).trim().replace('<Thought>', '').replace('</Thought>', '')}
                       </div>
                     </div>
                   )

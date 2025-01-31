@@ -231,8 +231,8 @@ dependencies:
     specifier: 0.0.0-beta.0
     version: 0.0.0-beta.0
   r2r-js:
-    specifier: 0.4.20
-    version: 0.4.20
+    specifier: file:../R2R/js/sdk
+    version: file:../R2R/js/sdk
   radix-ui:
     specifier: ^1.0.1
     version: 1.1.2(@types/react@18.3.3)(react-dom@18.3.1)(react@18.3.1)
@@ -12642,20 +12642,6 @@ packages:
   /queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
 
-  /r2r-js@0.4.20:
-    resolution: {integrity: sha512-NfWH6t03BI/KrtD1bdR14yluc7U3GxKFGypXmRrq+QQxo4Evue7WiFTiQgHQkN3JJOKnHT0Vf7DAXVvZrZkRXA==}
-    dependencies:
-      '@jest/globals': 29.7.0
-      '@rrweb/types': 2.0.0-alpha.17
-      axios: 1.7.9
-      form-data: 4.0.1
-      rrweb-snapshot: 2.0.0-alpha.4
-      uuid: 10.0.0
-    transitivePeerDependencies:
-      - debug
-      - supports-color
-    dev: false
-
   /r2r@0.0.0-beta.0:
     resolution: {integrity: sha512-LwZXOYJexUffYHP+LcBP3zgF17Az9dTTM60J9q3WGBReF4qqgEvFDyzHxOukMqIR8zUz4E00rRnCW5Mdktoe6g==}
     dependencies:
@@ -14884,4 +14870,19 @@ packages:
 
   /zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
+    dev: false
+
+  file:../R2R/js/sdk:
+    resolution: {directory: ../R2R/js/sdk, type: directory}
+    name: r2r-js
+    dependencies:
+      '@jest/globals': 29.7.0
+      '@rrweb/types': 2.0.0-alpha.17
+      axios: 1.7.9
+      form-data: 4.0.1
+      rrweb-snapshot: 2.0.0-alpha.4
+      uuid: 10.0.0
+    transitivePeerDependencies:
+      - debug
+      - supports-color
     dev: false

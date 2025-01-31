@@ -10,7 +10,7 @@ const MessageBubble: React.FC<{ message: Message; isStreaming?: boolean }> = ({
     return (
       <div className="flex justify-end mb-4">
         <div className="bg-zinc-800 text-white rounded-lg p-3 max-w-xs lg:max-w-md">
-          <p>{message.content}</p>
+          <p>{message.content.trim()}</p>
         </div>
       </div>
     );
@@ -21,7 +21,7 @@ const MessageBubble: React.FC<{ message: Message; isStreaming?: boolean }> = ({
           className={`bg-gray-200 rounded-lg p-3 max-w-xs lg:max-w-md ${message.isStreaming ? 'animate-pulse' : ''}`}
         >
           <p>
-            {message.content}
+            {message.content.trim()}
             {message.isStreaming && (
               <span className="inline-block animate-pulse">▋</span>
             )}
