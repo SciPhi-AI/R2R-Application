@@ -367,11 +367,11 @@ export const Result: FC<ResultProps> = ({
 
     try {
       // If you want to use the real client + user context:
-      // const client = await getClient();
-      // if (!client) {
-      //   throw new Error('Failed to get authenticated client');
-      // }
-      const client = new r2rClient(DEFAULT_DEPLOYMENT_URL);
+      const client = await getClient();
+      if (!client) {
+        throw new Error('Failed to get authenticated client');
+      }
+      // const client = new r2rClient(DEFAULT_DEPLOYMENT_URL);
 
       // Possibly create conversation if agent mode
       let currentConversationId = selectedConversationId;
