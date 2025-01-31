@@ -244,7 +244,6 @@ export interface LogoProps {
   priority?: boolean;
 }
 
-
 export interface Message {
   role: 'user' | 'assistant';
   content: string;
