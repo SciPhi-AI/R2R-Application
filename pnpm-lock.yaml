@@ -153,8 +153,8 @@ importers:
         specifier: ^1.212.1
         version: 1.212.1
       r2r-js:
-        specifier: ^0.4.19
-        version: 0.4.19
+        specifier: ^0.4.20
+        version: 0.4.20
       react:
         specifier: 18.3.1
         version: 18.3.1
@@ -3335,8 +3335,8 @@ packages:
   queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
 
-  r2r-js@0.4.19:
-    resolution: {integrity: sha512-zokoae3U+rHN3L85Hikr29zX3N5Sexdqd21uBtq88MChm3rZtCz9KOX95vuU0/KM7yQTAJJSLJ4KN7SNxcfHgg==}
+  r2r-js@0.4.20:
+    resolution: {integrity: sha512-NfWH6t03BI/KrtD1bdR14yluc7U3GxKFGypXmRrq+QQxo4Evue7WiFTiQgHQkN3JJOKnHT0Vf7DAXVvZrZkRXA==}
 
   rc@1.2.8:
     resolution: {integrity: sha512-y3bGgqKj3QBdxLbLkomlohkvsA8gdAiUQlSBJnBhfn+BPxg4bc62d8TcBW15wavDfgexCgccckhcZvywyQYPOw==}
@@ -7669,7 +7669,7 @@ snapshots:
 
   queue-microtask@1.2.3: {}
 
-  r2r-js@0.4.19:
+  r2r-js@0.4.20:
     dependencies:
       '@jest/globals': 29.7.0
       '@rrweb/types': 2.0.0-alpha.17
