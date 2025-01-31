@@ -42,11 +42,11 @@ const NavItems: React.FC<NavItemsProps> = ({
   const homeItem = { path: '/', label: 'Home' };
 
   const commonItems = [
+    { path: '/chat', label: 'Chat' },
     { path: '/documents', label: 'Documents' },
     { path: '/collections', label: 'Collections' },
     { path: '/graphs', label: 'Graphs' },
-    { path: '/chat', label: 'Chat' },
-    { path: '/search', label: 'Search' },
+    // { path: '/search', label: 'Search' },
   ];
 
   // const adminItems = [

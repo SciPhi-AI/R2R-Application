@@ -30,7 +30,6 @@ interface Conversation {
   createdAt: string;
   lastMessage?: string; // optional: last message snippet
 }
-const LAST_N_CONVERSATIONS_TO_LIST = 5;
 
 const Sidebar: React.FC<SidebarProps> = ({
   isOpen,
@@ -109,7 +108,6 @@ const Sidebar: React.FC<SidebarProps> = ({
             // Filter out conversations without a name
             (c: Conversation) => c.name != 'undefined'
           )
-          .slice(0, LAST_N_CONVERSATIONS_TO_LIST);
         console.log('fetched = ', fetched);
         setConversations(fetched);
       } catch (error) {
@@ -178,8 +176,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             </div>
           )}
 
-          {/* Search Settings Section */}
-          <h3 className="text-lg font-semibold text-accent-base mt-2">
+          {/* <h3 className="text-lg font-semibold text-accent-base mt-2">
             Search Settings
             <Link
               href="https://r2r-docs.sciphi.ai/api-and-sdks/retrieval/retrieval"
@@ -192,7 +189,6 @@ const Sidebar: React.FC<SidebarProps> = ({
             </Link>
           </h3>
 
-          {/* Switches */}
           <div className="space-y-2 mb-4">
             {Object.keys(switches).map((id) => (
               <SingleSwitch
@@ -204,11 +200,10 @@ const Sidebar: React.FC<SidebarProps> = ({
                 tooltipText={switches[id].tooltipText}
               />
             ))}
-          </div>
+          </div> */}
 
           <Accordion type="single" collapsible className="w-full">
-            {/* Vector Search Settings */}
-            {config.showVectorSearch && (
+            {/* {config.showVectorSearch && (
               <AccordionItem value="vectorSearchSettings">
                 <AccordionTrigger className="text-lg font-semibold text-accent-base pt-4">
                   Vector Search Settings
@@ -248,10 +243,9 @@ const Sidebar: React.FC<SidebarProps> = ({
                   </div>
                 </AccordionContent>
               </AccordionItem>
-            )}
+            )} */}
 
-            {/* Hybrid Search Settings */}
-            {config.showHybridSearch && (
+            {/* {config.showHybridSearch && (
               <AccordionItem value="hybridSearchSettings">
                 <AccordionTrigger className="text-lg font-semibold text-accent-base pt-4">
                   Hybrid Search Settings
@@ -293,9 +287,8 @@ const Sidebar: React.FC<SidebarProps> = ({
                   </div>
                 </AccordionContent>
               </AccordionItem>
-            )}
+            )} */}
 
-            {/* Knowledge Graph Settings (if applicable) */}
             {config.showKGSearch && (
               <AccordionItem value="kgSearchSettings">
                 <AccordionTrigger className="text-lg font-semibold text-accent-base pt-4">
@@ -307,8 +300,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               </AccordionItem>
             )}
 
-            {/* RAG Generation Settings */}
-            {config.showRagGeneration &&
+            {/* {config.showRagGeneration &&
               temperature !== undefined &&
               setTemperature !== undefined &&
               topP !== undefined &&
@@ -365,13 +357,13 @@ const Sidebar: React.FC<SidebarProps> = ({
                     </div>
                   </AccordionContent>
                 </AccordionItem>
-              )}
+              )} */}
           </Accordion>
         </div>
       </div>
 
       {/* Sidebar toggle button */}
-      <button
+      {/* <button
         className={`fixed left-0 top-0 z-50 h-full w-6 bg-zinc-1000 flex items-center justify-center transition-transform duration-300 ease-in-out ${
           isOpen ? 'translate-x-80' : 'translate-x-0'
         }`}
@@ -382,7 +374,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         ) : (
           <ChevronRight className="h-6 w-6 text-white" />
         )}
-      </button>
+      </button> */}
     </>
   );
 };
