@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/nextjs';
 import type { AppProps } from 'next/app';
 import { useRouter } from 'next/router';
 import { useTheme } from 'next-themes';
@@ -119,20 +120,23 @@ function MyApp(props: AppProps) {
   }, []);
 
   return (
-    <ThemeProvider
-      attribute="class"
-      defaultTheme="dark"
-      enableSystem={false}
-      disableTransitionOnChange
-    >
-      <PostHogProvider client={posthog}>
-        <UserProvider>
-          <JoyrideProvider>
-            <MyAppContent {...props} />
-          </JoyrideProvider>
-        </UserProvider>
-      </PostHogProvider>
-    </ThemeProvider>
+    <Sentry.ErrorBoundary fallback={<p>An error occurred</p>}>
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="dark"
+        enableSystem={false}
+        disableTransitionOnChange
+      >
+        <PostHogProvider client={posthog}>
+          <UserProvider>
+            <JoyrideProvider>
+              <MyAppContent {...props} />
+            </JoyrideProvider>
+          </UserProvider>
+        </PostHogProvider>
+      </ThemeProvider>
+    </Sentry.ErrorBoundary>
+
   );
 }
 
