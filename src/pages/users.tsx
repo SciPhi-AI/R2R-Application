@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
+import UserForm from '@/components/UserForm';
 import { useUserContext } from '@/context/UserContext';
 
 const PAGE_SIZE = 100;
@@ -23,6 +24,7 @@ const Index: React.FC = () => {
   const [selectedUserID, setSelectedUserID] = useState<string>();
   const [isUserInfoDialogOpen, setIsUserInfoDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isUserFormOpen, setIsUserFormOpen] = useState(false);
 
   const { toast } = useToast();
 
@@ -106,6 +108,16 @@ const Index: React.FC = () => {
     setCurrentPage(pageNumber);
   };
 
+  const handleUserDelete = () => {
+    // Refresh the users list
+    fetchAllUsers();
+  };
+
+  const handleUserCreated = () => {
+    // Refresh the users list
+    fetchAllUsers();
+  };
+
   const columns: Column<User>[] = [
     {
       key: 'id',
@@ -114,6 +126,11 @@ const Index: React.FC = () => {
       copyable: true,
     },
     {
+      key: 'name',
+      label: 'Name',
+      renderCell: (user) => user.name || 'Unnamed User',  // Provides a fallback if name is empty
+    },
+   {
       key: 'isSuperuser',
       label: 'Role',
       renderCell: (user) =>
@@ -134,6 +151,9 @@ const Index: React.FC = () => {
               <div className="mb-6">
                 <div className="flex items-center justify-between">
                   <h1 className="text-2xl font-bold text-white">Users</h1>
+                  <Button onClick={() => setIsUserFormOpen(true)}>
+                    Add New User
+                  </Button>
                 </div>
 
                 <div className="flex items-center mt-6 gap-2">
@@ -146,8 +166,13 @@ const Index: React.FC = () => {
                     }}
                     className="flex-grow"
                   />
-                  {/* Add any action buttons here if needed */}
                 </div>
+                {/* Keep the UserForm here */}
+                <UserForm 
+                  open={isUserFormOpen} 
+                  onClose={() => setIsUserFormOpen(false)}
+                  onUserCreated={handleUserCreated}  // Add this prop
+                />
               </div>
 
               <Table<User>
@@ -179,12 +204,16 @@ const Index: React.FC = () => {
       </main>
 
       {selectedUserID && (
-        <UserInfoDialog
-          id={selectedUserID}
-          open={isUserInfoDialogOpen}
-          onClose={() => setIsUserInfoDialogOpen(false)}
-        />
-      )}
+      <UserInfoDialog
+        id={selectedUserID}
+        open={isUserInfoDialogOpen}
+        onClose={() => {
+          setIsUserInfoDialogOpen(false);
+          handleUserDelete(); // Refresh list after dialog closes
+        }}
+      />
+    )}
+      
     </Layout>
   );
 };
