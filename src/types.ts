@@ -440,7 +440,24 @@ export interface UserContextProps {
   viewMode: 'admin' | 'user';
   setViewMode: React.Dispatch<React.SetStateAction<'admin' | 'user'>>;
   isSuperUser: () => boolean;
+  createUser: (userData: {
+    email: string;
+    password: string;
+    role: string;
+  }) => Promise<any>;
 }
+
+export type CreateUserRequest = {
+  email: string;
+  password: string;
+  role: 'admin' | 'user';
+};
+
+export type User = {
+  id: string;
+  email: string;
+  role: 'admin' | 'user';
+};
 
 export type Collection = {
   name: string;
