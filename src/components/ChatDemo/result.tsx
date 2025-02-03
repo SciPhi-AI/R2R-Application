@@ -20,10 +20,14 @@ import { UploadButton } from './upload';
 // Default URLs and constants
 const DEFAULT_PRODUCTION_URL = 'https://api.cloud.sciphi.ai';
 const DEFAULT_DEVELOPMENT_URL = 'http://0.0.0.0:7272';
-const PRODUCTION_URL = process.env.NEXT_PUBLIC_PRODUCTION_API_URL || DEFAULT_PRODUCTION_URL;
-const DEVELOPMENT_URL = process.env.NEXT_PUBLIC_DEVELOPMENT_API_URL || DEFAULT_DEVELOPMENT_URL;
+const PRODUCTION_URL =
+  process.env.NEXT_PUBLIC_PRODUCTION_API_URL || DEFAULT_PRODUCTION_URL;
+const DEVELOPMENT_URL =
+  process.env.NEXT_PUBLIC_DEVELOPMENT_API_URL || DEFAULT_DEVELOPMENT_URL;
 const DEFAULT_DEPLOYMENT_URL =
-  process.env.NEXT_PUBLIC_ENV === 'development' ? DEVELOPMENT_URL : PRODUCTION_URL;
+  process.env.NEXT_PUBLIC_ENV === 'development'
+    ? DEVELOPMENT_URL
+    : PRODUCTION_URL;
 
 // Helper to strip <Thought> tags from the final chainOfThought text
 const cleanThought = (thought: string): string =>
@@ -51,7 +55,9 @@ interface ResultProps {
   messages: Message[];
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
   selectedConversationId: string | null;
-  setSelectedConversationId: React.Dispatch<React.SetStateAction<string | null>>;
+  setSelectedConversationId: React.Dispatch<
+    React.SetStateAction<string | null>
+  >;
   enabledTools: string[];
 }
 
@@ -91,7 +97,9 @@ export const Result: FC<ResultProps> = ({
   const [lastScrollUpTime, setLastScrollUpTime] = useState<number>(0);
 
   const [pdfPreviewOpen, setPdfPreviewOpen] = useState(false);
-  const [pdfPreviewDocumentId, setPdfPreviewDocumentId] = useState<string | null>(null);
+  const [pdfPreviewDocumentId, setPdfPreviewDocumentId] = useState<
+    string | null
+  >(null);
   const [initialPage, setInitialPage] = useState<number>(1);
 
   const SCROLL_BACK_DELAY_MS = 3000;
@@ -116,7 +124,8 @@ export const Result: FC<ResultProps> = ({
     const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
     const userIsNearBottom = distanceFromBottom < 50;
     const now = Date.now();
-    const enoughTimeSinceScrollUp = now - lastScrollUpTime > SCROLL_BACK_DELAY_MS;
+    const enoughTimeSinceScrollUp =
+      now - lastScrollUpTime > SCROLL_BACK_DELAY_MS;
 
     if (userIsNearBottom || enoughTimeSinceScrollUp) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -248,7 +257,10 @@ export const Result: FC<ResultProps> = ({
       if (selectedCollectionIds.length > 0) {
         if (Object.keys(combinedFilters).length > 0) {
           combinedFilters = {
-            $and: [combinedFilters, { collection_id: { $in: selectedCollectionIds } }],
+            $and: [
+              combinedFilters,
+              { collection_id: { $in: selectedCollectionIds } },
+            ],
           };
         } else {
           combinedFilters = { collection_id: { $in: selectedCollectionIds } };
@@ -451,8 +463,8 @@ export const Result: FC<ResultProps> = ({
       {mode === 'rag_agent' && (
         <Alert className="mb-4 bg-zinc-800 border-zinc-600">
           <AlertDescription className="text-sm text-white">
-            Currently using our advanced reasoning agent. For quick, direct answers,
-            R2R supports <strong>fast rag mode</strong>.
+            Currently using our advanced reasoning agent. For quick, direct
+            answers, R2R supports <strong>fast rag mode</strong>.
           </AlertDescription>
         </Alert>
       )}

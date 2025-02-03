@@ -119,7 +119,7 @@ export const Answer: FC<AnswerProps> = ({
   const contentChunks = message.content
     ? splitContent(processMarkdown(message.content))
     : [];
-    
+
   console.log('message.chainOfThought = ', message.chainOfThought);
   return (
     <div className="mt-4">
@@ -128,7 +128,7 @@ export const Answer: FC<AnswerProps> = ({
           (Retrieving additional context...)
         </div>
       )} */}
-      
+
       {message.chainOfThought && message.chainOfThought.length > 0 && (
         <Accordion
           type="single"
@@ -150,7 +150,13 @@ export const Answer: FC<AnswerProps> = ({
                       className="bg-zinc-700 p-2 rounded mb-2"
                     >
                       <div className="text-sm text-gray-200 whitespace-pre-wrap">
-                        {(thought.startsWith(">") ? thought.slice(1,thought.length) : thought).trim().replace('<Thought>', '').replace('</Thought>', '')}
+                        {(thought.startsWith('>')
+                          ? thought.slice(1, thought.length)
+                          : thought
+                        )
+                          .trim()
+                          .replace('<Thought>', '')
+                          .replace('</Thought>', '')}
                       </div>
                     </div>
                   )
