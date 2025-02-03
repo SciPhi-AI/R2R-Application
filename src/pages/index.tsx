@@ -20,6 +20,7 @@ import RequestsCard from '@/components/RequestsCard';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/Button';
 import { CardTitle, CardHeader, CardContent, Card } from '@/components/ui/card';
+import { brandingConfig } from '@/config/brandingConfig';
 import { useUserContext } from '@/context/UserContext';
 
 const HomePage = () => {
@@ -55,7 +56,8 @@ const HomePage = () => {
                 <AlertTitle className="text-lg ">
                   <div className="flex gap-2 text-xl">
                     <span className="text-gray-500 dark:text-gray-200 font-semibold">
-                      You're connected to your R2R deployment!
+                      You're connected to your {brandingConfig.deploymentName}{' '}
+                      deployment!
                     </span>
                   </div>
                 </AlertTitle>
@@ -143,8 +145,8 @@ const HomePage = () => {
                       <div>
                         <h3 className="text-sm font-semibold mb-1">Settings</h3>
                         <p className="text-xs text-gray-500 dark:text-gray-400">
-                          Manage your R2R deployment settings and
-                          configurations.
+                          Manage your {brandingConfig.deploymentName} deployment
+                          settings and configurations.
                         </p>
                       </div>
                     </div>
@@ -182,196 +184,204 @@ const HomePage = () => {
               {/* SDK Cards */}
               <div className="flex flex-col gap-4">
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <Card className="w-full sm:w-1/2 flex flex-col">
-                    <CardHeader className="flex flex-row items-center space-x-2">
-                      <Image
-                        src="/images/python-logo.svg"
-                        alt="Python Logo"
-                        width={30}
-                        height={30}
-                      />
-                      <CardTitle>Python SDK</CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex flex-col justify-end flex-grow">
-                      <div className="flex flex-row space-x-2">
-                        <Button
-                          className="rounded-md py-1 px-3"
-                          color="light"
-                          onClick={() =>
-                            window.open(
-                              'https://r2r-docs.sciphi.ai/documentation/python-sdk/introduction',
-                              '_blank'
-                            )
-                          }
-                        >
-                          <div className="flex items-center">
-                            <BookOpenText size={20} className="mr-2" />
-                            <span>Docs</span>
-                          </div>
-                        </Button>
-                        <Button
-                          className="rounded-md py-1 px-3"
-                          color="light"
-                          onClick={() =>
-                            window.open(
-                              'https://github.com/SciPhi-AI/R2R/tree/main/py',
-                              '_blank'
-                            )
-                          }
-                        >
-                          <div className="flex items-center">
-                            <Image
-                              src="/images/github-mark.svg"
-                              alt="GitHub Logo"
-                              width={20}
-                              height={20}
-                              className="mr-2"
-                            />
-                            <span>View on GitHub</span>
-                          </div>
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  <Card className="w-full sm:w-1/2 flex flex-col">
-                    <CardHeader className="flex flex-row items-center space-x-2">
-                      <Image
-                        src="/images/javascript-logo.svg"
-                        alt="JavaScript Logo"
-                        width={30}
-                        height={30}
-                      />
-                      <CardTitle>JavaScript SDK</CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex flex-col justify-end flex-grow">
-                      <div className="flex flex-row space-x-2">
-                        <Button
-                          className="rounded-md py-1 px-3"
-                          color="light"
-                          onClick={() =>
-                            window.open(
-                              'https://r2r-docs.sciphi.ai/documentation/js-sdk/introduction',
-                              '_blank'
-                            )
-                          }
-                        >
-                          <div className="flex items-center">
-                            <BookOpenText size={20} className="mr-2" />
-                            <span>Docs</span>
-                          </div>
-                        </Button>
-                        <Button
-                          className="rounded-md py-1 px-3"
-                          color="light"
-                          onClick={() =>
-                            window.open(
-                              'https://github.com/SciPhi-AI/R2R/tree/main/js/sdk',
-                              '_blank'
-                            )
-                          }
-                        >
-                          <div className="flex items-center">
-                            <Image
-                              src="/images/github-mark.svg"
-                              alt="GitHub Logo"
-                              width={20}
-                              height={20}
-                              className="mr-2"
-                            />
-                            <span>View on GitHub</span>
-                          </div>
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  {brandingConfig.homePage.pythonSdk && (
+                    <Card className="w-full sm:w-1/2 flex flex-col">
+                      <CardHeader className="flex flex-row items-center space-x-2">
+                        <Image
+                          src="/images/python-logo.svg"
+                          alt="Python Logo"
+                          width={30}
+                          height={30}
+                        />
+                        <CardTitle>Python SDK</CardTitle>
+                      </CardHeader>
+                      <CardContent className="flex flex-col justify-end flex-grow">
+                        <div className="flex flex-row space-x-2">
+                          <Button
+                            className="rounded-md py-1 px-3"
+                            color="light"
+                            onClick={() =>
+                              window.open(
+                                'https://r2r-docs.sciphi.ai/documentation/python-sdk/introduction',
+                                '_blank'
+                              )
+                            }
+                          >
+                            <div className="flex items-center">
+                              <BookOpenText size={20} className="mr-2" />
+                              <span>Docs</span>
+                            </div>
+                          </Button>
+                          <Button
+                            className="rounded-md py-1 px-3"
+                            color="light"
+                            onClick={() =>
+                              window.open(
+                                'https://github.com/SciPhi-AI/R2R/tree/main/py',
+                                '_blank'
+                              )
+                            }
+                          >
+                            <div className="flex items-center">
+                              <Image
+                                src="/images/github-mark.svg"
+                                alt="GitHub Logo"
+                                width={20}
+                                height={20}
+                                className="mr-2"
+                              />
+                              <span>View on GitHub</span>
+                            </div>
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                  {brandingConfig.homePage.githubCard && (
+                    <Card className="w-full sm:w-1/2 flex flex-col">
+                      <CardHeader className="flex flex-row items-center space-x-2">
+                        <Image
+                          src="/images/javascript-logo.svg"
+                          alt="JavaScript Logo"
+                          width={30}
+                          height={30}
+                        />
+                        <CardTitle>JavaScript SDK</CardTitle>
+                      </CardHeader>
+                      <CardContent className="flex flex-col justify-end flex-grow">
+                        <div className="flex flex-row space-x-2">
+                          <Button
+                            className="rounded-md py-1 px-3"
+                            color="light"
+                            onClick={() =>
+                              window.open(
+                                'https://r2r-docs.sciphi.ai/documentation/js-sdk/introduction',
+                                '_blank'
+                              )
+                            }
+                          >
+                            <div className="flex items-center">
+                              <BookOpenText size={20} className="mr-2" />
+                              <span>Docs</span>
+                            </div>
+                          </Button>
+                          <Button
+                            className="rounded-md py-1 px-3"
+                            color="light"
+                            onClick={() =>
+                              window.open(
+                                'https://github.com/SciPhi-AI/R2R/tree/main/js/sdk',
+                                '_blank'
+                              )
+                            }
+                          >
+                            <div className="flex items-center">
+                              <Image
+                                src="/images/github-mark.svg"
+                                alt="GitHub Logo"
+                                width={20}
+                                height={20}
+                                className="mr-2"
+                              />
+                              <span>View on GitHub</span>
+                            </div>
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
                 </div>
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <Card className="w-full sm:w-1/2 flex flex-col">
-                    <CardHeader className="flex flex-row items-center space-x-2">
-                      <Image
-                        src="/images/hatchet-logo.svg"
-                        alt="Python Logo"
-                        width={30}
-                        height={30}
-                      />
-                      <CardTitle>Hatchet</CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex flex-col justify-end flex-grow">
-                      <div className="flex flex-row space-x-2">
-                        <Button
-                          className="rounded-md py-1 px-3"
-                          color="light"
-                          disabled={
-                            !window.__RUNTIME_CONFIG__
-                              ?.NEXT_PUBLIC_HATCHET_DASHBOARD_URL ||
-                            window.__RUNTIME_CONFIG__.NEXT_PUBLIC_HATCHET_DASHBOARD_URL.includes(
-                              '__NEXT_PUBLIC_HATCHET_DASHBOARD_URL__'
-                            )
-                          }
-                          onClick={() => {
-                            const url =
-                              window.__RUNTIME_CONFIG__
-                                ?.NEXT_PUBLIC_HATCHET_DASHBOARD_URL;
-                            if (
-                              url &&
-                              !url.includes(
+                  {brandingConfig.homePage.hatchetCard && (
+                    <Card className="w-full sm:w-1/2 flex flex-col">
+                      <CardHeader className="flex flex-row items-center space-x-2">
+                        <Image
+                          src="/images/hatchet-logo.svg"
+                          alt="Python Logo"
+                          width={30}
+                          height={30}
+                        />
+                        <CardTitle>Hatchet</CardTitle>
+                      </CardHeader>
+                      <CardContent className="flex flex-col justify-end flex-grow">
+                        <div className="flex flex-row space-x-2">
+                          <Button
+                            className="rounded-md py-1 px-3"
+                            color="light"
+                            disabled={
+                              !window.__RUNTIME_CONFIG__
+                                ?.NEXT_PUBLIC_HATCHET_DASHBOARD_URL ||
+                              window.__RUNTIME_CONFIG__.NEXT_PUBLIC_HATCHET_DASHBOARD_URL.includes(
                                 '__NEXT_PUBLIC_HATCHET_DASHBOARD_URL__'
                               )
-                            ) {
-                              window.open(url, '_blank');
                             }
-                          }}
-                          tooltip={
-                            !window.__RUNTIME_CONFIG__
-                              ?.NEXT_PUBLIC_HATCHET_DASHBOARD_URL ||
-                            window.__RUNTIME_CONFIG__.NEXT_PUBLIC_HATCHET_DASHBOARD_URL.includes(
-                              '__NEXT_PUBLIC_HATCHET_DASHBOARD_URL__'
-                            ) ? (
-                              <div>
-                                Hatchet Dashboard Deployment URL unavailable.
-                                <br />
-                                <a
-                                  href="https://r2r-docs.sciphi.ai/cookbooks/orchestration"
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-blue-500 hover:text-blue-600 underline"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  Learn more about orchestration with R2R Full.
-                                </a>
-                              </div>
-                            ) : undefined
-                          }
-                        >
-                          <div className="flex items-center">
-                            <PanelsTopLeft size={20} className="mr-2" />
-                            <span>Dashboard</span>
-                          </div>
-                        </Button>
-                        <Button
-                          className="rounded-md py-1 px-3"
-                          color="light"
-                          onClick={() =>
-                            window.open(
-                              'https://github.com/hatchet-dev/hatchet',
-                              '_blank'
-                            )
-                          }
-                        >
-                          <div className="flex items-center">
-                            <Image
-                              src="/images/github-mark.svg"
-                              alt="GitHub Logo"
-                              width={20}
-                              height={20}
-                              className="mr-2"
-                            />
-                            <span>View on GitHub</span>
-                          </div>
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+                            onClick={() => {
+                              const url =
+                                window.__RUNTIME_CONFIG__
+                                  ?.NEXT_PUBLIC_HATCHET_DASHBOARD_URL;
+                              if (
+                                url &&
+                                !url.includes(
+                                  '__NEXT_PUBLIC_HATCHET_DASHBOARD_URL__'
+                                )
+                              ) {
+                                window.open(url, '_blank');
+                              }
+                            }}
+                            tooltip={
+                              !window.__RUNTIME_CONFIG__
+                                ?.NEXT_PUBLIC_HATCHET_DASHBOARD_URL ||
+                              window.__RUNTIME_CONFIG__.NEXT_PUBLIC_HATCHET_DASHBOARD_URL.includes(
+                                '__NEXT_PUBLIC_HATCHET_DASHBOARD_URL__'
+                              ) ? (
+                                <div>
+                                  Hatchet Dashboard Deployment URL unavailable.
+                                  <br />
+                                  <a
+                                    href="https://r2r-docs.sciphi.ai/cookbooks/orchestration"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-500 hover:text-blue-600 underline"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    Learn more about orchestration with{' '}
+                                    {brandingConfig.deploymentName}
+                                    Full.
+                                  </a>
+                                </div>
+                              ) : undefined
+                            }
+                          >
+                            <div className="flex items-center">
+                              <PanelsTopLeft size={20} className="mr-2" />
+                              <span>Dashboard</span>
+                            </div>
+                          </Button>
+                          <Button
+                            className="rounded-md py-1 px-3"
+                            color="light"
+                            onClick={() =>
+                              window.open(
+                                'https://github.com/hatchet-dev/hatchet',
+                                '_blank'
+                              )
+                            }
+                          >
+                            <div className="flex items-center">
+                              <Image
+                                src="/images/github-mark.svg"
+                                alt="GitHub Logo"
+                                width={20}
+                                height={20}
+                                className="mr-2"
+                              />
+                              <span>View on GitHub</span>
+                            </div>
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
                   <div className="w-full sm:w-1/2"></div>
                 </div>
               </div>
