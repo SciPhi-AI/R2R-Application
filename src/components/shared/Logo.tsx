@@ -2,6 +2,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
 
+import { brandingConfig } from '@/config/brandingConfig';
+
 interface LogoProps {
   width?: number;
   height?: number;
@@ -27,8 +29,8 @@ export function Logo({
 
   const imageElement = (
     <Image
-      alt="sciphi.svg"
-      src="/images/sciphi.svg"
+      alt={brandingConfig.logo.alt}
+      src={brandingConfig.logo.src}
       width={width}
       height={height}
       className={className}

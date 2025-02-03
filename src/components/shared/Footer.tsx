@@ -2,6 +2,8 @@
 
 import Link from 'next/link';
 
+import { brandingConfig } from '@/config/brandingConfig';
+
 function XIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
   return (
     <svg viewBox="0 0 20 20" aria-hidden="true" {...props}>
@@ -40,10 +42,12 @@ function SocialLink({
   children: React.ReactNode;
 }) {
   return (
-    <Link href={href} className="group">
-      <span className="sr-only">{children}</span>
-      <Icon className="h-5 w-5 fill-zinc-700 transition group-hover:fill-accent-base dark:group-hover:fill-accent-dark" />
-    </Link>
+    href && (
+      <Link href={href} className="group">
+        <span className="sr-only">{children}</span>
+        <Icon className="h-5 w-5 fill-zinc-700 transition group-hover:fill-accent-base dark:group-hover:fill-accent-dark" />
+      </Link>
+    )
   );
 }
 
@@ -51,19 +55,34 @@ function SmallPrint() {
   return (
     <div className="flex flex-col items-center justify-between sm:flex-row dark:border-white/5 mb-6">
       <p className="text-xs text-zinc-600 dark:text-zinc-400">
-        &copy; Copyright {new Date().getFullYear()}. EmergentAGI Inc. All rights
-        reserved.
+        &copy; Copyright {new Date().getFullYear()}.{' '}
+        {brandingConfig.companyName} All rights reserved.
       </p>
       <div className="flex gap-4 mt-4 sm:mt-0 sm:mb-0 mr-14">
-        <SocialLink href="https://twitter.com/ocolegro?lang=en" icon={XIcon}>
-          Follow us on X
-        </SocialLink>
-        <SocialLink href="https://github.com/SciPhi-AI/R2R" icon={GitHubIcon}>
-          Follow us on GitHub
-        </SocialLink>
-        <SocialLink href="https://discord.gg/p6KqD2kjtB" icon={DiscordIcon}>
-          Join our Discord server
-        </SocialLink>
+        {brandingConfig.socialLinks.twitter.enabled && (
+          <SocialLink
+            href={brandingConfig.socialLinks.twitter.url}
+            icon={XIcon}
+          >
+            Follow us on X
+          </SocialLink>
+        )}
+        {brandingConfig.socialLinks.github.enabled && (
+          <SocialLink
+            href={brandingConfig.socialLinks.github.url}
+            icon={GitHubIcon}
+          >
+            Follow us on GitHub
+          </SocialLink>
+        )}
+        {brandingConfig.socialLinks.discord.enabled && (
+          <SocialLink
+            href={brandingConfig.socialLinks.discord.url}
+            icon={DiscordIcon}
+          >
+            Join our Discord server
+          </SocialLink>
+        )}
       </div>
     </div>
   );
@@ -72,7 +91,6 @@ function SmallPrint() {
 export function Footer() {
   return (
     <footer className="w-full flex flex-col container space-y-4">
-      {/* <OtherLinks /> */}
       <SmallPrint />
     </footer>
   );

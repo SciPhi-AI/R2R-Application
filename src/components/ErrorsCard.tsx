@@ -20,6 +20,7 @@ import {
   CardDescription,
   CardContent,
 } from '@/components/ui/card';
+import { brandingConfig } from '@/config/brandingConfig';
 import { useUserContext } from '@/context/UserContext';
 
 interface LogEntry {
@@ -302,7 +303,8 @@ const ErrorsCard: React.FC = () => {
           <CardTitle className="text-xl">Errors</CardTitle>
         </div>
         <CardDescription>
-          Errors that your R2R server has seen over the past 24 hours.
+          Errors that your {brandingConfig.deploymentName} server has seen over
+          the past 24 hours.
         </CardDescription>
       </CardHeader>
       <CardContent

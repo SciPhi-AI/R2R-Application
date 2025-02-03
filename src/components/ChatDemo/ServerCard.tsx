@@ -13,6 +13,7 @@ import {
   CardDescription,
   CardContent,
 } from '@/components/ui/card';
+import { brandingConfig } from '@/config/brandingConfig';
 import { R2RServerCardProps } from '@/types';
 
 const R2RServerCard: React.FC<R2RServerCardProps> = ({
@@ -39,11 +40,13 @@ const R2RServerCard: React.FC<R2RServerCardProps> = ({
     <Card className="flex flex-col">
       <CardHeader className="pb-2">
         <div className="flex justify-between items-center">
-          <CardTitle className="text-lg">R2R Server</CardTitle>
+          <CardTitle className="text-lg">
+            {brandingConfig.deploymentName} Server
+          </CardTitle>
           <PipelineStatus onStatusChange={onStatusChange} />
         </div>
         <CardDescription className="text-sm">
-          Your R2R server deployment.
+          Your {brandingConfig.deploymentName} server deployment.
         </CardDescription>
       </CardHeader>
       <CardContent className="pt-0">

@@ -6,11 +6,12 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/input';
+import { brandingConfig } from '@/config/brandingConfig';
 import { useUserContext } from '@/context/UserContext';
 import debounce from '@/lib/debounce';
 import { supabase } from '@/lib/supabase';
 
-const DEFAULT_DEPLOYMENT_URL = 'http://localhost:7272';
+const DEFAULT_DEPLOYMENT_URL = brandingConfig.auth.loginUrl;
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('admin@example.com');
@@ -88,7 +89,7 @@ const LoginPage: React.FC = () => {
       // Provide appropriate error message based on server health
       const serverStatusMessage = isServerHealthy
         ? 'The server appears to be running correctly. Please check your credentials and try again.'
-        : 'Unable to communicate with the server. Please verify the R2R server is running at the specified URL.';
+        : 'Unable to communicate with the server. Please verify the server is running at the specified URL.';
 
       alert(`Login failed. ${serverStatusMessage}\n\nError: ${errorMessage}`);
     } finally {
@@ -188,7 +189,7 @@ const LoginPage: React.FC = () => {
                 className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2"
                 htmlFor="sanitizedDeploymentUrl"
               >
-                R2R Deployment URL
+                {brandingConfig.deploymentName} Deployment URL
               </label>
               {serverHealth === false && (
                 <span className="text-red-400 text-sm font-bold mb-2 block">
@@ -200,7 +201,7 @@ const LoginPage: React.FC = () => {
                 id="deploymentUrl"
                 name="deploymentUrl"
                 type="text"
-                placeholder="R2R Deployment URL"
+                placeholder="Deployment URL"
                 value={rawDeploymentUrl}
                 onChange={(e) => setRawDeploymentUrl(e.target.value)}
                 autoComplete="url"
