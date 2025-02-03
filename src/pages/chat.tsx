@@ -343,15 +343,12 @@ const Index: React.FC = () => {
                       <SelectItem value="anthropic/claude-3-5-sonnet-20241022">
                         claude-3-5-sonnet
                       </SelectItem>
-                      <SelectItem value="openai/gpt-4o">
-                        gpt-4o
-                      </SelectItem>
+                      <SelectItem value="openai/gpt-4o">gpt-4o</SelectItem>
 
-                      <SelectItem value="openai/o3-mini">
-                        o3-mini
+                      <SelectItem value="openai/o3-mini">o3-mini</SelectItem>
+                      <SelectItem value="gemini/gemini-2.0-flash-thinking-exp-01-21">
+                        gemini-2.0-flash-thinking-exp-01-21
                       </SelectItem>
-                      <SelectItem value="gemini/gemini-2.0-flash-thinking-exp-01-21">gemini-2.0-flash-thinking-exp-01-21</SelectItem>
-
                     </SelectContent>
                   </Select>
                 </div>

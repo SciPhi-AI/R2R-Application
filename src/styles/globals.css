@@ -325,7 +325,6 @@ td {
   border-radius: 4px;
 }
 
-
 @keyframes float {
   0% {
     transform: translate(0, 0) scale(1);
@@ -348,7 +347,7 @@ td {
   .animate-float {
     animation: float var(--animation-duration, 20s) ease-in-out infinite;
   }
-  
+
   /* We might also need this fallback class */
   .float {
     animation: float 20s ease-in-out infinite;

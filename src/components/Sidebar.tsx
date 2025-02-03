@@ -107,7 +107,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           .filter(
             // Filter out conversations without a name
             (c: Conversation) => c.name != 'undefined'
-          )
+          );
         console.log('fetched = ', fetched);
         setConversations(fetched);
       } catch (error) {

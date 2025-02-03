@@ -29,7 +29,6 @@ export const DefaultQueries: FC<DefaultQueriesProps> = ({ setQuery, mode }) => {
     {
       query: 'Search deeply for some interesting facts.',
       icon: <FlaskConical className="h-6 w-6 text-purple-400" />,
-
     },
     {
       query: 'What is happening in California today?',
@@ -68,7 +67,6 @@ export const DefaultQueries: FC<DefaultQueriesProps> = ({ setQuery, mode }) => {
             // Optional: adjust character spacing if needed for this specific font
             letterSpacing: '0.01em',
             transform: 'translateX(8%)', // Fine-tune horizontal centering
-
           }}
         >
           {`  ░▒▓███████▓▒░  ░▒▓███████▓▒░  ░▒▓███████▓▒░
@@ -81,8 +79,7 @@ export const DefaultQueries: FC<DefaultQueriesProps> = ({ setQuery, mode }) => {
                                                               
                                                               `}
         </pre>
-        </div>
-
+      </div>
     );
   };
 
@@ -106,4 +103,3 @@ export const DefaultQueries: FC<DefaultQueriesProps> = ({ setQuery, mode }) => {
     </div>
   );
 };
-

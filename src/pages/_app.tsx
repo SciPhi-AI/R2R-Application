@@ -7,10 +7,10 @@ import { PostHogProvider } from 'posthog-js/react';
 import { useEffect, useCallback } from 'react';
 
 import { ThemeProvider } from '@/components/ThemeProvider';
+import { JoyrideProvider } from '@/context/JoyrideContext'; // <--- our new context
 import { UserProvider, useUserContext } from '@/context/UserContext';
 import '@/styles/globals.css';
 // import { initializePostHog } from '@/lib/posthog-client';
-import { JoyrideProvider } from '@/context/JoyrideContext'; // <--- our new context
 // import posthog from 'posthog-js';
 // import { PostHogProvider } from 'posthog-js/react';
 
@@ -136,7 +136,6 @@ function MyApp(props: AppProps) {
         </PostHogProvider>
       </ThemeProvider>
     </Sentry.ErrorBoundary>
-
   );
 }
 
