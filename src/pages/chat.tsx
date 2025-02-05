@@ -324,7 +324,7 @@ const Index: React.FC = () => {
                       <SelectValue placeholder="Select Mode" />
                     </SelectTrigger>
                     <SelectContent>
-                      {/* <SelectItem value="rag">RAG Q&A</SelectItem> */}
+                      <SelectItem value="rag">RAG Q&A</SelectItem>
                       <SelectItem value="rag_agent">Reasoning Agent</SelectItem>
                     </SelectContent>
                   </Select>
@@ -343,8 +343,10 @@ const Index: React.FC = () => {
                       <SelectItem value="anthropic/claude-3-5-sonnet-20241022">
                         claude-3-5-sonnet
                       </SelectItem>
+                      <SelectItem value="deepseek/deepseek-ai/DeepSeek-R1">
+                        deepseek-reasoner
+                      </SelectItem>
                       <SelectItem value="openai/gpt-4o">gpt-4o</SelectItem>
-
                       <SelectItem value="openai/o3-mini">o3-mini</SelectItem>
                       <SelectItem value="gemini/gemini-2.0-flash-thinking-exp-01-21">
                         gemini-2.0-flash-thinking-exp-01-21

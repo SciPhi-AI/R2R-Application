@@ -53,39 +53,83 @@ export const Answer: FC<AnswerProps> = ({
   }, []);
 
   const processMarkdown = (content: string) => {
-    // For tables, ensure proper formatting
+    if (!content) return '';
+    
+    // Unescape Unicode sequences
+    content = content.replace(/\\u[\dA-F]{4}/gi, match =>
+      String.fromCharCode(parseInt(match.replace(/\\u/g, ''), 16))
+    );
+  
+    // Unescape quotes and other special characters
+    content = content
+      .replace(/\\"/g, '"')
+      .replace(/\\'/g, "'")
+      .replace(/\\n/g, '\n');
+  
+    // Handle table formatting
     if (content.includes('|')) {
       const lines = content.split('\n');
-      const processedLines = lines.map((line, index) => {
+      const processedLines = lines.map((line) => {
         if (line.includes('|')) {
           // Clean up table row formatting
           const cells = line
             .split('|')
             .map((cell) => cell.trim())
             .filter(Boolean);
-
           if (cells.length === 0) return '';
-
           // If this is a separator row (contains ---), format it properly
           if (line.includes('---')) {
-            return `| ${cells.map(() => ' --- ').join('|')} |`;
+            return `| ${cells.map(() => ' --- ').join(' | ')} |`;
           }
-
           return `| ${cells.join(' | ')} |`;
         }
         return line;
       });
-
       content = processedLines.join('\n');
     }
-
-    // Handle other markdown elements
-    let processed = content;
-    processed = processed.replace(/(\d+\.|\*)\s+/g, '$1 ');
-    processed = processed.replace(/\n{3,}/g, '\n\n');
-
-    return processed;
+  
+    // Clean up list formatting
+    content = content
+      .replace(/(\d+\.|\*)\s+/g, '$1 ')
+      .replace(/\n{3,}/g, '\n\n');
+  
+    return content;
   };
+  
+  // const processMarkdown = (content: string) => {
+  //   // Unescape literal newlines to actual newlines
+  //   content = content.replace(/\\n/g, '\n');
+  
+  //   // Your existing processing logic for markdown...
+  //   if (content.includes('|')) {
+  //     const lines = content.split('\n');
+  //     const processedLines = lines.map((line) => {
+  //       if (line.includes('|')) {
+  //         // Clean up table row formatting
+  //         const cells = line
+  //           .split('|')
+  //           .map((cell) => cell.trim())
+  //           .filter(Boolean);
+  //         if (cells.length === 0) return '';
+  //         // If this is a separator row (contains ---), format it properly
+  //         if (line.includes('---')) {
+  //           return `| ${cells.map(() => ' --- ').join('|')} |`;
+  //         }
+  //         return `| ${cells.join(' | ')} |`;
+  //       }
+  //       return line;
+  //     });
+  //     content = processedLines.join('\n');
+  //   }
+  
+  //   // Handle other markdown formatting issues
+  //   let processed = content;
+  //   processed = processed.replace(/(\d+\.|\*)\s+/g, '$1 ');
+  //   processed = processed.replace(/\n{3,}/g, '\n\n');
+  
+  //   return processed;
+  // };
+
 
   const splitContent = (content: string) => {
     if (!content) return [];
@@ -116,19 +160,17 @@ export const Answer: FC<AnswerProps> = ({
     );
   }
 
+  
   const contentChunks = message.content
     ? splitContent(processMarkdown(message.content))
     : [];
 
+    
+  console.log('Actual message.content:', JSON.stringify(message.content, null, 2));
+
   console.log('message.chainOfThought = ', message.chainOfThought);
   return (
     <div className="mt-4">
-      {/* {isSearching && (
-        <div className="text-sm text-gray-400">
-          (Retrieving additional context...)
-        </div>
-      )} */}
-
       {message.chainOfThought && message.chainOfThought.length > 0 && (
         <Accordion
           type="single"
