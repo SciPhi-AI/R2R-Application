@@ -1,3 +1,4 @@
+// app.tsx
 import * as Sentry from '@sentry/nextjs';
 import type { AppProps } from 'next/app';
 import { useRouter } from 'next/router';
@@ -5,48 +6,38 @@ import { useTheme } from 'next-themes';
 import posthog from 'posthog-js';
 import { PostHogProvider } from 'posthog-js/react';
 import { useEffect, useCallback } from 'react';
+import Script from 'next/script'; // <-- Import Next.js Script
 
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { JoyrideProvider } from '@/context/JoyrideContext'; // <--- our new context
 import { UserProvider, useUserContext } from '@/context/UserContext';
 import '@/styles/globals.css';
-// import { initializePostHog } from '@/lib/posthog-client';
-// import posthog from 'posthog-js';
-// import { PostHogProvider } from 'posthog-js/react';
 
 function MyAppContent({ Component, pageProps }: AppProps) {
   const { setTheme } = useTheme();
   const { isAuthenticated, isSuperUser, authState } = useUserContext();
   const router = useRouter();
-  // // Check that PostHog is client-side (used to handle Next.js SSR)
-  // if (typeof window !== 'undefined') {
-  //   posthog.init("phc_pE4e6AhYVYxz0q2JgdVpdcLreryBT3g7zZuWMviCgkb", {
-  //     api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://app.posthog.com',
-  //   });
-  // }
 
-  // Add this component before your MyApp component
+  // Example: identify user for PostHog
   const PostHogUserIdentifier: React.FC<{ children: React.ReactNode }> = ({
     children,
   }) => {
     const { authState } = useUserContext();
-
     useEffect(() => {
       if (authState?.email && authState?.userId) {
         posthog.identify(authState?.userId, {
           email: authState?.email,
-          // Add any other user properties you want to track
-          // isSuperUser: authState.userRole === 'SUPER_USER',
+          // Additional properties as needed
         });
       }
     }, [authState]);
 
     return <>{children}</>;
   };
+
   useEffect(() => {
     setTheme('dark');
-    // initializePostHog();
-  }, []);
+  }, [setTheme]);
 
   const checkAccess = useCallback(async () => {
     const publicRoutes = [
@@ -59,7 +50,6 @@ function MyAppContent({ Component, pageProps }: AppProps) {
       '/auth/oauth/*',
     ];
     const userRoutes = [
-      // '',
       '/',
       '/documents',
       '/collections',
@@ -70,15 +60,8 @@ function MyAppContent({ Component, pageProps }: AppProps) {
     ];
     const currentPath = router.pathname;
 
-    const isUserRoute = (path: string) => {
-      // console.log('route = ', route)
-      console.log(
-        'userRoutes.some((route) => path.startsWith(route)) = ',
-        userRoutes.some((route) => path.startsWith(route))
-      );
-      console.log('path = ', path);
-      return userRoutes.some((route) => path.startsWith(route));
-    };
+    const isUserRoute = (path: string) =>
+      userRoutes.some((route) => path.startsWith(route));
 
     if (!isAuthenticated) {
       if (!publicRoutes.includes(currentPath)) {
@@ -94,7 +77,7 @@ function MyAppContent({ Component, pageProps }: AppProps) {
     if (!isUserRoute(currentPath)) {
       router.replace('/documents');
     }
-  }, [isAuthenticated, isSuperUser, authState.userRole, router]);
+  }, [isAuthenticated, isSuperUser, router]);
 
   useEffect(() => {
     checkAccess();
@@ -104,9 +87,8 @@ function MyAppContent({ Component, pageProps }: AppProps) {
 }
 
 function MyApp(props: AppProps) {
-  // Move the runtime config check into useEffect
+  // Dynamically load env-config.js script
   useEffect(() => {
-    // Load the env-config.js script dynamically
     const script = document.createElement('script');
     script.src = '/env-config.js';
     script.onload = () => {
@@ -121,20 +103,38 @@ function MyApp(props: AppProps) {
 
   return (
     <Sentry.ErrorBoundary fallback={<p>An error occurred</p>}>
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="dark"
-        enableSystem={false}
-        disableTransitionOnChange
-      >
-        <PostHogProvider client={posthog}>
-          <UserProvider>
-            <JoyrideProvider>
-              <MyAppContent {...props} />
-            </JoyrideProvider>
-          </UserProvider>
-        </PostHogProvider>
-      </ThemeProvider>
+      <>
+        {/* Google Tag: Load gtag.js asynchronously */}
+        <Script
+          strategy="afterInteractive"
+          src="https://www.googletagmanager.com/gtag/js?id=AW-16863933652"
+        />
+
+        {/* Google Tag: Initialize gtag */}
+        <Script id="gtag-init" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'AW-16863933652');
+          `}
+        </Script>
+
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem={false}
+          disableTransitionOnChange
+        >
+          <PostHogProvider client={posthog}>
+            <UserProvider>
+              <JoyrideProvider>
+                <MyAppContent {...props} />
+              </JoyrideProvider>
+            </UserProvider>
+          </PostHogProvider>
+        </ThemeProvider>
+      </>
     </Sentry.ErrorBoundary>
   );
 }
