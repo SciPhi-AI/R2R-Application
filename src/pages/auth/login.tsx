@@ -122,9 +122,9 @@ const LoginPage: React.FC = () => {
         }
         // The returned shape: { redirect_url: 'https://accounts.google.com/...' }
         // @ts-ignore
-        if (redirectResult?.redirectUrl) {
+        if (redirectResult?.results.message) {
           // @ts-ignore
-          window.location.href = redirectResult.redirectUrl;
+          window.location.href = redirectResult.results.message;
         } else {
           // Fallback
           throw new Error('No redirect URL returned by server');

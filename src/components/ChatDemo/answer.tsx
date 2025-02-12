@@ -54,18 +54,18 @@ export const Answer: FC<AnswerProps> = ({
 
   const processMarkdown = (content: string) => {
     if (!content) return '';
-    
+
     // Unescape Unicode sequences
-    content = content.replace(/\\u[\dA-F]{4}/gi, match =>
+    content = content.replace(/\\u[\dA-F]{4}/gi, (match) =>
       String.fromCharCode(parseInt(match.replace(/\\u/g, ''), 16))
     );
-  
+
     // Unescape quotes and other special characters
     content = content
       .replace(/\\"/g, '"')
       .replace(/\\'/g, "'")
       .replace(/\\n/g, '\n');
-  
+
     // Handle table formatting
     if (content.includes('|')) {
       const lines = content.split('\n');
@@ -87,19 +87,19 @@ export const Answer: FC<AnswerProps> = ({
       });
       content = processedLines.join('\n');
     }
-  
+
     // Clean up list formatting
     content = content
       .replace(/(\d+\.|\*)\s+/g, '$1 ')
       .replace(/\n{3,}/g, '\n\n');
-  
+
     return content;
   };
-  
+
   // const processMarkdown = (content: string) => {
   //   // Unescape literal newlines to actual newlines
   //   content = content.replace(/\\n/g, '\n');
-  
+
   //   // Your existing processing logic for markdown...
   //   if (content.includes('|')) {
   //     const lines = content.split('\n');
@@ -121,15 +121,14 @@ export const Answer: FC<AnswerProps> = ({
   //     });
   //     content = processedLines.join('\n');
   //   }
-  
+
   //   // Handle other markdown formatting issues
   //   let processed = content;
   //   processed = processed.replace(/(\d+\.|\*)\s+/g, '$1 ');
   //   processed = processed.replace(/\n{3,}/g, '\n\n');
-  
+
   //   return processed;
   // };
-
 
   const splitContent = (content: string) => {
     if (!content) return [];
@@ -160,13 +159,14 @@ export const Answer: FC<AnswerProps> = ({
     );
   }
 
-  
   const contentChunks = message.content
     ? splitContent(processMarkdown(message.content))
     : [];
 
-    
-  console.log('Actual message.content:', JSON.stringify(message.content, null, 2));
+  console.log(
+    'Actual message.content:',
+    JSON.stringify(message.content, null, 2)
+  );
 
   console.log('message.chainOfThought = ', message.chainOfThought);
   return (
