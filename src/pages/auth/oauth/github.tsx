@@ -70,9 +70,9 @@ const GoogleOAuthCallback: React.FC = () => {
           code: authorizationCode,
           state: oauthState,
         });
-        console.log('response = ', response);
+        console.log('response = ', response.results);
 
-        const { accessToken, refreshToken } = response;
+        const { accessToken, refreshToken } = response.results;
 
         loginWithTokens(
           accessToken.token,
