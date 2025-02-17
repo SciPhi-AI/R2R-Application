@@ -116,12 +116,18 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
           password: password,
         });
 
-        localStorage.setItem('accessToken', tokens.results.accessToken.token);
-        localStorage.setItem('refreshToken', tokens.results.refreshToken.token);
+        localStorage.setItem(
+          'accessToken',
+          tokens.results.accessToken.accessToken
+        );
+        localStorage.setItem(
+          'refreshToken',
+          tokens.results.refreshToken.refreshToken
+        );
 
         newClient.setTokens(
-          tokens.results.accessToken.token,
-          tokens.results.refreshToken.token
+          tokens.results.accessToken.accessToken,
+          tokens.results.refreshToken.refreshToken
         );
 
         setClient(newClient);
