@@ -1,8 +1,9 @@
-import { Loader, UserRound, ChevronDown, ChevronUp } from 'lucide-react';
+import { Loader, UserRound, ChevronDown, ChevronUp, Edit2, Save, X } from 'lucide-react';
 import { User } from 'r2r-js';
 import React, { useState, useEffect } from 'react';
 
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/Button';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import CopyableContent from '@/components/ui/CopyableContent';
 import {
@@ -11,6 +12,22 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { useToast } from '@/components/ui/use-toast';
 import { useUserContext } from '@/context/UserContext';
 
 interface UserInfoDialogProps {
@@ -101,9 +118,20 @@ export const UserInfoDialog: React.FC<UserInfoDialogProps> = ({
   open,
   onClose,
 }) => {
-  const { getClient } = useUserContext();
+  const { getClient, deleteUser, updateUser } = useUserContext();
+  const { toast } = useToast();
   const [userProfile, setUserProfile] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedData, setEditedData] = useState<{
+    name: string;
+    bio: string;
+    isSuperuser: boolean;
+  }>({
+    name: '',
+    bio: '',
+    isSuperuser: false,
+  });
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -120,6 +148,11 @@ export const UserInfoDialog: React.FC<UserInfoDialogProps> = ({
 
         const user = await client.users.retrieve({ id });
         setUserProfile(user.results);
+        setEditedData({
+          name: user.results.name || '',
+          bio: user.results.bio || '',
+          isSuperuser: user.results.isSuperuser || false,
+        });
       } catch (error) {
         console.error('Error fetching user:', error);
       } finally {
@@ -130,11 +163,74 @@ export const UserInfoDialog: React.FC<UserInfoDialogProps> = ({
     fetchUser();
   }, [id, open, getClient]);
 
+  const handleDeleteUser = async () => {
+    try {
+      await deleteUser(id);
+      toast({
+        title: "User Deleted",
+        description: "The user has been successfully deleted.",
+      });
+      onClose();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete user. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSaveChanges = async () => {
+    try {
+      // Transform the editedData to match API's expected snake_case
+      const transformedData = {
+        name: editedData.name,
+        bio: editedData.bio,
+        is_superuser: editedData.isSuperuser
+      };
+      
+      const updatedUser = await updateUser(id, transformedData);
+      setUserProfile(updatedUser);
+      setIsEditing(false);
+      toast({
+        title: "Success",
+        description: "User information updated successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update user information.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>User Details</DialogTitle>
+          <div className="flex items-center justify-between">
+            <DialogTitle>User Details</DialogTitle>
+            {!loading && userProfile && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsEditing(!isEditing)}
+              >
+                {isEditing ? (
+                  <>
+                    <X className="h-4 w-4 mr-2" />
+                    Cancel
+                  </>
+                ) : (
+                  <>
+                    <Edit2 className="h-4 w-4 mr-2" />
+                    Edit
+                  </>
+                )}
+              </Button>
+            )}
+          </div>
         </DialogHeader>
 
         {loading ? (
@@ -150,67 +246,147 @@ export const UserInfoDialog: React.FC<UserInfoDialogProps> = ({
                     <UserRound size={40} />
                   </div>
                   <div>
-                    <div className="flex items-center space-x-2">
-                      <h2 className="text-xl font-semibold">
-                        {userProfile?.name || 'Unnamed User'}
-                      </h2>
-                      {userProfile?.isSuperuser && (
-                        <Badge variant="secondary">Admin</Badge>
-                      )}
-                    </div>
-                    <p className="text-gray-400">{userProfile?.email}</p>
-                    <p className="text-gray-400">
-                      <CopyableContent
-                        content={userProfile?.id}
-                        truncated={userProfile?.id}
-                      />
-                    </p>
+                    {isEditing ? (
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="name">Name</Label>
+                          <Input
+                            id="name"
+                            value={editedData.name}
+                            onChange={(e) => 
+                              setEditedData({ ...editedData, name: e.target.value })
+                            }
+                            placeholder="User name"
+                          />
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            checked={editedData.isSuperuser}
+                            onCheckedChange={(checked) =>
+                              setEditedData({ ...editedData, isSuperuser: checked })
+                            }
+                          />
+                          <Label>Admin privileges</Label>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="flex items-center space-x-2">
+                          <h2 className="text-xl font-semibold">
+                            {userProfile?.name || 'Unnamed User'}
+                          </h2>
+                          {userProfile?.isSuperuser && (
+                            <Badge variant="secondary">Admin</Badge>
+                          )}
+                        </div>
+                        <p className="text-gray-400">{userProfile?.email}</p>
+                        <p className="text-gray-400">
+                          <CopyableContent
+                            content={userProfile?.id}
+                            truncated={userProfile?.id}
+                          />
+                        </p>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
-                <InfoRow
-                  label="Account Status"
-                  values={[
-                    { label: 'Active', value: userProfile?.isActive },
-                    { label: 'Verified', value: userProfile?.isVerified },
-                    { label: 'Super User', value: userProfile?.isSuperuser },
-                  ]}
-                />
+                {!isEditing && (
+                  <>
+                    <InfoRow
+                      label="Account Status"
+                      values={[
+                        { label: 'Active', value: userProfile?.isActive },
+                        { label: 'Verified', value: userProfile?.isVerified },
+                        { label: 'Super User', value: userProfile?.isSuperuser },
+                      ]}
+                    />
 
-                <InfoRow
-                  label="Account Dates"
-                  values={[
-                    {
-                      label: 'Created',
-                      value: new Date(
-                        userProfile?.createdAt || ''
-                      ).toLocaleDateString(),
-                    },
-                    {
-                      label: 'Updated',
-                      value: new Date(
-                        userProfile?.updatedAt || ''
-                      ).toLocaleDateString(),
-                    },
-                  ]}
-                />
-
-                {userProfile?.bio && (
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-400 mb-2">
-                      Bio
-                    </h3>
-                    <p className="text-gray-300">{userProfile.bio}</p>
-                  </div>
+                    <InfoRow
+                      label="Account Dates"
+                      values={[
+                        {
+                          label: 'Created',
+                          value: new Date(
+                            userProfile?.createdAt || ''
+                          ).toLocaleDateString(),
+                        },
+                        {
+                          label: 'Updated',
+                          value: new Date(
+                            userProfile?.updatedAt || ''
+                          ).toLocaleDateString(),
+                        },
+                      ]}
+                    />
+                  </>
                 )}
 
-                <ExpandableInfoRow
-                  label="Collections"
-                  values={userProfile?.collectionIds}
-                />
+                {isEditing ? (
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="bio">Bio</Label>
+                      <Textarea
+                        id="bio"
+                        value={editedData.bio}
+                        onChange={(e) =>
+                          setEditedData({ ...editedData, bio: e.target.value })
+                        }
+                        placeholder="User bio"
+                        rows={4}
+                      />
+                    </div>
+                    <Button
+                      className="w-full"
+                      onClick={handleSaveChanges}
+                    >
+                      <Save className="h-4 w-4 mr-2" />
+                      Save Changes
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    {userProfile?.bio && (
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-400 mb-2">
+                          Bio
+                        </h3>
+                        <p className="text-gray-300">{userProfile.bio}</p>
+                      </div>
+                    )}
+
+                    <ExpandableInfoRow
+                      label="Collections"
+                      values={userProfile?.collectionIds}
+                    />
+
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="destructive" className="w-full">
+                          Delete User
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete the
+                            user account and remove all associated data.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={handleDeleteUser}>
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </>
+                )}
               </div>
             </CardContent>
           </Card>

@@ -39,7 +39,7 @@ const LoginPage: React.FC = () => {
     } catch (error) {
       console.error('Registration or login failed:', error);
       alert(
-        'Registration or login failed. Ensure that your R2R server is running at the specified URL or check your credentials and try again.'
+        'Registration or login failed. Ensure that your server is running at the specified URL or check your credentials and try again.'
       );
     }
   };
