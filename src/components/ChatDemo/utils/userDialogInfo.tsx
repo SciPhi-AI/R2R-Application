@@ -1,17 +1,15 @@
-import { Loader, UserRound, ChevronDown, ChevronUp, Edit2, Save, X } from 'lucide-react';
+import {
+  Loader,
+  UserRound,
+  ChevronDown,
+  ChevronUp,
+  Edit2,
+  Save,
+  X,
+} from 'lucide-react';
 import { User } from 'r2r-js';
 import React, { useState, useEffect } from 'react';
 
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/Button';
-import { Card, CardHeader, CardContent } from '@/components/ui/card';
-import CopyableContent from '@/components/ui/CopyableContent';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,10 +21,20 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/Button';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import CopyableContent from '@/components/ui/CopyableContent';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 import { useUserContext } from '@/context/UserContext';
 
@@ -165,42 +173,41 @@ export const UserInfoDialog: React.FC<UserInfoDialogProps> = ({
 
   const handleDeleteUser = async () => {
     try {
-      await deleteUser(id);
+      await deleteUser(id, '');
       toast({
-        title: "User Deleted",
-        description: "The user has been successfully deleted.",
+        title: 'User Deleted',
+        description: 'The user has been successfully deleted.',
       });
       onClose();
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to delete user. Please try again.",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to delete user. Please try again.',
+        variant: 'destructive',
       });
     }
   };
 
   const handleSaveChanges = async () => {
     try {
-      // Transform the editedData to match API's expected snake_case
-      const transformedData = {
-        name: editedData.name,
-        bio: editedData.bio,
-        is_superuser: editedData.isSuperuser
-      };
-      
-      const updatedUser = await updateUser(id, transformedData);
+      const updatedUser = await updateUser(
+        id,
+        { email: userProfile?.email || '', role: 'user' },
+        editedData.name,
+        editedData.bio,
+        editedData.isSuperuser
+      );
       setUserProfile(updatedUser);
       setIsEditing(false);
       toast({
-        title: "Success",
-        description: "User information updated successfully.",
+        title: 'Success',
+        description: 'User information updated successfully.',
       });
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to update user information.",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to update user information.',
+        variant: 'destructive',
       });
     }
   };
@@ -212,11 +219,7 @@ export const UserInfoDialog: React.FC<UserInfoDialogProps> = ({
           <div className="flex items-center justify-between">
             <DialogTitle>User Details</DialogTitle>
             {!loading && userProfile && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsEditing(!isEditing)}
-              >
+              <Button shape="outline" onClick={() => setIsEditing(!isEditing)}>
                 {isEditing ? (
                   <>
                     <X className="h-4 w-4 mr-2" />
@@ -253,8 +256,11 @@ export const UserInfoDialog: React.FC<UserInfoDialogProps> = ({
                           <Input
                             id="name"
                             value={editedData.name}
-                            onChange={(e) => 
-                              setEditedData({ ...editedData, name: e.target.value })
+                            onChange={(e) =>
+                              setEditedData({
+                                ...editedData,
+                                name: e.target.value,
+                              })
                             }
                             placeholder="User name"
                           />
@@ -263,7 +269,10 @@ export const UserInfoDialog: React.FC<UserInfoDialogProps> = ({
                           <Switch
                             checked={editedData.isSuperuser}
                             onCheckedChange={(checked) =>
-                              setEditedData({ ...editedData, isSuperuser: checked })
+                              setEditedData({
+                                ...editedData,
+                                isSuperuser: checked,
+                              })
                             }
                           />
                           <Label>Admin privileges</Label>
@@ -301,7 +310,10 @@ export const UserInfoDialog: React.FC<UserInfoDialogProps> = ({
                       values={[
                         { label: 'Active', value: userProfile?.isActive },
                         { label: 'Verified', value: userProfile?.isVerified },
-                        { label: 'Super User', value: userProfile?.isSuperuser },
+                        {
+                          label: 'Super User',
+                          value: userProfile?.isSuperuser,
+                        },
                       ]}
                     />
 
@@ -339,10 +351,7 @@ export const UserInfoDialog: React.FC<UserInfoDialogProps> = ({
                         rows={4}
                       />
                     </div>
-                    <Button
-                      className="w-full"
-                      onClick={handleSaveChanges}
-                    >
+                    <Button className="w-full" onClick={handleSaveChanges}>
                       <Save className="h-4 w-4 mr-2" />
                       Save Changes
                     </Button>
@@ -365,16 +374,19 @@ export const UserInfoDialog: React.FC<UserInfoDialogProps> = ({
 
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="destructive" className="w-full">
+                        <Button color="danger" className="w-full">
                           Delete User
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                          <AlertDialogTitle>
+                            Are you absolutely sure?
+                          </AlertDialogTitle>
                           <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete the
-                            user account and remove all associated data.
+                            This action cannot be undone. This will permanently
+                            delete the user account and remove all associated
+                            data.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
