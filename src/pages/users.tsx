@@ -128,9 +128,9 @@ const Index: React.FC = () => {
     {
       key: 'name',
       label: 'Name',
-      renderCell: (user) => user.name || 'Unnamed User',  // Provides a fallback if name is empty
+      renderCell: (user) => user.name || 'Unnamed User', // Provides a fallback if name is empty
     },
-   {
+    {
       key: 'isSuperuser',
       label: 'Role',
       renderCell: (user) =>
@@ -168,10 +168,10 @@ const Index: React.FC = () => {
                   />
                 </div>
                 {/* Keep the UserForm here */}
-                <UserForm 
-                  open={isUserFormOpen} 
+                <UserForm
+                  open={isUserFormOpen}
                   onClose={() => setIsUserFormOpen(false)}
-                  onUserCreated={handleUserCreated}  // Add this prop
+                  onUserCreated={handleUserCreated} // Add this prop
                 />
               </div>
 
@@ -204,16 +204,15 @@ const Index: React.FC = () => {
       </main>
 
       {selectedUserID && (
-      <UserInfoDialog
-        id={selectedUserID}
-        open={isUserInfoDialogOpen}
-        onClose={() => {
-          setIsUserInfoDialogOpen(false);
-          handleUserDelete(); // Refresh list after dialog closes
-        }}
-      />
-    )}
-      
+        <UserInfoDialog
+          id={selectedUserID}
+          open={isUserInfoDialogOpen}
+          onClose={() => {
+            setIsUserInfoDialogOpen(false);
+            handleUserDelete(); // Refresh list after dialog closes
+          }}
+        />
+      )}
     </Layout>
   );
 };

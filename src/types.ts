@@ -445,6 +445,14 @@ export interface UserContextProps {
     password: string;
     role: string;
   }) => Promise<any>;
+  deleteUser: (userId: string, password: string) => Promise<any>;
+  updateUser: (
+    userId: string,
+    userData: { email: string; role: string },
+    name?: string,
+    bio?: string,
+    is_superuser?: boolean
+  ) => Promise<any>;
 }
 
 export type CreateUserRequest = {

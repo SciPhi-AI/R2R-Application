@@ -1,10 +1,16 @@
-import React, { useState } from 'react';
-import { useUserContext } from '@/context/UserContext';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Loader, UserPlus } from 'lucide-react';
+import React, { useState } from 'react';
+
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { useUserContext } from '@/context/UserContext';
 
 interface UserFormProps {
   open: boolean;
@@ -12,7 +18,11 @@ interface UserFormProps {
   onUserCreated?: () => void;
 }
 
-const UserForm: React.FC<UserFormProps> = ({ open, onClose, onUserCreated }) => {
+const UserForm: React.FC<UserFormProps> = ({
+  open,
+  onClose,
+  onUserCreated,
+}) => {
   const { createUser } = useUserContext();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,16 +31,16 @@ const UserForm: React.FC<UserFormProps> = ({ open, onClose, onUserCreated }) => 
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
-  const validateEmail = (email) => {
+  const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
-  const validatePassword = (password) => {
+  const validatePassword = (password: string) => {
     return password.length >= 8;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
     setSuccess(false);
@@ -53,7 +63,7 @@ const UserForm: React.FC<UserFormProps> = ({ open, onClose, onUserCreated }) => 
       setPassword('');
       setRole('user');
       console.log('User created successfully:', newUser);
-      
+
       // Call the onUserCreated callback if provided
       if (onUserCreated) {
         onUserCreated();
@@ -63,7 +73,7 @@ const UserForm: React.FC<UserFormProps> = ({ open, onClose, onUserCreated }) => 
       setTimeout(() => {
         onClose();
       }, 1500);
-    } catch (error) {
+    } catch (error: any) {
       setError(error.message || 'Error creating user. Please try again.');
       console.error('Error creating user:', error);
     } finally {
@@ -123,13 +133,15 @@ const UserForm: React.FC<UserFormProps> = ({ open, onClose, onUserCreated }) => 
               disabled={isLoading}
               placeholder="••••••••"
             />
-            <p className="text-xs text-muted-foreground">Must be at least 8 characters long</p>
+            <p className="text-xs text-muted-foreground">
+              Must be at least 8 characters long
+            </p>
           </div>
 
           <div className="space-y-2">
             <label className="text-sm font-medium">Role</label>
-            <select 
-              value={role} 
+            <select
+              value={role}
               onChange={(e) => setRole(e.target.value)}
               className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2"
               disabled={isLoading}

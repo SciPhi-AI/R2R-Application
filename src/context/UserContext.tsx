@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router';
-import { r2rClient } from 'r2r-js';
+import { r2rClient, User } from 'r2r-js';
 import React, {
   createContext,
   useContext,
@@ -44,12 +44,14 @@ const UserContext = createContext<UserContextProps>({
   viewMode: 'admin',
   setViewMode: () => {},
   isSuperUser: () => false,
-  // Add createUser with a placeholder implementation
   createUser: async () => {
     throw new Error('createUser is not implemented in the default context');
   },
   deleteUser: async () => {
     throw new Error('deleteUser is not implemented in the default context');
+  },
+  updateUser: async () => {
+    throw new Error('updateUser is not implemented in the default context');
   },
 });
 
@@ -123,18 +125,12 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
           password: password,
         });
 
-        localStorage.setItem(
-          'accessToken',
-          tokens.results.accessToken.accessToken
-        );
-        localStorage.setItem(
-          'refreshToken',
-          tokens.results.refreshToken.refreshToken
-        );
+        localStorage.setItem('accessToken', tokens.results.accessToken.token);
+        localStorage.setItem('refreshToken', tokens.results.refreshToken.token);
 
         newClient.setTokens(
-          tokens.results.accessToken.accessToken,
-          tokens.results.refreshToken.refreshToken
+          tokens.results.accessToken.token,
+          tokens.results.refreshToken.token
         );
 
         setClient(newClient);
@@ -408,10 +404,11 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const createUser = useCallback(
     async (userData: { email: string; password: string; role: string }) => {
-      if (!client) throw new Error('Client not initialized');
+      if (!client) {
+        throw new Error('Client not initialized');
+      }
       try {
-        const newUser = await client.users.create(userData);
-        return newUser;
+        return await client.users.create(userData);
       } catch (error) {
         console.error('Failed to create user:', error);
         throw error;
@@ -421,10 +418,12 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 
   const deleteUser = useCallback(
-    async (userId: string) => {
-      if (!client) throw new Error('Client not initialized');
+    async (userId: string, password: string) => {
+      if (!client) {
+        throw new Error('Client not initialized');
+      }
       try {
-        await client.users.delete({ id: userId });
+        await client.users.delete({ id: userId, password });
       } catch (error) {
         console.error('Failed to delete user:', error);
         throw error;
@@ -435,11 +434,13 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const updateUser = useCallback(
     async (userId: string, userData: Partial<User>) => {
-      if (!client) throw new Error('Client not initialized');
+      if (!client) {
+        throw new Error('Client not initialized');
+      }
       try {
         const response = await client.users.update({
           id: userId,
-          ...userData
+          ...userData,
         });
         return response.results;
       } catch (error) {
