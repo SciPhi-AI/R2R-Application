@@ -9,7 +9,7 @@ on:
         type: string
 
 env:
-  REGISTRY_IMAGE: emrgntcmplxty/r2r-dashboard
+  REGISTRY_IMAGE: sciphiai/r2r-dashboard
 
 jobs:
   prepare:
