@@ -19,8 +19,6 @@ const VectorSearchResultItem: FC<{
 }> = ({ source, index, onOpenPdfPreview }) => {
   const { document_id, metadata, text, score } = source;
 
-  console.log('source', source);
-
   return (
     <div className="p-4 mb-2 flex items-center w-full">
       <div className="flex-grow mr-4">
