@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import Pagination from '@/components/ui/pagination';
 import { useUserContext } from '@/context/UserContext';
 
-const PAGE_SIZE = 100;
+const PAGE_SIZE = 1000;
 const ITEMS_PER_PAGE = 8;
 
 const Index: React.FC = () => {

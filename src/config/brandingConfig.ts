@@ -30,9 +30,6 @@ const defaultConfig = {
     src: '/images/sciphi.svg',
     alt: 'sciphi.svg',
   },
-  auth: {
-    loginUrl: 'http://localhost:7272',
-  },
   theme: 'dark',
   homePage: {
     pythonSdk: true,
