@@ -43,3 +43,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 .vercel
+
+# Sentry Config File
+.env.sentry-build-plugin
