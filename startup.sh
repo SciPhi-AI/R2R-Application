@@ -8,6 +8,7 @@ replace_env_vars() {
   sed -i "s|__SUPABASE_URL__|${SUPABASE_URL}|g" /app/public/env-config.js
   sed -i "s|__SUPABASE_ANON_KEY__|${SUPABASE_ANON_KEY}|g" /app/public/env-config.js
   sed -i "s|__NEXT_PUBLIC_HATCHET_DASHBOARD_URL__|${NEXT_PUBLIC_HATCHET_DASHBOARD_URL}|g" /app/public/env-config.js
+  sed -i "s|__NEXT_PUBLIC_SENTRY_DSN__|${NEXT_PUBLIC_SENTRY_DSN}|g" /app/public/env-config.js
 }
 
 # Replace environment variables
