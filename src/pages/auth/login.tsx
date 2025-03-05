@@ -174,7 +174,7 @@ const LoginPage: React.FC = () => {
     }
 
     if (!url || url === 'http://' || url === 'https://') {
-      return DEFAULT_DEPLOYMENT_URL;
+      return '';
     }
 
     let sanitized = url.trim();
