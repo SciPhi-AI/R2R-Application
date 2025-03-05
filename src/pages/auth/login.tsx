@@ -11,15 +11,13 @@ import { useUserContext } from '@/context/UserContext';
 import debounce from '@/lib/debounce';
 import { supabase } from '@/lib/supabase';
 
-const DEFAULT_DEPLOYMENT_URL = brandingConfig.auth.loginUrl;
-
 const LoginPage: React.FC = () => {
-  const [email, setEmail] = useState('admin@example.com');
-  const [password, setPassword] = useState('change_me_immediately');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [serverHealth, setServerHealth] = useState(true); // Default to true since we're not checking initially
+  const [serverHealth, setServerHealth] = useState(true);
   const [loginSuccess, setLoginSuccess] = useState(false);
   const { login, loginWithToken, authState } = useUserContext();
   const router = useRouter();
@@ -38,15 +36,36 @@ const LoginPage: React.FC = () => {
     ) {
       return window.__RUNTIME_CONFIG__.NEXT_PUBLIC_R2R_DEPLOYMENT_URL;
     }
-    return DEFAULT_DEPLOYMENT_URL;
+    return '';
   };
 
-  // Initialize deployment URL on component mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const url = getDeploymentUrl();
       setRawDeploymentUrl(url);
       setSanitizedDeploymentUrl(url);
+
+      if (window.__RUNTIME_CONFIG__) {
+        if (
+          window.__RUNTIME_CONFIG__.NEXT_PUBLIC_R2R_DEFAULT_EMAIL &&
+          !window.__RUNTIME_CONFIG__.NEXT_PUBLIC_R2R_DEFAULT_EMAIL.includes(
+            '__NEXT_PUBLIC_R2R_DEFAULT_EMAIL__'
+          )
+        ) {
+          setEmail(window.__RUNTIME_CONFIG__.NEXT_PUBLIC_R2R_DEFAULT_EMAIL);
+        }
+
+        if (
+          window.__RUNTIME_CONFIG__.NEXT_PUBLIC_R2R_DEFAULT_PASSWORD &&
+          !window.__RUNTIME_CONFIG__.NEXT_PUBLIC_R2R_DEFAULT_PASSWORD.includes(
+            '__NEXT_PUBLIC_R2R_DEFAULT_PASSWORD__'
+          )
+        ) {
+          setPassword(
+            window.__RUNTIME_CONFIG__.NEXT_PUBLIC_R2R_DEFAULT_PASSWORD
+          );
+        }
+      }
     }
   }, []);
 
