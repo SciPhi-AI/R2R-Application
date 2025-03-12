@@ -76,11 +76,6 @@ const NavItems: React.FC<NavItemsProps> = ({
       show: brandingConfig.navbar.menuItems.users,
     },
     {
-      path: '/logs',
-      label: 'Logs',
-      show: brandingConfig.navbar.menuItems.logs,
-    },
-    {
       path: '/analytics',
       label: 'Analytics',
       show: brandingConfig.navbar.menuItems.analytics,
