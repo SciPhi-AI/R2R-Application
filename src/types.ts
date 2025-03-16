@@ -245,17 +245,19 @@ export interface LogoProps {
 }
 
 export interface Message {
-  role: 'user' | 'assistant';
-  content: string;
   id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
   timestamp: number;
-  sources?: {
-    vector?: string | null;
-    kg?: string | null;
-  };
-  chainOfThought?: string[];
   isStreaming?: boolean;
-  searchPerformed?: boolean;
+  chainOfThought?: string[];
+  citations?: any[];
+  toolCalls?: {
+    id: string;
+    name: string;
+    arguments: any;
+  }[];
+  toolResults?: any[];
 }
 
 export interface ModelSelectorProps {
@@ -301,7 +303,10 @@ export interface SearchProps {
   placeholder?: string;
   disabled?: boolean;
   mode?: string;
+  setMode?: (mode: string) => void;
   webSearch: boolean;
+  thinking: boolean;
+  setThinking: React.Dispatch<React.SetStateAction<boolean>>;
   setWebSearch: React.Dispatch<React.SetStateAction<boolean>>;
   magnify: boolean;
   setMagnify: React.Dispatch<React.SetStateAction<boolean>>;

@@ -4,6 +4,9 @@ import {
   Globe,
   Paperclip,
   Search as SearchIcon,
+  Brain,
+  MessageCircle,
+  Sparkles,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React from 'react';
@@ -42,13 +45,11 @@ export const Search: React.FC<SearchProps> = ({
   placeholder,
   disabled = false,
   mode,
-  // Toggles for agent tools
-  webSearch,
-  setWebSearch,
-  magnify,
-  setMagnify,
-  contextTool,
-  setContextTool,
+  setMode,
+  research,
+  setResearch,
+  thinking,
+  setThinking,
 }) => {
   const router = useRouter();
   const { getClient } = useUserContext();
@@ -59,6 +60,21 @@ export const Search: React.FC<SearchProps> = ({
   if (!placeholder) {
     placeholder = 'Ask a question...';
   }
+
+  // Handle research toggle
+  const handleResearchToggle = (enabled: boolean) => {
+    setResearch(enabled);
+  };
+
+  // Handle thinking toggle
+  const handleThinkingToggle = (enabled: boolean) => {
+    setThinking(enabled);
+  };
+
+  // Handle mode toggle between RAG and RAG Agent
+  const handleModeToggle = (enabled: boolean) => {
+    setMode(enabled ? 'rag_agent' : 'rag');
+  };
 
   // Debounced nav to search
   const navigateToSearch = React.useCallback(
@@ -117,74 +133,69 @@ export const Search: React.FC<SearchProps> = ({
       <div className="flex items-center justify-between w-full gap-2 mb-2">
         {/* Left side toggles */}
         <div className="flex items-center gap-2">
-          {/* Web Search Toggle */}
-          {mode === 'rag_agent' && (
-            <TooltipProvider delayDuration={300}>
-              <Tooltip>
-                <div className="flex items-center">
-                  <TooltipTrigger>
-                    <Toggle
-                      variant="outline"
-                      pressed={webSearch}
-                      onPressedChange={setWebSearch}
-                      aria-label="Toggle Web Search"
-                    >
-                      <Globe className="h-4 w-4" />
-                    </Toggle>
-                  </TooltipTrigger>
-                </div>
-                <TooltipContent side="bottom">
-                  <p>Agentic web search tool</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
+          {/* Agent/RAG Mode Toggle */}
+          <TooltipProvider delayDuration={300}>
+            <Tooltip>
+              <div className="flex items-center">
+                <TooltipTrigger>
+                  <Toggle
+                    variant="outline"
+                    pressed={mode === 'rag_agent'}
+                    onPressedChange={handleModeToggle}
+                    aria-label="Toggle Agent Mode"
+                  >
+                    <MessageCircle className="h-4 w-4 mr-1" /> Agent Mode
+                  </Toggle>
+                </TooltipTrigger>
+              </div>
+              <TooltipContent side="bottom">
+                <p>Toggle between RAG and RAG Agent mode</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
 
-          {/* Magnify Toggle */}
-          {mode === 'rag_agent' && (
-            <TooltipProvider delayDuration={300}>
-              <Tooltip>
-                <div className="flex items-center">
-                  <TooltipTrigger>
-                    <Toggle
-                      variant="outline"
-                      pressed={magnify}
-                      onPressedChange={setMagnify}
-                      aria-label="Toggle Magnify"
-                    >
-                      <SearchIcon className="h-4 w-4" />
-                    </Toggle>
-                  </TooltipTrigger>
-                </div>
-                <TooltipContent side="bottom">
-                  <p>Internal knowledge search tool</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
+          {/* Research Toggle */}
+          {mode == "rag_agent" && <TooltipProvider delayDuration={300}>
+            <Tooltip>
+              <div className="flex items-center">
+                <TooltipTrigger>
+                  <Toggle
+                    variant="outline"
+                    pressed={research}
+                    onPressedChange={handleResearchToggle}
+                    aria-label="Toggle Deep Research"
+                  >
+                    <Sparkles className="h-4 w-4 mr-1" /> Deep Research
+                  </Toggle>
+                </TooltipTrigger>
+              </div>
+              <TooltipContent side="bottom">
+                <p>Enable Deep Research Mode</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          }
 
-          {/* Context Toggle */}
-          {mode === 'rag_agent' && (
-            <TooltipProvider delayDuration={300}>
-              <Tooltip>
-                <div className="flex items-center">
-                  <TooltipTrigger>
-                    <Toggle
-                      variant="outline"
-                      pressed={contextTool}
-                      onPressedChange={setContextTool}
-                      aria-label="Toggle Context Tool"
-                    >
-                      <FolderOpen className="h-4 w-4" />
-                    </Toggle>
-                  </TooltipTrigger>
-                </div>
-                <TooltipContent side="bottom">
-                  <p>Internal document / collection fetcher</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
+          {/* Thinking Toggle */}
+          <TooltipProvider delayDuration={300}>
+            <Tooltip>
+              <div className="flex items-center">
+                <TooltipTrigger>
+                  <Toggle
+                    variant="outline"
+                    pressed={thinking || research}
+                    onPressedChange={handleThinkingToggle}
+                    aria-label="Toggle Thinking"
+                  >
+                    <Brain className="h-4 w-4 mr-1" /> Thinking
+                  </Toggle>
+                </TooltipTrigger>
+              </div>
+              <TooltipContent side="bottom">
+                <p>Show AI thinking process</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
 
         {/* Right side buttons: Paperclip (upload) + Up Arrow (submit) */}
@@ -198,7 +209,7 @@ export const Search: React.FC<SearchProps> = ({
                     className="rounded-md shrink-0 p-2"
                     type="button"
                     onClick={() => setIsUploadDialogOpen(true)}
-                    disabled={disabled}
+                    // disabled={disabled}
                   >
                     <Paperclip size={16} />
                   </Button>
@@ -214,7 +225,7 @@ export const Search: React.FC<SearchProps> = ({
           <Button
             type="submit"
             className="rounded-md shrink-0"
-            disabled={disabled}
+            // disabled={disabled}
           >
             <ArrowUp size={20} />
           </Button>
@@ -239,7 +250,7 @@ export const Search: React.FC<SearchProps> = ({
         }}
         placeholder={placeholder}
         className="w-full px-4 py-2 bg-zinc-700 text-zinc-200 rounded-md focus:outline-none resize-none"
-        disabled={disabled}
+        // disabled={disabled}
       />
 
       {/* External UploadDialog component */}
