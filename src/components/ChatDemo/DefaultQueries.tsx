@@ -31,7 +31,7 @@ export const DefaultQueries: FC<DefaultQueriesProps> = ({ setQuery, mode }) => {
       icon: <FlaskConical className="h-6 w-6 text-purple-400" />,
     },
     {
-      query: 'What is happening in California today?',
+      query: 'Why did DeepSeek move the markets?',
       icon: <Lightbulb className="h-6 w-6 text-yellow-400" />,
     },
     {
@@ -45,13 +45,14 @@ export const DefaultQueries: FC<DefaultQueriesProps> = ({ setQuery, mode }) => {
   ];
 
   const getQueriesBasedOnMode = (mode: 'rag' | 'rag_agent') => {
-    if (mode === 'rag') {
-      return defaultRagQueries;
-    } else if (mode === 'rag_agent') {
-      return defaultAgentQueries;
-    } else {
-      throw new Error('Invalid mode');
-    }
+    // if (mode === 'rag') {
+    //   return defaultRagQueries;
+    // } else if (mode === 'rag_agent') {
+    //   return defaultAgentQueries;
+    // } else {
+    //   throw new Error('Invalid mode');
+    // }
+    return defaultAgentQueries;
   };
 
   const defaultQueries = getQueriesBasedOnMode(mode);

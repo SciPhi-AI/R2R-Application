@@ -6,9 +6,11 @@ import {
   ChunkSearchSettings,
 } from 'r2r-js';
 import React, { FC, useEffect, useState, useRef } from 'react';
+import { ArrowDown } from 'lucide-react';
 
 import PdfPreviewDialog from '@/components/ChatDemo/utils/pdfPreviewDialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import { useUserContext } from '@/context/UserContext';
 import { Message } from '@/types';
 
@@ -40,10 +42,6 @@ interface ResultProps {
   pipelineUrl: string | null;
   searchLimit: number;
   searchFilters: Record<string, unknown>;
-  ragTemperature: number | null;
-  ragTopP: number | null;
-  ragTopK: number | null;
-  ragMaxTokensToSample: number | null;
   model: string | null;
   uploadedDocuments: string[];
   setUploadedDocuments: React.Dispatch<React.SetStateAction<string[]>>;
@@ -59,6 +57,8 @@ interface ResultProps {
     React.SetStateAction<string | null>
   >;
   enabledTools: string[];
+  research?: boolean;
+  thinking?: boolean;
 }
 
 export const Result: FC<ResultProps> = ({
@@ -68,11 +68,6 @@ export const Result: FC<ResultProps> = ({
   pipelineUrl,
   searchLimit,
   searchFilters,
-  ragTemperature,
-  ragTopP,
-  ragTopK,
-  ragMaxTokensToSample,
-  model,
   uploadedDocuments,
   setUploadedDocuments,
   hasAttemptedFetch,
@@ -85,6 +80,8 @@ export const Result: FC<ResultProps> = ({
   selectedConversationId,
   setSelectedConversationId,
   enabledTools,
+  research,
+  thinking,
 }) => {
   const abortControllerRef = useRef<AbortController | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -94,12 +91,14 @@ export const Result: FC<ResultProps> = ({
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isProcessingQuery, setIsProcessingQuery] = useState(false);
+  
+  // Scroll-related state variables
   const [lastScrollUpTime, setLastScrollUpTime] = useState<number>(0);
+  const [showScrollButton, setShowScrollButton] = useState(false);
 
+  // PDF preview state
   const [pdfPreviewOpen, setPdfPreviewOpen] = useState(false);
-  const [pdfPreviewDocumentId, setPdfPreviewDocumentId] = useState<
-    string | null
-  >(null);
+  const [pdfPreviewDocumentId, setPdfPreviewDocumentId] = useState<string | null>(null);
   const [initialPage, setInitialPage] = useState<number>(1);
 
   const SCROLL_BACK_DELAY_MS = 3000;
@@ -117,37 +116,63 @@ export const Result: FC<ResultProps> = ({
 
   // Auto-scrolling logic
   useEffect(() => {
+    // Save messages to localStorage
     localStorage.setItem('chatMessages', JSON.stringify(messages));
+    
+    // If there's no container, exit early
     if (!containerRef.current) return;
-
+    
+    // Calculate scroll metrics
     const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
     const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
+    
+    // Simple fixed threshold of 50px
     const userIsNearBottom = distanceFromBottom < 50;
+    
+    // Update scroll button visibility
+    setShowScrollButton(!userIsNearBottom && messages.length > 0);
+    
+    // Check if enough time has passed since user scrolled up
     const now = Date.now();
-    const enoughTimeSinceScrollUp =
-      now - lastScrollUpTime > SCROLL_BACK_DELAY_MS;
-
-    if (userIsNearBottom || enoughTimeSinceScrollUp) {
+    const enoughTimeSinceScrollUp = now - lastScrollUpTime > SCROLL_BACK_DELAY_MS;
+    
+    // Check if visible content has changed
+    const lastMessage = messages[messages.length - 1];
+    const isContentUpdate = lastMessage?.role === 'user' || 
+                           (lastMessage?.role === 'assistant' && !lastMessage.isStreaming) ||
+                           (isStreaming && lastMessage?.role === 'assistant');
+    
+    if ((userIsNearBottom || enoughTimeSinceScrollUp) && isContentUpdate) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messages, lastScrollUpTime]);
+  }, [messages, lastScrollUpTime, isStreaming]);
 
   // Detect user scrolling up
   useEffect(() => {
     const handleScroll = () => {
       if (!containerRef.current) return;
+      
       const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
       const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
+      
       if (distanceFromBottom > 50) {
         setLastScrollUpTime(Date.now());
+        setShowScrollButton(true && messages.length > 0);
+      } else {
+        setShowScrollButton(false);
       }
     };
+    
     const ref = containerRef.current;
     if (!ref) return;
-    ref.addEventListener('scroll', handleScroll);
-    return () => ref.removeEventListener('scroll', handleScroll);
-  }, []);
+    
+    ref.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      ref.removeEventListener('scroll', handleScroll);
+    };
+  }, [messages.length]);
 
+  // Abort current request
   const abortCurrentRequest = () => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -158,12 +183,25 @@ export const Result: FC<ResultProps> = ({
     }
   };
 
-  // Helper: Update the last assistant message or create a new one
-  const updateLastAssistantMessage = (
+  // Update the assistant message with new content
+  const updateAssistantMessage = (
     content: string,
     chainOfThought: string[],
+    citations: any[],
+    toolCalls: any[],
+    toolResults: any[],
     isStreaming: boolean
   ) => {
+    // Normalize citations for consistent structure
+    const normalizedCitations = citations.map(cit => ({
+      id: cit.id,
+      object: 'citation',
+      title: cit.title || cit.payload?.title || 'Source',
+      snippet: cit.snippet || cit.payload?.snippet || '',
+      link: cit.link || cit.payload?.link || '',
+      payload: cit.payload || {}
+    }));
+    
     setMessages((prev) => {
       const last = prev[prev.length - 1];
       if (last?.role === 'assistant') {
@@ -172,12 +210,14 @@ export const Result: FC<ResultProps> = ({
           {
             ...last,
             content,
-            chainOfThought: chainOfThought.map(cleanThought),
+            chainOfThought,
+            citations: normalizedCitations,
+            toolCalls,
+            toolResults,
             isStreaming,
           },
         ];
       } else {
-        // Create new assistant message
         return [
           ...prev,
           {
@@ -186,24 +226,27 @@ export const Result: FC<ResultProps> = ({
             id: Date.now().toString(),
             timestamp: Date.now(),
             isStreaming,
-            chainOfThought: chainOfThought.map(cleanThought),
+            chainOfThought,
+            citations: normalizedCitations,
+            toolCalls,
+            toolResults,
           },
         ];
       }
     });
   };
 
-  // ---- Main streaming logic with partial-match for <Response / <Thought ----
+  // Main streaming function
   const parseStreaming = async (userQuery: string) => {
     if (isProcessingQuery) return;
-
+  
     abortControllerRef.current = new AbortController();
     const { signal } = abortControllerRef.current;
-
+  
     setIsProcessingQuery(true);
     setIsStreaming(true);
     setError(null);
-
+  
     // 1) Add user message
     const newUserMessage: Message = {
       role: 'user',
@@ -212,7 +255,7 @@ export const Result: FC<ResultProps> = ({
       timestamp: Date.now(),
     };
     setMessages((prev) => [...prev, newUserMessage]);
-
+  
     // 2) Add placeholder assistant message
     setMessages((prev) => [
       ...prev,
@@ -223,15 +266,18 @@ export const Result: FC<ResultProps> = ({
         timestamp: Date.now(),
         isStreaming: true,
         chainOfThought: [],
+        citations: [],
+        toolCalls: [],
+        toolResults: [],
       },
     ]);
-
+  
     try {
       const client = await getClient();
       if (!client) {
         throw new Error('Failed to get authenticated client');
       }
-
+  
       // If agent mode, ensure conversation
       let currentConversationId = selectedConversationId;
       if (!currentConversationId && mode === 'rag_agent') {
@@ -242,16 +288,7 @@ export const Result: FC<ResultProps> = ({
         currentConversationId = newConversation.results.id;
         setSelectedConversationId(currentConversationId);
       }
-
-      // Generation config
-      const ragGenerationConfig: GenerationConfig = {
-        stream: true,
-        temperature: ragTemperature ?? undefined,
-        topP: ragTopP ?? undefined,
-        maxTokensToSample: ragMaxTokensToSample ?? undefined,
-        model: model && model !== 'null' ? model : undefined,
-      };
-
+  
       // Combine filters
       let combinedFilters = { ...searchFilters };
       if (selectedCollectionIds.length > 0) {
@@ -266,16 +303,17 @@ export const Result: FC<ResultProps> = ({
           combinedFilters = { collection_id: { $in: selectedCollectionIds } };
         }
       }
-
+  
+      // Configure search settings
       const vectorSearchSettings: ChunkSearchSettings = {
         indexMeasure: IndexMeasure.COSINE_DISTANCE,
         enabled: switches.vectorSearch?.checked ?? true,
       };
-
+  
       const graphSearchSettings: GraphSearchSettings = {
         enabled: switches.knowledgeGraphSearch?.checked ?? true,
       };
-
+  
       const searchSettings: SearchSettings = {
         useHybridSearch: switches.hybridSearch?.checked ?? false,
         useSemanticSearch: switches.vectorSearch?.checked ?? true,
@@ -284,141 +322,215 @@ export const Result: FC<ResultProps> = ({
         chunkSettings: vectorSearchSettings,
         graphSettings: graphSearchSettings,
       };
-
+  
       setIsSearching(true);
+  
+      // Generation configs
+      const thinkingEnabled = thinking;
+      
+      // Config with thinking enabled
+      let ragGenerationConfig: GenerationConfig = {
+        model: "anthropic/claude-3-7-sonnet-20250219",
+        maxTokensToSample: 16000,
+        stream: true,
+      };
 
+      if (thinkingEnabled) {
+        ragGenerationConfig["extended_thinking"] = true;
+        ragGenerationConfig["thinking_budget"] = 4096;
+        ragGenerationConfig["temperature"] = 1;
+        ragGenerationConfig["top_p"] = null;
+      }
+
+      // Use appropriate config based on thinking setting
+      
       // 3) Start streaming call
       const streamResponse =
         mode === 'rag_agent'
-          ? await client.retrieval.reasoningAgent({
+          ? await client.retrieval.agent({
               message: newUserMessage,
-              ragGenerationConfig,
+              ragGenerationConfig: ragGenerationConfig,
+              researchGenerationConfig: ragGenerationConfig,
               searchSettings,
               conversationId: currentConversationId,
-              tools: enabledTools,
+              ragTools: enabledTools,
+              mode: research ? "research" : undefined
             })
           : await client.retrieval.rag({
               query: userQuery,
-              ragGenerationConfig,
+              ragGenerationConfig: ragGenerationConfig,
               searchSettings,
+              includeWebSearch: true
             });
-
+  
       const reader = streamResponse.getReader();
       const decoder = new TextDecoder();
-
-      // States for chain-of-thought + final response
+  
+      // States for accumulating different event data
+      let responseText = '';
       const chainOfThoughtBlocks: string[] = [];
-      let finalResponse = '';
-
-      // We'll store partial text in buffer and parse
+      const citations: any[] = [];
+      const toolCalls: any[] = [];
+      const toolResults: any[] = [];
+      
+      // Buffer for SSE parsing
       let buffer = '';
-      let inThought = false;
-      let inResponse = false;
-
+      let currentEventType = '';
+  
+      // Process stream
       while (true) {
         if (signal.aborted) {
           reader.cancel();
           break;
         }
+        
         const { done, value } = await reader.read();
         if (done) break;
-
+  
         // Append new chunk to buffer
         const chunk = decoder.decode(value, { stream: true });
         buffer += chunk;
-        console.log('[chunk]', chunk);
-
-        // Parse out any completed tags from buffer
-        let parseNext = true;
-        while (parseNext) {
-          parseNext = false;
-
-          // 1) If we are inside a <Thought> block, check for its close tag `</Thought`
-          if (inThought) {
-            const closeIdx = buffer.indexOf('</Thought');
-            if (closeIdx >= 0) {
-              // Everything up to closeIdx is the final for this Thought
-              const blockContent = buffer.slice(0, closeIdx);
-              chainOfThoughtBlocks.push(blockContent);
-              // Remove from buffer
-              buffer = buffer.slice(closeIdx + '</Thought'.length);
-              inThought = false;
-              parseNext = true;
-            }
+  
+        // Parse SSE lines from the buffer
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || ''; // Keep the last potentially incomplete line
+  
+        for (const line of lines) {
+          const trimmedLine = line.trim();
+          
+          if (!trimmedLine || trimmedLine.startsWith(':')) {
+            // Empty line or SSE comment/heartbeat
+            continue;
           }
-          // 2) If we are inside a <Response> block, check for `</Response`
-          if (inResponse) {
-            const closeIdx = buffer.indexOf('</Response');
-            if (closeIdx >= 0) {
-              // Everything up to closeIdx is final for this Response chunk
-              const blockContent = buffer.slice(0, closeIdx);
-              finalResponse += blockContent;
-              // Remove from buffer
-              buffer = buffer.slice(closeIdx + '</Response'.length);
-              inResponse = false;
-              parseNext = true;
+          
+          if (trimmedLine.startsWith('event:')) {
+            // Extract event type
+            currentEventType = trimmedLine.substring(6).trim();
+          } else if (trimmedLine.startsWith('data:')) {
+            // Extract data payload
+            const dataStr = trimmedLine.substring(5).trim();
+            
+            // Check for [DONE] message
+            if (dataStr === '[DONE]') {
+              continue;
             }
-          }
-
-          // 3) If we are not inside a Thought, see if there's a new `<Thought`
-          if (!inThought) {
-            const openIdx = buffer.indexOf('<Thought');
-            if (openIdx >= 0) {
-              // Everything before openIdx might be response text if inResponse
-              if (inResponse && openIdx > 0) {
-                finalResponse += buffer.slice(0, openIdx);
+            
+            try {
+              const eventData = JSON.parse(dataStr);
+              
+              // Handle different event types
+              switch (currentEventType) {
+                case 'message':
+                  // Accumulate message content
+                  if (eventData.delta?.content) {
+                    const contentItems = eventData.delta.content;
+                    for (const item of contentItems) {
+                      if (item.type === 'text' && item.payload?.value) {
+                        responseText += item.payload.value;
+                      }
+                    }
+                  }
+                  break;
+                  
+                case 'thinking':
+                  // Add to chain of thought
+                  if (eventData.delta?.content) {
+                    const contentItems = eventData.delta.content;
+                    for (const item of contentItems) {
+                      if (item.type === 'text' && item.payload?.value) {
+                        // Accumulate thinking content
+                        if (chainOfThoughtBlocks.length === 0) {
+                          chainOfThoughtBlocks.push(item.payload.value);
+                        } else {
+                          chainOfThoughtBlocks[chainOfThoughtBlocks.length - 1] += item.payload.value;
+                        }
+                      }
+                    }
+                  }
+                  break;
+                  
+                case 'citation':
+                  if (eventData) {
+                    // Create normalized citation object
+                    let citationToAdd = {
+                      id: eventData.id || '',
+                      object: 'citation',
+                      title: eventData.payload?.title || 'Source',
+                      snippet: eventData.payload?.snippet || '',
+                      link: eventData.payload?.link || '',
+                      payload: eventData.payload
+                    };
+                    
+                    // Add to citations array if not already present
+                    if (!citations.some(c => c.id === citationToAdd.id)) {
+                      citations.push(citationToAdd);
+                    }
+                  }
+                  break;
+                                    
+                case 'tool_call':
+                  // Add tool call
+                  if (eventData.tool_call_id) {
+                    try {
+                      const args = typeof eventData.arguments === 'string' 
+                        ? JSON.parse(eventData.arguments) 
+                        : eventData.arguments;
+                        
+                      toolCalls.push({
+                        id: eventData.tool_call_id,
+                        name: eventData.name,
+                        arguments: args
+                      });
+                    } catch (err) {
+                      toolCalls.push({
+                        id: eventData.tool_call_id,
+                        name: eventData.name,
+                        arguments: eventData.arguments // keep as string if parsing fails
+                      });
+                    }
+                  }
+                  break;
+                  
+                case 'tool_result':
+                  // Add tool result
+                  toolResults.push(eventData);
+                  break;
+                  
+                case 'final_answer':
+                  // Final answer handling if needed
+                  break;
+                  
+                case 'search_results':
+                  // Search results handling if needed
+                  setIsSearching(false);
+                  break;
               }
-              buffer = buffer.slice(openIdx + '<Thought'.length);
-              inThought = true;
-              parseNext = true;
-            }
-          }
-
-          // 4) If we are not inside a Response, see if there's a new `<Response`
-          if (!inResponse) {
-            const openIdx = buffer.indexOf('<Response');
-            if (openIdx >= 0) {
-              // Everything before openIdx might be chain-of-thought if inThought
-              if (inThought && openIdx > 0) {
-                chainOfThoughtBlocks.push(buffer.slice(0, openIdx));
-              }
-              buffer = buffer.slice(openIdx + '<Response'.length);
-              inResponse = true;
-              parseNext = true;
+              
+              // Update UI with current data
+              updateAssistantMessage(
+                responseText,
+                chainOfThoughtBlocks,
+                citations,
+                toolCalls,
+                toolResults,
+                true
+              );
+            } catch (err) {
+              console.error('Error parsing SSE data:', err, dataStr);
             }
           }
         }
-
-        // After attempting to parse full blocks, whatever remains in `buffer` is partial
-        // If we are "inThought," that leftover is partial chain-of-thought
-        // If we are "inResponse," leftover is partial response text
-        // So let's do a partial UI update:
-        const partialChainOfThought = [...chainOfThoughtBlocks];
-        if (inThought && buffer.trim()) {
-          // This is partial thought
-          partialChainOfThought.push(buffer.trim());
-        }
-        const partialResponse = inResponse
-          ? finalResponse + buffer
-          : finalResponse;
-
-        // Update UI with partial data
-        updateLastAssistantMessage(
-          partialResponse,
-          partialChainOfThought,
-          true
-        );
       }
-
-      // Done reading. If leftover was never closed, treat it as final partial.
-      if (inThought && buffer.trim()) {
-        chainOfThoughtBlocks.push(buffer.trim());
-      } else if (inResponse && buffer) {
-        finalResponse += buffer;
-      }
-
+  
       // Final update, not streaming
-      updateLastAssistantMessage(finalResponse, chainOfThoughtBlocks, false);
+      updateAssistantMessage(
+        responseText,
+        chainOfThoughtBlocks,
+        citations,
+        toolCalls,
+        toolResults,
+        false
+      );
     } catch (err: any) {
       if (err.name === 'AbortError') {
         // request was aborted by user
@@ -435,6 +547,11 @@ export const Result: FC<ResultProps> = ({
     }
   };
 
+  // Scroll to bottom handler
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   // Fire off parse function on new query
   useEffect(() => {
     if (!query || !pipelineUrl) return;
@@ -445,7 +562,7 @@ export const Result: FC<ResultProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, userId, pipelineUrl]);
 
-  // PDF preview
+  // PDF preview handlers
   const handleOpenPdfPreview = (id: string, page?: number) => {
     setPdfPreviewDocumentId(id);
     setInitialPage(page && page > 0 ? page : 1);
@@ -459,14 +576,16 @@ export const Result: FC<ResultProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-8 h-full">
-      {mode === 'rag_agent' && (
-        <Alert className="mb-4 bg-zinc-800 border-zinc-600">
-          <AlertDescription className="text-sm text-white">
-            Currently using our advanced reasoning agent. For quick, direct
-            answers, R2R supports <strong>fast rag mode</strong>.
-          </AlertDescription>
-        </Alert>
+    <div className="flex flex-col gap-8 h-full relative">
+      {/* Floating scroll-to-bottom button */}
+      {showScrollButton && (
+        <Button
+          className="fixed bottom-24 right-8 bg-zinc-700 text-white p-2 rounded-full shadow-lg z-10"
+          size="icon"
+          onClick={scrollToBottom}
+        >
+          <ArrowDown size={20} />
+        </Button>
       )}
 
       <div

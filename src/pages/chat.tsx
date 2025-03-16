@@ -56,12 +56,9 @@ const Index: React.FC = () => {
   >({});
   const [mode, setMode] = useState<'rag' | 'rag_agent'>('rag_agent');
   const [sidebarIsOpen, setSidebarIsOpen] = useState(true);
+  const [research, setResearch] = useState<boolean>(false);
+  const [thinking, setThinking] = useState(true);
 
-  // useEffect(() => {
-  //   if (searchParams) {
-  //     setQuery(decodeURIComponent(searchParams.get('q') || ''));
-  //   }
-  // }, [searchParams]);
 
   // NOTE: Grab the selectedModel and its setter from the user context.
   const { pipeline, getClient, selectedModel, setSelectedModel } =
@@ -75,24 +72,8 @@ const Index: React.FC = () => {
 
   const { switches, initializeSwitch, updateSwitch } = useSwitchManager();
 
-  const [temperature, setTemperature] = useState(0.7);
-  const [topP, setTopP] = useState(1);
-  const [top_k, setTop_k] = useState(100);
-  const [maxTokensToSample, setmaxTokensToSample] = useState(4096);
-  const [kg_temperature, setKgTemperature] = useState(0.1);
-  const [kg_topP, setKgTopP] = useState(1);
-  const [kg_top_k, setKgTop_k] = useState(100);
-  const [kg_maxTokensToSample, setKgmaxTokensToSample] = useState(1024);
-  // Add new state for tool toggles
-  const [webSearch, setWebSearch] = useState(true);
-  const [magnify, setMagnify] = useState(true);
-  const [contextTool, setContextTool] = useState(true);
-
   const getEnabledTools = () => {
-    const enabledTools = [];
-    if (webSearch) enabledTools.push('web_search');
-    if (magnify) enabledTools.push('local_search');
-    if (contextTool) enabledTools.push('content');
+    const enabledTools = ['web_search', 'web_scrape', 'search_file_knowledge', 'get_file_content'];
     return enabledTools;
   };
 
@@ -209,10 +190,6 @@ const Index: React.FC = () => {
     setQuery('');
   };
 
-  const handleModeChange = (newMode: 'rag' | 'rag_agent') => {
-    setMode(newMode);
-  };
-
   const handleConversationSelect = async (conversationId: string) => {
     setSelectedConversationId(conversationId);
     try {
@@ -243,8 +220,6 @@ const Index: React.FC = () => {
       setSelectedModel('anthropic/claude-3-5-sonnet-20241022');
     }
   }, [selectedModel, setSelectedModel]);
-
-  // console.log('getEnabledTools() = ', getEnabledTools());
 
   return (
     <Layout pageTitle="Agentic RAG with R2R" includeFooter={false}>
@@ -286,14 +261,6 @@ const Index: React.FC = () => {
           setMaxCommunityDescriptionLength={setMaxCommunityDescriptionLength}
           localSearchLimits={localSearchLimits}
           setLocalSearchLimits={setLocalSearchLimits}
-          temperature={temperature}
-          setTemperature={setTemperature}
-          topP={topP}
-          setTopP={setTopP}
-          topK={top_k}
-          setTopK={setTop_k}
-          maxTokensToSample={maxTokensToSample}
-          setMaxTokensToSample={setmaxTokensToSample}
           config={{
             showVectorSearch: true,
             showHybridSearch: true,
@@ -315,47 +282,8 @@ const Index: React.FC = () => {
             <div className="w-full max-w-4xl mx-auto px-4 py-4 flex flex-col h-full">
               {/* Chat Interface */}
 
-              {/* Mode and Model selectors in a single row */}
-              <div className="flex items-center justify-between mb-4">
-                {/* Left: Mode Selector */}
-                <div className="mode-selector">
-                  <Select value={mode} onValueChange={handleModeChange}>
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Select Mode" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="rag">RAG Q&A</SelectItem>
-                      <SelectItem value="rag_agent">Reasoning Agent</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Right: Model Selector */}
-                <div className="model-selector">
-                  <Select
-                    value={selectedModel || 'azure/gpt-4o'}
-                    onValueChange={(val) => setSelectedModel(val)}
-                  >
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Select Model" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="anthropic/claude-3-5-sonnet-20241022">
-                        claude-3-5-sonnet
-                      </SelectItem>
-                      <SelectItem value="deepseek/deepseek-ai/DeepSeek-R1">
-                        deepseek-reasoner
-                      </SelectItem>
-                      <SelectItem value="openai/gpt-4o">gpt-4o</SelectItem>
-                      <SelectItem value="openai/o3-mini">o3-mini</SelectItem>
-                      <SelectItem value="gemini/gemini-2.0-flash-thinking-exp-01-21">
-                        gemini-2.0-flash-thinking-exp-01-21
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="flex-1 overflow-auto p-4 mt-16">
+              {/* Remove the Mode and Model selectors row */}
+              <div className="flex-1 overflow-auto p-4">
                 <Result
                   query={query}
                   setQuery={setQuery}
@@ -364,15 +292,10 @@ const Index: React.FC = () => {
                   pipelineUrl={pipeline?.deploymentUrl || ''}
                   searchLimit={searchLimit}
                   searchFilters={safeJsonParse(searchFilters)}
-                  ragTemperature={temperature}
-                  ragTopP={topP}
-                  ragTopK={top_k}
-                  ragMaxTokensToSample={maxTokensToSample}
                   uploadedDocuments={uploadedDocuments}
                   setUploadedDocuments={setUploadedDocuments}
                   switches={switches}
                   hasAttemptedFetch={hasAttemptedFetch}
-                  mode={mode}
                   selectedCollectionIds={selectedCollectionIds}
                   onAbortRequest={handleAbortRequest}
                   messages={messages}
@@ -380,6 +303,9 @@ const Index: React.FC = () => {
                   selectedConversationId={selectedConversationId}
                   setSelectedConversationId={setSelectedConversationId}
                   enabledTools={getEnabledTools()}
+                  mode={mode}
+                  research={research}
+                  thinking={thinking || research}
                 />
               </div>
 
@@ -395,12 +321,11 @@ const Index: React.FC = () => {
                   }
                   disabled={uploadedDocuments?.length === 0 && mode === 'rag'}
                   mode={mode}
-                  webSearch={webSearch}
-                  setWebSearch={setWebSearch}
-                  magnify={magnify}
-                  setMagnify={setMagnify}
-                  contextTool={contextTool}
-                  setContextTool={setContextTool}
+                  setMode={setMode}
+                  research={research}
+                  setResearch={setResearch}
+                  thinking={thinking}
+                  setThinking={setThinking}
                 />
               </div>
             </div>

@@ -128,9 +128,9 @@ function MyApp(props: AppProps) {
         >
           <PostHogProvider client={posthog}>
             <UserProvider>
-              <JoyrideProvider>
+              {/* <JoyrideProvider> */}
                 <MyAppContent {...props} />
-              </JoyrideProvider>
+              {/* </JoyrideProvider> */}
             </UserProvider>
           </PostHogProvider>
         </ThemeProvider>

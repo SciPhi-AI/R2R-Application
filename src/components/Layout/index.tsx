@@ -103,7 +103,7 @@ const Layout: React.FC<Props> = ({
     stepsForRoute.length > 0;
 
   // Local state for the Joyride "run" prop
-  const [runJoyride, setRunJoyride] = useState(true);
+  const [runJoyride, setRunJoyride] = useState(false);
 
   const [shouldStartTour, setShouldStartTour] = useState(false);
 
