@@ -20,7 +20,7 @@ import MessageBubble from './MessageBubble';
 import { UploadButton } from './upload';
 
 // Default URLs and constants
-const DEFAULT_PRODUCTION_URL = 'https://api.cloud.sciphi.ai';
+const DEFAULT_PRODUCTION_URL = 'https://api.sciphi.ai';
 const DEFAULT_DEVELOPMENT_URL = 'http://0.0.0.0:7272';
 const PRODUCTION_URL =
   process.env.NEXT_PUBLIC_PRODUCTION_API_URL || DEFAULT_PRODUCTION_URL;

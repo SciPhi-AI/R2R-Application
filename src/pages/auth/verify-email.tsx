@@ -9,7 +9,7 @@ import { useUserContext } from '@/context/UserContext';
 import { SignupSplitLayout } from './signup-layout';
 
 // Default URLs as fallbacks
-const DEFAULT_PRODUCTION_URL = 'https://api.cloud.sciphi.ai';
+const DEFAULT_PRODUCTION_URL = 'https://api.sciphi.ai';
 const DEFAULT_DEVELOPMENT_URL = 'http://0.0.0.0:7272';
 
 // Get URLs from environment variables with fallbacks

@@ -9,7 +9,7 @@ import { useUserContext } from '@/context/UserContext';
 
 import { SignupSplitLayout } from './signup-layout';
 // Default URLs as fallbacks
-const DEFAULT_PRODUCTION_URL = 'https://api.cloud.sciphi.ai';
+const DEFAULT_PRODUCTION_URL = 'https://api.sciphi.ai';
 const DEFAULT_DEVELOPMENT_URL = 'http://0.0.0.0:7272';
 
 // Get URLs from environment variables with fallbacks
@@ -38,7 +38,7 @@ const RegistrationPage: React.FC = () => {
   const [deploymentUrl, setDeploymentUrl] = useState('');
 
   useEffect(() => {
-    // const url = process.env.R2R_DEPLOYMENT_URL || 'https://api.cloud.sciphi.ai';
+    // const url = process.env.R2R_DEPLOYMENT_URL || 'https://api.sciphi.ai';
     // const url = 'http://0.0.0.0:7272'; // For local development
 
     setDeploymentUrl(DEFAULT_DEPLOYMENT_URL);
