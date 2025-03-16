@@ -2,11 +2,11 @@
 import * as Sentry from '@sentry/nextjs';
 import type { AppProps } from 'next/app';
 import { useRouter } from 'next/router';
+import Script from 'next/script'; // <-- Import Next.js Script
 import { useTheme } from 'next-themes';
 import posthog from 'posthog-js';
 import { PostHogProvider } from 'posthog-js/react';
 import { useEffect, useCallback } from 'react';
-import Script from 'next/script'; // <-- Import Next.js Script
 
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { JoyrideProvider } from '@/context/JoyrideContext'; // <--- our new context
