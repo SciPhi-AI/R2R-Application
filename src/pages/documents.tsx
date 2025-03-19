@@ -9,13 +9,7 @@ import { IngestionStatus } from '@/types';
 const PAGE_SIZE = 1000;
 const ITEMS_PER_PAGE = 10;
 
-// Add some CSS to hide the search bar in DocumentsTable
-const hideDocumentTableSearchBar = `
-  /* Hide DocumentsTable's search input */
-  .documents-table-search-input {
-    display: none !important;
-  }
-`;
+
 
 const Index: React.FC = () => {
   const { pipeline, getClient } = useUserContext();
@@ -215,13 +209,10 @@ const Index: React.FC = () => {
 
   return (
     <Layout pageTitle="Documents" includeFooter={false}>
-      {/* Add style tag to hide DocumentsTable search bar */}
-      <style>{hideDocumentTableSearchBar}</style>
       
       <main className="w-full flex flex-col container h-screen-[calc(100%-4rem)]">
         <div className="relative flex-grow bg-zinc-900 mt-[4rem] sm:mt-[4rem]">
           <div className="mx-auto max-w-6xl mb-12 mt-4 p-4 h-full">
-            {/* Remove the search bar from here */}
             
             <DocumentsTable
               documents={filteredDocuments}
@@ -240,9 +231,8 @@ const Index: React.FC = () => {
               itemsPerPage={ITEMS_PER_PAGE}
               filters={filters}
               onFiltersChange={handleFiltersChange}
-              searchQuery="" // Pass empty string to disable DocumentsTable's internal search
-              onSearchQueryChange={() => {}} // Empty function to prevent DocumentsTable from updating search
-              
+              searchQuery={searchQuery}
+              onSearchQueryChange={handleSearchQueryChange}
               // pass search bar to format correctly
               middleContent={
                 <div className="w-full px-2">
