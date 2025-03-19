@@ -4,25 +4,25 @@ import {
   SearchSettings,
   GraphSearchSettings,
   ChunkSearchSettings,
-} from 'r2r-js';
-import React, { FC, useEffect, useState, useRef } from 'react';
+} from "r2r-js";
+import React, { FC, useEffect, useState, useRef } from "react";
 
-import PdfPreviewDialog from '@/components/ChatDemo/utils/pdfPreviewDialog';
-import { useUserContext } from '@/context/UserContext';
-import { extractBlocks } from '@/lib/utils';
-import { Message } from '@/types';
+import PdfPreviewDialog from "@/components/ChatDemo/utils/pdfPreviewDialog";
+import { useUserContext } from "@/context/UserContext";
+import { extractBlocks } from "@/lib/utils";
+import { Message } from "@/types";
 
-import { Answer } from './answer';
-import { DefaultQueries } from './DefaultQueries';
-import MessageBubble from './MessageBubble';
-import { UploadButton } from './upload';
+import { Answer } from "./answer";
+import { DefaultQueries } from "./DefaultQueries";
+import MessageBubble from "./MessageBubble";
+import { UploadButton } from "./upload";
 
-const CHUNK_SEARCH_STREAM_MARKER = '<chunk_search>';
-const CHUNK_SEARCH_STREAM_END_MARKER = '</chunk_search>';
-const GRAPH_SEARCH_STREAM_MARKER = '<graph_search>';
-const GRAPH_SEARCH_STREAM_END_MARKER = '</graph_search>';
-const LLM_START_TOKEN = '<completion>';
-const LLM_END_TOKEN = '</completion>';
+const CHUNK_SEARCH_STREAM_MARKER = "<chunk_search>";
+const CHUNK_SEARCH_STREAM_END_MARKER = "</chunk_search>";
+const GRAPH_SEARCH_STREAM_MARKER = "<graph_search>";
+const GRAPH_SEARCH_STREAM_END_MARKER = "</graph_search>";
+const LLM_START_TOKEN = "<completion>";
+const LLM_END_TOKEN = "</completion>";
 
 export const Result: FC<{
   query: string;
@@ -40,7 +40,7 @@ export const Result: FC<{
   setUploadedDocuments: React.Dispatch<React.SetStateAction<string[]>>;
   hasAttemptedFetch: boolean;
   switches: any;
-  mode: 'rag' | 'rag_agent';
+  mode: "rag" | "rag_agent";
   selectedCollectionIds: string[];
   onAbortRequest?: () => void;
   messages: Message[];
@@ -96,8 +96,8 @@ export const Result: FC<{
   }, [mode]);
 
   useEffect(() => {
-    localStorage.setItem('chatMessages', JSON.stringify(messages));
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    localStorage.setItem("chatMessages", JSON.stringify(messages));
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   const updateLastMessage = (
@@ -108,7 +108,7 @@ export const Result: FC<{
   ) => {
     setMessages((prevMessages) => {
       const lastMessage = prevMessages[prevMessages.length - 1];
-      if (lastMessage.role === 'assistant') {
+      if (lastMessage.role === "assistant") {
         return [
           ...prevMessages.slice(0, -1),
           {
@@ -123,8 +123,8 @@ export const Result: FC<{
         return [
           ...prevMessages,
           {
-            role: 'assistant',
-            content: content || '',
+            role: "assistant",
+            content: content || "",
             id: Date.now().toString(),
             timestamp: Date.now(),
             isStreaming: isStreaming || false,
@@ -164,7 +164,7 @@ export const Result: FC<{
     setError(null);
 
     const newUserMessage: Message = {
-      role: 'user',
+      role: "user",
       content: query,
       id: Date.now().toString(),
       timestamp: Date.now(),
@@ -173,8 +173,8 @@ export const Result: FC<{
 
     // Start with an empty assistant message
     const newAssistantMessage: Message = {
-      role: 'assistant',
-      content: '',
+      role: "assistant",
+      content: "",
       id: (Date.now() + 1).toString(),
       timestamp: Date.now() + 1,
       isStreaming: true,
@@ -186,11 +186,11 @@ export const Result: FC<{
     setMessages((prevMessages) => [...prevMessages, newUserMessage]);
 
     // We'll accumulate raw text in this buffer
-    let buffer = '';
+    let buffer = "";
     // Flags and placeholders
     let inLLMResponse = false; // Are we inside <completion> blocks?
-    let fullContent = ''; // Combined text for the LLM
-    let assistantResponse = ''; // The final text for the assistant
+    let fullContent = ""; // Combined text for the LLM
+    let assistantResponse = ""; // The final text for the assistant
     let vectorSearchSources: string | null = null;
     let kgSearchResult: string | null = null;
     let searchPerformed = false;
@@ -198,7 +198,7 @@ export const Result: FC<{
     try {
       const client = await getClient();
       if (!client) {
-        throw new Error('Failed to get authenticated client');
+        throw new Error("Failed to get authenticated client");
       }
 
       // Make sure we have a conversation
@@ -207,21 +207,21 @@ export const Result: FC<{
         try {
           const newConversation = await client.conversations.create();
           if (!newConversation || !newConversation.results) {
-            throw new Error('Failed to create a new conversation');
+            throw new Error("Failed to create a new conversation");
           }
           currentConversationId = newConversation.results.id;
-          if (typeof currentConversationId !== 'string') {
-            throw new Error('Invalid conversation ID received');
+          if (typeof currentConversationId !== "string") {
+            throw new Error("Invalid conversation ID received");
           }
           setSelectedConversationId(currentConversationId);
         } catch (error) {
-          console.error('Error creating new conversation:', error);
-          setError('Failed to create a new conversation. Please try again.');
+          console.error("Error creating new conversation:", error);
+          setError("Failed to create a new conversation. Please try again.");
           return;
         }
       }
       if (!currentConversationId) {
-        setError('No valid conversation ID. Please try again.');
+        setError("No valid conversation ID. Please try again.");
         return;
       }
 
@@ -231,7 +231,7 @@ export const Result: FC<{
         temperature: ragTemperature ?? undefined,
         topP: ragTopP ?? undefined,
         maxTokensToSample: ragMaxTokensToSample ?? undefined,
-        model: model && model !== 'null' ? model : undefined,
+        model: model && model !== "null" ? model : undefined,
       };
 
       const vectorSearchSettings: ChunkSearchSettings = {
@@ -254,7 +254,7 @@ export const Result: FC<{
 
       // Call the streaming endpoint
       const streamResponse =
-        mode === 'rag_agent'
+        mode === "rag_agent"
           ? await client.retrieval.agent({
               message: newUserMessage,
               ragGenerationConfig,
@@ -298,7 +298,7 @@ export const Result: FC<{
             vectorSearchSources = rawJson;
             searchPerformed = true;
           } catch (err) {
-            console.error('Failed to parse chunk_search JSON:', err, rawJson);
+            console.error("Failed to parse chunk_search JSON:", err, rawJson);
           }
           // Update state so user sees search results
           updateLastMessage(
@@ -327,7 +327,7 @@ export const Result: FC<{
             kgSearchResult = rawJson;
             searchPerformed = true;
           } catch (err) {
-            console.error('Failed to parse graph_search JSON:', err, rawJson);
+            console.error("Failed to parse graph_search JSON:", err, rawJson);
           }
           // Update
           updateLastMessage(
@@ -392,7 +392,7 @@ export const Result: FC<{
               true,
               searchPerformed
             );
-            buffer = '';
+            buffer = "";
           }
         }
       }
@@ -408,27 +408,27 @@ export const Result: FC<{
         try {
           await client.conversations.addMessage({
             id: currentConversationId,
-            role: 'assistant',
+            role: "assistant",
             content: assistantResponse,
           });
         } catch (error) {
           console.error(
-            'Error adding assistant message to conversation:',
+            "Error adding assistant message to conversation:",
             error
           );
         }
       }
     } catch (err: unknown) {
       if (err instanceof Error) {
-        if (err.name === 'AbortError') {
-          console.log('Request was aborted');
+        if (err.name === "AbortError") {
+          console.log("Request was aborted");
         } else {
-          console.error('Error in streaming:', err.message);
+          console.error("Error in streaming:", err.message);
           setError(err.message);
         }
       } else {
-        console.error('Unknown error in streaming:', err);
-        setError('An unknown error occurred');
+        console.error("Unknown error in streaming:", err);
+        setError("An unknown error occurred");
       }
     } finally {
       setIsStreaming(false);
@@ -438,14 +438,14 @@ export const Result: FC<{
         false,
         searchPerformed
       );
-      setQuery('');
+      setQuery("");
       setIsProcessingQuery(false);
       abortControllerRef.current = null;
     }
   };
 
   useEffect(() => {
-    if (query === '' || !pipelineUrl) {
+    if (query === "" || !pipelineUrl) {
       return;
     }
 
@@ -477,7 +477,7 @@ export const Result: FC<{
       <div className="flex flex-col space-y-8 mb-4">
         {messages.map((message, index) => (
           <React.Fragment key={message.id}>
-            {message.role === 'user' ? (
+            {message.role === "user" ? (
               <MessageBubble message={message} />
             ) : (
               <Answer
@@ -501,16 +501,16 @@ export const Result: FC<{
       {hasAttemptedFetch &&
         uploadedDocuments?.length === 0 &&
         pipelineUrl &&
-        mode === 'rag' && (
-          <div className="absolute inset-4 flex items-center justify-center backdrop-blur-sm">
+        mode === "rag" && (
+          <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm">
             <div className="flex items-center p-4 bg-white shadow-2xl rounded text-text-accent-base font-medium gap-4">
-              Please upload at least one document to submit queries.{' '}
+              Please upload at least one document to submit queries.
               <UploadButton setUploadedDocuments={setUploadedDocuments} />
             </div>
           </div>
         )}
       <PdfPreviewDialog
-        id={pdfPreviewDocumentId || ''}
+        id={pdfPreviewDocumentId || ""}
         open={pdfPreviewOpen}
         onClose={handleClosePdfPreview}
         initialPage={initialPage}

@@ -92,7 +92,7 @@ export const CreateFileButton: React.FC<CreateFileButton> = ({
         shape="rounded"
         onClick={() => setIsDialogOpen(true)}
         disabled={isUploading}
-        className={`pl-2 pr-2 text-white py-2 px-4`}
+        className={`pl-2 pr-2 text-primary py-2 px-4`}
         style={{ zIndex: 20 }}
       >
         <FileUp className="mr-2 h-4 w-4 mt-1" />

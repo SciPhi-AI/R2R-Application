@@ -81,7 +81,7 @@ const UpdateButtonContainer: React.FC<UpdateButtonContainerProps> = ({
         tooltip="Update Document"
       >
         {isUpdating ? (
-          <Spinner className="h-6 w-6 text-white" />
+          <Spinner className="h-6 w-6 text-primary" />
         ) : (
           <FileUp className="h-6 w-6" />
         )}

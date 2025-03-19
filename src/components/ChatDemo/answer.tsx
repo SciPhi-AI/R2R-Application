@@ -58,7 +58,7 @@ const SourceInfo: React.FC<{
 }> = ({ isSearching, sourcesCount }) => (
   <div className="flex items-center justify-between w-full">
     <Logo width={50} height={50} disableLink={true} />
-    <span className="text-sm font-normal text-white">
+    <span className="text-sm font-normal text-primary">
       {isSearching ? (
         <span className="searching-animation">Searching over sources...</span>
       ) : sourcesCount !== null && sourcesCount > 0 ? (
@@ -122,15 +122,7 @@ export const Answer: FC<{
     }, []);
 
     return (
-      <span
-        style={{
-          color: 'white',
-          display: 'inline-block',
-          width: '1em',
-          height: '1em',
-          textAlign: 'left',
-        }}
-      >
+      <span className="inline-block w-[1em] h-[1em] text-left text-primary">
         {dots}
       </span>
     );
@@ -144,28 +136,28 @@ export const Answer: FC<{
         components={{
           h1: (props) => <h1 className="white" {...props} />,
           h2: (props) => <h2 className="white" {...props} />,
-          h3: (props) => <h3 style={{ color: 'white' }} {...props} />,
-          h4: (props) => <h4 style={{ color: 'white' }} {...props} />,
-          h5: (props) => <h5 style={{ color: 'white' }} {...props} />,
-          h6: (props) => <h6 style={{ color: 'white' }} {...props} />,
+          h3: (props) => <h3 className="text-primary" {...props} />,
+          h4: (props) => <h4 className="text-primary" {...props} />,
+          h5: (props) => <h5 className="text-primary" {...props} />,
+          h6: (props) => <h6 className="text-primary" {...props} />,
           strong: (props) => (
-            <strong style={{ color: 'white', fontWeight: 'bold' }} {...props} />
+            <strong className="text-primary font-bold" {...props} />
           ),
           p: ({ children }) => (
-            <p style={{ color: 'white', display: 'inline' }}>
+            <p className="text-primary inline-block">
               {children}
               {isStreaming && index === paragraphs.length - 1 && (
                 <AnimatedEllipsis />
               )}
             </p>
           ),
-          li: (props) => <li style={{ color: 'white' }} {...props} />,
+          li: (props) => <li className="text-primary" {...props} />,
           blockquote: (props) => (
-            <blockquote style={{ color: 'white' }} {...props} />
+            <blockquote className="text-primary" {...props} />
           ),
-          em: (props) => <em style={{ color: 'white' }} {...props} />,
-          code: (props) => <code style={{ color: 'white' }} {...props} />,
-          pre: (props) => <pre style={{ color: 'white' }} {...props} />,
+          em: (props) => <em className="text-primary" {...props} />,
+          code: (props) => <code className="text-primary" {...props} />,
+          pre: (props) => <pre className="text-primary" {...props} />,
 
           a: ({ href, ...props }) => {
             if (!href) return null;
@@ -213,7 +205,7 @@ export const Answer: FC<{
                   </PopoverTrigger>
                   <PopoverContent
                     align="start"
-                    className="max-w-screen-md flex flex-col gap-2 bg-zinc-800 shadow-transparent ring-zinc-600 border-zinc-600 ring-4 text-xs"
+                    className="max-w-screen-md flex flex-col gap-2 bg-secondary shadow-transparent ring-zinc-600 border-zinc-600 ring-4 text-xs"
                   >
                     {!isKGElement && metadata?.documentid && (
                       <div className="text-zinc-200 font-medium border-b border-zinc-600 pb-1">
@@ -274,7 +266,7 @@ export const Answer: FC<{
         onValueChange={(value) => setIsOpen(value === 'answer')}
       >
         <AccordionItem value="answer">
-          <AccordionTrigger className="py-2 text-lg font-bold text-zinc-200 hover:no-underline text-white">
+          <AccordionTrigger className="py-2 text-lg font-bold hover:no-underline text-primary">
             <SourceInfo isSearching={isSearching} sourcesCount={sourcesCount} />
           </AccordionTrigger>
           <AccordionContent>
@@ -291,28 +283,21 @@ export const Answer: FC<{
 
       <div className="space-y-4 mt-4">
         {message.content || isStreaming ? (
-          <div className="prose prose-sm max-w-full text-zinc-300 overflow-y-auto max-h-[700px] prose-headings:text-white prose-p:text-white prose-strong:text-white prose-code:text-white p-4 rounded-lg">
+          <div className="prose prose-sm max-w-full text-primary overflow-y-auto max-h-[700px] prose-headings:text-primary prose-p:text-primary prose-strong:text-primary prose-code:text-primary p-4 rounded-lg">
             {message.content ? (
               renderContent()
             ) : (
-              <div
-                style={{
-                  color: 'white',
-                  display: 'inline-block',
-                  width: '1em',
-                  height: '1em',
-                }}
-              >
+              <div className="inline-block w-[1em] h-[1em] text-primary">
                 <AnimatedEllipsis />
               </div>
             )}
           </div>
         ) : (
           <div className="flex flex-col gap-2">
-            <Skeleton className="max-w-lg h-4 bg-zinc-200" />
-            <Skeleton className="max-w-2xl h-4 bg-zinc-200" />
-            <Skeleton className="max-w-lg h-4 bg-zinc-200" />
-            <Skeleton className="max-w-xl h-4 bg-zinc-200" />
+            <Skeleton className="max-w-lg h-4 bg-secondary" />
+            <Skeleton className="max-w-2xl h-4 bg-secondary" />
+            <Skeleton className="max-w-lg h-4 bg-secondary" />
+            <Skeleton className="max-w-xl h-4 bg-secondary" />
           </div>
         )}
       </div>

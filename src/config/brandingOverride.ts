@@ -27,6 +27,9 @@ const brandingOverride = {
   //  alt: 'https://example.com/logo.png',
   //},
   //theme: 'light',
+  //auth: {
+  //  loginUrl: 'https://example.com',
+  //},
   //homePage: {
   //  pythonSdk: false,
   //  githubCard: false,

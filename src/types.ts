@@ -484,7 +484,8 @@ export type Graph = {
 };
 
 export interface VectorSearchResult {
-  document_id: string;
+  extraction_id: string;
+  documentId: string;
   userId: string;
   collectionIds: string[];
   score: number;

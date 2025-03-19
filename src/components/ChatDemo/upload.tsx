@@ -150,7 +150,7 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
         <PopoverTrigger asChild>
           <Button
             className="pl-2 pr-2 py-2 px-4"
-            color="filled"
+            color="primary"
             shape="rounded"
             disabled={isUploading}
             style={{ zIndex: 20, minWidth: '100px' }}
@@ -159,7 +159,7 @@ export const UploadButton: React.FC<UploadButtonProps> = ({
             {isUploading ? 'Uploading...' : 'New'}
           </Button>
         </PopoverTrigger>
-        <PopoverContent align="start" className="w-[150px] p-1">
+        <PopoverContent align="start" className="w-[150px] bg-primary p-1">
           <div className="flex flex-col gap-1">
             <Button
               onClick={() => setIsUploadDialogOpen(true)}

@@ -13,7 +13,7 @@ const OverlayWrapper: React.FC<OverlayWrapperProps> = ({
     <div className="relative">
       {children}
       <div className="absolute inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-        <p className="text-white text-center font-semibold px-4 text-xl">
+        <p className="text-primary text-center font-semibold px-4 text-xl">
           {message}
         </p>
       </div>

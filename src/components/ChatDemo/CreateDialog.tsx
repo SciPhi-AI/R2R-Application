@@ -1,16 +1,16 @@
-import { Plus, X } from 'lucide-react';
-import { UnprocessedChunk } from 'r2r-js/dist/types';
-import React, { useState } from 'react';
+import { Plus, X } from "lucide-react";
+import { UnprocessedChunk } from "r2r-js/dist/types";
+import React, { useState } from "react";
 
-import { Button } from '@/components/ui/Button';
+import { Button } from "@/components/ui/Button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 interface CreateDialogProps {
   isOpen: boolean;
@@ -32,9 +32,9 @@ export const CreateDialog: React.FC<CreateDialogProps> = ({
   onClose,
   onCreateChunks,
 }) => {
-  const [chunks, setChunks] = useState<ChunkInput[]>([{ id: 1, text: '' }]);
-  const [documentId, setDocumentId] = useState<string>('');
-  const [metadata, setMetadata] = useState<string>('');
+  const [chunks, setChunks] = useState<ChunkInput[]>([{ id: 1, text: "" }]);
+  const [documentId, setDocumentId] = useState<string>("");
+  const [metadata, setMetadata] = useState<string>("");
   const [isMetadataValid, setIsMetadataValid] = useState<boolean>(true);
   const [isDocumentIdValid, setIsDocumentIdValid] = useState<boolean>(true);
 
@@ -78,7 +78,7 @@ export const CreateDialog: React.FC<CreateDialogProps> = ({
   const addChunk = () => {
     const newId =
       chunks.length > 0 ? Math.max(...chunks.map((c) => c.id)) + 1 : 1;
-    setChunks([...chunks, { id: newId, text: '' }]);
+    setChunks([...chunks, { id: newId, text: "" }]);
   };
 
   const removeChunk = (id: number) => {
@@ -105,12 +105,12 @@ export const CreateDialog: React.FC<CreateDialogProps> = ({
         }))
       );
       // Reset form
-      setChunks([{ id: 1, text: '' }]);
-      setDocumentId('');
-      setMetadata('');
+      setChunks([{ id: 1, text: "" }]);
+      setDocumentId("");
+      setMetadata("");
       onClose();
     } catch (error) {
-      console.error('Error creating chunks:', error);
+      console.error("Error creating chunks:", error);
     }
   };
 
@@ -133,8 +133,8 @@ export const CreateDialog: React.FC<CreateDialogProps> = ({
               placeholder="Optional UUID"
               className={`${
                 isDocumentIdValid
-                  ? ''
-                  : 'border-red-500 focus:ring-red-500 focus:border-red-500'
+                  ? ""
+                  : "border-red-500 focus:ring-red-500 focus:border-red-500"
               }`}
             />
             {!isDocumentIdValid && (
@@ -187,8 +187,8 @@ export const CreateDialog: React.FC<CreateDialogProps> = ({
               rows={4}
               className={`${
                 isMetadataValid
-                  ? ''
-                  : 'border-red-500 focus:ring-red-500 focus:border-red-500'
+                  ? ""
+                  : "border-red-500 focus:ring-red-500 focus:border-red-500"
               }`}
             />
             {!isMetadataValid && (
@@ -198,7 +198,7 @@ export const CreateDialog: React.FC<CreateDialogProps> = ({
         </div>
 
         <div className="flex justify-end gap-2 mt-4">
-          <Button onClick={onClose} color="secondary">
+          <Button onClick={onClose} color="primary">
             Cancel
           </Button>
           <Button

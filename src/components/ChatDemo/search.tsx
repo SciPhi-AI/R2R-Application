@@ -60,7 +60,7 @@ export const Search: FC<SearchProps> = ({
           }
           autoFocus
           placeholder={placeholder}
-          className="w-full px-4 py-2 h-10 bg-zinc-700 text-zinc-200 rounded-l-full focus:outline-none"
+          className="w-full px-4 py-2 h-10 bg-secondary text-secondary rounded-l-full focus:outline-none"
           disabled={disabled}
         />
         <Button

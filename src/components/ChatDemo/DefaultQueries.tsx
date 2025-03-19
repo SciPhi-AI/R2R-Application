@@ -63,11 +63,11 @@ export const DefaultQueries: FC<DefaultQueriesProps> = ({ setQuery, mode }) => {
         {defaultQueries.map(({ query, icon }, index) => (
           <Alert
             key={index}
-            className="cursor-pointer hover:bg-zinc-700 flex flex-col items-start p-3 h-[100px]"
+            className="cursor-pointer hover:bg-secondary flex flex-col items-start p-3 h-[100px]"
             onClick={() => setQuery(query)}
           >
             <div className="mb-2">{icon}</div>
-            <AlertDescription className="text-sm text-left">
+            <AlertDescription className="text-sm text-left text-primary">
               {query}
             </AlertDescription>
           </Alert>

@@ -10,7 +10,7 @@ export const InfoIcon: React.FC<InfoIconProps> = ({
   width = 'w-6',
   height = 'h-6',
   backgroundColor = 'bg-accent-dark',
-  textColor = 'text-white',
+  textColor = 'text-primary',
   className = '',
 }) => (
   <div

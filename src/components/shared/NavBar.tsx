@@ -18,6 +18,8 @@ import { brandingConfig } from '@/config/brandingConfig';
 import { useUserContext } from '@/context/UserContext';
 import { NavbarProps, NavItemsProps } from '@/types';
 
+import ThemeToggle from './ThemeToggle';
+
 interface NavItemProps {
   href: string;
   children: ReactNode;
@@ -28,7 +30,7 @@ const NavItem: React.FC<NavItemProps> = ({ href, children, isActive }) => (
   <Link
     href={href}
     className={`px-2 py-1 text-sm font-medium ${
-      isActive ? 'text-accent-base' : 'text-zinc-400 hover:text-white'
+      isActive ? 'text-accent' : 'text-secondary hover:text-primary'
     }`}
   >
     {children}
@@ -74,6 +76,11 @@ const NavItems: React.FC<NavItemsProps> = ({
       path: '/users',
       label: 'Users',
       show: brandingConfig.navbar.menuItems.users,
+    },
+    {
+      path: '/logs',
+      label: 'Logs',
+      show: brandingConfig.navbar.menuItems.logs,
     },
     {
       path: '/analytics',
@@ -145,7 +152,7 @@ export const Navbar = forwardRef<React.ElementRef<'nav'>, NavbarProps>(
     };
 
     return (
-      <nav ref={ref} className="bg-zinc-900 shadow z-50 w-full">
+      <nav ref={ref} className="bg-primary shadow z-50 w-full">
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-14 items-center">
             <div className="flex items-center space-x-4">
@@ -154,13 +161,13 @@ export const Navbar = forwardRef<React.ElementRef<'nav'>, NavbarProps>(
                 className="flex-shrink-0 flex items-center"
               >
                 <Logo className="h-12 w-auto" />
-                <span className="ml-2 text-xl font-bold text-white">
+                <span className="ml-2 text-xl font-bold text-primary">
                   {brandingConfig.navbar.appName}
                 </span>
               </Link>
               {isSignedIn && (
                 <>
-                  <span className="text-zinc-400">|</span>
+                  <span className="text-secondary">|</span>
                   <NavItems
                     isAuthenticated={isAuthenticated}
                     role={role}
@@ -170,6 +177,7 @@ export const Navbar = forwardRef<React.ElementRef<'nav'>, NavbarProps>(
               )}
             </div>
             <div className="flex items-center space-x-4">
+              <ThemeToggle />
               {brandingConfig.navbar.showDocsButton && (
                 <Button
                   color="primary"

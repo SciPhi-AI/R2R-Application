@@ -20,6 +20,8 @@ import { useUserContext } from '@/context/UserContext';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
 
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
+
 const MIN_PDF_WIDTH = 300;
 const MAX_PDF_WIDTH = 800;
 const MIN_PDF_HEIGHT = 400;

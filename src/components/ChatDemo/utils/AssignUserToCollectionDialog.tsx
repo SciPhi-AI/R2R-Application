@@ -167,7 +167,7 @@ const AssignUserToCollectionDialog: React.FC<
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="text-white max-w-4xl">
+      <DialogContent className="text-primary max-w-4xl">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold mb-4">
             Assign Users to Collection

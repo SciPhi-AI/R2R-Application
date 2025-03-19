@@ -92,7 +92,7 @@ export function ContainerObjectCard({
     <div
       onClick={handleClick}
       onMouseMove={onMouseMove}
-      className={`group relative overflow-hidden cursor-pointer rounded-2xl bg-zinc-800 transition-shadow hover:shadow-md hover:shadow-zinc-900/5 dark:bg-white/2.5 dark:hover:shadow-black/5 hover:cursor-pointer ${className}`}
+      className={`group relative overflow-hidden cursor-pointer rounded-2xl bg-card shadow-md transition-shadow hover:shadow-md hover:shadow-zinc-900/5 dark:bg-white/2.5 dark:hover:shadow-black/5 hover:cursor-pointer ${className}`}
     >
       <div className="absolute inset-0">
         <ResourcePattern
@@ -106,10 +106,10 @@ export function ContainerObjectCard({
         />
       </div>
       <div className="relative flex flex-col rounded-2xl p-4 sm:p-6 w-full h-full -mt-4">
-        <h2 className="text-xl font-medium truncate w-full text-white mb-2">
+        <h2 className="text-xl font-medium truncate w-full text-secondary mb-2">
           {containerObject.name}
         </h2>
-        <p className="text-white">
+        <p className="text-primary">
           {containerObject.description
             ? containerObject.description.length > 32
               ? `${containerObject.description.substring(0, 32)}...`

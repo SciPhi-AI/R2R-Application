@@ -1,5 +1,5 @@
-import { Loader, FileSearch2, Settings } from 'lucide-react';
-import { useRouter } from 'next/router';
+import { Loader, FileSearch2, Settings } from "lucide-react";
+import { useRouter } from "next/router";
 import {
   CollectionResponse,
   CommunityResponse,
@@ -7,28 +7,28 @@ import {
   EntityResponse,
   RelationshipResponse,
   User,
-} from 'r2r-js/dist/types';
+} from "r2r-js/dist/types";
 import React, {
   useRef,
   useState,
   useEffect,
   useCallback,
   useMemo,
-} from 'react';
+} from "react";
 
-import { RemoveButton } from '@/components/ChatDemo/remove';
-import Table, { Column } from '@/components/ChatDemo/Table';
-import CollectionDialog from '@/components/ChatDemo/utils/collectionDialog';
-import DocumentInfoDialog from '@/components/ChatDemo/utils/documentDialogInfo';
-import KnowledgeGraph from '@/components/knowledgeGraph';
-import Layout from '@/components/Layout';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useToast } from '@/components/ui/use-toast';
-import { useUserContext } from '@/context/UserContext';
-import { IngestionStatus, KGExtractionStatus } from '@/types';
+import { RemoveButton } from "@/components/ChatDemo/remove";
+import Table, { Column } from "@/components/ChatDemo/Table";
+import CollectionDialog from "@/components/ChatDemo/utils/collectionDialog";
+import DocumentInfoDialog from "@/components/ChatDemo/utils/documentDialogInfo";
+import KnowledgeGraph from "@/components/knowledgeGraph";
+import Layout from "@/components/Layout";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/components/ui/use-toast";
+import { useUserContext } from "@/context/UserContext";
+import { IngestionStatus, KGExtractionStatus } from "@/types";
 
 const PAGE_SIZE = 100;
 const ITEMS_PER_PAGE = 10;
@@ -68,7 +68,7 @@ const CollectionIdPage: React.FC = () => {
 
   const [selectedDocumentIds, setSelectedDocumentIds] = useState<string[]>([]);
   const { toast } = useToast();
-  const [selectedDocumentId, setSelectedDocumentId] = useState('');
+  const [selectedDocumentId, setSelectedDocumentId] = useState("");
   const [isDocumentInfoDialogOpen, setIsDocumentInfoDialogOpen] =
     useState(false);
   const [isCollectionDialogOpen, setIsCollectionDialogOpen] = useState(false);
@@ -79,27 +79,27 @@ const CollectionIdPage: React.FC = () => {
     relationships: 1,
     communities: 1,
   });
-  const [activeTab, setActiveTab] = useState('documents');
+  const [activeTab, setActiveTab] = useState("documents");
   const itemsPerPage = ITEMS_PER_PAGE;
 
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<Record<string, any>>({
-    ingestionStatus: ['success', 'failed', 'pending', 'enriched'],
+    ingestionStatus: ["success", "failed", "pending", "enriched"],
     extractionStatus: [
-      'success',
-      'failed',
-      'pending',
-      'processing',
-      'enriched',
+      "success",
+      "failed",
+      "pending",
+      "processing",
+      "enriched",
     ],
   });
 
   const currentCollectionId =
-    typeof router.query.id === 'string' ? router.query.id : '';
+    typeof router.query.id === "string" ? router.query.id : "";
 
   useEffect(() => {
     const updateDimensions = () => {
-      if (graphContainerRef.current && activeTab === 'viewEntities') {
+      if (graphContainerRef.current && activeTab === "viewEntities") {
         const width = graphContainerRef.current.offsetWidth;
         const height = graphContainerRef.current.offsetHeight;
         setContainerDimensions({
@@ -114,10 +114,10 @@ const CollectionIdPage: React.FC = () => {
     // Small delay to ensure the tab content is rendered
     const timeoutId = setTimeout(updateDimensions, 100);
 
-    window.addEventListener('resize', updateDimensions);
+    window.addEventListener("resize", updateDimensions);
 
     return () => {
-      window.removeEventListener('resize', updateDimensions);
+      window.removeEventListener("resize", updateDimensions);
       clearTimeout(timeoutId);
     };
   }, [activeTab]); // Add activeTab as dependency
@@ -131,7 +131,7 @@ const CollectionIdPage: React.FC = () => {
       setLoading(true);
       const client = await getClient();
       if (!client) {
-        throw new Error('Failed to get authenticated client');
+        throw new Error("Failed to get authenticated client");
       }
 
       const collection = await client.collections.retrieve({
@@ -140,7 +140,7 @@ const CollectionIdPage: React.FC = () => {
 
       setCollection(collection.results);
     } catch (error) {
-      console.error('Error fetching collection:', error);
+      console.error("Error fetching collection:", error);
     }
   }, [currentCollectionId, getClient]);
 
@@ -158,7 +158,7 @@ const CollectionIdPage: React.FC = () => {
       setLoading(true);
       const client = await getClient();
       if (!client) {
-        throw new Error('Failed to get authenticated client');
+        throw new Error("Failed to get authenticated client");
       }
 
       let offset = 0;
@@ -208,7 +208,7 @@ const CollectionIdPage: React.FC = () => {
 
       setDocuments(allDocs);
     } catch (error) {
-      console.error('Error fetching documents:', error);
+      console.error("Error fetching documents:", error);
       setLoading(false);
     }
   }, [currentCollectionId, getClient]);
@@ -227,7 +227,7 @@ const CollectionIdPage: React.FC = () => {
       setLoading(true);
       const client = await getClient();
       if (!client) {
-        throw new Error('Failed to get authenticated client');
+        throw new Error("Failed to get authenticated client");
       }
 
       let offset = 0;
@@ -277,7 +277,7 @@ const CollectionIdPage: React.FC = () => {
 
       setUsers(allUsers);
     } catch (error) {
-      console.error('Error fetching users:', error);
+      console.error("Error fetching users:", error);
       setLoading(false);
     }
   }, [currentCollectionId, getClient]);
@@ -296,7 +296,7 @@ const CollectionIdPage: React.FC = () => {
       setLoading(true);
       const client = await getClient();
       if (!client) {
-        throw new Error('Failed to get authenticated client');
+        throw new Error("Failed to get authenticated client");
       }
 
       let offset = 0;
@@ -346,7 +346,7 @@ const CollectionIdPage: React.FC = () => {
 
       setEntities(allEntities);
     } catch (error) {
-      console.error('Error fetching entities:', error);
+      console.error("Error fetching entities:", error);
       setLoading(false);
     }
   }, [currentCollectionId, getClient]);
@@ -365,7 +365,7 @@ const CollectionIdPage: React.FC = () => {
       setLoading(true);
       const client = await getClient();
       if (!client) {
-        throw new Error('Failed to get authenticated client');
+        throw new Error("Failed to get authenticated client");
       }
 
       let offset = 0;
@@ -415,7 +415,7 @@ const CollectionIdPage: React.FC = () => {
 
       setRelationships(allRelationships);
     } catch (error) {
-      console.error('Error fetching entities:', error);
+      console.error("Error fetching entities:", error);
       setLoading(false);
     }
   }, [currentCollectionId, getClient]);
@@ -434,7 +434,7 @@ const CollectionIdPage: React.FC = () => {
       setLoading(true);
       const client = await getClient();
       if (!client) {
-        throw new Error('Failed to get authenticated client');
+        throw new Error("Failed to get authenticated client");
       }
 
       let offset = 0;
@@ -484,7 +484,7 @@ const CollectionIdPage: React.FC = () => {
 
       setCommunities(allCommunities);
     } catch (error) {
-      console.error('Error fetching entities:', error);
+      console.error("Error fetching entities:", error);
       setLoading(false);
     }
   }, [currentCollectionId, getClient]);
@@ -505,7 +505,7 @@ const CollectionIdPage: React.FC = () => {
     }
 
     const { id } = router.query;
-    if (typeof id === 'string') {
+    if (typeof id === "string") {
       refetchData();
     }
   }, [router.isReady, router.query.id, refetchData]);
@@ -519,9 +519,9 @@ const CollectionIdPage: React.FC = () => {
       if (value && value.length > 0 && Array.isArray(value)) {
         filtered = filtered.filter((doc) => {
           switch (key) {
-            case 'ingestionStatus':
+            case "ingestionStatus":
               return value.includes(doc.ingestionStatus);
-            case 'extractionStatus':
+            case "extractionStatus":
               return value.includes(doc.extractionStatus);
             default:
               return true;
@@ -581,7 +581,7 @@ const CollectionIdPage: React.FC = () => {
   const renderActionButtons = () => {
     return (
       <div className="flex justify-between items-center mb-2">
-        <h1 className="text-2xl font-bold text-white">{collection?.name}</h1>
+        <h1 className="text-2xl font-bold text-primary">{collection?.name}</h1>
         <div className="flex items-center space-x-2">
           <Button
             onClick={() => {
@@ -629,28 +629,28 @@ const CollectionIdPage: React.FC = () => {
 
   const documentColumns: Column<DocumentResponse>[] = [
     {
-      key: 'title',
-      label: 'Title',
+      key: "title",
+      label: "Title",
       truncatedSubstring: true,
       sortable: true,
       copyable: true,
     },
-    { key: 'id', label: 'Document ID', truncate: true, copyable: true },
+    { key: "id", label: "Document ID", truncate: true, copyable: true },
     {
-      key: 'ingestionStatus',
-      label: 'Ingestion',
+      key: "ingestionStatus",
+      label: "Ingestion",
       filterable: true,
-      filterType: 'multiselect',
-      filterOptions: ['success', 'failed', 'pending', 'enriched'],
+      filterType: "multiselect",
+      filterOptions: ["success", "failed", "pending", "enriched"],
       renderCell: (doc) => (
         <Badge
           variant={
             doc.ingestionStatus === IngestionStatus.SUCCESS ||
             doc.ingestionStatus === IngestionStatus.ENRICHED
-              ? 'success'
+              ? "success"
               : doc.ingestionStatus === IngestionStatus.FAILED
-                ? 'destructive'
-                : 'pending'
+                ? "destructive"
+                : "pending"
           }
         >
           {doc.ingestionStatus}
@@ -658,21 +658,21 @@ const CollectionIdPage: React.FC = () => {
       ),
     },
     {
-      key: 'extractionStatus',
-      label: 'Extraction',
+      key: "extractionStatus",
+      label: "Extraction",
       filterable: true,
-      filterType: 'multiselect',
-      filterOptions: ['success', 'failed', 'pending', 'processing', 'enriched'],
+      filterType: "multiselect",
+      filterOptions: ["success", "failed", "pending", "processing", "enriched"],
       renderCell: (doc) => (
         <Badge
           variant={
             doc.extractionStatus === KGExtractionStatus.SUCCESS
-              ? 'success'
+              ? "success"
               : doc.extractionStatus === KGExtractionStatus.ENRICHED
-                ? 'success'
+                ? "success"
                 : doc.extractionStatus === KGExtractionStatus.FAILED
-                  ? 'destructive'
-                  : 'pending'
+                  ? "destructive"
+                  : "pending"
           }
         >
           {doc.extractionStatus}
@@ -683,36 +683,36 @@ const CollectionIdPage: React.FC = () => {
   ];
 
   const userColumns: Column<User>[] = [
-    { key: 'id', label: 'User ID', truncate: true, copyable: true },
-    { key: 'email', label: 'Email', truncate: true, copyable: true },
+    { key: "id", label: "User ID", truncate: true, copyable: true },
+    { key: "email", label: "Email", truncate: true, copyable: true },
   ];
 
   const entityColumns: Column<EntityResponse>[] = [
-    { key: 'id', label: 'Entity ID', truncate: true, copyable: true },
-    { key: 'name', label: 'Name' },
-    { key: 'category', label: 'Type' },
+    { key: "id", label: "Entity ID", truncate: true, copyable: true },
+    { key: "name", label: "Name" },
+    { key: "category", label: "Type" },
   ];
 
   const relationshipColumns: Column<RelationshipResponse>[] = [
-    { key: 'id', label: 'Relationship ID', truncate: true, copyable: true },
-    { key: 'subject', label: 'Subject' },
-    { key: 'predicate', label: 'Predicate' },
-    { key: 'object', label: 'Object' },
-    { key: 'subjectId', label: 'Subject ID', truncate: true, copyable: true },
-    { key: 'objectId', label: 'Object ID', truncate: true, copyable: true },
+    { key: "id", label: "Relationship ID", truncate: true, copyable: true },
+    { key: "subject", label: "Subject" },
+    { key: "predicate", label: "Predicate" },
+    { key: "object", label: "Object" },
+    { key: "subjectId", label: "Subject ID", truncate: true, copyable: true },
+    { key: "objectId", label: "Object ID", truncate: true, copyable: true },
   ];
 
   const communityColumns: Column<CommunityResponse>[] = [
-    { key: 'id', label: 'Community ID', truncate: true, copyable: true },
-    { key: 'name', label: 'Name' },
-    { key: 'summary', label: 'Summary' },
-    { key: 'findings', label: 'Findings' },
+    { key: "id", label: "Community ID", truncate: true, copyable: true },
+    { key: "name", label: "Name" },
+    { key: "summary", label: "Summary" },
+    { key: "findings", label: "Findings" },
   ];
 
   const renderUserActions = (user: User) => (
     <div className="flex space-x-1 justify-end">
       <RemoveButton
-        itemId={user.id?.toString() || ''}
+        itemId={user.id?.toString() || ""}
         collectionId={currentCollectionId}
         itemType="user"
         onSuccess={() => refetchData()}
@@ -724,7 +724,7 @@ const CollectionIdPage: React.FC = () => {
   const renderEntityActions = (entity: EntityResponse) => (
     <div className="flex space-x-1 justify-end">
       <RemoveButton
-        itemId={entity.id?.toString() || ''}
+        itemId={entity.id?.toString() || ""}
         collectionId={currentCollectionId}
         itemType="entity"
         onSuccess={() => refetchData()}
@@ -736,7 +736,7 @@ const CollectionIdPage: React.FC = () => {
   const renderRelationshipActions = (relationship: RelationshipResponse) => (
     <div className="flex space-x-1 justify-end">
       <RemoveButton
-        itemId={relationship.id?.toString() || ''}
+        itemId={relationship.id?.toString() || ""}
         collectionId={currentCollectionId}
         itemType="relationship"
         onSuccess={() => refetchData()}
@@ -748,7 +748,7 @@ const CollectionIdPage: React.FC = () => {
   const renderCommunityActions = (community: CommunityResponse) => (
     <div className="flex space-x-1 justify-end">
       <RemoveButton
-        itemId={community.id?.toString() || ''}
+        itemId={community.id?.toString() || ""}
         collectionId={currentCollectionId}
         itemType="community"
         onSuccess={() => refetchData()}
@@ -832,9 +832,9 @@ const CollectionIdPage: React.FC = () => {
               onSelectItem={handleSelectItem}
               selectedItems={selectedDocumentIds}
               actions={renderDocumentActions}
-              initialSort={{ key: 'title', order: 'asc' }}
+              initialSort={{ key: "title", order: "asc" }}
               initialFilters={filters}
-              currentPage={pagination['documents']}
+              currentPage={pagination["documents"]}
               totalEntries={totalDocumentEntries}
               onPageChange={handlePageChange}
               loading={loading}
@@ -852,9 +852,9 @@ const CollectionIdPage: React.FC = () => {
               onSelectItem={() => {}}
               selectedItems={[]}
               actions={renderUserActions}
-              initialSort={{ key: 'id', order: 'asc' }}
+              initialSort={{ key: "id", order: "asc" }}
               initialFilters={{}}
-              currentPage={pagination['users']}
+              currentPage={pagination["users"]}
               totalEntries={totalUserEntries}
               onPageChange={handlePageChange}
               loading={loading}
@@ -870,9 +870,9 @@ const CollectionIdPage: React.FC = () => {
               onSelectItem={() => {}}
               selectedItems={[]}
               actions={renderEntityActions}
-              initialSort={{ key: 'id', order: 'asc' }}
+              initialSort={{ key: "id", order: "asc" }}
               initialFilters={{}}
-              currentPage={pagination['entities']}
+              currentPage={pagination["entities"]}
               totalEntries={totalEntityEntries}
               onPageChange={handlePageChange}
               loading={loading}
@@ -888,9 +888,9 @@ const CollectionIdPage: React.FC = () => {
               onSelectItem={() => {}}
               selectedItems={[]}
               actions={renderRelationshipActions}
-              initialSort={{ key: 'id', order: 'asc' }}
+              initialSort={{ key: "id", order: "asc" }}
               initialFilters={{}}
-              currentPage={pagination['relationships']}
+              currentPage={pagination["relationships"]}
               totalEntries={totalRelationshipEntries}
               onPageChange={handlePageChange}
               loading={loading}
@@ -906,9 +906,9 @@ const CollectionIdPage: React.FC = () => {
               onSelectItem={() => {}}
               selectedItems={[]}
               actions={renderCommunityActions}
-              initialSort={{ key: 'id', order: 'asc' }}
+              initialSort={{ key: "id", order: "asc" }}
               initialFilters={{}}
-              currentPage={pagination['communities']}
+              currentPage={pagination["communities"]}
               totalEntries={totalCommunityEntries}
               onPageChange={handlePageChange}
               loading={loading}
@@ -936,7 +936,7 @@ const CollectionIdPage: React.FC = () => {
         open={isDocumentInfoDialogOpen}
         onClose={() => {
           setIsDocumentInfoDialogOpen(false);
-          setSelectedDocumentId('');
+          setSelectedDocumentId("");
         }}
       />
       <CollectionDialog

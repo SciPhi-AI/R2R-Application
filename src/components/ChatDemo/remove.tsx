@@ -1,5 +1,5 @@
-import { FileMinus, UserMinus, Minus } from 'lucide-react';
-import React from 'react';
+import { FileMinus, UserMinus, Minus } from "lucide-react";
+import React from "react";
 
 import {
   AlertDialog,
@@ -11,19 +11,19 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-import { Button } from '@/components/ui/Button';
-import { useUserContext } from '@/context/UserContext';
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/Button";
+import { useUserContext } from "@/context/UserContext";
 
 export interface RemoveButtonProps {
   itemId: string;
   collectionId: string;
-  itemType: 'document' | 'user' | 'entity' | 'relationship' | 'community';
+  itemType: "document" | "user" | "entity" | "relationship" | "community";
   onSuccess: () => void;
   showToast: (message: {
     title: string;
     description: string;
-    variant: 'default' | 'destructive' | 'success';
+    variant: "default" | "destructive" | "success";
   }) => void;
 }
 
@@ -40,30 +40,30 @@ export const RemoveButton: React.FC<RemoveButtonProps> = ({
     try {
       const client = await getClient();
       if (!client) {
-        throw new Error('Failed to get authenticated client');
+        throw new Error("Failed to get authenticated client");
       }
 
-      if (itemType === 'document') {
+      if (itemType === "document") {
         await client.collections.removeDocument({
           id: collectionId,
           documentId: itemId,
         });
-      } else if (itemType === 'user') {
+      } else if (itemType === "user") {
         await client.collections.removeUser({
           id: collectionId,
           userId: itemId,
         });
-      } else if (itemType === 'entity') {
+      } else if (itemType === "entity") {
         await client.graphs.removeEntity({
           collectionId: collectionId,
           entityId: itemId,
         });
-      } else if (itemType === 'relationship') {
+      } else if (itemType === "relationship") {
         await client.graphs.removeRelationship({
           collectionId: collectionId,
           relationshipId: itemId,
         });
-      } else if (itemType === 'community') {
+      } else if (itemType === "community") {
         await client.graphs.deleteCommunity({
           collectionId: collectionId,
           communityId: itemId,
@@ -71,7 +71,7 @@ export const RemoveButton: React.FC<RemoveButtonProps> = ({
       }
 
       showToast({
-        variant: 'success',
+        variant: "success",
         title: `${itemType.charAt(0).toUpperCase() + itemType.slice(1)} removed`,
         description: `The ${itemType} has been successfully removed from the collection`,
       });
@@ -80,24 +80,24 @@ export const RemoveButton: React.FC<RemoveButtonProps> = ({
       console.error(`Error removing ${itemType}:`, error);
       if (error instanceof Error) {
         showToast({
-          variant: 'destructive',
+          variant: "destructive",
           title: `Failed to remove ${itemType}`,
           description: error.message,
         });
       } else {
         showToast({
-          variant: 'destructive',
+          variant: "destructive",
           title: `Failed to remove ${itemType}`,
-          description: 'An unknown error occurred',
+          description: "An unknown error occurred",
         });
       }
     }
   };
 
   const Icon =
-    itemType === 'document'
+    itemType === "document"
       ? FileMinus
-      : itemType === 'user'
+      : itemType === "user"
         ? UserMinus
         : Minus;
 

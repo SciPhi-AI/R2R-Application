@@ -122,8 +122,8 @@ const Index: React.FC = () => {
     toast({
       title: `${switches[id].label} status changed`,
       description: (
-        <pre className="mt-2 mb-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">
+        <pre className="mt-2 mb-2 w-[340px] rounded-md bg-secondary p-4">
+          <code className="text-primary">
             {JSON.stringify({ [id]: checked }, null, 2)}
           </code>
         </pre>

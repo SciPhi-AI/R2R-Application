@@ -44,7 +44,7 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
-        <div className="max-h-[300px] overflow-y-auto p-4">
+        <div className="max-h-[300px] overflow-y-auto p-4 bg-secondary">
           {options.map((option) => (
             <div
               key={option.value}
