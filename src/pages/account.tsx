@@ -1,14 +1,14 @@
-import { Loader, UserRound, Pencil } from "lucide-react";
-import { User } from "r2r-js";
-import React, { useState, useEffect, useCallback } from "react";
+import { Loader, UserRound, Pencil } from 'lucide-react';
+import { User } from 'r2r-js';
+import React, { useState, useEffect, useCallback } from 'react';
 
-import { DeleteButton } from "@/components/ChatDemo/deleteButton";
-import Layout from "@/components/Layout";
-import { Button } from "@/components/ui/Button";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/components/ui/use-toast";
-import { useUserContext } from "@/context/UserContext";
+import { DeleteButton } from '@/components/ChatDemo/deleteButton';
+import Layout from '@/components/Layout';
+import { Button } from '@/components/ui/Button';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { useToast } from '@/components/ui/use-toast';
+import { useUserContext } from '@/context/UserContext';
 
 interface UpdateUserModalProps {
   open: boolean;
@@ -30,9 +30,9 @@ const UpdateUserModal: React.FC<UpdateUserModalProps> = ({
   currentData,
 }) => {
   const [formData, setFormData] = useState<UpdateUserData>({
-    name: currentData.name || "",
-    email: currentData.email || "",
-    bio: currentData.bio || "",
+    name: currentData.name || '',
+    email: currentData.email || '',
+    bio: currentData.bio || '',
   });
 
   if (!open) {
@@ -106,14 +106,14 @@ const Index: React.FC = () => {
       setLoading(true);
       const client = await getClient();
       if (!client) {
-        throw new Error("Failed to get authenticated client");
+        throw new Error('Failed to get authenticated client');
       }
 
       const user = await client.users.me();
       setUserProfile(user.results);
       setLoading(false);
     } catch (error) {
-      console.error("Error fetching user:", error);
+      console.error('Error fetching user:', error);
       setLoading(false);
     }
   }, [getClient]);
@@ -131,18 +131,18 @@ const Index: React.FC = () => {
       });
 
       toast({
-        variant: "success",
-        title: "Profile Updated",
-        description: "Your profile has been successfully updated",
+        variant: 'success',
+        title: 'Profile Updated',
+        description: 'Your profile has been successfully updated',
       });
 
       fetchUserAccount();
     } catch (error) {
-      console.error("Error updating user:", error);
+      console.error('Error updating user:', error);
       toast({
-        variant: "destructive",
-        title: "Update Failed",
-        description: "Failed to update profile. Please try again.",
+        variant: 'destructive',
+        title: 'Update Failed',
+        description: 'Failed to update profile. Please try again.',
       });
     }
   };
@@ -179,7 +179,7 @@ const Index: React.FC = () => {
                     </div>
                     <div>
                       <h2 className="text-xl font-semibold">
-                        {userProfile?.name || "Unnamed User"}
+                        {userProfile?.name || 'Unnamed User'}
                       </h2>
                       <p className="text-grey">{userProfile?.email}</p>
                     </div>
@@ -197,7 +197,7 @@ const Index: React.FC = () => {
                 <div className="space-y-6">
                   <div>
                     <h3 className="text-sm font-medium text-grey mb-2">Bio</h3>
-                    <p>{userProfile?.bio || "No bio provided"}</p>
+                    <p>{userProfile?.bio || 'No bio provided'}</p>
                   </div>
 
                   <div className="space-y-2">
@@ -213,7 +213,7 @@ const Index: React.FC = () => {
                         <span className="text-sm text-grey">Created At</span>
                         <p>
                           {new Date(
-                            userProfile?.createdAt || ""
+                            userProfile?.createdAt || ''
                           ).toLocaleDateString()}
                         </p>
                       </div>

@@ -1,27 +1,27 @@
-import { ChevronUpSquare, ChevronDownSquare, Filter } from "lucide-react";
-import React, { useState, useMemo } from "react";
+import { ChevronUpSquare, ChevronDownSquare, Filter } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
 
-import { Checkbox } from "@/components/ui/checkbox";
-import CopyableContent from "@/components/ui/CopyableContent";
-import Pagination from "@/components/ui/pagination";
+import { Checkbox } from '@/components/ui/checkbox';
+import CopyableContent from '@/components/ui/CopyableContent';
+import Pagination from '@/components/ui/pagination';
 import {
   Popover,
   PopoverTrigger,
   PopoverContent,
-} from "@/components/ui/popover";
+} from '@/components/ui/popover';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from '@/components/ui/tooltip';
 
 export interface Column<T> {
   key: string;
   label: string;
   sortable?: boolean;
   filterable?: boolean;
-  filterType?: "text" | "select" | "multiselect";
+  filterType?: 'text' | 'select' | 'multiselect';
   filterOptions?: string[];
   renderCell?: (item: T) => React.ReactNode;
   truncate?: boolean;
@@ -38,13 +38,13 @@ interface TableProps<T extends object> {
   onSelectItem?: (itemId: string, selected: boolean) => void;
   selectedItems?: string[];
   actions?: (item: T) => React.ReactNode;
-  initialSort?: { key: string; order: "asc" | "desc" };
+  initialSort?: { key: string; order: 'asc' | 'desc' };
   initialFilters?: Record<string, any>;
   filters?: Record<string, any>;
   tableHeight?: string;
   currentPage: number;
   onPageChange: (page: number) => void;
-  onSort?: (key: string, order: "asc" | "desc") => void;
+  onSort?: (key: string, order: 'asc' | 'desc') => void;
   onFilter?: (filters: Record<string, any>) => void;
   showPagination?: boolean;
   loading: boolean;
@@ -63,7 +63,7 @@ function Table<T extends object>({
   actions,
   initialSort,
   initialFilters,
-  tableHeight = "600px",
+  tableHeight = '600px',
   currentPage,
   onPageChange,
   onSort,
@@ -73,13 +73,13 @@ function Table<T extends object>({
   enableColumnToggle = true,
   totalEntries,
   getRowKey = (item: T) => {
-    const idKey = "id" as keyof T;
+    const idKey = 'id' as keyof T;
     const id = item[idKey];
     return id ? id.toString() : Math.random().toString();
   },
 }: TableProps<T>) {
   const [sort, setSort] = useState(
-    initialSort || { key: "", order: "asc" as const }
+    initialSort || { key: '', order: 'asc' as const }
   );
   const [filters, setFilters] = useState(initialFilters || {});
 
@@ -92,17 +92,17 @@ function Table<T extends object>({
         column &&
         value !== undefined &&
         value !== null &&
-        value !== "" &&
+        value !== '' &&
         ((Array.isArray(value) && value.length > 0) ||
-          typeof value === "string")
+          typeof value === 'string')
       ) {
         result = result.filter((item) => {
           const itemValue = (item as any)[key];
-          if (column.filterType === "multiselect") {
+          if (column.filterType === 'multiselect') {
             return value.includes(itemValue?.toLowerCase());
-          } else if (column.filterType === "select") {
+          } else if (column.filterType === 'select') {
             return itemValue === value;
-          } else if (typeof value === "string") {
+          } else if (typeof value === 'string') {
             return itemValue
               .toString()
               .toLowerCase()
@@ -118,10 +118,10 @@ function Table<T extends object>({
         const aValue = (a as any)[sort.key];
         const bValue = (b as any)[sort.key];
         if (aValue < bValue) {
-          return sort.order === "asc" ? -1 : 1;
+          return sort.order === 'asc' ? -1 : 1;
         }
         if (aValue > bValue) {
-          return sort.order === "asc" ? 1 : -1;
+          return sort.order === 'asc' ? 1 : -1;
         }
         return 0;
       });
@@ -173,9 +173,9 @@ function Table<T extends object>({
   };
 
   const handleSort = (key: string) => {
-    const newSort: { key: string; order: "asc" | "desc" } = {
+    const newSort: { key: string; order: 'asc' | 'desc' } = {
       key,
-      order: sort.key === key && sort.order === "asc" ? "desc" : "asc",
+      order: sort.key === key && sort.order === 'asc' ? 'desc' : 'asc',
     };
     setSort(newSort);
     if (onSort) {
@@ -203,9 +203,9 @@ function Table<T extends object>({
 
   const handleSelectItemInternal = (
     item: T,
-    checked: boolean | "indeterminate"
+    checked: boolean | 'indeterminate'
   ) => {
-    if (onSelectItem && typeof checked === "boolean") {
+    if (onSelectItem && typeof checked === 'boolean') {
       onSelectItem(getRowKey(item).toString(), checked);
     }
   };
@@ -215,14 +215,14 @@ function Table<T extends object>({
       return col.renderCell(item);
     }
     const content = (item as any)[col.key];
-    if (col.truncate && typeof content === "string") {
+    if (col.truncate && typeof content === 'string') {
       const truncated = `${content.substring(0, 8)}...${content.slice(-4)}`;
       return col.copyable ? (
         <CopyableContent content={content} truncated={truncated} />
       ) : (
         truncated
       );
-    } else if (col.truncatedSubstring && typeof content === "string") {
+    } else if (col.truncatedSubstring && typeof content === 'string') {
       const maxLength = 20;
       const truncated =
         content.length > maxLength
@@ -245,7 +245,7 @@ function Table<T extends object>({
       {/* Remove the column toggle popover as it's now handled in DocumentsTable */}
       <div
         className="overflow-x-auto border border-gray-600 rounded-[0.5em]"
-        style={{ height: tableHeight, maxWidth: "100%" }}
+        style={{ height: tableHeight, maxWidth: '100%' }}
       >
         <table className="w-full bg-primary h-full">
           <thead className="sticky top-0 bg-primary z-10">
@@ -274,7 +274,7 @@ function Table<T extends object>({
                               onClick={() => handleSort(col.key)}
                               className="p-1"
                             >
-                              {sort.key === col.key && sort.order === "asc" ? (
+                              {sort.key === col.key && sort.order === 'asc' ? (
                                 <ChevronUpSquare className="h-4 w-4 hover:bg-primary cursor-pointer" />
                               ) : (
                                 <ChevronDownSquare className="h-4 w-4 hover:bg-primary cursor-pointer" />
@@ -283,10 +283,10 @@ function Table<T extends object>({
                           </TooltipTrigger>
                           <TooltipContent className="bg-primary">
                             <p>
-                              Sort by {col.label}{" "}
-                              {sort.order === "asc"
-                                ? "Descending"
-                                : "Ascending"}
+                              Sort by {col.label}{' '}
+                              {sort.order === 'asc'
+                                ? 'Descending'
+                                : 'Ascending'}
                             </p>
                           </TooltipContent>
                         </Tooltip>
@@ -304,7 +304,7 @@ function Table<T extends object>({
                                 Filter by {col.label}
                               </h4>
                             </div>
-                            {col.filterType === "multiselect" ? (
+                            {col.filterType === 'multiselect' ? (
                               <div className="space-y-2">
                                 {col.filterOptions?.map((option) => (
                                   <div
@@ -317,7 +317,7 @@ function Table<T extends object>({
                                         filters[col.key] || []
                                       ).includes(option)}
                                       onCheckedChange={(
-                                        checked: boolean | "indeterminate"
+                                        checked: boolean | 'indeterminate'
                                       ) => {
                                         const currentFilters =
                                           filters[col.key] || [];
@@ -339,9 +339,9 @@ function Table<T extends object>({
                                   </div>
                                 ))}
                               </div>
-                            ) : col.filterType === "select" ? (
+                            ) : col.filterType === 'select' ? (
                               <select
-                                value={filters[col.key] || ""}
+                                value={filters[col.key] || ''}
                                 onChange={(e) =>
                                   handleFilter(col.key, e.target.value)
                                 }
@@ -358,7 +358,7 @@ function Table<T extends object>({
                               <input
                                 type="text"
                                 placeholder={`Filter ${col.label}...`}
-                                value={filters[col.key] || ""}
+                                value={filters[col.key] || ''}
                                 onChange={(e) =>
                                   handleFilter(col.key, e.target.value)
                                 }
@@ -388,7 +388,7 @@ function Table<T extends object>({
                       checked={selectedItems.includes(
                         getRowKey(item).toString()
                       )}
-                      onCheckedChange={(checked: boolean | "indeterminate") =>
+                      onCheckedChange={(checked: boolean | 'indeterminate') =>
                         handleSelectItemInternal(item, checked as boolean)
                       }
                     />
@@ -412,7 +412,7 @@ function Table<T extends object>({
               </tr>
             ))}
             {Array.from({ length: emptyRowsCount }).map((_, index) => (
-              <tr key={`empty-${index}`} style={{ height: "50px" }}>
+              <tr key={`empty-${index}`} style={{ height: '50px' }}>
                 {onSelectItem && <td></td>}
                 {columns.map((col) => (
                   <td

@@ -1,26 +1,26 @@
-import { Loader, FileSearch2, SlidersHorizontal } from "lucide-react";
-import { DocumentResponse } from "r2r-js";
-import React, { useState, useMemo } from "react";
+import { Loader, FileSearch2, SlidersHorizontal } from 'lucide-react';
+import { DocumentResponse } from 'r2r-js';
+import React, { useState, useMemo } from 'react';
 
-import { DeleteButton } from "@/components/ChatDemo/deleteButton";
-import DownloadFileContainer from "@/components/ChatDemo/DownloadFileContainer";
-import Table, { Column } from "@/components/ChatDemo/Table";
-import UpdateButtonContainer from "@/components/ChatDemo/UpdateButtonContainer";
-import { UploadButton } from "@/components/ChatDemo/upload";
-import DocumentInfoDialog from "@/components/ChatDemo/utils/documentDialogInfo";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/Button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
+import { DeleteButton } from '@/components/ChatDemo/deleteButton';
+import DownloadFileContainer from '@/components/ChatDemo/DownloadFileContainer';
+import Table, { Column } from '@/components/ChatDemo/Table';
+import UpdateButtonContainer from '@/components/ChatDemo/UpdateButtonContainer';
+import { UploadButton } from '@/components/ChatDemo/upload';
+import DocumentInfoDialog from '@/components/ChatDemo/utils/documentDialogInfo';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/Button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
 import {
   Popover,
   PopoverTrigger,
   PopoverContent,
-} from "@/components/ui/popover";
-import { useToast } from "@/components/ui/use-toast";
-import { IngestionStatus, KGExtractionStatus } from "@/types";
+} from '@/components/ui/popover';
+import { useToast } from '@/components/ui/use-toast';
+import { IngestionStatus, KGExtractionStatus } from '@/types';
 
-import ExtractButtonContainer from "./ExtractContainer";
+import ExtractButtonContainer from './ExtractContainer';
 
 interface DocumentsTableProps {
   documents: DocumentResponse[];
@@ -63,10 +63,10 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
   onPageChange,
 }) => {
   const { toast } = useToast();
-  const [selectedDocumentId, setSelectedDocumentId] = useState("");
+  const [selectedDocumentId, setSelectedDocumentId] = useState('');
   const [isDocumentInfoDialogOpen, setIsDocumentInfoDialogOpen] =
     useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleSelectAllInternal = (selected: boolean) => {
     onSelectAll(selected);
@@ -78,94 +78,94 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
 
   const columns: Column<DocumentResponse>[] = [
     {
-      key: "title",
-      label: "Title",
+      key: 'title',
+      label: 'Title',
       truncatedSubstring: true,
       sortable: true,
       copyable: true,
     },
-    { key: "id", label: "Document ID", truncate: true, copyable: true },
-    { key: "ownerId", label: "Owner ID", truncate: true, copyable: true },
+    { key: 'id', label: 'Document ID', truncate: true, copyable: true },
+    { key: 'ownerId', label: 'Owner ID', truncate: true, copyable: true },
     {
-      key: "collectionIds",
-      label: "Collection IDs",
+      key: 'collectionIds',
+      label: 'Collection IDs',
       renderCell: (doc) =>
         doc.collectionIds && doc.collectionIds.length > 0
-          ? doc.collectionIds.join(", ")
-          : "N/A",
+          ? doc.collectionIds.join(', ')
+          : 'N/A',
       selected: false,
     },
     {
-      key: "ingestionStatus",
-      label: "Ingestion",
+      key: 'ingestionStatus',
+      label: 'Ingestion',
       filterable: true,
-      filterType: "multiselect",
-      filterOptions: ["success", "failed", "pending", "enriched"],
+      filterType: 'multiselect',
+      filterOptions: ['success', 'failed', 'pending', 'enriched'],
       renderCell: (doc) => {
-        let variant: "success" | "destructive" | "pending" | "enriched" =
-          "pending";
+        let variant: 'success' | 'destructive' | 'pending' | 'enriched' =
+          'pending';
         switch (doc.ingestionStatus) {
           case IngestionStatus.SUCCESS:
-            variant = "success";
+            variant = 'success';
             break;
           case IngestionStatus.ENRICHED:
-            variant = "success";
+            variant = 'success';
             break;
           case IngestionStatus.FAILED:
-            variant = "destructive";
+            variant = 'destructive';
             break;
           case IngestionStatus.PENDING:
-            variant = "pending";
+            variant = 'pending';
             break;
         }
         return <Badge variant={variant}>{doc.ingestionStatus}</Badge>;
       },
     },
     {
-      key: "extractionStatus",
-      label: "Extraction",
+      key: 'extractionStatus',
+      label: 'Extraction',
       filterable: true,
-      filterType: "multiselect",
-      filterOptions: ["success", "failed", "pending", "processing", "enriched"],
+      filterType: 'multiselect',
+      filterOptions: ['success', 'failed', 'pending', 'processing', 'enriched'],
       renderCell: (doc) => {
-        let variant: "success" | "destructive" | "pending" = "pending";
+        let variant: 'success' | 'destructive' | 'pending' = 'pending';
         switch (doc.extractionStatus) {
           case KGExtractionStatus.SUCCESS:
-            variant = "success";
+            variant = 'success';
             break;
           case KGExtractionStatus.ENRICHED:
-            variant = "success";
+            variant = 'success';
             break;
           case KGExtractionStatus.FAILED:
-            variant = "destructive";
+            variant = 'destructive';
             break;
           case KGExtractionStatus.PENDING:
-            variant = "pending";
+            variant = 'pending';
             break;
           case KGExtractionStatus.PROCESSING:
-            variant = "pending";
+            variant = 'pending';
             break;
         }
         return <Badge variant={variant}>{doc.extractionStatus}</Badge>;
       },
     },
-    { key: "documentType", label: "Type", selected: false },
+    { key: 'documentType', label: 'Type', selected: false },
     {
-      key: "metadata",
-      label: "Metadata",
+      key: 'metadata',
+      label: 'Metadata',
       renderCell: (doc) => JSON.stringify(doc.metadata),
       selected: false,
     },
-    { key: "version", label: "Version", selected: false },
+    { key: 'version', label: 'Version', selected: false },
     {
-      key: "createdAt",
-      label: "Created At",
+      key: 'createdAt',
+      label: 'Created At',
       sortable: true,
       renderCell: (doc) => new Date(doc.createdAt).toLocaleString(),
     },
     {
-      key: "updatedAt",
-      label: "Updated At",
+      key: 'updatedAt',
+      label: 'Updated At',
       sortable: true,
       renderCell: (doc) => new Date(doc.updatedAt).toLocaleString(),
       selected: false,
@@ -188,7 +188,7 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
         />
         <DownloadFileContainer
           id={doc.id}
-          fileName={doc.title ? doc.title : ""}
+          fileName={doc.title ? doc.title : ''}
           showToast={toast}
         />
         <Button
@@ -257,9 +257,9 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
                           id={`column-toggle-${col.key}`}
                           checked={visibleColumns[col.key]}
                           onCheckedChange={(
-                            checked: boolean | "indeterminate"
+                            checked: boolean | 'indeterminate'
                           ) => {
-                            if (typeof checked === "boolean") {
+                            if (typeof checked === 'boolean') {
                               onToggleColumn(col.key, checked);
                             }
                           }}
@@ -345,7 +345,7 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
           open={isDocumentInfoDialogOpen}
           onClose={() => {
             setIsDocumentInfoDialogOpen(false);
-            setSelectedDocumentId("");
+            setSelectedDocumentId('');
           }}
         />
       )}
