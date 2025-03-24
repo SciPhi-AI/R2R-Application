@@ -43,6 +43,7 @@ interface DocumentsTableProps {
   onFiltersChange: (filters: Record<string, any>) => void;
   searchQuery: string;
   onSearchQueryChange: (query: string) => void;
+  middleContent?: React.ReactNode;
 }
 
 const DocumentsTable: React.FC<DocumentsTableProps> = ({
@@ -61,6 +62,7 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
   totalEntries,
   currentPage = 1,
   onPageChange,
+  middleContent
 }) => {
   const { toast } = useToast();
   const [selectedDocumentId, setSelectedDocumentId] = useState('');
@@ -277,16 +279,8 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
               </PopoverContent>
             </Popover>
 
-            {/* Middle: Search input */}
-            <div className="flex-grow mx-4">
-              <Input
-                placeholder="Search by Title or Document ID"
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                }}
-              />
-            </div>
+            {/* New search bar should be here */}
+            {middleContent}
 
             {/* Right side: Upload and Delete buttons */}
             {!hideActions && (
