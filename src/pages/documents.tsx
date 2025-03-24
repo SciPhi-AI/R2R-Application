@@ -9,8 +9,6 @@ import { IngestionStatus } from '@/types';
 const PAGE_SIZE = 1000;
 const ITEMS_PER_PAGE = 10;
 
-
-
 const Index: React.FC = () => {
   const { pipeline, getClient } = useUserContext();
   const [documents, setDocuments] = useState<DocumentResponse[]>([]);
@@ -144,14 +142,12 @@ const Index: React.FC = () => {
     // Apply search query with improved handling
     if (searchQuery && searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (doc) => {
-          // Ensure title and id are strings before using toLowerCase
-          const title = doc.title ? String(doc.title).toLowerCase() : '';
-          const id = doc.id ? String(doc.id).toLowerCase() : '';
-          return title.includes(query) || id.includes(query);
-        }
-      );
+      filtered = filtered.filter((doc) => {
+        // Ensure title and id are strings before using toLowerCase
+        const title = doc.title ? String(doc.title).toLowerCase() : '';
+        const id = doc.id ? String(doc.id).toLowerCase() : '';
+        return title.includes(query) || id.includes(query);
+      });
     }
 
     return filtered;
@@ -201,7 +197,7 @@ const Index: React.FC = () => {
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
-  
+
   // Direct search input handler
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     handleSearchQueryChange(e.target.value);
@@ -209,11 +205,9 @@ const Index: React.FC = () => {
 
   return (
     <Layout pageTitle="Documents" includeFooter={false}>
-      
       <main className="w-full flex flex-col container h-screen-[calc(100%-4rem)]">
         <div className="relative flex-grow bg-zinc-900 mt-[4rem] sm:mt-[4rem]">
           <div className="mx-auto max-w-6xl mb-12 mt-4 p-4 h-full">
-            
             <DocumentsTable
               documents={filteredDocuments}
               loading={loading}
@@ -236,7 +230,7 @@ const Index: React.FC = () => {
               // pass search bar to format correctly
               middleContent={
                 <div className="w-full px-2">
-                  <input 
+                  <input
                     type="text"
                     placeholder="Search by Title or Document ID"
                     value={searchQuery}
@@ -251,6 +245,6 @@ const Index: React.FC = () => {
       </main>
     </Layout>
   );
-}
+};
 
 export default Index;

@@ -62,7 +62,7 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
   totalEntries,
   currentPage = 1,
   onPageChange,
-  middleContent
+  middleContent,
 }) => {
   const { toast } = useToast();
   const [selectedDocumentId, setSelectedDocumentId] = useState('');

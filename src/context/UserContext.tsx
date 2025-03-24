@@ -281,7 +281,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
           });
         } catch (error) {
           console.error('Failed to create user:', error);
-          
+
           //better error handling to display error to user if duplicate email
           const errorStr = JSON.stringify(error).toLowerCase();
           if (
@@ -292,7 +292,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
               'An account with this email already exists. You may have previously signed in with this email through Google, GitHub, or another method.'
             );
           }
-          
+
           // throw original error if not duplicate email
           throw error;
         }
