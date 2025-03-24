@@ -17,7 +17,10 @@ interface AppData {
   prompts: Prompt[];
 }
 
-const renderNestedConfig = (config: Record<string, any>, depth = 0): JSX.Element => {
+const renderNestedConfig = (
+  config: Record<string, any>,
+  depth = 0
+): JSX.Element => {
   // Update getFontSize function to handle both key and value lengths
   const getFontSize = (content: string, isKey: boolean = false): string => {
     const length = content.length;
@@ -33,11 +36,14 @@ const renderNestedConfig = (config: Record<string, any>, depth = 0): JSX.Element
   };
 
   if (typeof config !== 'object' || config === null) {
-    const valueStr = typeof config === 'string' ? `"${config}"` : String(config);
+    const valueStr =
+      typeof config === 'string' ? `"${config}"` : String(config);
     return (
       <div className="bg-zinc-700 rounded p-3 ml-6 text-gray-300">
         <span className="text-accent-base font-normal">Value: </span>
-        <span className={`whitespace-pre-wrap font-normal ${getFontSize(valueStr)}`}>
+        <span
+          className={`whitespace-pre-wrap font-normal ${getFontSize(valueStr)}`}
+        >
           {valueStr}
         </span>
       </div>
@@ -46,106 +52,133 @@ const renderNestedConfig = (config: Record<string, any>, depth = 0): JSX.Element
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-auto">
-      {Object.entries(config).sort(([keyA], [keyB]) => {
-        // Always put extraFields last
-        if (keyA === 'extraFields') return 1;
-        if (keyB === 'extraFields') return -1;
-        
-        // Sort other keys normally
-        const groupOrder = { 'extraParsers': 0, 'parserOverrides': 1 };
-        if (keyA in groupOrder && keyB in groupOrder) return groupOrder[keyA] - groupOrder[keyB];
-        if (keyA in groupOrder) return -1;
-        if (keyB in groupOrder) return 1;
-        return keyA.localeCompare(keyB);
-      }).map(([key, value]) => {
-        const contentLength = JSON.stringify(value).length;
-        const isComplexObject = typeof value === 'object' && value !== null && !Array.isArray(value);
-        
-        // Special handling for grouped and compact keys
-        const isGroupedKey = ['extraFields', 'extraParsers', 'parserOverrides'].includes(key);
-        const isSpecialKey = ['routeLimits', 'userLimits'].includes(key);
-        const needsCompactLayout = key === 'parserOverrides' || isSpecialKey;
-        
-        // Modify spanning logic
-        const shouldSpanTwo = !isSpecialKey && !isGroupedKey && contentLength > 100 && !isComplexObject;
-        const shouldSpanThree = !isSpecialKey && !isGroupedKey && (isComplexObject || contentLength > 300);
-        
-        const spanClass = shouldSpanThree 
-          ? 'md:col-span-2 lg:col-span-3' 
-          : shouldSpanTwo 
-            ? 'md:col-span-2'
-            : needsCompactLayout
-              ? 'col-span-1 max-w-[300px]' // Add max-width for compact containers
-              : isGroupedKey
-                ? 'col-span-1'
-                : '';
+      {Object.entries(config)
+        .sort(([keyA], [keyB]) => {
+          // Always put extraFields last
+          if (keyA === 'extraFields') return 1;
+          if (keyB === 'extraFields') return -1;
 
-        // Use compact container for special cases
-        const containerClass = needsCompactLayout
-          ? 'bg-zinc-700 rounded p-3 h-fit'
-          : isGroupedKey
-            ? 'bg-zinc-700 rounded p-3'
-            : 'bg-zinc-700 rounded p-4';
+          // Sort other keys normally
+          const groupOrder: Record<string, number> = {
+            extraParsers: 0,
+            parserOverrides: 1,
+          };
+          if (keyA in groupOrder && keyB in groupOrder)
+            return groupOrder[keyA] - groupOrder[keyB];
+          if (keyA in groupOrder) return -1;
+          if (keyB in groupOrder) return 1;
+          return keyA.localeCompare(keyB);
+        })
+        .map(([key, value]) => {
+          const contentLength = JSON.stringify(value).length;
+          const isComplexObject =
+            typeof value === 'object' &&
+            value !== null &&
+            !Array.isArray(value);
 
-        // For extraFields, format without curly brackets
-        const valueStr = key === 'extraFields' && typeof value === 'object'
-          ? JSON.stringify(value, null, 2)
-            .replace(/^{/, '') // Remove opening curly brace
-            .replace(/}$/, '') // Remove closing curly brace
-            .trim()
-          : typeof value === 'string' 
-            ? `"${value}"` 
-            : Array.isArray(value)
-              ? `[${value.map(item => typeof item === 'string' ? `"${item}"` : JSON.stringify(item)).join(', ')}]`
-              : String(value);
-        
-        return (
-          <div 
-            key={key} 
-            className={`${containerClass} ${spanClass}`}
-          >
-            <div
-              className="text-white"
-              style={{ paddingLeft: `${depth * 16}px` }}
-            >
-              <span className="text-accent-base font-normal">Key: </span>
-              <span className={`font-normal ${getFontSize(key, true)}`}>{key}</span>
-              <br />
-              {typeof value === 'object' && value !== null && key !== 'extraFields' ? (
-                Array.isArray(value) ? (
-                  <span className={`whitespace-pre-wrap font-normal ${getFontSize(valueStr)}`}>
-                    <span className="text-accent-base">Value: </span>
-                    {valueStr}
-                  </span>
-                ) : (
-                  <div className="mt-2">
-                    {renderNestedConfig(value, depth + 1)}
-                  </div>
-                )
-              ) : (
-                <span className="font-normal">
-                  {key === 'extraFields' ? (
-                    <span className={`whitespace-pre-wrap ${getFontSize(valueStr)}`}>
+          // Special handling for grouped and compact keys
+          const isGroupedKey = [
+            'extraFields',
+            'extraParsers',
+            'parserOverrides',
+          ].includes(key);
+          const isSpecialKey = ['routeLimits', 'userLimits'].includes(key);
+          const needsCompactLayout = key === 'parserOverrides' || isSpecialKey;
+
+          // Modify spanning logic
+          const shouldSpanTwo =
+            !isSpecialKey &&
+            !isGroupedKey &&
+            contentLength > 100 &&
+            !isComplexObject;
+          const shouldSpanThree =
+            !isSpecialKey &&
+            !isGroupedKey &&
+            (isComplexObject || contentLength > 300);
+
+          const spanClass = shouldSpanThree
+            ? 'md:col-span-2 lg:col-span-3'
+            : shouldSpanTwo
+              ? 'md:col-span-2'
+              : needsCompactLayout
+                ? 'col-span-1 max-w-[300px]' // Add max-width for compact containers
+                : isGroupedKey
+                  ? 'col-span-1'
+                  : '';
+
+          // Use compact container for special cases
+          const containerClass = needsCompactLayout
+            ? 'bg-zinc-700 rounded p-3 h-fit'
+            : isGroupedKey
+              ? 'bg-zinc-700 rounded p-3'
+              : 'bg-zinc-700 rounded p-4';
+
+          // For extraFields, format without curly brackets
+          const valueStr =
+            key === 'extraFields' && typeof value === 'object'
+              ? JSON.stringify(value, null, 2)
+                  .replace(/^{/, '') // Remove opening curly brace
+                  .replace(/}$/, '') // Remove closing curly brace
+                  .trim()
+              : typeof value === 'string'
+                ? `"${value}"`
+                : Array.isArray(value)
+                  ? `[${value.map((item) => (typeof item === 'string' ? `"${item}"` : JSON.stringify(item))).join(', ')}]`
+                  : String(value);
+
+          return (
+            <div key={key} className={`${containerClass} ${spanClass}`}>
+              <div
+                className="text-white"
+                style={{ paddingLeft: `${depth * 16}px` }}
+              >
+                <span className="text-accent-base font-normal">Key: </span>
+                <span className={`font-normal ${getFontSize(key, true)}`}>
+                  {key}
+                </span>
+                <br />
+                {typeof value === 'object' &&
+                value !== null &&
+                key !== 'extraFields' ? (
+                  Array.isArray(value) ? (
+                    <span
+                      className={`whitespace-pre-wrap font-normal ${getFontSize(valueStr)}`}
+                    >
+                      <span className="text-accent-base">Value: </span>
                       {valueStr}
                     </span>
                   ) : (
-                    <>
-                      <span className="text-accent-base">Value: </span>
-                      <span className={`whitespace-pre-wrap ${getFontSize(valueStr)}`}>
+                    <div className="mt-2">
+                      {renderNestedConfig(value, depth + 1)}
+                    </div>
+                  )
+                ) : (
+                  <span className="font-normal">
+                    {key === 'extraFields' ? (
+                      <span
+                        className={`whitespace-pre-wrap ${getFontSize(valueStr)}`}
+                      >
                         {valueStr}
                       </span>
-                    </>
-                  )}
-                </span>
-              )}
+                    ) : (
+                      <>
+                        <span className="text-accent-base">Value: </span>
+                        <span
+                          className={`whitespace-pre-wrap ${getFontSize(valueStr)}`}
+                        >
+                          {valueStr}
+                        </span>
+                      </>
+                    )}
+                  </span>
+                )}
+              </div>
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
     </div>
   );
 };
-
 
 interface PromptRowProps {
   name: string;
@@ -176,7 +209,9 @@ const PromptRow: React.FC<PromptRowProps> = ({ name, template, onEdit }) => {
             </button>
           </div>
         </div>
-        <div className={`text-white mt-1 text-sm ${isExpanded ? 'whitespace-pre-wrap' : 'truncate'}`}>
+        <div
+          className={`text-white mt-1 text-sm ${isExpanded ? 'whitespace-pre-wrap' : 'truncate'}`}
+        >
           {template}
         </div>
       </div>
@@ -243,19 +278,23 @@ const Index: React.FC = () => {
         key={letter}
         className="px-2 py-1 text-white hover:text-accent-base"
         style={{ letterSpacing: '0.8em' }} // Adjust the spacing as needed
-        onClick={() => document.getElementById(letter)?.scrollIntoView({ behavior: 'smooth' })}
+        onClick={() =>
+          document
+            .getElementById(letter)
+            ?.scrollIntoView({ behavior: 'smooth' })
+        }
       >
         {letter}
       </button>
     ));
-  };  
+  };
 
   // Function to render sections alphabetically
   const renderAlphabeticalConfigSections = () => {
     const groupedSections: Record<string, JSX.Element[]> = {};
 
     // First, sort the config keys alphabetically
-    const sortedKeys = Object.keys(config).sort((a, b) => 
+    const sortedKeys = Object.keys(config).sort((a, b) =>
       a.toLowerCase().localeCompare(b.toLowerCase())
     );
 
@@ -281,9 +320,7 @@ const Index: React.FC = () => {
       .map((letter) => (
         <div key={letter} id={letter} className="mb-6">
           <h4 className="text-xl font-bold text-accent-base pb-2">{letter}</h4>
-          <div>
-            {groupedSections[letter]}
-          </div>
+          <div>{groupedSections[letter]}</div>
         </div>
       ));
   };
