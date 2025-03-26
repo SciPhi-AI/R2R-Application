@@ -9,7 +9,6 @@ import React, { FC, useEffect, useState, useRef } from 'react';
 
 import PdfPreviewDialog from '@/components/ChatDemo/utils/pdfPreviewDialog';
 import { useUserContext } from '@/context/UserContext';
-import { extractBlocks } from '@/lib/utils';
 import { Message } from '@/types';
 
 import { Answer } from './answer';
@@ -17,12 +16,9 @@ import { DefaultQueries } from './DefaultQueries';
 import MessageBubble from './MessageBubble';
 import { UploadButton } from './upload';
 
-const CHUNK_SEARCH_STREAM_MARKER = '<chunk_search>';
-const CHUNK_SEARCH_STREAM_END_MARKER = '</chunk_search>';
-const GRAPH_SEARCH_STREAM_MARKER = '<graph_search>';
-const GRAPH_SEARCH_STREAM_END_MARKER = '</graph_search>';
-const LLM_START_TOKEN = '<completion>';
-const LLM_END_TOKEN = '</completion>';
+// SSE event types
+const SEARCH_RESULTS_EVENT = 'search_results';
+const MESSAGE_EVENT = 'message';
 
 export const Result: FC<{
   query: string;
@@ -108,7 +104,7 @@ export const Result: FC<{
   ) => {
     setMessages((prevMessages) => {
       const lastMessage = prevMessages[prevMessages.length - 1];
-      if (lastMessage.role === 'assistant') {
+      if (lastMessage && lastMessage.role === 'assistant') {
         return [
           ...prevMessages.slice(0, -1),
           {
@@ -146,7 +142,7 @@ export const Result: FC<{
     }
   };
 
-  const parseStreaming = async (query: string): Promise<void> => {
+  const parseSSEResponse = async (query: string): Promise<void> => {
     if (isProcessingQuery) {
       return;
     }
@@ -171,26 +167,11 @@ export const Result: FC<{
       sources: {},
     };
 
-    // Start with an empty assistant message
-    const newAssistantMessage: Message = {
-      role: 'assistant',
-      content: '',
-      id: (Date.now() + 1).toString(),
-      timestamp: Date.now() + 1,
-      isStreaming: true,
-      sources: {},
-      searchPerformed: false,
-    };
-
-    // Push the user message immediately
+    // Add the user message to the chat
     setMessages((prevMessages) => [...prevMessages, newUserMessage]);
 
-    // We'll accumulate raw text in this buffer
-    let buffer = '';
-    // Flags and placeholders
-    let inLLMResponse = false; // Are we inside <completion> blocks?
-    let fullContent = ''; // Combined text for the LLM
-    let assistantResponse = ''; // The final text for the assistant
+    // Initialize variables for assembling the response
+    let fullContent = '';
     let vectorSearchSources: string | null = null;
     let kgSearchResult: string | null = null;
     let searchPerformed = false;
@@ -252,7 +233,10 @@ export const Result: FC<{
         graphSettings: graphSearchSettings,
       };
 
-      // Call the streaming endpoint
+      // Create empty assistant message to start streaming into
+      updateLastMessage('', {}, true, false);
+
+      // Call the appropriate retrieval method based on mode
       const streamResponse =
         mode === 'rag_agent'
           ? await client.retrieval.agent({
@@ -267,10 +251,12 @@ export const Result: FC<{
               searchSettings,
             });
 
+      // Get the reader from the response
       const reader = streamResponse.getReader();
       const decoder = new TextDecoder();
+      let buffer = '';
 
-      // Continuously read chunks
+      // Process the stream
       while (true) {
         if (signal.aborted) {
           reader.cancel();
@@ -284,139 +270,102 @@ export const Result: FC<{
 
         buffer += decoder.decode(value, { stream: true });
 
-        //
-        // 1) Extract any <chunk_search> blocks
-        //
-        const chunkSearchResult = extractBlocks(
-          buffer,
-          CHUNK_SEARCH_STREAM_MARKER,
-          CHUNK_SEARCH_STREAM_END_MARKER
-        );
-        buffer = chunkSearchResult.newBuffer; // leftover data
-        for (const rawJson of chunkSearchResult.blocks) {
+        // Process complete SSE events from the buffer
+        const events = buffer.split('\n\n');
+        buffer = events.pop() || ''; // Keep the last potentially incomplete event in the buffer
+
+        for (const event of events) {
+          if (!event.trim()) {
+            continue;
+          }
+
+          const lines = event.split('\n');
+          const eventType = lines[0].startsWith('event: ')
+            ? lines[0].slice(7)
+            : '';
+          const dataLine = lines.find((line) => line.startsWith('data: '));
+
+          if (!dataLine) {
+            continue;
+          }
+
+          const jsonStr = dataLine.slice(6);
+
           try {
-            vectorSearchSources = rawJson;
-            searchPerformed = true;
+            const eventData = JSON.parse(jsonStr);
+
+            if (eventType === SEARCH_RESULTS_EVENT) {
+              // Handle search results
+              if (eventData.data && eventData.data.chunk_search_results) {
+                vectorSearchSources = JSON.stringify(eventData);
+                searchPerformed = true;
+                setIsSearching(false);
+              }
+              if (eventData.data && eventData.data.graph_search_results) {
+                kgSearchResult = JSON.stringify(eventData);
+                searchPerformed = true;
+                setIsSearching(false);
+              }
+
+              // Update message with search results
+              updateLastMessage(
+                fullContent,
+                {
+                  vector: vectorSearchSources,
+                  kg: kgSearchResult,
+                },
+                true,
+                searchPerformed
+              );
+            } else if (eventType === MESSAGE_EVENT) {
+              // Handle incremental content delta
+              if (eventData.delta && eventData.delta.content) {
+                const contentItems = eventData.delta.content;
+                for (const item of contentItems) {
+                  if (
+                    item.type === 'text' &&
+                    item.payload &&
+                    item.payload.value
+                  ) {
+                    fullContent += item.payload.value;
+                  }
+                }
+
+                // Update message with new content
+                updateLastMessage(
+                  fullContent,
+                  {
+                    vector: vectorSearchSources,
+                    kg: kgSearchResult,
+                  },
+                  true,
+                  searchPerformed
+                );
+              }
+            }
           } catch (err) {
-            console.error('Failed to parse chunk_search JSON:', err, rawJson);
-          }
-          // Update state so user sees search results
-          updateLastMessage(
-            fullContent,
-            {
-              vector: vectorSearchSources,
-              kg: kgSearchResult,
-            },
-            true,
-            searchPerformed
-          );
-          setIsSearching(false);
-        }
-
-        //
-        // 2) Extract any <graph_search> blocks
-        //
-        const graphSearchResultBlocks = extractBlocks(
-          buffer,
-          GRAPH_SEARCH_STREAM_MARKER,
-          GRAPH_SEARCH_STREAM_END_MARKER
-        );
-        buffer = graphSearchResultBlocks.newBuffer;
-        for (const rawJson of graphSearchResultBlocks.blocks) {
-          try {
-            kgSearchResult = rawJson;
-            searchPerformed = true;
-          } catch (err) {
-            console.error('Failed to parse graph_search JSON:', err, rawJson);
-          }
-          // Update
-          updateLastMessage(
-            fullContent,
-            {
-              vector: vectorSearchSources,
-              kg: kgSearchResult,
-            },
-            true,
-            searchPerformed
-          );
-          setIsSearching(false);
-        }
-
-        //
-        // 3) Handle <completion> tokens for LLM text
-        //
-        //   The approach below is a simplified example, just like your original code,
-        //   but we keep leftover text in `buffer` in case the marker is partial.
-        //
-        if (!inLLMResponse) {
-          // See if we have the start token
-          const startIdx = buffer.indexOf(LLM_START_TOKEN);
-          if (startIdx !== -1) {
-            inLLMResponse = true;
-            // Discard anything before <completion>
-            buffer = buffer.slice(startIdx + LLM_START_TOKEN.length);
-          }
-        }
-
-        // If we're in LLM mode, check if we found the end token
-        if (inLLMResponse) {
-          const endIdx = buffer.indexOf(LLM_END_TOKEN);
-          if (endIdx !== -1) {
-            // We have a complete chunk of LLM text
-            const chunk = buffer.slice(0, endIdx);
-            buffer = buffer.slice(endIdx + LLM_END_TOKEN.length);
-            inLLMResponse = false;
-
-            fullContent += chunk;
-            assistantResponse += chunk;
-            updateLastMessage(
-              fullContent,
-              {
-                vector: vectorSearchSources,
-                kg: kgSearchResult,
-              },
-              true,
-              searchPerformed
-            );
-          } else {
-            // No closing token yet, so the entire buffer is partial LLM text
-            // We append it and clear buffer for next read
-            fullContent += buffer;
-            assistantResponse += buffer;
-            updateLastMessage(
-              fullContent,
-              {
-                vector: vectorSearchSources,
-                kg: kgSearchResult,
-              },
-              true,
-              searchPerformed
-            );
-            buffer = '';
+            console.error('Error parsing SSE event data:', err, jsonStr);
           }
         }
       }
 
-      // After the loop completes, we have the final `assistantResponse`
-      if (assistantResponse) {
-        updateLastMessage(
-          assistantResponse,
-          { vector: vectorSearchSources, kg: kgSearchResult },
-          false,
-          searchPerformed
-        );
-        try {
-          await client.conversations.addMessage({
-            id: currentConversationId,
-            role: 'assistant',
-            content: assistantResponse,
-          });
-        } catch (error) {
-          console.error(
-            'Error adding assistant message to conversation:',
-            error
-          );
-        }
+      // Final update with complete content
+      updateLastMessage(
+        fullContent,
+        { vector: vectorSearchSources, kg: kgSearchResult },
+        false,
+        searchPerformed
+      );
+
+      // Save the assistant's message to the conversation
+      try {
+        await client.conversations.addMessage({
+          id: currentConversationId,
+          role: 'assistant',
+          content: fullContent,
+        });
+      } catch (error) {
+        console.error('Error adding assistant message to conversation:', error);
       }
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -449,11 +398,11 @@ export const Result: FC<{
       return;
     }
 
-    const debouncedParseStreaming = setTimeout(() => {
-      parseStreaming(query);
+    const debouncedParseSSE = setTimeout(() => {
+      parseSSEResponse(query);
     }, 500);
 
-    return () => clearTimeout(debouncedParseStreaming);
+    return () => clearTimeout(debouncedParseSSE);
   }, [query, userId, pipelineUrl]);
 
   const handleOpenPdfPreview = (id: string, page?: number) => {

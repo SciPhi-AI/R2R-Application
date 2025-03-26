@@ -101,33 +101,3 @@ export function formatFileSize(bytes: number | undefined): string {
 
   return `${size.toFixed(2)} ${units[unitIndex]}`;
 }
-
-export function extractBlocks(
-  buffer: string,
-  markerStart: string,
-  markerEnd: string
-): { blocks: string[]; newBuffer: string } {
-  const blocks: string[] = [];
-  let startIdx = buffer.indexOf(markerStart);
-
-  while (startIdx !== -1) {
-    // see if there's a matching </markerEnd> AFTER <markerStart>
-    const endIdx = buffer.indexOf(markerEnd, startIdx + markerStart.length);
-    if (endIdx === -1) {
-      // No closing tag yet -> partial data. We'll wait for next chunk
-      break;
-    }
-
-    const blockContent = buffer.slice(startIdx + markerStart.length, endIdx);
-    blocks.push(blockContent);
-
-    // Remove the entire <markerStart>...</markerEnd> from buffer
-    buffer =
-      buffer.slice(0, startIdx) + buffer.slice(endIdx + markerEnd.length);
-
-    // Look for the *next* <markerStart>
-    startIdx = buffer.indexOf(markerStart);
-  }
-
-  return { blocks, newBuffer: buffer };
-}
