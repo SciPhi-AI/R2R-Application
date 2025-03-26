@@ -21,6 +21,7 @@ import Table, { Column } from '@/components/ChatDemo/Table';
 import CollectionDialog from '@/components/ChatDemo/utils/collectionDialog';
 import DocumentInfoDialog from '@/components/ChatDemo/utils/documentDialogInfo';
 import KnowledgeGraph from '@/components/knowledgeGraph';
+import KnowledgeGraphD3 from '@/components/knowledgeGraphD3';
 import Layout from '@/components/Layout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/Button';
@@ -62,6 +63,8 @@ const CollectionIdPage: React.FC = () => {
 
   const [communities, setCommunities] = useState<CommunityResponse[]>([]);
   const [totalCommunityEntries, setTotalCommunityEntries] = useState<number>(0);
+
+  const [nodeLimit, setNodeLimit] = useState<number>(250);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -791,7 +794,7 @@ const CollectionIdPage: React.FC = () => {
           onValueChange={setActiveTab}
           className="flex flex-col flex-1 mt-4 overflow-hidden"
         >
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="documents" className="flex items-center">
               Documents
             </TabsTrigger>
@@ -806,6 +809,9 @@ const CollectionIdPage: React.FC = () => {
             </TabsTrigger>
             <TabsTrigger value="communities" className="flex items-center">
               Communities
+            </TabsTrigger>
+            <TabsTrigger value="knowledgeGraph" className="flex items-center">
+              Knowledge Graph
             </TabsTrigger>
             <TabsTrigger value="viewEntities" className="flex items-center">
               Explore
@@ -914,6 +920,22 @@ const CollectionIdPage: React.FC = () => {
               loading={loading}
               showPagination={true}
             />
+          </TabsContent>
+          <TabsContent value="knowledgeGraph" className="flex-1 overflow-auto">
+            <div
+              ref={graphContainerRef}
+              className="w-full h-[550px] flex items-center justify-center"
+            >
+              {containerDimensions.width > 0 && (
+                <KnowledgeGraphD3
+                  entities={entities}
+                  relationships={relationships}
+                  width={containerDimensions.width}
+                  height={containerDimensions.height}
+                  maxNodes={nodeLimit}
+                />
+              )}
+            </div>
           </TabsContent>
           <TabsContent value="viewEntities" className="flex-1 overflow-auto">
             <div
