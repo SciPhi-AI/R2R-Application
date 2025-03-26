@@ -42,14 +42,39 @@ interface Source extends VectorSearchResult {
 const parseVectorSearchSources = (sources: string | object): Source[] => {
   if (typeof sources === 'string') {
     try {
-      const cleanedSources = sources;
-      return JSON.parse(cleanedSources);
+      const parsedData = JSON.parse(sources);
+      // Handle the new SSE format where results are in data.chunk_search_results
+      if (parsedData.data && parsedData.data.chunk_search_results) {
+        return parsedData.data.chunk_search_results;
+      }
+      return parsedData;
     } catch (error) {
-      console.error('Failed to parse sources:', error);
+      console.error('Failed to parse vector sources:', error);
       return [];
     }
   }
   return sources as Source[];
+};
+
+const parseKGSearchResults = (sources: string | object): KGSearchResult[] => {
+  if (typeof sources === 'string') {
+    try {
+      const parsedData = JSON.parse(sources);
+      // Handle the new SSE format where results are in data.graph_search_results
+      if (parsedData.data && parsedData.data.graph_search_results) {
+        return parsedData.data.graph_search_results;
+      }
+      // If the data is directly an array
+      if (Array.isArray(parsedData)) {
+        return parsedData;
+      }
+      return [];
+    } catch (error) {
+      console.error('Failed to parse KG sources:', error);
+      return [];
+    }
+  }
+  return [];
 };
 
 const SourceInfo: React.FC<{
@@ -84,6 +109,7 @@ export const Answer: FC<{
   useEffect(() => {
     if (message.sources) {
       let count = 0;
+
       if (message.sources.vector) {
         const parsed = parseVectorSearchSources(message.sources.vector);
         setParsedVectorSources(parsed);
@@ -92,16 +118,25 @@ export const Answer: FC<{
 
       if (message.sources.kg) {
         console.log('message.sources.kg', message.sources.kg);
-        const kgLocalResult: KGSearchResult[] = JSON.parse(message.sources.kg);
-        const entitiesArray = kgLocalResult.filter(
-          (item: any) => item.result_type === 'entity'
-        );
-        const communitiesArray = kgLocalResult.filter(
-          (item: any) => item.result_type === 'community'
-        );
-        setParsedEntities(entitiesArray);
-        setParsedCommunities(communitiesArray);
-        count += entitiesArray.length + communitiesArray.length;
+        const kgResults = parseKGSearchResults(message.sources.kg);
+
+        // Only attempt to filter if kgResults is an array
+        if (Array.isArray(kgResults)) {
+          const entitiesArray = kgResults.filter(
+            (item: any) => item.result_type === 'entity'
+          );
+          const communitiesArray = kgResults.filter(
+            (item: any) => item.result_type === 'community'
+          );
+
+          setParsedEntities(entitiesArray);
+          setParsedCommunities(communitiesArray);
+          count += entitiesArray.length + communitiesArray.length;
+        } else {
+          console.warn('KG search results is not an array:', kgResults);
+          setParsedEntities([]);
+          setParsedCommunities([]);
+        }
       }
 
       setSourcesCount(count > 0 ? count : null);
