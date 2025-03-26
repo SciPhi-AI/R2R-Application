@@ -102,7 +102,7 @@ const CollectionIdPage: React.FC = () => {
 
   useEffect(() => {
     const updateDimensions = () => {
-      if (graphContainerRef.current && activeTab === 'viewEntities') {
+      if (graphContainerRef.current) {
         const width = graphContainerRef.current.offsetWidth;
         const height = graphContainerRef.current.offsetHeight;
         setContainerDimensions({
@@ -123,7 +123,7 @@ const CollectionIdPage: React.FC = () => {
       window.removeEventListener('resize', updateDimensions);
       clearTimeout(timeoutId);
     };
-  }, [activeTab]); // Add activeTab as dependency
+  }, [activeTab]);
 
   const fetchCollection = useCallback(async () => {
     if (!currentCollectionId) {
