@@ -55,7 +55,7 @@ const Index: React.FC = () => {
         const cachedDocs = JSON.parse(cachedDocuments);
         setDocuments(cachedDocs);
         setLoading(false);
-        return;  // Exit early if cached data is available
+        return; // Exit early if cached data is available
       }
 
       let offset = 0;
@@ -106,7 +106,6 @@ const Index: React.FC = () => {
 
       setDocuments(allDocs);
       localStorage.setItem('documents', JSON.stringify(allDocs)); // Cache all documents
-      
     } catch (error) {
       console.error('Error fetching documents:', error);
       setLoading(false);

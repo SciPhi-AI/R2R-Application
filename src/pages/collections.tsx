@@ -88,7 +88,9 @@ const Index: React.FC = () => {
         while (offset < personalBatch.totalEntries) {
           // Check cache for the current page
           if (collectionsCache.personal.has(offset)) {
-            allPersonal = allPersonal.concat(collectionsCache.personal.get(offset));
+            allPersonal = allPersonal.concat(
+              collectionsCache.personal.get(offset)
+            );
             offset += PAGE_SIZE;
             continue;
           }
@@ -112,7 +114,9 @@ const Index: React.FC = () => {
         while (offset < accessibleBatch.totalEntries) {
           // Check cache for the current page
           if (collectionsCache.shared.has(offset)) {
-            allAccessible = allAccessible.concat(collectionsCache.shared.get(offset));
+            allAccessible = allAccessible.concat(
+              collectionsCache.shared.get(offset)
+            );
             offset += PAGE_SIZE;
             continue;
           }
