@@ -33,6 +33,14 @@ const Index: React.FC = () => {
   const [currentSharedPage, setCurrentSharedPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Cache to store fetched data for collections
+  const collectionsCache = useMemo(() => {
+    return {
+      personal: new Map(),
+      shared: new Map(),
+    };
+  }, []);
+
   const fetchInitialData = useCallback(async () => {
     setLoading(true);
 
@@ -78,6 +86,13 @@ const Index: React.FC = () => {
         // Fetch remaining personal collections
         let offset = PAGE_SIZE;
         while (offset < personalBatch.totalEntries) {
+          // Check cache for the current page
+          if (collectionsCache.personal.has(offset)) {
+            allPersonal = allPersonal.concat(collectionsCache.personal.get(offset));
+            offset += PAGE_SIZE;
+            continue;
+          }
+
           const batch = await client.users.listCollections({
             id: userId,
             offset,
@@ -86,6 +101,8 @@ const Index: React.FC = () => {
           if (batch.results.length === 0) {
             break;
           }
+
+          collectionsCache.personal.set(offset, batch.results);
           allPersonal = allPersonal.concat(batch.results);
           offset += PAGE_SIZE;
         }
@@ -93,6 +110,13 @@ const Index: React.FC = () => {
         // Fetch remaining accessible collections
         offset = PAGE_SIZE;
         while (offset < accessibleBatch.totalEntries) {
+          // Check cache for the current page
+          if (collectionsCache.shared.has(offset)) {
+            allAccessible = allAccessible.concat(collectionsCache.shared.get(offset));
+            offset += PAGE_SIZE;
+            continue;
+          }
+
           const batch = await client.collections.list({
             offset,
             limit: PAGE_SIZE,
@@ -100,6 +124,8 @@ const Index: React.FC = () => {
           if (batch.results.length === 0) {
             break;
           }
+
+          collectionsCache.shared.set(offset, batch.results);
           allAccessible = allAccessible.concat(batch.results);
           offset += PAGE_SIZE;
         }

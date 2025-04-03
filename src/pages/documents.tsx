@@ -49,6 +49,15 @@ const Index: React.FC = () => {
         throw new Error('Failed to get authenticated client');
       }
 
+      // Check if documents are cached
+      const cachedDocuments = localStorage.getItem('documents');
+      if (cachedDocuments) {
+        const cachedDocs = JSON.parse(cachedDocuments);
+        setDocuments(cachedDocs);
+        setLoading(false);
+        return;  // Exit early if cached data is available
+      }
+
       let offset = 0;
       let allDocs: DocumentResponse[] = [];
       let totalEntries = 0;
@@ -65,6 +74,9 @@ const Index: React.FC = () => {
 
         allDocs = firstBatch.results;
         setDocuments(allDocs);
+
+        // Cache the documents once fetched
+        localStorage.setItem('documents', JSON.stringify(allDocs));
 
         // Set loading to false after the first batch is fetched
         setLoading(false);
@@ -93,6 +105,8 @@ const Index: React.FC = () => {
       }
 
       setDocuments(allDocs);
+      localStorage.setItem('documents', JSON.stringify(allDocs)); // Cache all documents
+      
     } catch (error) {
       console.error('Error fetching documents:', error);
       setLoading(false);
