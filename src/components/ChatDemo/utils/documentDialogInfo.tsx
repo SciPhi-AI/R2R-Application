@@ -8,7 +8,6 @@ import {
 } from 'r2r-js';
 import { useEffect, useState, useCallback } from 'react';
 
-import PdfPreviewDialog from '@/components/ChatDemo/utils/pdfPreviewDialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -64,11 +63,7 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
   const [loading, setLoading] = useState(true);
   const [documentOverview, setDocumentResponse] =
     useState<DocumentResponse | null>(null);
-
   const { getClient } = useUserContext();
-
-  const [pdfPreviewOpen, setPdfPreviewOpen] = useState(false);
-  const [initialPage, setInitialPage] = useState<number>(1);
   const [activeTab, setActiveTab] = useState('chunks');
 
   const fetchDocumentResponse = useCallback(
@@ -249,20 +244,6 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
     }
   }, [open, id, getClient, fetchDocumentResponse]);
 
-  const handleOpenPdfPreview = (page?: number) => {
-    if (page && page > 0) {
-      setInitialPage(page);
-    } else {
-      setInitialPage(1);
-    }
-    setPdfPreviewOpen(true);
-  };
-
-  const handleClosePdfPreview = () => {
-    setPdfPreviewOpen(false);
-    setInitialPage(1);
-  };
-
   return (
     <>
       <Dialog open={open} onOpenChange={onClose}>
@@ -335,20 +316,6 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
                     />
                   </div>
                 )}
-                {documentOverview &&
-                  documentOverview.documentType &&
-                  ['pdf', 'application/pdf'].includes(
-                    documentOverview.documentType.toLowerCase()
-                  ) && (
-                    <div className="flex justify-end">
-                      <Button
-                        onClick={() => handleOpenPdfPreview()}
-                        color="filled"
-                      >
-                        Preview PDF
-                      </Button>
-                    </div>
-                  )}
                 <Tabs
                   value={activeTab}
                   onValueChange={setActiveTab}
@@ -424,12 +391,6 @@ const DocumentInfoDialog: React.FC<DocumentInfoDialogProps> = ({
           </div>
         </DialogContent>
       </Dialog>
-      <PdfPreviewDialog
-        id={id}
-        open={pdfPreviewOpen}
-        onClose={handleClosePdfPreview}
-        initialPage={initialPage}
-      />
     </>
   );
 };
