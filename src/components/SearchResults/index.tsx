@@ -1,6 +1,5 @@
-import React, { FC, useState } from 'react';
+import React, { FC } from 'react';
 
-import PdfPreviewDialog from '@/components/ChatDemo/utils/pdfPreviewDialog';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   Carousel,
@@ -15,8 +14,7 @@ import { VectorSearchResult, KGSearchResult } from '@/types';
 const VectorSearchResultItem: FC<{
   source: VectorSearchResult;
   index: number;
-  onOpenPdfPreview: (documentId: string, page?: number) => void;
-}> = ({ source, index, onOpenPdfPreview }) => {
+}> = ({ source, index }) => {
   const { document_id, metadata, text, score } = source;
 
   return (
@@ -161,27 +159,6 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
   entities,
   communities,
 }) => {
-  const [pdfPreviewOpen, setPdfPreviewOpen] = useState(false);
-  const handleClosePdfPreview = () => {
-    setPdfPreviewOpen(false);
-  };
-  const [initialPage, setInitialPage] = useState<number>(1);
-  const [pdfPreviewDocumentId, setPdfPreviewDocumentId] = useState<
-    string | null
-  >(null);
-
-  const openPdfPreview = (documentId: string, page?: number) => {
-    setPdfPreviewDocumentId(documentId);
-    if (page && page > 0) {
-      setInitialPage(page);
-    } else {
-      setInitialPage(1);
-    }
-    setPdfPreviewOpen(true);
-
-    setPdfPreviewOpen(true);
-  };
-
   return (
     <div className="flex justify-center text-zinc-200 bg-zinc-900">
       <Tabs
@@ -209,7 +186,6 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
           <ResultCarousel
             items={vectorSearchResults.map((source) => ({
               source,
-              onOpenPdfPreview: openPdfPreview,
             }))}
             ItemComponent={VectorSearchResultItem}
             offset={0}
@@ -230,12 +206,6 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
           />
         </TabsContent>
       </Tabs>
-      <PdfPreviewDialog
-        id={pdfPreviewDocumentId || ''}
-        open={pdfPreviewOpen}
-        onClose={handleClosePdfPreview}
-        initialPage={initialPage}
-      />
     </div>
   );
 };

@@ -7,7 +7,6 @@ import {
 } from 'r2r-js';
 import React, { FC, useEffect, useState, useRef } from 'react';
 
-import PdfPreviewDialog from '@/components/ChatDemo/utils/pdfPreviewDialog';
 import { useUserContext } from '@/context/UserContext';
 import { Message } from '@/types';
 
@@ -76,10 +75,6 @@ export const Result: FC<{
   const [isProcessingQuery, setIsProcessingQuery] = useState(false);
   const { getClient } = useUserContext();
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [pdfPreviewOpen, setPdfPreviewOpen] = useState(false);
-  const [pdfPreviewDocumentId, setPdfPreviewDocumentId] = useState<
-    string | null
-  >(null);
   const [initialPage, setInitialPage] = useState<number>(1);
 
   useEffect(() => {
@@ -405,22 +400,6 @@ export const Result: FC<{
     return () => clearTimeout(debouncedParseSSE);
   }, [query, userId, pipelineUrl]);
 
-  const handleOpenPdfPreview = (id: string, page?: number) => {
-    setPdfPreviewDocumentId(id);
-    if (page && page > 0) {
-      setInitialPage(page);
-    } else {
-      setInitialPage(1);
-    }
-    setPdfPreviewOpen(true);
-  };
-
-  const handleClosePdfPreview = () => {
-    setPdfPreviewOpen(false);
-    setPdfPreviewDocumentId(null);
-    setInitialPage(1);
-  };
-
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col space-y-8 mb-4">
@@ -435,8 +414,6 @@ export const Result: FC<{
                 isSearching={
                   index === messages.length - 1 ? isSearching : false
                 }
-                // mode={mode}
-                // onOpenPdfPreview={handleOpenPdfPreview}
               />
             )}
           </React.Fragment>
@@ -458,12 +435,6 @@ export const Result: FC<{
             </div>
           </div>
         )}
-      <PdfPreviewDialog
-        id={pdfPreviewDocumentId || ''}
-        open={pdfPreviewOpen}
-        onClose={handleClosePdfPreview}
-        initialPage={initialPage}
-      />
     </div>
   );
 };
