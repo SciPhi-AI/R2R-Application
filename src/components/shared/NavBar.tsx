@@ -153,7 +153,7 @@ export const Navbar = forwardRef<React.ElementRef<'nav'>, NavbarProps>(
                 href={isSuperUser() ? '/' : '/documents'}
                 className="flex-shrink-0 flex items-center"
               >
-                <Logo className="h-12 w-auto" />
+                <Logo className="h-12 w-auto" disableLink={true} />
                 <span className="ml-2 text-xl font-bold text-white">
                   {brandingConfig.navbar.appName}
                 </span>
