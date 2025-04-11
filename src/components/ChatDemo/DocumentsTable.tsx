@@ -100,10 +100,9 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
       label: 'Ingestion',
       filterable: true,
       filterType: 'multiselect',
-      filterOptions: ['success', 'failed', 'pending', 'enriched'],
+      filterOptions: ['success', 'failed', 'pending'],
       renderCell: (doc) => {
-        let variant: 'success' | 'destructive' | 'pending' | 'enriched' =
-          'pending';
+        let variant: 'success' | 'destructive' | 'pending' = 'pending';
         switch (doc.ingestionStatus) {
           case IngestionStatus.SUCCESS:
             variant = 'success';
@@ -141,14 +140,11 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
       label: 'Extraction',
       filterable: true,
       filterType: 'multiselect',
-      filterOptions: ['success', 'failed', 'pending', 'processing', 'enriched'],
+      filterOptions: ['success', 'failed', 'pending', 'processing'],
       renderCell: (doc) => {
         let variant: 'success' | 'destructive' | 'pending' = 'pending';
         switch (doc.extractionStatus) {
           case KGExtractionStatus.SUCCESS:
-            variant = 'success';
-            break;
-          case KGExtractionStatus.ENRICHED:
             variant = 'success';
             break;
           case KGExtractionStatus.FAILED:

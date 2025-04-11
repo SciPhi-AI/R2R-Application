@@ -130,7 +130,6 @@ export enum KGExtractionStatus {
   PROCESSING = 'processing',
   SUCCESS = 'success',
   FAILED = 'failed',
-  ENRICHED = 'enriched',
 }
 
 export interface DocumentInfoType {

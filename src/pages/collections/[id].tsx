@@ -87,14 +87,8 @@ const CollectionIdPage: React.FC = () => {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<Record<string, any>>({
-    ingestionStatus: ['success', 'failed', 'pending', 'enriched'],
-    extractionStatus: [
-      'success',
-      'failed',
-      'pending',
-      'processing',
-      'enriched',
-    ],
+    ingestionStatus: ['success', 'failed', 'pending'],
+    extractionStatus: ['success', 'failed', 'pending', 'processing'],
   });
 
   const currentCollectionId =
@@ -619,10 +613,7 @@ const CollectionIdPage: React.FC = () => {
         }}
         color="text_gray"
         shape="slim"
-        disabled={
-          doc.ingestionStatus !== IngestionStatus.SUCCESS &&
-          doc.ingestionStatus !== IngestionStatus.ENRICHED
-        }
+        disabled={doc.ingestionStatus !== IngestionStatus.SUCCESS}
         tooltip="View Document Info"
       >
         <FileSearch2 className="h-6 w-6" />
@@ -644,12 +635,11 @@ const CollectionIdPage: React.FC = () => {
       label: 'Ingestion',
       filterable: true,
       filterType: 'multiselect',
-      filterOptions: ['success', 'failed', 'pending', 'enriched'],
+      filterOptions: ['success', 'failed', 'pending'],
       renderCell: (doc) => (
         <Badge
           variant={
-            doc.ingestionStatus === IngestionStatus.SUCCESS ||
-            doc.ingestionStatus === IngestionStatus.ENRICHED
+            doc.ingestionStatus === IngestionStatus.SUCCESS
               ? 'success'
               : doc.ingestionStatus === IngestionStatus.FAILED
                 ? 'destructive'
@@ -665,17 +655,15 @@ const CollectionIdPage: React.FC = () => {
       label: 'Extraction',
       filterable: true,
       filterType: 'multiselect',
-      filterOptions: ['success', 'failed', 'pending', 'processing', 'enriched'],
+      filterOptions: ['success', 'failed', 'pending', 'processing'],
       renderCell: (doc) => (
         <Badge
           variant={
             doc.extractionStatus === KGExtractionStatus.SUCCESS
               ? 'success'
-              : doc.extractionStatus === KGExtractionStatus.ENRICHED
-                ? 'success'
-                : doc.extractionStatus === KGExtractionStatus.FAILED
-                  ? 'destructive'
-                  : 'pending'
+              : doc.extractionStatus === KGExtractionStatus.FAILED
+                ? 'destructive'
+                : 'pending'
           }
         >
           {doc.extractionStatus}
