@@ -28,6 +28,11 @@ const Index: React.FC = () => {
 
   const { toast } = useToast();
 
+  // Cache to store user data by page offset
+  const usersCache = useMemo(() => {
+    return new Map<number, User[]>(); // Map page number to user data array
+  }, []);
+
   const filteredUsers = useMemo(() => {
     if (!searchQuery.trim()) {
       return users;
@@ -78,6 +83,13 @@ const Index: React.FC = () => {
 
       // Continue fetching in the background
       while (offset < totalEntries) {
+        // Check cache for the current page
+        if (usersCache.has(offset)) {
+          allUsers = allUsers.concat(usersCache.get(offset) || []);
+          offset += PAGE_SIZE;
+          continue;
+        }
+
         const batch = await client.users.list({
           offset: offset,
           limit: PAGE_SIZE,
@@ -86,6 +98,9 @@ const Index: React.FC = () => {
         if (batch.results.length === 0) {
           break;
         }
+
+        // Update cache with the fetched data
+        usersCache.set(offset, batch.results);
 
         allUsers = allUsers.concat(batch.results);
         setUsers([...allUsers]);
@@ -98,7 +113,7 @@ const Index: React.FC = () => {
       console.error('Error fetching users:', error);
       setLoading(false);
     }
-  }, [pipeline?.deploymentUrl, getClient]);
+  }, [pipeline?.deploymentUrl, getClient, usersCache]);
 
   useEffect(() => {
     fetchAllUsers();
