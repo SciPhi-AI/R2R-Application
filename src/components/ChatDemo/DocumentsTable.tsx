@@ -100,21 +100,35 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
       label: 'Ingestion',
       filterable: true,
       filterType: 'multiselect',
-      filterOptions: ['success', 'failed', 'pending', 'enriched'],
+      filterOptions: ['success', 'failed', 'pending'],
       renderCell: (doc) => {
-        let variant: 'success' | 'destructive' | 'pending' | 'enriched' =
-          'pending';
+        let variant: 'success' | 'destructive' | 'pending' = 'pending';
         switch (doc.ingestionStatus) {
           case IngestionStatus.SUCCESS:
-            variant = 'success';
-            break;
-          case IngestionStatus.ENRICHED:
             variant = 'success';
             break;
           case IngestionStatus.FAILED:
             variant = 'destructive';
             break;
           case IngestionStatus.PENDING:
+            variant = 'pending';
+            break;
+          case IngestionStatus.PARSING:
+            variant = 'pending';
+            break;
+          case IngestionStatus.EXTRACTING:
+            variant = 'pending';
+            break;
+          case IngestionStatus.CHUNKING:
+            variant = 'pending';
+            break;
+          case IngestionStatus.AUGMENTING:
+            variant = 'pending';
+            break;
+          case IngestionStatus.ENRICHING:
+            variant = 'pending';
+            break;
+          case IngestionStatus.STORING:
             variant = 'pending';
             break;
         }
@@ -126,14 +140,11 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
       label: 'Extraction',
       filterable: true,
       filterType: 'multiselect',
-      filterOptions: ['success', 'failed', 'pending', 'processing', 'enriched'],
+      filterOptions: ['success', 'failed', 'pending', 'processing'],
       renderCell: (doc) => {
         let variant: 'success' | 'destructive' | 'pending' = 'pending';
         switch (doc.extractionStatus) {
           case KGExtractionStatus.SUCCESS:
-            variant = 'success';
-            break;
-          case KGExtractionStatus.ENRICHED:
             variant = 'success';
             break;
           case KGExtractionStatus.FAILED:
@@ -175,12 +186,6 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
   const renderActions = (doc: DocumentResponse) =>
     hideActions ? null : (
       <div className="flex space-x-1 justify-end">
-        {/* TODO: Add this back once the API supports it
-        <UpdateButtonContainer
-          id={doc.id}
-          onUpdateSuccess={() => onRefresh()}
-          showToast={toast}
-        /> */}
         <ExtractButtonContainer
           id={doc.id}
           ingestionStatus={doc.ingestionStatus}
@@ -197,10 +202,7 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
             setIsDocumentInfoDialogOpen(true);
           }}
           color="text_gray"
-          disabled={
-            doc.ingestionStatus !== IngestionStatus.SUCCESS &&
-            doc.ingestionStatus !== IngestionStatus.ENRICHED
-          }
+          disabled={doc.ingestionStatus !== IngestionStatus.SUCCESS}
           shape="slim"
           tooltip="View Document Info"
         >
@@ -209,19 +211,7 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
       </div>
     );
 
-  // Client-side search filtering
-  // const filteredDocuments = useMemo(() => {
-  //   if (!searchQuery.trim()) {
-  //     return documents;
-  //   }
-  //   const query = searchQuery.toLowerCase();
-  //   return documents.filter(
-  //     (doc) =>
-  //       doc.title?.toLowerCase().includes(query) ||
-  //       doc.id.toLowerCase().includes(query)
-  //   );
-  // }, [searchQuery, documents]);
-  const displayedDocuments = documents; // no filtering
+  const displayedDocuments = documents;
 
   return (
     <div>
@@ -277,7 +267,6 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
               </PopoverContent>
             </Popover>
 
-            {/* New search bar should be here */}
             {middleContent}
 
             {/* Right side: Upload and Delete buttons */}
