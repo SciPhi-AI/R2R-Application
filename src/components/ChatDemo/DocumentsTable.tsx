@@ -1,17 +1,15 @@
 import { Loader, FileSearch2, SlidersHorizontal } from 'lucide-react';
 import { DocumentResponse } from 'r2r-js';
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 
 import { DeleteButton } from '@/components/ChatDemo/deleteButton';
 import DownloadFileContainer from '@/components/ChatDemo/DownloadFileContainer';
 import Table, { Column } from '@/components/ChatDemo/Table';
-import UpdateButtonContainer from '@/components/ChatDemo/UpdateButtonContainer';
 import { UploadButton } from '@/components/ChatDemo/upload';
 import DocumentInfoDialog from '@/components/ChatDemo/utils/documentDialogInfo';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/Button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
 import {
   Popover,
   PopoverTrigger,

@@ -269,17 +269,17 @@ function Table<T extends object>({
                     {col.sortable && (
                       <TooltipProvider>
                         <Tooltip>
-                          <TooltipTrigger>
-                            <button
-                              onClick={() => handleSort(col.key)}
-                              className="p-1"
-                            >
+                          <TooltipTrigger
+                            asChild
+                            onClick={() => handleSort(col.key)}
+                          >
+                            <div className="p-1 cursor-pointer">
                               {sort.key === col.key && sort.order === 'asc' ? (
-                                <ChevronUpSquare className="h-4 w-4 hover:bg-zinc-500 cursor-pointer" />
+                                <ChevronUpSquare className="h-4 w-4 hover:bg-zinc-500" />
                               ) : (
-                                <ChevronDownSquare className="h-4 w-4 hover:bg-zinc-500 cursor-pointer" />
+                                <ChevronDownSquare className="h-4 w-4 hover:bg-zinc-500" />
                               )}
-                            </button>
+                            </div>
                           </TooltipTrigger>
                           <TooltipContent>
                             <p>
