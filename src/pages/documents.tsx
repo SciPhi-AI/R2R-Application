@@ -35,8 +35,19 @@ const Index: React.FC = () => {
   // New states for filters and search query
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<Record<string, any>>({
-    ingestionStatus: ['success', 'failed', 'pending', 'enriched'],
-    extractionStatus: ['success', 'failed', 'pending'],
+    ingestionStatus: [
+      'pending',
+      'parsing',
+      'extracting',
+      'chunking',
+      'embedding',
+      'augmenting',
+      'storing',
+      'enriching',
+      'failed',
+      'success',
+    ],
+    extractionStatus: ['success', 'failed', 'pending', 'processing'],
   });
   const [currentPage, setCurrentPage] = useState<number>(1);
 
@@ -114,7 +125,6 @@ const Index: React.FC = () => {
       .filter(
         (doc) =>
           doc.ingestionStatus !== IngestionStatus.SUCCESS &&
-          doc.ingestionStatus !== IngestionStatus.ENRICHED &&
           doc.ingestionStatus !== IngestionStatus.FAILED
       )
       .map((doc) => doc.id);

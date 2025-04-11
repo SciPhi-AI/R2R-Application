@@ -115,12 +115,14 @@ export interface DocumentFilterCriteria {
 export enum IngestionStatus {
   PENDING = 'pending',
   PARSING = 'parsing',
+  EXTRACTING = 'extracting',
   CHUNKING = 'chunking',
   EMBEDDING = 'embedding',
+  AUGMENTING = 'augmenting',
   STORING = 'storing',
+  ENRICHING = 'enriching',
   FAILED = 'failed',
   SUCCESS = 'success',
-  ENRICHED = 'enriched',
 }
 
 export enum KGExtractionStatus {
