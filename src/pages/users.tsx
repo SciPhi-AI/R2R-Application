@@ -26,8 +26,6 @@ const Index: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isUserFormOpen, setIsUserFormOpen] = useState(false);
 
-  const { toast } = useToast();
-
   const filteredUsers = useMemo(() => {
     if (!searchQuery.trim()) {
       return users;
@@ -41,13 +39,42 @@ const Index: React.FC = () => {
     );
   }, [users, searchQuery]);
 
-  /*** Fetching Users in Batches ***/
   const fetchAllUsers = useCallback(async () => {
     try {
       setLoading(true);
       const client = await getClient();
       if (!client) {
         throw new Error('Failed to get authenticated client');
+      }
+
+      // Check if users are cached with timestamp and total entries
+      const cachedUsers = localStorage.getItem('users');
+      const cachedTotalEntries = localStorage.getItem('usersTotalEntries');
+      const cacheTimestamp = localStorage.getItem('usersTimestamp');
+      const currentTime = new Date().getTime();
+
+      // Use cache if it exists, is less than 5 minutes old, and totalEntries matches
+      if (
+        cachedUsers &&
+        cachedTotalEntries &&
+        cacheTimestamp &&
+        currentTime - parseInt(cacheTimestamp) < 5 * 60 * 1000
+      ) {
+        const cachedData = JSON.parse(cachedUsers);
+
+        // First check totalEntries to validate cache
+        const checkTotalEntries = await client.users.list({
+          offset: 0,
+          limit: 1, // Just get count, not actual data
+        });
+
+        // If totalEntries matches, use cache
+        if (parseInt(cachedTotalEntries) === checkTotalEntries.totalEntries) {
+          setUsers(cachedData);
+          setTotalEntries(parseInt(cachedTotalEntries));
+          setLoading(false);
+          return;
+        }
       }
 
       let offset = 0;
@@ -66,6 +93,11 @@ const Index: React.FC = () => {
 
         allUsers = firstBatch.results;
         setUsers(allUsers);
+
+        // Cache the first batch with metadata
+        localStorage.setItem('users', JSON.stringify(allUsers));
+        localStorage.setItem('usersTotalEntries', totalEntries.toString());
+        localStorage.setItem('usersTimestamp', currentTime.toString());
 
         // Set loading to false after the first batch is fetched
         setLoading(false);
@@ -93,7 +125,9 @@ const Index: React.FC = () => {
         offset += PAGE_SIZE;
       }
 
+      // Update cache with all users
       setUsers(allUsers);
+      localStorage.setItem('users', JSON.stringify(allUsers));
     } catch (error) {
       console.error('Error fetching users:', error);
       setLoading(false);

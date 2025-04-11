@@ -44,7 +44,29 @@ const Index: React.FC = () => {
 
       const userId = authState.userId || '';
 
-      // Fetch first batch of personal and accessible collections in parallel
+      const cachedPersonalData = localStorage.getItem('personalCollections');
+      const cachedSharedData = localStorage.getItem('sharedCollections');
+      const cacheTimestamp = localStorage.getItem('collectionsTimestamp');
+      const currentTime = new Date().getTime();
+
+      // Use cache if it exists and is less than 5 minutes old
+      if (
+        cachedPersonalData &&
+        cachedSharedData &&
+        cacheTimestamp &&
+        currentTime - parseInt(cacheTimestamp) < 5 * 60 * 1000
+      ) {
+        setPersonalCollections(JSON.parse(cachedPersonalData));
+        setSharedCollections(JSON.parse(cachedSharedData));
+        setPersonalTotalEntries(JSON.parse(cachedPersonalData).length);
+        setAccessibleTotalEntries(
+          JSON.parse(cachedSharedData).length +
+            JSON.parse(cachedPersonalData).length
+        );
+        setLoading(false);
+        return;
+      }
+
       const [personalBatch, accessibleBatch] = await Promise.all([
         client.users.listCollections({
           id: userId,
@@ -54,9 +76,7 @@ const Index: React.FC = () => {
         client.collections.list({ offset: 0, limit: PAGE_SIZE }),
       ]);
 
-      // Determine personal total
       setPersonalTotalEntries(personalBatch.totalEntries);
-      // Determine accessible total
       setAccessibleTotalEntries(accessibleBatch.totalEntries);
 
       // Determine which accessible are actually shared (not personal)
@@ -68,6 +88,15 @@ const Index: React.FC = () => {
       // Set initial states so user sees first page right away
       setPersonalCollections(personalBatch.results);
       setSharedCollections(initialShared);
+
+      // Save to localStorage with timestamp
+      localStorage.setItem(
+        'personalCollections',
+        JSON.stringify(personalBatch.results)
+      );
+      localStorage.setItem('sharedCollections', JSON.stringify(initialShared));
+      localStorage.setItem('collectionsTimestamp', currentTime.toString());
+
       setLoading(false);
 
       // Now fetch remaining in the background
@@ -86,6 +115,7 @@ const Index: React.FC = () => {
           if (batch.results.length === 0) {
             break;
           }
+
           allPersonal = allPersonal.concat(batch.results);
           offset += PAGE_SIZE;
         }
@@ -100,6 +130,7 @@ const Index: React.FC = () => {
           if (batch.results.length === 0) {
             break;
           }
+
           allAccessible = allAccessible.concat(batch.results);
           offset += PAGE_SIZE;
         }
@@ -112,6 +143,16 @@ const Index: React.FC = () => {
 
         setPersonalCollections(allPersonal);
         setSharedCollections(updatedShared);
+
+        // Update localStorage with complete data
+        localStorage.setItem(
+          'personalCollections',
+          JSON.stringify(allPersonal)
+        );
+        localStorage.setItem(
+          'sharedCollections',
+          JSON.stringify(updatedShared)
+        );
       })();
     } catch (error) {
       console.error('Error fetching collections:', error);
@@ -120,10 +161,6 @@ const Index: React.FC = () => {
       setLoading(false);
     }
   }, [getClient, authState.userId]);
-
-  useEffect(() => {
-    fetchInitialData();
-  }, [fetchInitialData]);
 
   const filteredPersonalCollections = useMemo(() => {
     if (!searchQuery.trim()) {
