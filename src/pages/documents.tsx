@@ -49,13 +49,24 @@ const Index: React.FC = () => {
         throw new Error('Failed to get authenticated client');
       }
 
-      // Check if documents are cached
+      // Check if documents are cached with timestamp
       const cachedDocuments = localStorage.getItem('documents');
-      if (cachedDocuments) {
+      const cachedTotalEntries = localStorage.getItem('documentsTotalEntries');
+      const cacheTimestamp = localStorage.getItem('documentsTimestamp');
+      const currentTime = new Date().getTime();
+
+      // Use cache if it exists and is less than 5 minutes old and has a total entries count
+      if (
+        cachedDocuments &&
+        cachedTotalEntries &&
+        cacheTimestamp &&
+        currentTime - parseInt(cacheTimestamp) < 5 * 60 * 1000
+      ) {
         const cachedDocs = JSON.parse(cachedDocuments);
         setDocuments(cachedDocs);
+        setTotalEntries(parseInt(cachedTotalEntries));
         setLoading(false);
-        return; // Exit early if cached data is available
+        return;
       }
 
       let offset = 0;
@@ -75,8 +86,10 @@ const Index: React.FC = () => {
         allDocs = firstBatch.results;
         setDocuments(allDocs);
 
-        // Cache the documents once fetched
+        // Cache the documents with timestamp and total entries
         localStorage.setItem('documents', JSON.stringify(allDocs));
+        localStorage.setItem('documentsTotalEntries', totalEntries.toString());
+        localStorage.setItem('documentsTimestamp', currentTime.toString());
 
         // Set loading to false after the first batch is fetched
         setLoading(false);
@@ -105,7 +118,8 @@ const Index: React.FC = () => {
       }
 
       setDocuments(allDocs);
-      localStorage.setItem('documents', JSON.stringify(allDocs)); // Cache all documents
+      localStorage.setItem('documents', JSON.stringify(allDocs));
+      localStorage.setItem('documentsTotalEntries', totalEntries.toString());
     } catch (error) {
       console.error('Error fetching documents:', error);
       setLoading(false);
