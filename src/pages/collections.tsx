@@ -162,6 +162,11 @@ const Index: React.FC = () => {
     }
   }, [getClient, authState.userId]);
 
+  useEffect(() => {
+    console.log('Component mounted, triggering fetchInitialData');
+    fetchInitialData();
+  }, [fetchInitialData]);
+
   const filteredPersonalCollections = useMemo(() => {
     if (!searchQuery.trim()) {
       return personalCollections;
