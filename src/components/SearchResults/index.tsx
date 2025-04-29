@@ -14,8 +14,9 @@ import { VectorSearchResult, KGSearchResult } from '@/types';
 const VectorSearchResultItem: FC<{
   source: VectorSearchResult;
   index: number;
-}> = ({ source, index }) => {
-  const { document_id, metadata, text, score } = source;
+  onOpenPdfPreview: (documentId: string, page?: number) => void;
+}> = ({ source, index, onOpenPdfPreview }) => {
+  const { documentId, metadata, text, score, extraction_id } = source;
 
   return (
     <div className="p-4 mb-2 flex items-center w-full">
@@ -31,7 +32,11 @@ const VectorSearchResultItem: FC<{
         </div>
 
         <p className="text-xs text-wrap break-words">{text}</p>
-        <p className="text-xs pt-4 text-zinc-500">Document ID: {document_id}</p>
+        <p className="text-xs pt-4 text-zinc-500">
+          Document ID: {documentId}
+          <br />
+          Extraction ID: {extraction_id}
+        </p>
       </div>
     </div>
   );

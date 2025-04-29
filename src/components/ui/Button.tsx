@@ -11,25 +11,25 @@ import {
 
 const colorStyles = {
   primary:
-    'bg-zinc-900 text-white hover:bg-zinc-700 dark:bg-accent-darker dark:text-accent-contrast dark:ring-1 dark:ring-inset dark:ring-accent-dark dark:hover:bg-accent-dark dark:hover:text-accent-contrast dark:hover:ring-accent-base',
+    'bg-button text-button-text hover:bg-opacity-90 dark:bg-button dark:text-button-text dark:hover:bg-opacity-90',
   secondary:
-    'text-zinc-900 hover:bg-zinc-200 dark:bg-zinc-800/40 dark:text-zinc-400 dark:ring-1 dark:ring-inset dark:ring-zinc-800 dark:hover:bg-zinc-800 dark:hover:text-zinc-300',
+    'text-text-primary hover:bg-border dark:text-text-secondary dark:hover:bg-border',
   filled:
-    'bg-zinc-900 text-white hover:bg-zinc-700 dark:bg-accent-darker dark:text-white dark:hover:bg-accent-dark',
+    'bg-button text-button-text hover:bg-opacity-90 dark:bg-button dark:text-button-text dark:hover:bg-opacity-90',
   danger:
     'bg-red-600 text-white hover:bg-red-500 dark:bg-red-600 dark:text-white dark:hover:bg-red-500',
   amber:
     'bg-amber-500 text-white hover:bg-amber-600 dark:bg-amber-500 dark:text-white dark:hover:bg-amber-600',
-  blue: 'bg-zinc-900 text-white hover:bg-zinc-700 dark:bg-blue-600/10 dark:text-blue-600 dark:ring-1 dark:ring-inset dark:ring-blue-600/20 dark:hover:bg-blue-600/10 dark:hover:text-blue-300',
+  blue: 'bg-button text-button-text hover:bg-opacity-90 dark:bg-blue-600/10 dark:text-blue-600 dark:ring-1 dark:ring-inset dark:ring-blue-600/20 dark:hover:bg-blue-600/10 dark:hover:text-blue-300',
   blue_filled:
-    'bg-zinc-900 text-white hover:bg-zinc-700 dark:bg-blue-600 dark:text-white dark:hover:bg-opacity-90',
-  text: 'text-accent-base hover:text-accent-dark dark:text-accent-base dark:hover:text-accent-dark',
+    'bg-button text-button-text hover:bg-opacity-90 dark:bg-blue-600 dark:text-white dark:hover:bg-opacity-90',
+  text: 'text-link hover:text-link-hover dark:text-link dark:hover:text-link-hover',
   text_gray:
-    'text-gray-200 hover:text-gray-600 dark:text-gray-200 dark:hover:text-gray-500',
-  disabled: 'bg-zinc-600 text-white cursor-not-allowed hover:bg-zinc-500',
-  light: 'bg-zinc-700 text-white hover:bg-zinc-600',
+    'text-text-secondary hover:text-text-primary dark:text-text-secondary dark:hover:text-text-primary',
+  disabled: 'bg-border text-text-secondary cursor-not-allowed hover:bg-border',
+  light: 'bg-button text-button-text hover:bg-opacity-90',
   transparent:
-    'bg-transparent text-zinc-900 hover:bg-zinc-200 dark:text-zinc-400 dark:hover:bg-zinc-800',
+    'bg-transparent text-text-primary hover:bg-border dark:text-text-secondary dark:hover:bg-border',
 };
 
 const shapeStyles = {

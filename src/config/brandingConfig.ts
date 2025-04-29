@@ -30,6 +30,9 @@ const defaultConfig = {
     src: '/images/sciphi.svg',
     alt: 'sciphi.svg',
   },
+  auth: {
+    loginUrl: 'https://api.cloud.sciphi.ai/',
+  },
   theme: 'dark',
   homePage: {
     pythonSdk: true,

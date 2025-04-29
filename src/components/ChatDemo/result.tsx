@@ -428,9 +428,9 @@ export const Result: FC<{
         uploadedDocuments?.length === 0 &&
         pipelineUrl &&
         mode === 'rag' && (
-          <div className="absolute inset-4 flex items-center justify-center backdrop-blur-sm">
+          <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm">
             <div className="flex items-center p-4 bg-white shadow-2xl rounded text-text-accent-base font-medium gap-4">
-              Please upload at least one document to submit queries.{' '}
+              Please upload at least one document to submit queries.
               <UploadButton setUploadedDocuments={setUploadedDocuments} />
             </div>
           </div>

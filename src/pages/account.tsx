@@ -40,8 +40,8 @@ const UpdateUserModal: React.FC<UpdateUserModalProps> = ({
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-zinc-900 p-6 rounded-lg w-full max-w-md">
+    <div className="fixed inset-0 bg-primary bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-primary p-6 rounded-lg w-full max-w-md">
         <h2 className="text-xl font-semibold mb-4">Update Profile</h2>
         <div className="space-y-4">
           <div>
@@ -76,7 +76,9 @@ const UpdateUserModal: React.FC<UpdateUserModalProps> = ({
             />
           </div>
           <div className="flex justify-end space-x-2 mt-6">
-            <Button onClick={onClose}>Cancel</Button>
+            <Button onClick={onClose} color="secondary">
+              Cancel
+            </Button>
             <Button
               onClick={() => {
                 onUpdate(formData);
@@ -164,29 +166,29 @@ const Index: React.FC = () => {
       <main className="w-full flex flex-col container h-screen-[calc(100%-4rem)]">
         <div className="mx-auto max-w-3xl mb-12 mt-20 w-full">
           <div className="mb-6">
-            <h1 className="text-2xl font-bold text-white mb-6">
+            <h1 className="text-2xl font-bold text-primary mb-6">
               Account Settings
             </h1>
 
-            <Card className="bg-zinc-900">
+            <Card className="bg-primary">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
-                    <div className="bg-zinc-800 p-4 rounded-full">
+                    <div className="bg-secondary p-4 rounded-full">
                       <UserRound size={40} />
                     </div>
                     <div>
                       <h2 className="text-xl font-semibold">
                         {userProfile?.name || 'Unnamed User'}
                       </h2>
-                      <p className="text-gray-400">{userProfile?.email}</p>
+                      <p className="text-grey">{userProfile?.email}</p>
                     </div>
                   </div>
                   <Button
                     color="primary"
                     onClick={() => setIsUpdateModalOpen(true)}
                   >
-                    <Pencil className="w-4 h-4 mr-2" />
+                    <Pencil className="w-4 h-4 mr-2 mt-1" />
                     Edit Profile
                   </Button>
                 </div>
@@ -194,25 +196,21 @@ const Index: React.FC = () => {
               <CardContent>
                 <div className="space-y-6">
                   <div>
-                    <h3 className="text-sm font-medium text-gray-400 mb-2">
-                      Bio
-                    </h3>
+                    <h3 className="text-sm font-medium text-grey mb-2">Bio</h3>
                     <p>{userProfile?.bio || 'No bio provided'}</p>
                   </div>
 
                   <div className="space-y-2">
-                    <h3 className="text-sm font-medium text-gray-400">
+                    <h3 className="text-sm font-medium text-grey">
                       Account Details
                     </h3>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <span className="text-sm text-gray-400">User ID</span>
+                        <span className="text-sm text-grey">User ID</span>
                         <p className="font-mono text-sm">{userProfile?.id}</p>
                       </div>
                       <div>
-                        <span className="text-sm text-gray-400">
-                          Created At
-                        </span>
+                        <span className="text-sm text-grey">Created At</span>
                         <p>
                           {new Date(
                             userProfile?.createdAt || ''
@@ -223,7 +221,7 @@ const Index: React.FC = () => {
                   </div>
 
                   <div className="pt-6 border-t border-zinc-800">
-                    <h3 className="text-sm font-medium text-gray-400 mb-4">
+                    <h3 className="text-sm font-medium text-grey mb-4">
                       Danger Zone
                     </h3>
                     <DeleteButton
