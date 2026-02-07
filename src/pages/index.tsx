@@ -22,6 +22,7 @@ import { Button } from '@/components/ui/Button';
 import { CardTitle, CardHeader, CardContent, Card } from '@/components/ui/card';
 import { brandingConfig } from '@/config/brandingConfig';
 import { useUserContext } from '@/context/UserContext';
+import { assetPath } from '@/lib/assetPath';
 
 const HomePage = () => {
   const router = useRouter();
@@ -188,7 +189,7 @@ const HomePage = () => {
                     <Card className="w-full sm:w-1/2 flex flex-col">
                       <CardHeader className="flex flex-row items-center space-x-2">
                         <Image
-                          src="/images/python-logo.svg"
+                          src={assetPath('/images/python-logo.svg')}
                           alt="Python Logo"
                           width={30}
                           height={30}
@@ -224,7 +225,7 @@ const HomePage = () => {
                           >
                             <div className="flex items-center">
                               <Image
-                                src="/images/github-mark.svg"
+                                src={assetPath('/images/github-mark.svg')}
                                 alt="GitHub Logo"
                                 width={20}
                                 height={20}
@@ -241,7 +242,7 @@ const HomePage = () => {
                     <Card className="w-full sm:w-1/2 flex flex-col">
                       <CardHeader className="flex flex-row items-center space-x-2">
                         <Image
-                          src="/images/javascript-logo.svg"
+                          src={assetPath('/images/javascript-logo.svg')}
                           alt="JavaScript Logo"
                           width={30}
                           height={30}
@@ -277,7 +278,7 @@ const HomePage = () => {
                           >
                             <div className="flex items-center">
                               <Image
-                                src="/images/github-mark.svg"
+                                src={assetPath('/images/github-mark.svg')}
                                 alt="GitHub Logo"
                                 width={20}
                                 height={20}
@@ -296,7 +297,7 @@ const HomePage = () => {
                     <Card className="w-full sm:w-1/2 flex flex-col">
                       <CardHeader className="flex flex-row items-center space-x-2">
                         <Image
-                          src="/images/hatchet-logo.svg"
+                          src={assetPath('/images/hatchet-logo.svg')}
                           alt="Python Logo"
                           width={30}
                           height={30}
@@ -369,7 +370,7 @@ const HomePage = () => {
                           >
                             <div className="flex items-center">
                               <Image
-                                src="/images/github-mark.svg"
+                                src={assetPath('/images/github-mark.svg')}
                                 alt="GitHub Logo"
                                 width={20}
                                 height={20}

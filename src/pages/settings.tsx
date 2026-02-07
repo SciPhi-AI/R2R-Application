@@ -20,7 +20,7 @@ interface AppData {
 const renderNestedConfig = (
   config: Record<string, any>,
   depth = 0
-): JSX.Element => {
+): React.JSX.Element => {
   // Update getFontSize function to handle both key and value lengths
   const getFontSize = (content: string, isKey: boolean = false): string => {
     const length = content.length;
@@ -291,7 +291,7 @@ const Index: React.FC = () => {
 
   // Function to render sections alphabetically
   const renderAlphabeticalConfigSections = () => {
-    const groupedSections: Record<string, JSX.Element[]> = {};
+    const groupedSections: Record<string, React.JSX.Element[]> = {};
 
     // First, sort the config keys alphabetically
     const sortedKeys = Object.keys(config).sort((a, b) =>

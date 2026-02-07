@@ -14,6 +14,10 @@ RUN pnpm install --frozen-lockfile
 # Copy the rest of the application code
 COPY . .
 
+# Optional: set base path at build time for custom context path (e.g. /r2r-dashboard-dev)
+ARG NEXT_PUBLIC_BASE_PATH=
+ENV NEXT_PUBLIC_BASE_PATH=${NEXT_PUBLIC_BASE_PATH}
+
 # Build the Next.js application
 RUN pnpm build
 

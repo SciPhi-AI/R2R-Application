@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { brandingConfig } from '@/config/brandingConfig';
 import { useUserContext } from '@/context/UserContext';
+import { assetPath } from '@/lib/assetPath';
 import { NavbarProps, NavItemsProps } from '@/types';
 
 interface NavItemProps {
@@ -186,7 +187,9 @@ export const Navbar = forwardRef<React.ElementRef<'nav'>, NavbarProps>(
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Avatar className="cursor-pointer">
-                      <AvatarImage src="/images/default_profile.svg" />
+                      <AvatarImage
+                        src={assetPath('/images/default_profile.svg')}
+                      />
                       <AvatarFallback></AvatarFallback>
                     </Avatar>
                   </DropdownMenuTrigger>
