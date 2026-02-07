@@ -1,24 +1,22 @@
-// Anonymized telemetry data is sent to PostHog to help us improve the product. You can disable this by setting the R2R_DASHBOARD_DISABLE_TELEMETRY environment variable to 'true'.
+// PostHog telemetry disabled. No events are sent to external PostHog.
 
-import posthog from 'posthog-js';
-
-const posthogApiKey = 'phc_OPBbibOIErCGc4NDLQsOrMuYFTKDmRwXX6qxnTr6zpU';
-const posthogHost = 'https://us.i.posthog.com';
+const noop = () => {};
+const noopPostHog = {
+  init: noop,
+  capture: noop,
+  identify: noop,
+  reset: noop,
+  opt_out_capturing: noop,
+  opt_in_capturing: noop,
+  register: noop,
+  unregister: noop,
+  track: noop,
+  page: noop,
+};
 
 function initializePostHog() {
-  if (typeof window === 'undefined') {
-    return;
-  }
-
-  posthog.init(posthogApiKey, {
-    api_host: posthogHost,
-    autocapture: true,
-  });
-
-  if (window.__RUNTIME_CONFIG__?.R2R_DASHBOARD_DISABLE_TELEMETRY === 'true') {
-    posthog.opt_out_capturing();
-  }
+  // No-op: PostHog is disabled; no events are sent.
 }
 
-export default posthog;
+export default noopPostHog;
 export { initializePostHog };

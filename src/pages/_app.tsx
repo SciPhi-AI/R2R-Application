@@ -7,7 +7,6 @@ import { ThemeProvider } from '@/components/ThemeProvider';
 import { brandingConfig } from '@/config/brandingConfig';
 import { UserProvider, useUserContext } from '@/context/UserContext';
 import '@/styles/globals.css';
-import { initializePostHog } from '@/lib/posthog-client';
 
 function MyAppContent({ Component, pageProps }: AppProps) {
   const { setTheme } = useTheme();
@@ -16,7 +15,6 @@ function MyAppContent({ Component, pageProps }: AppProps) {
 
   useEffect(() => {
     setTheme(brandingConfig.theme);
-    initializePostHog();
   }, []);
 
   const checkAccess = useCallback(async () => {
@@ -60,9 +58,10 @@ function MyAppContent({ Component, pageProps }: AppProps) {
 function MyApp(props: AppProps) {
   // Move the runtime config check into useEffect
   useEffect(() => {
-    // Load the env-config.js script dynamically
+    // Load the env-config.js script dynamically (respect basePath for custom context path)
+    const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
     const script = document.createElement('script');
-    script.src = '/env-config.js';
+    script.src = `${basePath ? basePath.replace(/\/$/, '') : ''}/env-config.js`;
     script.onload = () => {
       if (typeof window !== 'undefined' && window.__RUNTIME_CONFIG__) {
         console.log('Runtime Config:', window.__RUNTIME_CONFIG__);

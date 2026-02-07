@@ -1,9 +1,14 @@
-import { animated, useTransition, interpolate } from '@react-spring/web';
+import { animated, interpolate, useTransition } from '@react-spring/web';
 import { Group } from '@visx/group';
 import { scaleOrdinal } from '@visx/scale';
 import Pie, { ProvidedProps, PieArcDatum } from '@visx/shape/lib/shapes/Pie';
 import { EntityResponse } from 'r2r-js/dist/types';
 import React from 'react';
+
+// React 19 / @react-spring types: animated.g does not declare children; cast for SVG g with children
+const AnimatedG = animated.g as React.FC<
+  React.SVGProps<SVGGElement> & { children?: React.ReactNode }
+>;
 
 const MIN_PERCENTAGE_THRESHOLD = 0.02;
 
@@ -170,19 +175,23 @@ function AnimatedPie({
     return (
       <g key={key}>
         <animated.path
-          d={interpolate(
-            [props.startAngle, props.endAngle],
-            (startAngle, endAngle) =>
-              path({
-                ...arc,
-                startAngle,
-                endAngle,
-              })
-          )}
-          fill={getColor(arc)}
+          {...({
+            d: interpolate(
+              [props.startAngle, props.endAngle],
+              (startAngle, endAngle) =>
+                path({
+                  ...arc,
+                  startAngle,
+                  endAngle,
+                })
+            ),
+            fill: getColor(arc),
+          } as unknown as React.SVGProps<SVGPathElement>)}
         />
         {hasSpaceForLabel && (
-          <animated.g style={{ opacity: props.opacity }}>
+          <AnimatedG
+            style={{ opacity: props.opacity } as unknown as React.CSSProperties}
+          >
             <text
               fill="white"
               x={centroidX}
@@ -194,7 +203,7 @@ function AnimatedPie({
             >
               {`${getKey(arc)} (${arc.data.count})`}
             </text>
-          </animated.g>
+          </AnimatedG>
         )}
       </g>
     );

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/input';
 import { brandingConfig } from '@/config/brandingConfig';
 import { useUserContext } from '@/context/UserContext';
+import { assetPath } from '@/lib/assetPath';
 import debounce from '@/lib/debounce';
 import { supabase } from '@/lib/supabase';
 
@@ -305,7 +306,7 @@ const LoginPage: React.FC = () => {
               >
                 <div className="absolute left-2 top-1/2 transform -translate-y-1/2">
                   <Image
-                    src="/images/google-logo.svg"
+                    src={assetPath('/images/google-logo.svg')}
                     alt="Google logo"
                     width={20}
                     height={20}
@@ -325,7 +326,7 @@ const LoginPage: React.FC = () => {
               >
                 <div className="absolute left-2 top-1/2 transform -translate-y-1/2">
                   <Image
-                    src="/images/github-mark.svg"
+                    src={assetPath('/images/github-mark.svg')}
                     alt="Github logo"
                     width={20}
                     height={20}

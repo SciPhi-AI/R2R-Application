@@ -1,0 +1,70 @@
+# Podman Compose / Docker Compose for R2R Dashboard
+# Run with: podman-compose up -d  (or docker compose up -d)
+# Access: http://localhost:3000/<CONTEXT_PATH> e.g. http://localhost:3000/r2r-dashboard-dev
+
+services:
+  r2r-dashboard-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_BASE_PATH: /r2r-dashboard-dev
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      HOSTNAME: "0.0.0.0"
+      NEXT_PUBLIC_BASE_PATH: /r2r-dashboard-dev
+      NEXT_PUBLIC_R2R_DEPLOYMENT_URL: ${NEXT_PUBLIC_R2R_DEPLOYMENT_URL:-http://localhost:8000}
+      R2R_DASHBOARD_DISABLE_TELEMETRY: "true"
+      SUPABASE_URL: ${SUPABASE_URL:-}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-}
+      NEXT_PUBLIC_HATCHET_DASHBOARD_URL: ${NEXT_PUBLIC_HATCHET_DASHBOARD_URL:-}
+      NEXT_PUBLIC_SENTRY_DSN: ${NEXT_PUBLIC_SENTRY_DSN:-}
+    restart: unless-stopped
+
+  # Optional: staging profile (build with different base path)
+  r2r-dashboard-stg:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_BASE_PATH: /r2r-dashboard-stg
+    ports:
+      - "3001:3000"
+    environment:
+      NODE_ENV: production
+      HOSTNAME: "0.0.0.0"
+      NEXT_PUBLIC_BASE_PATH: /r2r-dashboard-stg
+      NEXT_PUBLIC_R2R_DEPLOYMENT_URL: ${NEXT_PUBLIC_R2R_DEPLOYMENT_URL:-http://localhost:8000}
+      R2R_DASHBOARD_DISABLE_TELEMETRY: "true"
+      SUPABASE_URL: ${SUPABASE_URL:-}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-}
+      NEXT_PUBLIC_HATCHET_DASHBOARD_URL: ${NEXT_PUBLIC_HATCHET_DASHBOARD_URL:-}
+      NEXT_PUBLIC_SENTRY_DSN: ${NEXT_PUBLIC_SENTRY_DSN:-}
+    profiles:
+      - stg
+    restart: unless-stopped
+
+  # Optional: production profile
+  r2r-dashboard-prd:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_BASE_PATH: /r2r-dashboard-prd
+    ports:
+      - "3002:3000"
+    environment:
+      NODE_ENV: production
+      HOSTNAME: "0.0.0.0"
+      NEXT_PUBLIC_BASE_PATH: /r2r-dashboard-prd
+      NEXT_PUBLIC_R2R_DEPLOYMENT_URL: ${NEXT_PUBLIC_R2R_DEPLOYMENT_URL:-http://localhost:8000}
+      R2R_DASHBOARD_DISABLE_TELEMETRY: "true"
+      SUPABASE_URL: ${SUPABASE_URL:-}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-}
+      NEXT_PUBLIC_HATCHET_DASHBOARD_URL: ${NEXT_PUBLIC_HATCHET_DASHBOARD_URL:-}
+      NEXT_PUBLIC_SENTRY_DSN: ${NEXT_PUBLIC_SENTRY_DSN:-}
+    profiles:
+      - prd
+    restart: unless-stopped

@@ -1,7 +1,7 @@
 'use client';
 import { useSearchParams } from 'next/navigation';
 import { MessageResponse } from 'r2r-js';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { Suspense, useState, useEffect, useRef } from 'react';
 
 import { Result } from '@/components/ChatDemo/result';
 import { Search } from '@/components/ChatDemo/search';
@@ -357,4 +357,18 @@ const Index: React.FC = () => {
   );
 };
 
-export default Index;
+function ChatPageFallback() {
+  return (
+    <Layout>
+      <div className="flex items-center justify-center p-8">Loading...</div>
+    </Layout>
+  );
+}
+
+export default function ChatPage() {
+  return (
+    <Suspense fallback={<ChatPageFallback />}>
+      <Index />
+    </Suspense>
+  );
+}

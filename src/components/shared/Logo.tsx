@@ -3,6 +3,7 @@ import Link from 'next/link';
 import React from 'react';
 
 import { brandingConfig } from '@/config/brandingConfig';
+import { assetPath } from '@/lib/assetPath';
 
 interface LogoProps {
   width?: number;
@@ -30,7 +31,7 @@ export function Logo({
   const imageElement = (
     <Image
       alt={brandingConfig.logo.alt}
-      src={brandingConfig.logo.src}
+      src={assetPath(brandingConfig.logo.src)}
       width={width}
       height={height}
       className={className}
