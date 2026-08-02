@@ -198,7 +198,7 @@ export const CreateDialog: React.FC<CreateDialogProps> = ({
         </div>
 
         <div className="flex justify-end gap-2 mt-4">
-          <Button onClick={onClose} color="secondary">
+          <Button onClick={onClose} color="primary">
             Cancel
           </Button>
           <Button

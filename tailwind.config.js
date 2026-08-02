@@ -1,17 +1,15 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  darkMode: ['class'],
+  darkMode: 'class',
   content: [
     './pages/**/*.{ts,tsx}',
-    './@/components/**/*.{ts,tsx}',
     './components/**/*.{ts,tsx}',
     './app/**/*.{ts,tsx}',
     './src/**/*.{ts,tsx}',
   ],
-  prefix: '',
   theme: {
     container: {
-      center: 'true',
+      center: true,
       padding: '2rem',
       screens: {
         '2xl': '1400px',
@@ -19,101 +17,104 @@ module.exports = {
     },
     extend: {
       colors: {
+        /* ✅ Global Background & Text */
+        background: 'var(--bg-primary)',
+        foreground: 'var(--text-primary)',
+
+        /* ✅ Navbar & Sidebar */
+        navbar: {
+          DEFAULT: 'var(--bg-primary)',
+          text: 'var(--text-primary)',
+          hover: 'var(--link-hover)',
+          active: 'var(--accent-color)',
+        },
+        sidebar: {
+          DEFAULT: 'var(--sidebar-background)',
+          foreground: 'var(--sidebar-foreground)',
+          accent: 'var(--sidebar-accent)',
+        },
+
+        /* ✅ Buttons & Links */
+        button: {
+          DEFAULT: 'var(--button-bg)',
+          text: 'var(--button-text)',
+        },
+        link: {
+          DEFAULT: 'var(--link-color)',
+          hover: 'var(--link-hover)',
+        },
+
+        /* ✅ Card Components */
+        card: {
+          DEFAULT: 'var(--card-bg)',
+          foreground: 'var(--card-text)',
+        },
+
+        /* ✅ Borders */
+        border: {
+          DEFAULT: 'var(--border-color)',
+          accent: 'var(--accent-dark)', // ✅ Now directly applied
+        },
+
+        /* ✅ Accent Colors */
         accent: {
           base: 'var(--accent-base)',
           light: 'var(--accent-light)',
           lighter: 'var(--accent-lighter)',
-          dark: 'var(--accent-dark)',
+          dark: 'var(--accent-dark)', // ✅ Fixes accent-dark border issue
           darker: 'var(--accent-darker)',
           contrast: 'var(--accent-contrast)',
         },
-        color1: 'var(--color-1)',
-        color2: 'var(--color-2)',
-        color3: 'var(--color-3)',
-        color4: 'var(--color-4)',
-        color5: 'var(--color-5)',
-        color6: 'var(--color-6)',
-        color7: 'var(--color-7)',
-        color8: 'var(--color-8)',
-        color9: 'var(--color-9)',
-        border: 'var(--border)',
-        input: 'var(--input)',
-        ring: 'var(--ring)',
-        background: 'var(--background)',
-        foreground: 'var(--foreground)',
-        primary: {
-          DEFAULT: 'var(--primary)',
-          foreground: 'var(--primary-foreground)',
-        },
-        secondary: {
-          DEFAULT: 'var(--secondary)',
-          foreground: 'var(--secondary-foreground)',
-        },
-        destructive: {
-          DEFAULT: 'var(--destructive)',
-          foreground: 'var(--destructive-foreground)',
-        },
-        muted: {
-          DEFAULT: 'var(--muted)',
-          foreground: 'var(--muted-foreground)',
-        },
-        popover: {
-          DEFAULT: 'var(--popover)',
-          foreground: 'var(--popover-foreground)',
-        },
-        card: {
-          DEFAULT: 'var(--card)',
-          foreground: 'var(--card-foreground)',
-        },
-        link: 'var(--link)',
-        'link-hover': 'var(--link-hover)',
-        sidebar: {
-          DEFAULT: 'hsl(var(--sidebar-background))',
-          foreground: 'hsl(var(--sidebar-foreground))',
-          primary: 'hsl(var(--sidebar-primary))',
-          'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
-          accent: 'hsl(var(--sidebar-accent))',
-          'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
-          border: 'hsl(var(--sidebar-border))',
-          ring: 'hsl(var(--sidebar-ring))',
-        },
       },
+
+      /* ✅ Background Utilities */
       backgroundColor: {
-        'primary-custom': 'var(--sciphi-primary)',
-        'secondary-custom': 'var(--sciphi-secondary)',
-        'accent-custom': 'var(--sciphi-accent)',
+        primary: 'var(--bg-primary)',
+        secondary: 'var(--bg-secondary)',
+        accent: 'var(--accent-color)',
+        button: 'var(--button-bg)',
       },
+
+      /* ✅ Text Utilities */
       textColor: {
-        link: 'var(--link)',
+        primary: 'var(--text-primary)',
+        secondary: 'var(--text-secondary)',
+        grey: 'var(--text-grey)',
+        accent: 'var(--accent-color)',
+        link: 'var(--link-color)',
         'link-hover': 'var(--link-hover)',
       },
+
+      /* ✅ Border Utilities */
+      borderColor: {
+        DEFAULT: 'var(--border-color)',
+        accent: 'var(--accent-dark)', // ✅ Ensures proper border color
+      },
+
+      /* ✅ Border Radius */
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
       },
+
+      /* ✅ Animations */
       keyframes: {
         'accordion-down': {
-          from: {
-            height: '0',
-          },
-          to: {
-            height: 'var(--radix-accordion-content-height)',
-          },
+          from: { height: '0' },
+          to: { height: 'var(--radix-accordion-content-height)' },
         },
         'accordion-up': {
-          from: {
-            height: 'var(--radix-accordion-content-height)',
-          },
-          to: {
-            height: '0',
-          },
+          from: { height: 'var(--radix-accordion-content-height)' },
+          to: { height: '0' },
         },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
       },
+
+      /* ✅ Box Shadows */
       boxShadow: {
         header: 'var(--header-box-shadow)',
         shadow: 'var(--shadow)',

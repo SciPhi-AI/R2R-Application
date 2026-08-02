@@ -68,7 +68,7 @@ const ExtractButtonContainer: React.FC<ExtractContainerProps> = ({
         tooltip="Document Extraction"
       >
         {isExtracting ? (
-          <Spinner className="h-6 w-6 text-white" />
+          <Spinner className="h-6 w-6 text-primary" />
         ) : (
           <FileOutput className="h-6 w-6" />
         )}

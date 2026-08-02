@@ -578,7 +578,7 @@ const CollectionIdPage: React.FC = () => {
   const renderActionButtons = () => {
     return (
       <div className="flex justify-between items-center mb-2">
-        <h1 className="text-2xl font-bold text-white">{collection?.name}</h1>
+        <h1 className="text-2xl font-bold text-primary">{collection?.name}</h1>
         <div className="flex items-center space-x-2">
           <Button
             onClick={() => {

@@ -229,7 +229,7 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
                   <SlidersHorizontal className="h-4 w-4" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent align="start">
+              <PopoverContent align="start" className="bg-primary">
                 <div className="grid gap-4 p-4">
                   <div className="space-y-2">
                     <h4 className="font-medium leading-none">Toggle Columns</h4>

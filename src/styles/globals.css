@@ -1,3 +1,15 @@
+@layer base {
+  :root {
+    --tabs-trigger-active-bg: #16a085;
+    --tabs-trigger-active-text: #ffffff;
+  }
+
+  .dark {
+    --tabs-trigger-active-bg: #16a085;
+    --tabs-trigger-active-text: #ffffff;
+  }
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -7,15 +19,27 @@
     --header-height: 4.5rem;
     --sidebar-width: 20rem;
 
-    --text-gray-700: #374151;
-    --text-gray-200: #e5e7eb;
-    --text-accent-base: #818cf8;
-    --text-gray-600: #4b5563;
-    --text-gray-400: #9ca3af;
-    --text-gray-800: #1f2937;
-    --text-red-500: #ef4444;
-    --bg-zinc-100: #f4f4f5;
-    --bg-zinc-800: #27272a;
+    /* ✅ Light Theme (Default) */
+    --bg-primary: #ffffff; /* Navbar background */
+    --bg-secondary: #f1efef;
+    --text-primary: #000000; /* Black text */
+    --text-secondary: #3d3935;
+    --text-grey: #b6b6b6;
+    --border-color: #d6d5d5;
+    --accent-color: #16a085;
+    --link-color: #2563eb;
+    --link-hover: #2b6cb0;
+
+    /* ✅ Sidebar */
+    --sidebar-background: #e4c601;
+    --sidebar-foreground: #000000;
+    --sidebar-accent: #16a085;
+
+    /* ✅ Cards & Buttons */
+    --card-bg: #ffffff;
+    --card-text: #3d3935;
+    --button-bg: #16a085;
+    --button-text: #ffffff;
 
     --accent-lighter: #b3edd7;
     --accent-light: #5fe1b2;
@@ -24,95 +48,67 @@
     --accent-darker: #007948;
     --accent-contrast: #ffffff;
 
-    --sciphi-primary: #454eb5;
-    --sciphi-secondary: #686fc5;
-    --sciphi-accent: #7b4dc6;
-
-    --link: #3b82f6;
-    --link-hover: #2b6cb0;
-
-    --header-box-shadow: inset 0 -1px var(--color-2);
-    --shadow: 0 0 0 1px var(--color-2);
-    --shadow-hover: 0 0 0 1px var(--color-7);
-
-    --background: #171717;
-    --foreground: #3d3935;
-
-    --dark-background: #2c2a2a;
-    --dark-foreground: #fafafa;
-
-    --card: #ffffff;
-    --card-foreground: #3d3935;
-
-    --dark-card: #2c2a2a;
-    --dark-card-foreground: #fafafa;
-
-    --popover: #ffffff;
-    --popover-foreground: #3d3935;
-
-    --primary: #454eb5;
-    --primary-foreground: #fafafa;
-
-    --secondary: #686fc5;
-    --secondary-foreground: #1a1919;
-
-    --muted: #f4f3f3;
-    --muted-foreground: #757373;
-
-    --accent: #7b4dc6;
-    --accent-foreground: #1a1919;
-
-    --destructive: #ff5555;
-    --destructive-foreground: #fafafa;
-
-    --border: #e6e4e4;
-    --input: #e6e4e4;
-    --ring: #3d3935;
-
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: #171717;
-    --foreground: #fafafa;
+    /* ✅ Dark Theme */
+    --bg-primary: #18181b;
+    --bg-secondary: #2c2a2a;
+    --text-primary: #ffffff; /* White text */
+    --text-secondary: #a5a3a3;
+    --text-grey: #cbcbcb;
+    --border-color: #282626;
+    --accent-color: #16a085;
+    --link-color: #818cf8;
+    --link-hover: #5fe1b2;
 
-    --card: #2c2a2a;
-    --card-foreground: #fafafa;
+    /* ✅ Sidebar */
+    --sidebar-background: #1a1a1a;
+    --sidebar-foreground: #ffffff;
+    --sidebar-accent: #7b4dc6;
 
-    --popover: #3d3935;
-    --popover-foreground: #fafafa;
+    /* ✅ Cards & Buttons */
+    --card-bg: #2c2a2a;
+    --card-text: #fafafa;
+    --button-bg: #019f69;
+    --button-text: #ffffff;
 
-    --primary: #fafafa;
-    --primary-foreground: #1a1919;
-
-    --secondary: #282626;
-    --secondary-foreground: #fafafa;
-
-    --muted: #282626;
-    --muted-foreground: #a5a3a3;
-
-    --accent: #282626;
-    --accent-foreground: #fafafa;
-
-    --destructive: #802020;
-    --destructive-foreground: #fafafa;
-
-    --border: #282626;
-    --input: #282626;
-    --ring: #d6d5d5;
-  }
-  [inert] ::-webkit-scrollbar {
-    display: none;
-  }
-}
-
-@layer base {
-  * {
-    @apply border-border;
+    --accent-lighter: #b3edd7;
+    --accent-light: #5fe1b2;
+    --accent-base: #03d78c;
+    --accent-dark: #019f69;
+    --accent-darker: #007948;
+    --accent-contrast: #ffffff;
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-primary text-primary;
+  }
+}
+
+@layer utilities {
+  .searching-animation {
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      var(--text-primary) 50%,
+      transparent 100%
+    );
+    background-size: 200% 100%;
+    animation: searchingAnimation 4s forwards;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: var(--text-primary);
+  }
+
+  @keyframes searchingAnimation {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: 0 0;
+    }
   }
 }
 
@@ -153,7 +149,7 @@ a {
   }
 }
 
-.searching-animation {
+/* .searching-animation {
   background: linear-gradient(
     90deg,
     transparent 0%,
@@ -164,14 +160,14 @@ a {
   animation: searchingAnimation 4s forwards;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-}
+} */
 
 .main-content-wrapper {
-  position: fixed;
   top: var(--header-height);
   left: var(--sidebar-width);
   right: 0;
   bottom: 0;
+  height: 95vh;
   transition: left 0.2s ease-in-out;
   display: flex;
   justify-content: center;

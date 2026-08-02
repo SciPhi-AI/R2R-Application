@@ -179,7 +179,7 @@ const KGDescriptionDialog: React.FC<KGDescriptionDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="text-white max-w-4xl">
+      <DialogContent className="text-primary max-w-4xl">
         <div className="mt-4 space-y-2 h-[calc(90vh-120px)] overflow-y-auto pr-4 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-300 -mr-4">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold mb-2">

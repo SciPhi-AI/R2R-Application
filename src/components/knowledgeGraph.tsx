@@ -88,7 +88,7 @@ export default function KnowledgeGraph({
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
       {/* Text overlay - positioned absolutely in top left */}
       <div className="absolute top-8 left-8 z-10">
-        <h3 className="text-lg font-medium text-left text-white">
+        <h3 className="text-lg font-medium text-left text-primary">
           Distribution of Entity Categories
         </h3>
         <div className="text-sm text-muted-foreground text-left">

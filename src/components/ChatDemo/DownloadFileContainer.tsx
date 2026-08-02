@@ -75,7 +75,7 @@ const DownloadButtonContainer: React.FC<DownloadFileContainerProps> = ({
         tooltip="Download Document"
       >
         {isDownloading ? (
-          <Spinner className="h-6 w-6 text-white" />
+          <Spinner className="h-6 w-6 text-primary" />
         ) : (
           <FileDown className="h-6 w-6" />
         )}

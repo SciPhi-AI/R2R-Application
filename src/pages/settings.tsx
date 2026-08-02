@@ -327,7 +327,7 @@ const Index: React.FC = () => {
 
   return (
     <Layout pageTitle="Settings">
-      <main className="w-full flex flex-col min-h-screen container bg-zinc-900 text-white p-4 mt-4">
+      <main className="w-full flex flex-col min-h-screen container bg-zinc-900 text-primary p-4 mt-4">
         <div className="mx-auto w-full max-w-5xl mb-12 mt-4">
           <div className="mt-8">
             <div className="flex justify-between items-center mb-4">
@@ -370,7 +370,9 @@ const Index: React.FC = () => {
               )}
               {activeTab === 'prompts' && (
                 <>
-                  <h4 className="text-xl font-bold text-white pb-2">Prompts</h4>
+                  <h4 className="text-xl font-bold text-primary pb-2">
+                    Prompts
+                  </h4>
                   <div className="overflow-x-auto max-w-full">
                     <div className="w-full bg-zinc-800">
                       {prompts && prompts.length > 0 ? (
@@ -385,7 +387,7 @@ const Index: React.FC = () => {
                           ))}
                         </div>
                       ) : (
-                        <div className="px-4 py-2 text-white text-center">
+                        <div className="px-4 py-2 text-primary text-center">
                           No prompts available
                         </div>
                       )}

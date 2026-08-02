@@ -15,8 +15,8 @@ const badgeVariants = cva(
         destructive:
           'border-red-600 bg-red-600 text-destructive-foreground shadow hover:bg-destructive/80',
         outline: 'text-foreground',
-        success: 'border-accent-darker bg-accent-darker text-white',
-        pending: 'border-yellow-500 bg-yellow-500 text-white',
+        success: 'border-accent-darker bg-accent-darker text-primary',
+        pending: 'border-yellow-500 bg-yellow-500 text-primary',
       },
     },
     defaultVariants: {
